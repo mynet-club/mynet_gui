@@ -12,6 +12,7 @@ import { zoneService } from './zoneService'
 import type { 
   Node, 
   SocialOverview, 
+  SocialDataResponse,
   Friend, 
   SearchUser, 
   FriendRequest, 
@@ -551,15 +552,23 @@ export const apiService = {
   // Social API
   social: {
     // 获取社交数据概览
-    async getOverview(): Promise<{ data: SocialOverview }> {
+    async getOverview(): Promise<{ data: SocialDataResponse }> {
       if (USE_MOCK_DATA) {
         await mockDelay()
         return {
           data: {
-            friend_count: 12,
-            pending_requests: 3,
-            connected_nodes: 28,
-            active_routes: 15
+            friends: [],
+            pending_requests: [],
+            outgoing_requests: [],
+            invitations: [],
+            stats: {
+              friends_count: 12,
+              pending_count: 3,
+              outgoing_count: 1,
+              invitations_count: 5,
+              connected_nodes: 28,
+              active_routes: 15
+            }
           }
         }
       }
@@ -685,7 +694,10 @@ export const apiService = {
         ]
         return { data: mockRequests }
       }
-      const response = await api.get(`/social/friend-requests?type=${type}`)
+      
+      // 使用正确的端点
+      const endpoint = type === 'received' ? '/social/friend-requests' : '/social/sent-friend-requests'
+      const response = await api.get(endpoint)
       return response.data
     },
 

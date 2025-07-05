@@ -254,6 +254,7 @@ const {
   invitations,
   searchResults,
   searchLoading,
+  currentRequestType,
   searchUsers,
   fetchFriends,
   sendFriendRequest,

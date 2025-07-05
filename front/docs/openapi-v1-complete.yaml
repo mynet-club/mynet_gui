@@ -1249,6 +1249,52 @@ paths:
                         items:
                           $ref: '#/components/schemas/Node'
 
+  /social/friend-requests:
+    get:
+      tags: [Social]
+      summary: 获取接收到的好友请求列表
+      description: 获取当前用户接收到的好友请求列表
+      parameters:
+        - $ref: '#/components/parameters/PageParameter'
+        - $ref: '#/components/parameters/PerPageParameter'
+      responses:
+        '200':
+          description: 好友请求列表获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BaseResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/FriendRequest'
+
+  /social/sent-friend-requests:
+    get:
+      tags: [Social]
+      summary: 获取发送的好友请求列表
+      description: 获取当前用户发送的好友请求列表
+      parameters:
+        - $ref: '#/components/parameters/PageParameter'
+        - $ref: '#/components/parameters/PerPageParameter'
+      responses:
+        '200':
+          description: 发送的好友请求列表获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BaseResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/FriendRequest'
+
   /social/friend-request:
     post:
       tags: [Social]
@@ -1882,6 +1928,55 @@ components:
           type: string
           format: date-time
           description: 成为好友的时间
+
+    FriendRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 好友请求ID
+          example: "FR20240101123456"
+        requester_id:
+          type: string
+          description: 请求发送者ID
+          example: "U20240101123456"
+        requester_name:
+          type: string
+          description: 请求发送者名称
+          example: "张三"
+        requester_avatar:
+          type: string
+          description: 请求发送者头像URL
+          example: "https://example.com/avatar.jpg"
+        target_id:
+          type: string
+          description: 请求接收者ID
+          example: "U20240101654321"
+        target_name:
+          type: string
+          description: 请求接收者名称
+          example: "李四"
+        target_avatar:
+          type: string
+          description: 请求接收者头像URL
+          example: "https://example.com/avatar2.jpg"
+        message:
+          type: string
+          description: 请求消息
+          example: "我是张三，请求添加你为好友"
+        status:
+          type: string
+          enum: [pending, accepted, rejected]
+          description: 请求状态
+          example: "pending"
+        created_at:
+          type: string
+          format: date-time
+          description: 请求创建时间
+        updated_at:
+          type: string
+          format: date-time
+          description: 请求更新时间
 
     Invitation:
       type: object

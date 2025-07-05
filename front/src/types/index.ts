@@ -98,6 +98,21 @@ export interface SocialOverview {
   active_routes: number
 }
 
+export interface SocialDataResponse {
+  friends: Friend[]
+  pending_requests: FriendRequest[]
+  outgoing_requests: FriendRequest[]
+  invitations: Invitation[]
+  stats: {
+    friends_count: number
+    pending_count: number
+    outgoing_count: number
+    invitations_count: number
+    connected_nodes?: number
+    active_routes?: number
+  }
+}
+
 export interface Invitation {
   id: string
   code: string

@@ -8,7 +8,8 @@ import type {
   Invitation, 
   SearchUser, 
   SocialOverview,
-  SocialStats
+  SocialStats,
+  SocialDataResponse
 } from '../types'
 
 export function useSocial() {
@@ -26,9 +27,11 @@ export function useSocial() {
   
   const friends = ref<Friend[]>([])
   const friendRequests = ref<FriendRequest[]>([])
+  const sentRequests = ref<FriendRequest[]>([])
   const invitations = ref<Invitation[]>([])
   const searchResults = ref<SearchUser[]>([])
   const searchLoading = ref(false)
+  const currentRequestType = ref<'received' | 'sent'>('received')
 
   // 分页状态
   const currentPage = ref(1)
@@ -43,13 +46,49 @@ export function useSocial() {
   const pendingInvitations = computed(() => invitations.value.filter(i => i.status === 'active'))
   const usedInvitations = computed(() => invitations.value.filter(i => i.status === 'used'))
   const expiredInvitations = computed(() => invitations.value.filter(i => i.status === 'expired'))
+  
+  // 根据当前请求类型返回相应的请求列表
+  const currentRequests = computed(() => {
+    return currentRequestType.value === 'received' ? friendRequests.value : sentRequests.value
+  })
 
   // 获取社交概览数据
   const fetchOverview = async () => {
     try {
       loading.value = true
       const response = await apiService.social.getOverview()
-      overview.value = response.data
+      
+      // 设置概览数据
+      overview.value = {
+        friend_count: response.data.stats?.friends_count || response.data.friends?.length || 0,
+        pending_requests: response.data.stats?.pending_count || response.data.pending_requests?.length || 0,
+        connected_nodes: response.data.stats?.connected_nodes || 0,
+        active_routes: response.data.stats?.active_routes || 0
+      }
+      
+      // 同时设置好友数据（避免额外的API调用）
+      if (response.data.friends) {
+        friends.value = response.data.friends
+        // 模拟分页数据
+        currentPage.value = 1
+        totalPages.value = 1
+        totalItems.value = response.data.friends.length
+      }
+      
+      // 设置好友请求数据
+      if (response.data.pending_requests) {
+        friendRequests.value = response.data.pending_requests
+      }
+      
+      // 设置发送的请求数据
+      if (response.data.outgoing_requests) {
+        sentRequests.value = response.data.outgoing_requests
+      }
+      
+      // 设置邀请码数据
+      if (response.data.invitations) {
+        invitations.value = response.data.invitations
+      }
     } catch (error) {
       console.error('获取社交概览失败:', error)
       notify.error(t('social.fetchOverviewError'))
@@ -58,19 +97,24 @@ export function useSocial() {
     }
   }
 
-  // 获取好友列表
+  // 获取好友列表（现在主要用于搜索和分页）
   const fetchFriends = async (page = 1, search = '') => {
     try {
       loading.value = true
-      const response = await apiService.social.getFriends({
-        page,
-        per_page: perPage.value,
-        search
-      })
-      friends.value = response.data
-      currentPage.value = response.meta.current_page
-      totalPages.value = response.meta.last_page
-      totalItems.value = response.meta.total
+      
+      if (search) {
+        // 如果有搜索条件，从现有好友中过滤
+        const filteredFriends = friends.value.filter(friend => 
+          friend.name.toLowerCase().includes(search.toLowerCase())
+        )
+        friends.value = filteredFriends
+        currentPage.value = 1
+        totalPages.value = 1
+        totalItems.value = filteredFriends.length
+      } else {
+        // 如果没有搜索条件，重新获取完整数据
+        await fetchOverview()
+      }
     } catch (error) {
       console.error('获取好友列表失败:', error)
       notify.error(t('social.fetchFriendsError'))
@@ -98,12 +142,19 @@ export function useSocial() {
     }
   }
 
-  // 获取好友请求
+  // 获取好友请求（现在从已缓存的数据中获取）
   const fetchFriendRequests = async (type: 'received' | 'sent' = 'received') => {
     try {
       loading.value = true
-      const response = await apiService.social.getFriendRequests(type)
-      friendRequests.value = response.data
+      currentRequestType.value = type
+      
+      // 如果还没有数据，先获取overview数据
+      if (friendRequests.value.length === 0 && sentRequests.value.length === 0) {
+        await fetchOverview()
+      }
+      
+      // 数据已经通过 fetchOverview 设置，currentRequests 计算属性会自动返回正确的数据
+      
     } catch (error) {
       console.error('获取好友请求失败:', error)
       notify.error(t('social.fetchRequestsError'))
@@ -114,6 +165,7 @@ export function useSocial() {
 
   // 处理好友请求类型变化
   const handleRequestTypeChange = (type: 'received' | 'sent') => {
+    currentRequestType.value = type
     fetchFriendRequests(type)
   }
 
@@ -126,7 +178,7 @@ export function useSocial() {
         notify.success(t('social.friendRequestSent'))
         // 更新搜索结果中的状态
         const userIndex = searchResults.value.findIndex(u => u.id === targetId)
-        if (userIndex !== -1) {
+        if (userIndex !== -1 && searchResults.value[userIndex]) {
           searchResults.value[userIndex].has_pending_request = true
         }
       } else {
@@ -150,7 +202,7 @@ export function useSocial() {
         // 从请求列表中移除
         friendRequests.value = friendRequests.value.filter(r => r.id !== requestId)
         // 刷新好友列表和概览
-        await Promise.all([fetchFriends(), fetchOverview()])
+        await fetchOverview()
       } else {
         notify.error(response.message || t('social.friendRequestAcceptError'))
       }
@@ -206,12 +258,18 @@ export function useSocial() {
     }
   }
 
-  // 获取邀请码列表
+  // 获取邀请码列表（现在从已缓存的数据中获取）
   const fetchInvitations = async () => {
     try {
       loading.value = true
-      const response = await apiService.social.getInvitations()
-      invitations.value = response.data
+      
+      // 如果还没有数据，先获取overview数据
+      if (invitations.value.length === 0) {
+        await fetchOverview()
+      }
+      
+      // 数据已经通过 fetchOverview 设置，无需额外处理
+      
     } catch (error) {
       console.error('获取邀请码列表失败:', error)
       notify.error(t('social.fetchInvitationsError'))
@@ -251,10 +309,8 @@ export function useSocial() {
 
   // 初始化数据
   const init = async () => {
+    // 只需要调用 fetchOverview，它会获取所有必要的数据
     await fetchOverview()
-    await fetchFriends()
-    await fetchFriendRequests()
-    await fetchInvitations()
   }
 
   return {
@@ -262,7 +318,7 @@ export function useSocial() {
     loading,
     overview,
     friends,
-    friendRequests,
+    friendRequests: currentRequests, // 使用计算属性返回当前类型的请求
     invitations,
     searchResults,
     searchLoading,
@@ -270,6 +326,7 @@ export function useSocial() {
     perPage,
     totalPages,
     totalItems,
+    currentRequestType,
     
     // 计算属性
     hasMoreFriends,
