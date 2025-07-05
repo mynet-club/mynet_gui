@@ -1,0 +1,204 @@
+// 仪表板页面样式
+.dashboard-page {
+  background: var(--q-grey-1);
+  
+  .page-header {
+    margin-bottom: 2rem;
+    
+    h4 {
+      margin: 0;
+      font-weight: 600;
+    }
+    
+    p {
+      margin: 0.5rem 0 0 0;
+      color: var(--q-grey-6);
+    }
+  }
+}
+
+// 统计卡片样式
+.dashboard-stats {
+  .stat-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .q-card-section {
+      padding: 1.5rem;
+      text-align: center;
+    }
+    
+    .text-h4 {
+      font-weight: 700;
+      margin: 0.5rem 0;
+    }
+    
+    .text-caption {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+// 实时指标样式
+.realtime-metrics {
+  .metric-item {
+    text-align: center;
+    padding: 1rem;
+    
+    .metric-label {
+      font-size: 0.875rem;
+      color: var(--q-grey-6);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .metric-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--q-dark);
+    }
+    
+    .q-linear-progress {
+      height: 8px;
+      border-radius: 4px;
+    }
+  }
+}
+
+// 最近活动样式
+.recent-activities {
+  .activity-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--q-grey-3);
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    .q-item-section {
+      .q-item-label {
+        font-size: 0.875rem;
+        line-height: 1.4;
+      }
+      
+      .q-item-label.caption {
+        font-size: 0.75rem;
+        color: var(--q-grey-6);
+      }
+    }
+  }
+}
+
+// 连接状态指示器
+.connection-indicator {
+  .q-chip {
+    font-weight: 500;
+    
+    &.connected {
+      background: var(--q-positive);
+    }
+    
+    &.disconnected {
+      background: var(--q-negative);
+    }
+  }
+}
+
+// 加载状态
+.q-inner-loading {
+  background: rgba(255, 255, 255, 0.8);
+  
+  .q-spinner {
+    color: var(--q-primary);
+  }
+}
+
+// 深色模式优化
+.body--dark {
+  .dashboard-page {
+    background: var(--q-dark-page);
+  }
+  
+  .dashboard-stats {
+    .stat-card {
+      background: var(--q-dark);
+      border: 1px solid var(--q-dark-page);
+      
+      &:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      }
+    }
+  }
+  
+  .realtime-metrics {
+    .metric-item {
+      .metric-value {
+        color: var(--q-white);
+      }
+    }
+  }
+  
+  .recent-activities {
+    .activity-item {
+      border-bottom-color: var(--q-dark-page);
+    }
+  }
+  
+  .q-inner-loading {
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .dashboard-stats {
+    .stat-card {
+      .q-card-section {
+        padding: 1rem;
+      }
+      
+      .text-h4 {
+        font-size: 1.5rem;
+      }
+    }
+  }
+  
+  .realtime-metrics {
+    .metric-item {
+      padding: 0.75rem;
+      
+      .metric-value {
+        font-size: 1.5rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-page {
+    .page-header {
+      text-align: center;
+      
+      .row {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  }
+  
+  .dashboard-stats {
+    .row {
+      margin: 0;
+    }
+    
+    .col {
+      padding: 0.5rem;
+    }
+  }
+} 

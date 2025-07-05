@@ -1,0 +1,150 @@
+// 认证页面样式
+.auth-layout {
+  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
+  min-height: 100vh;
+  
+  .q-page-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  
+  .auth-header {
+    text-align: center;
+    padding-bottom: 0;
+    
+    .auth-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .auth-subtitle {
+      color: var(--q-grey-6);
+      font-size: 0.875rem;
+    }
+  }
+  
+  .auth-form {
+    .form-field {
+      margin-bottom: 1rem;
+    }
+    
+    .form-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    
+    .submit-btn {
+      width: 100%;
+      height: 48px;
+      font-weight: 500;
+      border-radius: 8px;
+    }
+  }
+  
+  .auth-footer {
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--q-grey-3);
+    
+    .footer-link {
+      color: var(--q-primary);
+      text-decoration: none;
+      font-weight: 500;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// 邮件验证页面特殊样式
+.email-verification {
+  .verification-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+  
+  .verification-form {
+    margin-top: 1.5rem;
+  }
+  
+  .resend-section {
+    text-align: center;
+    margin-top: 1rem;
+    
+    .resend-btn {
+      color: var(--q-secondary);
+    }
+    
+    .cooldown-text {
+      color: var(--q-grey-6);
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+    }
+  }
+  
+  .success-section {
+    text-align: center;
+    
+    .success-icon {
+      font-size: 4rem;
+      color: var(--q-positive);
+      margin-bottom: 1rem;
+    }
+    
+    .success-title {
+      color: var(--q-positive);
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .success-subtitle {
+      color: var(--q-grey-6);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+  }
+}
+
+// 深色模式优化
+.body--dark {
+  .auth-layout {
+    background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-accent) 100%);
+  }
+  
+  .auth-card {
+    background: var(--q-dark);
+    border: 1px solid var(--q-dark-page);
+    
+    .auth-footer {
+      border-top-color: var(--q-dark-page);
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 480px) {
+  .auth-card {
+    margin: 0 16px;
+    max-width: none;
+  }
+  
+  .auth-layout .q-page-container {
+    padding: 16px;
+  }
+} 

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .time-info { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 5px; }
+        .timestamp { font-family: monospace; font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body>
+    <h1>时间测试页面</h1>
+    
+    <div class="time-info">
+        <h3>当前时间</h3>
+        <p>Date.now(): <span class="timestamp" id="now"></span></p>
+        <p>new Date(): <span id="now-date"></span></p>
+        <p>new Date().toLocaleString(): <span id="now-locale"></span></p>
+    </div>
+    
+    <div class="time-info">
+        <h3>当前时间 + 2小时</h3>
+        <p>Date.now() + 7200000: <span class="timestamp" id="plus2h"></span></p>
+        <p>new Date(Date.now() + 7200000): <span id="plus2h-date"></span></p>
+        <p>new Date(Date.now() + 7200000).toLocaleString(): <span id="plus2h-locale"></span></p>
+    </div>
+    
+    <div class="time-info">
+        <h3>你提到的时间戳</h3>
+        <p>1751643482076: <span class="timestamp">1751643482076</span></p>
+        <p>new Date(1751643482076): <span id="specific-date"></span></p>
+        <p>new Date(1751643482076).toLocaleString(): <span id="specific-locale"></span></p>
+    </div>
+    
+    <div class="time-info">
+        <h3>时区信息</h3>
+        <p>时区偏移: <span id="timezone"></span></p>
+        <p>时区名称: <span id="timezone-name"></span></p>
+    </div>
+    
+    <script>
+        function updateTime() {
+            const now = Date.now();
+            const plus2h = now + 7200000;
+            const specific = 1751643482076;
+            
+            // 当前时间
+            document.getElementById('now').textContent = now;
+            document.getElementById('now-date').textContent = new Date(now).toString();
+            document.getElementById('now-locale').textContent = new Date(now).toLocaleString();
+            
+            // 当前时间 + 2小时
+            document.getElementById('plus2h').textContent = plus2h;
+            document.getElementById('plus2h-date').textContent = new Date(plus2h).toString();
+            document.getElementById('plus2h-locale').textContent = new Date(plus2h).toLocaleString();
+            
+            // 特定时间戳
+            document.getElementById('specific-date').textContent = new Date(specific).toString();
+            document.getElementById('specific-locale').textContent = new Date(specific).toLocaleString();
+            
+            // 时区信息
+            document.getElementById('timezone').textContent = new Date().getTimezoneOffset() + ' 分钟';
+            document.getElementById('timezone-name').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        }
+        
+        // 初始化
+        updateTime();
+        
+        // 每秒更新
+        setInterval(updateTime, 1000);
+        
+        // 控制台输出
+        console.log('=== 浏览器时间测试 ===');
+        console.log('Date.now():', Date.now());
+        console.log('Date.now() + 7200000:', Date.now() + 7200000);
+        console.log('new Date(Date.now() + 7200000):', new Date(Date.now() + 7200000));
+        console.log('时区偏移:', new Date().getTimezoneOffset());
+        console.log('时区名称:', Intl.DateTimeFormat().resolvedOptions().timeZone);
+    </script>
+</body>
+</html> 
