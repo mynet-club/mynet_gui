@@ -186,12 +186,13 @@
 
       <!-- Navigation Menu -->
       <q-list padding>
+        <!-- 主要功能 -->
         <q-item-label header class="text-weight-bold">
-          {{ $t('common.navigation') }}
+          {{ $t('navigation.mainFeatures') }}
         </q-item-label>
 
         <q-item 
-          v-for="item in navigationItems"
+          v-for="item in mainNavigationItems"
           :key="item.name"
           clickable 
           :to="item.path"
@@ -216,26 +217,76 @@
 
         <q-separator class="q-my-md" />
 
-        <!-- 快速操作 -->
+        <!-- 网络配置 -->
         <q-item-label header class="text-weight-bold">
-          {{ $t('dashboard.quickActions.title') }}
+          {{ $t('navigation.networkConfig') }}
         </q-item-label>
 
-        <q-item clickable @click="$router.push('/nodes')">
+        <q-item 
+          v-for="item in networkNavigationItems"
+          :key="item.name"
+          clickable 
+          :to="item.path"
+          exact
+          class="nav-item"
+        >
           <q-item-section avatar>
-            <q-icon name="add" color="primary" />
+            <q-icon :name="item.icon" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>{{ $t('dashboard.quickActions.addNode') }}</q-item-label>
+            <q-item-label>{{ $t(item.label) }}</q-item-label>
+            <q-item-label caption v-if="item.description">
+              {{ $t(item.description) }}
+            </q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <div class="row items-center">
+              <q-badge v-if="item.badge" :color="item.badgeColor || 'primary'" class="q-mr-xs">
+                {{ item.badge }}
+              </q-badge>
+              <q-chip 
+                v-if="item.comingSoon"
+                size="sm"
+                color="orange"
+                text-color="white"
+                :label="$t('common.comingSoon')"
+              />
+            </div>
           </q-item-section>
         </q-item>
 
-        <q-item clickable @click="$router.push('/routes')">
+        <q-separator class="q-my-md" />
+
+        <!-- 系统工具 -->
+        <q-item-label header class="text-weight-bold">
+          {{ $t('navigation.systemTools') }}
+        </q-item-label>
+
+        <q-item 
+          v-for="item in systemNavigationItems"
+          :key="item.name"
+          clickable 
+          :to="item.path"
+          exact
+          class="nav-item"
+          :class="{ 'disabled-item': item.comingSoon }"
+        >
           <q-item-section avatar>
-            <q-icon name="alt_route" color="secondary" />
+            <q-icon :name="item.icon" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>{{ $t('dashboard.quickActions.addRoute') }}</q-item-label>
+            <q-item-label>{{ $t(item.label) }}</q-item-label>
+            <q-item-label caption v-if="item.description">
+              {{ $t(item.description) }}
+            </q-item-label>
+          </q-item-section>
+          <q-item-section side v-if="item.comingSoon">
+            <q-chip 
+              size="sm"
+              color="orange"
+              text-color="white"
+              :label="$t('common.comingSoon')"
+            />
           </q-item-section>
         </q-item>
       </q-list>
@@ -369,6 +420,7 @@ import { useQuasar, date, LocalStorage } from 'quasar'
 import { useAuthStore } from '../stores/auth'
 import { useWebSocket } from '../services/websocket'
 import { useTheme } from '../composables/useTheme'
+import { useSidebarStats } from '../composables/useSidebarStats'
 import { useI18n } from 'vue-i18n'
 import ZoneSelector from '../components/common/ZoneSelector.vue'
 import { DEFAULT_GLOBAL_ZONE } from '../config/app'
@@ -378,6 +430,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const { connectionStats: wsConnectionStats, connect, reconnect } = useWebSocket()
 const { themeMode: currentThemeMode, setThemeMode, getThemeOptions, initializeTheme } = useTheme()
+const { stats: sidebarStats, init: initSidebarStats } = useSidebarStats()
 const { locale, t } = useI18n()
 
 // 响应式数据
@@ -433,9 +486,14 @@ interface NavigationItem {
   description?: string
   badge?: string | number
   badgeColor?: string
+  comingSoon?: boolean
 }
 
-const navigationItems = computed((): NavigationItem[] => [
+// 创建一个composable来管理sidebar统计数据
+// 现在使用 useSidebarStats composable
+
+// 主要功能导航项
+const mainNavigationItems = computed((): NavigationItem[] => [
   {
     name: 'dashboard',
     label: 'navigation.dashboard',
@@ -445,14 +503,67 @@ const navigationItems = computed((): NavigationItem[] => [
   {
     name: 'nodes',
     label: 'navigation.nodes',
-    icon: 'computer',
-    path: '/nodes'
+    icon: 'dns',
+    path: '/nodes',
+    badge: sidebarStats.value.nodes || 0,
+    badgeColor: 'primary'
   },
+  {
+    name: 'ippools',
+    label: 'navigation.ippools',
+    icon: 'network_wired',
+    path: '/ippools',
+    badge: sidebarStats.value.ippools || 0,
+    badgeColor: 'secondary',
+    comingSoon: true
+  }
+])
+
+// 网络配置导航项
+const networkNavigationItems = computed((): NavigationItem[] => [
   {
     name: 'routes',
     label: 'navigation.routes',
     icon: 'alt_route',
-    path: '/routes'
+    path: '/routes',
+    badge: sidebarStats.value.routes || 0,
+    badgeColor: 'accent'
+  },
+  {
+    name: 'zones',
+    label: 'navigation.zones',
+    icon: 'public',
+    path: '/zones',
+    badge: sidebarStats.value.zones || 0,
+    badgeColor: 'info',
+    comingSoon: true
+  },
+  {
+    name: 'social',
+    label: 'navigation.social',
+    icon: 'group',
+    path: '/social',
+    badge: sidebarStats.value.connections || 0,
+    badgeColor: 'positive',
+    comingSoon: true
+  }
+])
+
+// 系统工具导航项
+const systemNavigationItems = computed((): NavigationItem[] => [
+  {
+    name: 'apitest',
+    label: 'navigation.apiTest',
+    icon: 'code',
+    path: '/api-test',
+    comingSoon: true
+  },
+  {
+    name: 'help',
+    label: 'navigation.help',
+    icon: 'help',
+    path: '/help',
+    comingSoon: true
   }
 ])
 
@@ -684,6 +795,9 @@ onMounted(async () => {
   if (authStore.isAuthenticated && authStore.currentZone) {
     connect(authStore.token!, authStore.currentZone.zone_id.toString())
   }
+  
+  // 初始化边栏统计数据
+  await initSidebarStats()
 })
 </script>
 
@@ -729,6 +843,12 @@ onMounted(async () => {
       .q-icon {
         color: white;
       }
+    }
+    
+    &.disabled-item {
+      opacity: 0.6;
+      cursor: not-allowed;
+      pointer-events: none;
     }
   }
   

@@ -22,7 +22,11 @@ export default {
     connected: 'Connected',
     disconnected: 'Disconnected',
     profile: 'Profile',
-    notifications: 'Notifications'
+    notifications: 'Notifications',
+    active: 'Active',
+    inactive: 'Inactive',
+    comingSoon: 'Coming Soon',
+    navigation: 'Navigation'
   },
   settings: {
     language: 'Language Settings',
@@ -113,9 +117,17 @@ export default {
     port: 'Port'
   },
   navigation: {
+    mainFeatures: 'Main Features',
+    networkConfig: 'Network Configuration',
+    systemTools: 'System Tools',
     dashboard: 'Dashboard',
     nodes: 'Node Management',
-    routes: 'Route Management'
+    routes: 'Route Management',
+    ippools: 'IP Pool Management',
+    zones: 'Zone Management',
+    social: 'Social Network',
+    apiTest: 'API Testing',
+    help: 'Help Documentation'
   },
   routes: {
     title: 'Route Management',
@@ -125,14 +137,139 @@ export default {
     status: 'Status'
   },
   zones: {
+    subtitle: 'Network zone management and configuration',
     switchZone: 'Switch Zone',
     selectZone: 'Select Zone',
     switchedTo: 'Switched to {zoneName}',
-    switchFailed: 'Failed to switch zone'
+    switchFailed: 'Failed to switch zone',
+    comingSoonMessage: 'Zone management feature is under development, stay tuned!'
+  },
+  social: {
+    subtitle: 'Social network connections and user management',
+    comingSoonMessage: 'Social network feature is under development, stay tuned!',
+    // Overview stats
+    overview: {
+      title: 'Social Overview',
+      friends: 'Friends',
+      pendingRequests: 'Pending Requests',
+      connectedNodes: 'Connected Nodes',
+      activeRoutes: 'Active Routes'
+    },
+    // Friends management
+    friends: {
+      title: 'Friends List',
+      searchPlaceholder: 'Search friends...',
+      noFriends: 'No friends yet',
+      online: 'Online',
+      offline: 'Offline',
+      nodes: 'Nodes',
+      routes: 'Routes',
+      friendshipDate: 'Friends since',
+      removeFriend: 'Remove Friend',
+      viewNodes: 'View Nodes',
+      lastActive: 'Last Active'
+    },
+    // Friend requests
+    friendRequests: {
+      title: 'Friend Requests',
+      received: 'Received',
+      sent: 'Sent',
+      noRequests: 'No friend requests',
+      accept: 'Accept',
+      reject: 'Reject',
+      message: 'Message',
+      requestTime: 'Request Time',
+      cancel: 'Cancel Request',
+      status: {
+        pending: 'Pending',
+        accepted: 'Accepted',
+        rejected: 'Rejected'
+      }
+    },
+    // User search
+    search: {
+      title: 'Search Users',
+      placeholder: 'Enter username or email...',
+      noResults: 'No matching users found',
+      addFriend: 'Add Friend',
+      requested: 'Requested',
+      friend: 'Already Friends',
+      zone: 'Zone',
+      lastActive: 'Last Active'
+    },
+    // Invitations
+    invitations: {
+      title: 'Invitation Management',
+      createNew: 'Create New Invitation',
+      code: 'Invitation Code',
+      status: 'Status',
+      expiresAt: 'Expires At',
+      usedAt: 'Used At',
+      usedBy: 'Used By',
+      createdAt: 'Created At',
+      copyCode: 'Copy Code',
+      active: 'Active',
+      used: 'Used',
+      expired: 'Expired',
+      noInvitations: 'No invitations yet'
+    },
+    // Dialogs
+    dialogs: {
+      removeFriend: {
+        title: 'Remove Friend',
+        message: 'Are you sure you want to remove "{name}" from your friends? This action cannot be undone.',
+        confirm: 'Remove',
+        cancel: 'Cancel'
+      },
+      sendRequest: {
+        title: 'Send Friend Request',
+        message: 'Send friend request to "{name}"',
+        messagePlaceholder: 'Enter message (optional)',
+        send: 'Send Request',
+        cancel: 'Cancel'
+      },
+      createInvitation: {
+        title: 'Create Invitation',
+        expiresIn: 'Expires In (days)',
+        create: 'Create',
+        cancel: 'Cancel'
+      }
+    },
+    // Action messages
+    friendRequestSent: 'Friend request sent',
+    friendRequestAccepted: 'Friend request accepted',
+    friendRequestRejected: 'Friend request rejected',
+    friendRemoved: 'Friend "{name}" removed',
+    invitationCreated: 'Invitation code created',
+    invitationCopied: 'Invitation code copied to clipboard',
+    // Error messages
+    fetchOverviewError: 'Failed to fetch social overview',
+    fetchFriendsError: 'Failed to fetch friends list',
+    searchUsersError: 'Failed to search users',
+    fetchRequestsError: 'Failed to fetch friend requests',
+    friendRequestError: 'Failed to send friend request',
+    friendRequestAcceptError: 'Failed to accept friend request',
+    friendRequestRejectError: 'Failed to reject friend request',
+    friendRemoveError: 'Failed to remove friend',
+    fetchInvitationsError: 'Failed to fetch invitations',
+    invitationCreateError: 'Failed to create invitation',
+    fetchFriendNodesError: 'Failed to fetch friend nodes'
+  },
+  ippools: {
+    subtitle: 'IP address pool management and allocation',
+    comingSoonMessage: 'IP pool management feature is under development, stay tuned!'
+  },
+  apiTest: {
+    subtitle: 'API interface testing and debugging tools',
+    comingSoonMessage: 'API testing tool is under development, stay tuned!'
+  },
+  help: {
+    subtitle: 'Help documentation and user guide',
+    comingSoonMessage: 'Help documentation is being improved, stay tuned!'
   },
   websocket: {
     connected: 'Connected',
     disconnected: 'Disconnected',
     heartbeat: 'Heartbeat'
   }
-} 
+}

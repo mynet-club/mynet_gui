@@ -9,6 +9,15 @@ import {
   mockDelay 
 } from './mockData'
 import { zoneService } from './zoneService'
+import type { 
+  Node, 
+  SocialOverview, 
+  Friend, 
+  SearchUser, 
+  FriendRequest, 
+  BaseResponse, 
+  Invitation 
+} from '../types'
 
 // 配置是否使用模拟数据
 const USE_MOCK_DATA = false // 切换到真实API
@@ -537,5 +546,279 @@ export const apiService = {
       return { data: languageData[locale as keyof typeof languageData] || languageData['en-US'] }
     }
     return api.get(`/i18n/${locale}`)
+  },
+
+  // Social API
+  social: {
+    // 获取社交数据概览
+    async getOverview(): Promise<{ data: SocialOverview }> {
+      if (USE_MOCK_DATA) {
+        await mockDelay()
+        return {
+          data: {
+            friend_count: 12,
+            pending_requests: 3,
+            connected_nodes: 28,
+            active_routes: 15
+          }
+        }
+      }
+      const response = await api.get('/social/data')
+      return response.data
+    },
+
+    // 获取好友列表
+    async getFriends(params?: { page?: number; per_page?: number; search?: string }): Promise<{ data: Friend[]; meta: any }> {
+      if (USE_MOCK_DATA) {
+        await mockDelay()
+        const mockFriends: Friend[] = [
+          {
+            id: '1',
+            name: 'Alice Johnson',
+            avatar: '/avatars/alice.jpg',
+            node_count: 5,
+            connected_node_count: 3,
+            active_route_count: 2,
+            friendship_date: '2024-01-15',
+            status: 'online',
+            last_active: '2024-12-01T10:30:00Z'
+          },
+          {
+            id: '2',
+            name: 'Bob Smith',
+            avatar: '/avatars/bob.jpg',
+            node_count: 8,
+            connected_node_count: 6,
+            active_route_count: 4,
+            friendship_date: '2024-02-20',
+            status: 'offline',
+            last_active: '2024-11-30T15:45:00Z'
+          },
+          {
+            id: '3',
+            name: 'Charlie Brown',
+            node_count: 3,
+            connected_node_count: 2,
+            active_route_count: 1,
+            friendship_date: '2024-03-10',
+            status: 'online',
+            last_active: '2024-12-01T09:20:00Z'
+          }
+        ]
+        return {
+          data: mockFriends,
+          meta: {
+            current_page: 1,
+            last_page: 1,
+            per_page: 10,
+            total: mockFriends.length
+          }
+        }
+      }
+      const response = await api.get('/social/friends', { params })
+      return response.data
+    },
+
+    // 搜索用户
+    async searchUsers(query: string): Promise<{ data: SearchUser[] }> {
+      if (USE_MOCK_DATA) {
+        await mockDelay()
+        const mockUsers: SearchUser[] = [
+          {
+            id: '4',
+            name: 'David Wilson',
+            avatar: '/avatars/david.jpg',
+            node_count: 4,
+            zone_id: 'zone-1',
+            zone_name: 'Development Zone',
+            is_friend: false,
+            has_pending_request: false,
+            last_active: '2024-11-28T14:20:00Z'
+          },
+          {
+            id: '5',
+            name: 'Emma Davis',
+            avatar: '/avatars/emma.jpg',
+            node_count: 6,
+            zone_id: 'zone-1',
+            zone_name: 'Development Zone',
+            is_friend: false,
+            has_pending_request: true,
+            last_active: '2024-11-29T11:15:00Z'
+          }
+        ]
+        return { data: mockUsers.filter(u => u.name.toLowerCase().includes(query.toLowerCase())) }
+      }
+      const response = await api.post('/social/search-users', { query })
+      return response.data
+    },
+
+    // 获取好友请求
+    async getFriendRequests(type: 'received' | 'sent' = 'received'): Promise<{ data: FriendRequest[] }> {
+      if (USE_MOCK_DATA) {
+        await mockDelay()
+        const mockRequests: FriendRequest[] = [
+          {
+            id: '1',
+            requester_id: '6',
+            target_id: 'current-user',
+            requester_name: 'Frank Miller',
+            target_name: 'Current User',
+            requester_avatar: '/avatars/frank.jpg',
+            status: 'pending',
+            message: 'Hi, I would like to connect with you!',
+            created_at: '2024-11-30T10:00:00Z',
+            updated_at: '2024-11-30T10:00:00Z'
+          },
+          {
+            id: '2',
+            requester_id: '7',
+            target_id: 'current-user',
+            requester_name: 'Grace Lee',
+            target_name: 'Current User',
+            requester_avatar: '/avatars/grace.jpg',
+            status: 'pending',
+            message: 'Looking forward to collaborating!',
+            created_at: '2024-11-29T16:30:00Z',
+            updated_at: '2024-11-29T16:30:00Z'
+          }
+        ]
+        return { data: mockRequests }
+      }
+      const response = await api.get(`/social/friend-requests?type=${type}`)
+      return response.data
+    },
+
+    // 发送好友请求
+    async sendFriendRequest(targetId: string, message?: string): Promise<BaseResponse> {
+      if (USE_MOCK_DATA) {
+        await mockDelay()
+        return {
+          success: true,
+          code: 200,
+          message: 'Friend request sent successfully',
+          request_id: 'req_' + Date.now(),
+          timestamp: new Date().toISOString()
+        }
+      }
+      const response = await api.post('/social/friend-request', { target_id: targetId, message })
+      return response.data
+    },
+
+    // 接受好友请求
+    async acceptFriendRequest(requestId: string): Promise<BaseResponse> {
+      if (USE_MOCK_DATA) {
+        await mockDelay()
+        return {
+          success: true,
+          code: 200,
+          message: 'Friend request accepted',
+          request_id: 'req_' + Date.now(),
+          timestamp: new Date().toISOString()
+        }
+      }
+      const response = await api.post('/social/friend-request/accept', { request_id: requestId })
+      return response.data
+    },
+
+    // 拒绝好友请求
+    async rejectFriendRequest(requestId: string): Promise<BaseResponse> {
+      if (USE_MOCK_DATA) {
+        await mockDelay()
+        return {
+          success: true,
+          code: 200,
+          message: 'Friend request rejected',
+          request_id: 'req_' + Date.now(),
+          timestamp: new Date().toISOString()
+        }
+      }
+      const response = await api.post('/social/friend-request/reject', { request_id: requestId })
+      return response.data
+    },
+
+    // 删除好友
+    async removeFriend(friendId: string): Promise<BaseResponse> {
+      if (USE_MOCK_DATA) {
+        await mockDelay()
+        return {
+          success: true,
+          code: 200,
+          message: 'Friend removed successfully',
+          request_id: 'req_' + Date.now(),
+          timestamp: new Date().toISOString()
+        }
+      }
+      const response = await api.post('/social/friend/remove', { friend_id: friendId })
+      return response.data
+    },
+
+    // 获取邀请码列表
+    async getInvitations(): Promise<{ data: Invitation[] }> {
+      if (USE_MOCK_DATA) {
+        await mockDelay()
+        const mockInvitations: Invitation[] = [
+          {
+            id: '1',
+            code: 'INV-ABC123',
+            status: 'active',
+            expires_at: '2024-12-15T23:59:59Z',
+            created_at: '2024-11-15T10:00:00Z'
+          },
+          {
+            id: '2',
+            code: 'INV-XYZ789',
+            status: 'used',
+            expires_at: '2024-12-10T23:59:59Z',
+            used_at: '2024-11-25T14:30:00Z',
+            used_by: 'user-123',
+            created_at: '2024-11-10T09:00:00Z'
+          }
+        ]
+        return { data: mockInvitations }
+      }
+      const response = await api.get('/social/invitations')
+      return response.data
+    },
+
+    // 生成邀请码
+    async createInvitation(expiresIn?: number): Promise<{ data: Invitation }> {
+      if (USE_MOCK_DATA) {
+        await mockDelay()
+        const newInvitation: Invitation = {
+          id: 'new-' + Date.now(),
+          code: 'INV-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+          status: 'active',
+          expires_at: new Date(Date.now() + (expiresIn || 7) * 24 * 60 * 60 * 1000).toISOString(),
+          created_at: new Date().toISOString()
+        }
+        return { data: newInvitation }
+      }
+      const response = await api.post('/social/invitation', { expires_in: expiresIn })
+      return response.data
+    },
+
+    // 获取好友的节点
+    async getFriendNodes(friendId: string): Promise<{ data: Node[] }> {
+      if (USE_MOCK_DATA) {
+        await mockDelay()
+        const mockNodes: Node[] = [
+          {
+            id: 1,
+            node_name: 'Friend Node 1',
+            node_type: 'gateway',
+            ip_address: '192.168.1.100',
+            port: 8080,
+            status: 'active',
+            zone_id: 1,
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: '2024-01-01T00:00:00Z'
+          }
+        ]
+        return { data: mockNodes }
+      }
+      const response = await api.get(`/social/friends/${friendId}/nodes`)
+      return response.data
+    }
   }
 }

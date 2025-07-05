@@ -22,7 +22,11 @@ export default {
     connected: '已连接',
     disconnected: '未连接',
     profile: '个人资料',
-    notifications: '通知'
+    notifications: '通知',
+    active: '活跃',
+    inactive: '非活跃',
+    comingSoon: '开发中',
+    navigation: '导航'
   },
   settings: {
     language: '语言设置',
@@ -113,9 +117,17 @@ export default {
     port: '端口'
   },
   navigation: {
+    mainFeatures: '主要功能',
+    networkConfig: '网络配置',
+    systemTools: '系统工具',
     dashboard: '仪表板',
     nodes: '节点管理',
-    routes: '路由管理'
+    routes: '路由管理',
+    ippools: 'IP池管理',
+    zones: '区域管理',
+    social: '社交网络',
+    apiTest: 'API测试',
+    help: '帮助文档'
   },
   routes: {
     title: '路由管理',
@@ -125,14 +137,139 @@ export default {
     status: '状态'
   },
   zones: {
+    subtitle: '网络区域管理和配置',
     switchZone: '切换区域',
     selectZone: '选择区域',
     switchedTo: '已切换到 {zoneName}',
-    switchFailed: '切换区域失败'
+    switchFailed: '切换区域失败',
+    comingSoonMessage: '区域管理功能正在开发中，敬请期待！'
+  },
+  social: {
+    subtitle: '社交网络连接和用户管理',
+    comingSoonMessage: '社交网络功能正在开发中，敬请期待！',
+    // 概览统计
+    overview: {
+      title: '社交概览',
+      friends: '好友',
+      pendingRequests: '待处理请求',
+      connectedNodes: '已连接节点',
+      activeRoutes: '活跃路由'
+    },
+    // 好友管理
+    friends: {
+      title: '好友列表',
+      searchPlaceholder: '搜索好友...',
+      noFriends: '暂无好友',
+      online: '在线',
+      offline: '离线',
+      nodes: '节点',
+      routes: '路由',
+      friendshipDate: '成为好友时间',
+      removeFriend: '删除好友',
+      viewNodes: '查看节点',
+      lastActive: '最后活跃'
+    },
+    // 好友请求
+    friendRequests: {
+      title: '好友请求',
+      received: '收到的请求',
+      sent: '发送的请求',
+      noRequests: '暂无好友请求',
+      accept: '接受',
+      reject: '拒绝',
+      message: '消息',
+      requestTime: '请求时间',
+      cancel: '取消请求',
+      status: {
+        pending: '待处理',
+        accepted: '已接受',
+        rejected: '已拒绝'
+      }
+    },
+    // 用户搜索
+    search: {
+      title: '搜索用户',
+      placeholder: '输入用户名或邮箱...',
+      noResults: '未找到匹配用户',
+      addFriend: '添加好友',
+      requested: '已请求',
+      friend: '已是好友',
+      zone: '区域',
+      lastActive: '最后活跃'
+    },
+    // 邀请码
+    invitations: {
+      title: '邀请码管理',
+      createNew: '生成新邀请码',
+      code: '邀请码',
+      status: '状态',
+      expiresAt: '过期时间',
+      usedAt: '使用时间',
+      usedBy: '使用者',
+      createdAt: '创建时间',
+      copyCode: '复制邀请码',
+      active: '有效',
+      used: '已使用',
+      expired: '已过期',
+      noInvitations: '暂无邀请码'
+    },
+    // 对话框
+    dialogs: {
+      removeFriend: {
+        title: '删除好友',
+        message: '确定要删除好友 "{name}" 吗？此操作不可撤销。',
+        confirm: '确定删除',
+        cancel: '取消'
+      },
+      sendRequest: {
+        title: '发送好友请求',
+        message: '给 "{name}" 发送好友请求',
+        messagePlaceholder: '请输入消息（可选）',
+        send: '发送请求',
+        cancel: '取消'
+      },
+      createInvitation: {
+        title: '生成邀请码',
+        expiresIn: '有效期（天）',
+        create: '生成',
+        cancel: '取消'
+      }
+    },
+    // 操作消息
+    friendRequestSent: '好友请求已发送',
+    friendRequestAccepted: '好友请求已接受',
+    friendRequestRejected: '好友请求已拒绝',
+    friendRemoved: '好友 "{name}" 已删除',
+    invitationCreated: '邀请码已生成',
+    invitationCopied: '邀请码已复制到剪贴板',
+    // 错误消息
+    fetchOverviewError: '获取社交概览失败',
+    fetchFriendsError: '获取好友列表失败',
+    searchUsersError: '搜索用户失败',
+    fetchRequestsError: '获取好友请求失败',
+    friendRequestError: '发送好友请求失败',
+    friendRequestAcceptError: '接受好友请求失败',
+    friendRequestRejectError: '拒绝好友请求失败',
+    friendRemoveError: '删除好友失败',
+    fetchInvitationsError: '获取邀请码列表失败',
+    invitationCreateError: '创建邀请码失败',
+    fetchFriendNodesError: '获取好友节点失败'
+  },
+  ippools: {
+    subtitle: 'IP地址池管理和分配',
+    comingSoonMessage: 'IP池管理功能正在开发中，敬请期待！'
+  },
+  apiTest: {
+    subtitle: 'API接口测试和调试工具',
+    comingSoonMessage: 'API测试工具正在开发中，敬请期待！'
+  },
+  help: {
+    subtitle: '帮助文档和使用指南',
+    comingSoonMessage: '帮助文档正在完善中，敬请期待！'
   },
   websocket: {
     connected: '已连接',
     disconnected: '未连接',
     heartbeat: '心跳'
   }
-} 
+}

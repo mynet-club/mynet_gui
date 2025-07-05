@@ -77,3 +77,81 @@ export interface PaginatedResponse<T> {
     total: number
   }
 }
+
+// Social Module Types
+export interface Friend {
+  id: string
+  name: string
+  avatar?: string
+  node_count: number
+  connected_node_count: number
+  active_route_count: number
+  friendship_date: string
+  status: 'online' | 'offline'
+  last_active: string
+}
+
+export interface SocialOverview {
+  friend_count: number
+  pending_requests: number
+  connected_nodes: number
+  active_routes: number
+}
+
+export interface Invitation {
+  id: string
+  code: string
+  status: 'active' | 'used' | 'expired'
+  expires_at: string
+  used_at?: string
+  used_by?: string
+  created_at: string
+}
+
+export interface FriendRequest {
+  id: string
+  requester_id: string
+  target_id: string
+  requester_name: string
+  target_name: string
+  requester_avatar?: string
+  target_avatar?: string
+  status: 'pending' | 'accepted' | 'rejected'
+  message?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface SearchUser {
+  id: string
+  name: string
+  avatar?: string
+  node_count: number
+  zone_id: string
+  zone_name: string
+  is_friend: boolean
+  has_pending_request: boolean
+  last_active: string
+}
+
+export interface BaseResponse<T = any> {
+  success: boolean
+  code: number
+  message: string
+  data?: T
+  request_id: string
+  timestamp: string
+}
+
+export interface SocialStats {
+  total_friends: number
+  pending_friend_requests: number
+  sent_requests: number
+  received_requests: number
+  connected_nodes: number
+  active_routes: number
+  total_invitations: number
+  active_invitations: number
+  used_invitations: number
+  expired_invitations: number
+}

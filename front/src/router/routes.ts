@@ -9,6 +9,11 @@ const routes: RouteRecordRaw[] = [
       { path: 'dashboard', component: () => import('../pages/dashboard/DashboardPage.vue') },
       { path: 'nodes', component: () => import('../pages/network/NodesPage.vue') },
       { path: 'routes', component: () => import('../pages/network/RoutesPage.vue') },
+      { path: 'ippools', component: () => import('../pages/network/IpPoolsPage.vue') },
+      { path: 'zones', component: () => import('../pages/network/ZonesPage.vue') },
+      { path: 'social', component: () => import('../pages/network/SocialPage.vue') },
+      { path: 'api-test', component: () => import('../pages/system/ApiTestPage.vue') },
+      { path: 'help', component: () => import('../pages/system/HelpPage.vue') },
       { path: 'profile', component: () => import('../pages/user/ProfilePage.vue') }
     ],
   },
