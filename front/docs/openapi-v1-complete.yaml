@@ -865,6 +865,195 @@ paths:
                       data:
                         $ref: '#/components/schemas/IPPool'
 
+  /ippools/{sequence}:
+    delete:
+      tags: [IPPools]
+      summary: 释放IP池
+      description: 根据序列号释放指定的IP池
+      parameters:
+        - name: sequence
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: IP池序列号 (sequence_number)
+          example: 100002
+      responses:
+        '200':
+          description: IP池释放成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+        '404':
+          description: 未找到指定的IP池
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+
+  /ippools/create-multiple:
+    post:
+      tags: [IPPools]
+      summary: 批量创建IP池
+      description: 根据指定参数批量创建IP池，支持连续和不连续选项
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [zone_id]
+              properties:
+                zone_id:
+                  type: string
+                  description: 所属Zone ID
+                  example: "Z20240101123456"
+                pools_count:
+                  type: integer
+                  description: 要创建的IP池数量
+                  minimum: 1
+                  maximum: 3
+                  default: 1
+                  example: 2
+                continuous:
+                  type: boolean
+                  description: 是否要求连续IP池
+                  default: false
+                  example: true
+                target_pool_id:
+                  type: string
+                  description: 目标连续池ID（仅当continuous=true且存在不连续池时）
+                  example: "pool_123"
+                ip_range:
+                  type: object
+                  description: 自定义IP范围
+                  properties:
+                    start:
+                      type: string
+                      format: ipv4
+                      description: 起始IP地址
+                      example: "192.168.1.1"
+                    end:
+                      type: string
+                      format: ipv4
+                      description: 结束IP地址
+                      example: "192.168.1.254"
+                size:
+                  type: integer
+                  description: 每个池的IP地址数量
+                  minimum: 1
+                  maximum: 254
+                  default: 254
+                  example: 100
+      responses:
+        '201':
+          description: IP池批量创建成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BaseResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          pools:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/IPPool'
+                          total_count:
+                            type: integer
+                            description: 创建的IP池总数
+                            example: 2
+                          allocated_count:
+                            type: integer
+                            description: 已分配的IP池数量
+                            example: 2
+
+  /ippools/user-quota:
+    get:
+      tags: [IPPools]
+      summary: 获取用户IP池配额
+      description: 获取当前用户的IP池配额信息
+      responses:
+        '200':
+          description: 用户IP池配额获取成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BaseResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/IPPoolUserQuota'
+
+  /ippools/check-create-availability:
+    get:
+      tags: [IPPools]
+      summary: 检查创建IP池的可用性
+      description: 检查指定Zone中创建IP池的可用性和推荐方案
+      parameters:
+        - name: zone_id
+          in: query
+          required: true
+          schema:
+            type: string
+            description: Zone ID
+      responses:
+        '200':
+          description: 可用性检查成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BaseResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/IPPoolAvailabilityCheck'
+
+  /ippools/{id}/extend:
+    post:
+      tags: [IPPools]
+      summary: 扩展IP池
+      description: 扩展指定IP池的容量
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: IP池ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [size]
+              properties:
+                size:
+                  type: integer
+                  description: 扩展的IP地址数量
+                  minimum: 1
+                  maximum: 254
+                  example: 50
+      responses:
+        '200':
+          description: IP池扩展成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BaseResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/IPPool'
+
   # ==================== 路由相关 ====================
   /routes:
     get:
@@ -1722,43 +1911,71 @@ components:
       type: object
       properties:
         id:
-          type: string
+          type: integer
           description: IP池ID
-          example: "1"
+          example: 8
+        sequence_number:
+          type: integer
+          description: IP池序列号，用于删除操作
+          example: 100002
         zone_id:
-          type: string
+          type: integer
           description: 所属Zone ID
-          example: "Z20240101123456"
+          example: 1396569674824134
+        user_id:
+          type: integer
+          description: 用户ID
+          example: 3637361088456532
+        ip_start:
+          type: string
+          format: ipv4
+          description: 起始IP地址
+          example: "10.0.0.17"
+        ip_end:
+          type: string
+          format: ipv4
+          description: 结束IP地址
+          example: "10.0.0.22"
         ip_range:
           type: object
+          description: IP范围对象（前端使用）
           properties:
             start:
               type: string
               format: ipv4
               description: 起始IP地址
-              example: "192.168.1.1"
+              example: "10.0.0.17"
             end:
               type: string
               format: ipv4
               description: 结束IP地址
-              example: "192.168.1.254"
+              example: "10.0.0.22"
+        ip_count:
+          type: integer
+          description: IP地址数量
+          example: 6
+        is_allocated:
+          type: boolean
+          description: 是否已分配
+          example: true
         status:
+          type: integer
+          description: 状态码
+          example: 0
+        status_text:
           type: string
-          enum: [allocated, available]
-          description: IP池状态
-          example: "available"
-        allocated_at:
-          type: string
-          format: date-time
-          description: 分配时间
+          description: 状态文本
+          example: "allocated"
         created_at:
           type: string
           format: date-time
           description: 创建时间
+          example: "2025-06-18T12:39:26.000000Z"
         updated_at:
           type: string
           format: date-time
           description: 更新时间
+          example: "2025-06-18T06:16:17.000000Z"
 
     IPPoolStatistics:
       type: object
@@ -2242,4 +2459,4 @@ tags:
   - name: Social
     description: 社交网络相关接口
   - name: IDs
-    description: ID管理相关接口 
+    description: ID管理相关接口
