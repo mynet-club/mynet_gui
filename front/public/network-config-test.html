@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>网络配置测试</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .api-info {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+    .field-info {
+      margin-bottom: 10px;
+    }
+    .field-name {
+      font-weight: bold;
+      color: #333;
+    }
+    .field-type {
+      color: #666;
+      font-style: italic;
+    }
+    .field-desc {
+      color: #888;
+    }
+    .default-values {
+      background-color: #e8f5e8;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>MyNet 网络配置功能测试说明</h1>
+  
+  <div class="section">
+    <h2>1. API 端点信息</h2>
+    <div class="api-info">
+      <div><strong>获取可用IP:</strong> GET /api/v1/ippools/available-ips</div>
+      <div><strong>更新网络配置:</strong> PUT /api/v1/nodes/{node_id}/network-config</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>2. 网络配置字段</h2>
+    
+    <div class="field-info">
+      <div class="field-name">网络接口名称 (ifname)</div>
+      <div class="field-type">string, required</div>
+      <div class="field-desc">网络接口名称，如 eth0, wlan0, tun0 等</div>
+      <div class="default-values">
+        <strong>默认值规则:</strong>
+        <ul>
+          <li>gnb → gnb_tun</li>
+          <li>wireguard → WG01</li>
+          <li>openvpn → tun0</li>
+          <li>其他 → tun0</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="field-info">
+      <div class="field-name">节点虚拟IP (node_ip)</div>
+      <div class="field-type">string, required</div>
+      <div class="field-desc">从IP池中选择的虚拟IP地址</div>
+    </div>
+
+    <div class="field-info">
+      <div class="field-name">IP组序号 (ip_group_sequence_number)</div>
+      <div class="field-type">number, required</div>
+      <div class="field-desc">选择IP时自动获取的组序号</div>
+    </div>
+
+    <div class="field-info">
+      <div class="field-name">索引服务器 (index_servers)</div>
+      <div class="field-type">array[string], optional</div>
+      <div class="field-desc">多个索引服务器地址，格式: IP:端口</div>
+    </div>
+
+    <div class="field-info">
+      <div class="field-name">局域网IP (lan_ips)</div>
+      <div class="field-type">array[string], optional</div>
+      <div class="field-desc">多个局域网IP地址，格式: IP:端口</div>
+    </div>
+
+    <div class="field-info">
+      <div class="field-name">公网IP (public_ip)</div>
+      <div class="field-type">string, optional</div>
+      <div class="field-desc">公网IP地址，提升连接速度</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>3. 功能测试清单</h2>
+    <ul>
+      <li>✅ 网络接口名称根据VPN类型自动设置默认值</li>
+      <li>✅ 节点虚拟IP通过对话框选择，支持搜索和分组显示</li>
+      <li>✅ 选择IP时自动保存IP组序号</li>
+      <li>✅ 索引服务器支持多个，可添加/删除</li>
+      <li>✅ 局域网IP支持多个，可添加/删除</li>
+      <li>✅ 表单验证：网络接口名称、节点虚拟IP必填</li>
+      <li>✅ 提交时数据格式正确，调用正确的API端点</li>
+      <li>✅ 错误处理和用户反馈</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>4. 访问地址</h2>
+    <p>在浏览器中访问: <a href="http://localhost:8080/nodes/1/edit/network" target="_blank">http://localhost:8080/nodes/1/edit/network</a></p>
+    <p>注意：需要先启动开发服务器 <code>npm run dev</code></p>
+  </div>
+
+  <div class="section">
+    <h2>5. 后端联调要点</h2>
+    <ul>
+      <li>确保 <code>/api/v1/ippools/available-ips</code> 返回正确格式的数据</li>
+      <li>确保 <code>/api/v1/nodes/{node_id}/network-config</code> 接受所有字段</li>
+      <li>验证 <code>ip_group_sequence_number</code> 字段能正确保存</li>
+      <li>测试网络配置回显功能</li>
+    </ul>
+  </div>
+
+  <script>
+    console.log('网络配置测试页面已加载');
+    console.log('API Base URL:', 'http://localhost:8000/api/v1');
+  </script>
+</body>
+</html>

@@ -53,8 +53,8 @@ export interface PaginatedZoneResponse {
 
 export const zoneService = {
   // 获取用户可访问的Zone列表
-  async getUserZones(userId: string): Promise<Zone[]> {
-    const response = await api.get(`/user/${userId}/zones`)
+  async getUserZones(): Promise<Zone[]> {
+    const response = await api.get(`/user/zones`)
     return response.data.data
   },
 
@@ -66,10 +66,10 @@ export const zoneService = {
 
   // 获取Zone列表
   async getZones(params?: {
-    page?: number
-    per_page?: number
-    status?: 'active' | 'inactive'
-    search?: string
+    page?: number | undefined
+    per_page?: number | undefined
+    status?: 'active' | 'inactive' | undefined
+    search?: string | undefined
   }): Promise<PaginatedZoneResponse> {
     const response = await api.get('/zones', { params })
     return response.data.data
@@ -109,5 +109,11 @@ export const zoneService = {
   // 删除Zone
   async deleteZone(id: string): Promise<void> {
     await api.delete(`/zones/${id}`)
+  },
+
+  // 获取Zone统计信息
+  async getZoneStatistics(zoneId: string): Promise<ZoneStatistics> {
+    const response = await api.get(`/zones/${zoneId}/statistics`)
+    return response.data.data
   }
-} 
+}

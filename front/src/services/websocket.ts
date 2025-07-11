@@ -1,6 +1,17 @@
-// WebSocket 模拟服务
-import { ref, reactive } from 'vue'
-import { mockNodes, mockRoutes } from './mockData'
+// WebSocket 实现服务 - 使用 Laravel Echo
+import { ref } from 'vue'
+import Echo from 'laravel-echo'
+import Pusher from 'pusher-js'
+
+// 声明全局 Pusher 对象
+declare global {
+  interface Window {
+    Pusher: typeof Pusher;
+  }
+}
+
+// 设置全局 Pusher
+window.Pusher = Pusher
 
 interface WebSocketMessage {
   type: string
@@ -8,100 +19,174 @@ interface WebSocketMessage {
   timestamp: string
 }
 
-interface ConnectionStats {
-  connected: boolean
-  reconnectAttempts: number
-  lastHeartbeat: string
-  messagesSent: number
-  messagesReceived: number
+// 时间广播消息格式
+export interface TimeUpdateMessage {
+  timestamp: number            // Unix时间戳
+  formatted_time: string       // ISO格式的时间字符串
+  zone_id: number              // Zone ID（如果是特定zone的广播）
+  event: string                // 事件类型标识
 }
 
-// 模拟WebSocket连接
-const USE_MOCK_WEBSOCKET = true
-
-export class MockWebSocketService {
+export class WebSocketService {
+  private echo: Echo<any> | null = null
   private eventListeners: Map<string, Array<(data: any) => void>> = new Map()
-  private connectionStats = reactive<ConnectionStats>({
-    connected: false,
-    reconnectAttempts: 0,
-    lastHeartbeat: '',
-    messagesSent: 0,
-    messagesReceived: 0
-  })
-  private simulationInterval: NodeJS.Timeout | null = null
-  private heartbeatInterval: NodeJS.Timeout | null = null
-  
-  constructor() {
-    this.startSimulation()
-  }
-  
-  // 连接到WebSocket
+  private token: string = ''
+  private zoneId: string = ''
+  public isConnected = ref(false)
+
   connect(token: string, zoneId: string) {
-    console.log('WebSocket: Connecting...', { token, zoneId })
+    // 存储认证信息
+    this.token = token
+    this.zoneId = zoneId
     
-    // 模拟连接延迟
-    setTimeout(() => {
-      this.connectionStats.connected = true
-      this.connectionStats.lastHeartbeat = new Date().toISOString()
-      this.emit('connected', { status: 'connected', zone_id: zoneId })
-      this.startHeartbeat()
-      console.log('WebSocket: Connected successfully')
-    }, 1000)
-  }
-  
-  // 断开连接
-  disconnect() {
-    console.log('WebSocket: Disconnecting...')
-    this.connectionStats.connected = false
-    this.stopSimulation()
-    this.stopHeartbeat()
-    this.emit('disconnected', { status: 'disconnected' })
-  }
-  
-  // 重连
-  reconnect() {
-    console.log('WebSocket: Reconnecting...')
-    this.connectionStats.reconnectAttempts++
-    this.disconnect()
-    
-    // 模拟重连延迟
-    setTimeout(() => {
-      this.connectionStats.connected = true
-      this.connectionStats.lastHeartbeat = new Date().toISOString()
-      this.emit('reconnected', { status: 'reconnected' })
-      this.startHeartbeat()
-    }, 2000)
-  }
-  
-  // 发送消息
-  send(message: WebSocketMessage) {
-    if (!this.connectionStats.connected) {
-      console.warn('WebSocket: Not connected, message not sent')
+    // 检查是否已经连接
+    if (this.echo && this.isConnected.value) {
+      console.log('WebSocket: 已经连接，跳过重复连接')
       return
     }
     
-    console.log('WebSocket: Sending message', message)
-    this.connectionStats.messagesSent++
+    // 断开现有连接
+    if (this.echo) {
+      console.log('WebSocket: 断开现有 Echo 连接')
+      this.echo.disconnect()
+      this.echo = null
+    }
     
-    // 模拟服务器响应
-    setTimeout(() => {
-      this.emit('message_sent', { 
-        ...message, 
-        status: 'sent',
-        timestamp: new Date().toISOString()
+    // 确定WebSocket主机和端口
+    const wsHost = process.env.NODE_ENV === 'production' 
+      ? 'api.mynet.com' 
+      : 'localhost'
+    const wsPort = process.env.NODE_ENV === 'production' 
+      ? 443 
+      : 1080  // 根据服务端配置调整端口
+    
+    console.log(`WebSocket: 正在连接到 ${wsHost}:${wsPort}`)
+    
+    try {
+      // 根据工作样例配置 Laravel Echo
+      const config = {
+        broadcaster: 'pusher',
+        key: 'oyzmmhlqzmar2uvanq2k',  // 使用工作样例中的key
+        wsHost: wsHost,
+        wsPort: wsPort,
+        forceTLS: false,  // 本地开发环境不使用TLS
+        enabledTransports: ['ws', 'wss'],
+        disableStats: true,
+        encrypted: false,
+        namespace: null,   // 禁用命名空间，直接使用事件名
+        cluster: 'local'   // 添加cluster配置，避免Pusher报错
+      }
+      
+      console.log('WebSocket: Echo 配置', config)
+      
+      this.echo = new Echo(config)
+      
+      console.log('WebSocket: Echo 实例创建成功', this.echo)
+
+      // 监听连接状态
+      this.echo.connector.pusher.connection.bind('connected', () => {
+        console.log('WebSocket: Laravel Echo 连接成功')
+        this.isConnected.value = true
+        this.emit('connected', { status: 'connected', zone_id: zoneId })
       })
-    }, 100)
+
+      this.echo.connector.pusher.connection.bind('disconnected', () => {
+        console.log('WebSocket: Laravel Echo 连接断开')
+        this.isConnected.value = false
+        this.emit('disconnected', { status: 'disconnected' })
+      })
+
+      this.echo.connector.pusher.connection.bind('error', (error: any) => {
+        console.error('WebSocket: Laravel Echo 连接错误', error)
+        this.emit('connection_failed', { status: 'error', error: error.message })
+      })
+
+      // 监听连接状态变化
+      this.echo.connector.pusher.connection.bind('state_change', (states: any) => {
+        console.log('WebSocket: 连接状态变化', states)
+      })
+
+      // 订阅时间更新频道
+      console.log('WebSocket: 正在订阅时间更新频道...')
+      const timeChannel = this.echo.channel('time-updates')
+
+      // 监听多种可能的时间事件名称（根据Laravel后端的实际事件名）
+      const timeEvents = ['TimeUpdate', 'time.update', 'time_update', 'App\\Events\\TimeUpdate']
+      
+      timeEvents.forEach(eventName => {
+        timeChannel.listen(eventName, (data: any) => {
+          console.log(`🕐 收到时间事件 ${eventName}:`, data)
+          
+          // 格式化时间数据
+          const timeData: TimeUpdateMessage = {
+            timestamp: data.timestamp || Date.now() / 1000,
+            formatted_time: data.formatted_time || data.server_time || data.time || new Date().toISOString(),
+            zone_id: data.zone_id || parseInt(zoneId),
+            event: eventName
+          }
+          
+          console.log('🕐 格式化后的时间数据:', timeData)
+          console.log('  服务器时间:', timeData.formatted_time)
+          console.log('  Unix时间戳:', timeData.timestamp)
+          console.log('  Zone ID:', timeData.zone_id)
+          
+          // 转换为本地时间显示
+          const localTime = new Date(timeData.timestamp * 1000)
+          console.log('  本地时间:', localTime.toLocaleString())
+          
+          // 发射时间更新事件
+          this.emit('time_update', timeData)
+        })
+      })
+
+      // 监听原始消息（调试用）
+      this.echo.connector.pusher.connection.bind('message', (message: any) => {
+        console.log('WebSocket: 收到原始消息', message)
+      })
+
+      console.log('WebSocket: Laravel Echo 初始化完成')
+      
+    } catch (error) {
+      console.error('WebSocket: Laravel Echo 初始化失败', error)
+      this.emit('connection_failed', { 
+        status: 'error', 
+        error: error instanceof Error ? error.message : String(error)
+      })
+    }
   }
-  
-  // 监听事件
+
+  disconnect() {
+    console.log('WebSocket: 断开 Laravel Echo 连接')
+    
+    if (this.echo) {
+      try {
+        this.echo.disconnect()
+        this.echo = null
+        this.isConnected.value = false
+        console.log('WebSocket: Laravel Echo 连接已断开')
+      } catch (error) {
+        console.error('WebSocket: 断开连接时出错', error)
+      }
+    }
+  }
+
+  // 安排WebSocket重连 - Laravel Echo 自动处理重连
+  private scheduleReconnect() {
+    console.log('WebSocket: Laravel Echo 将自动处理重连')
+  }
+
+  // 清除重连计时器 - Laravel Echo 自动处理
+  private clearReconnectTimeout() {
+    console.log('WebSocket: Laravel Echo 自动处理重连计时器')
+  }
+
   on(event: string, callback: (data: any) => void) {
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, [])
     }
     this.eventListeners.get(event)?.push(callback)
   }
-  
-  // 取消监听
+
   off(event: string, callback: (data: any) => void) {
     const listeners = this.eventListeners.get(event)
     if (listeners) {
@@ -111,208 +196,40 @@ export class MockWebSocketService {
       }
     }
   }
-  
-  // 触发事件
+
   private emit(event: string, data: any) {
     const listeners = this.eventListeners.get(event)
     if (listeners) {
       listeners.forEach(callback => callback(data))
     }
-    this.connectionStats.messagesReceived++
   }
-  
-  // 开始数据模拟
-  private startSimulation() {
-    if (this.simulationInterval) {
-      clearInterval(this.simulationInterval)
-    }
-    
-    this.simulationInterval = setInterval(() => {
-      if (!this.connectionStats.connected) return
-      
-      // 随机生成模拟事件
-      const eventType = Math.random()
-      
-      if (eventType < 0.3) {
-        // 节点状态更新
-        this.simulateNodeStatusUpdate()
-      } else if (eventType < 0.6) {
-        // 路由状态更新
-        this.simulateRouteStatusUpdate()
-      } else if (eventType < 0.8) {
-        // 用户活动
-        this.simulateUserActivity()
-      } else {
-        // 系统通知
-        this.simulateSystemNotification()
-      }
-    }, 3000 + Math.random() * 5000) // 3-8秒随机间隔
-  }
-  
-  // 停止数据模拟
-  private stopSimulation() {
-    if (this.simulationInterval) {
-      clearInterval(this.simulationInterval)
-      this.simulationInterval = null
-    }
-  }
-  
-  // 开始心跳
-  private startHeartbeat() {
-    if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval)
-    }
-    
-    this.heartbeatInterval = setInterval(() => {
-      this.connectionStats.lastHeartbeat = new Date().toISOString()
-      this.emit('heartbeat', { 
-        timestamp: this.connectionStats.lastHeartbeat,
-        stats: this.connectionStats
-      })
-    }, 30000) // 30秒心跳
-  }
-  
-  // 停止心跳
-  private stopHeartbeat() {
-    if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval)
-      this.heartbeatInterval = null
-    }
-  }
-  
-  // 模拟节点状态更新
-  private simulateNodeStatusUpdate() {
-    const randomNode = mockNodes[Math.floor(Math.random() * mockNodes.length)]
-    const statuses = ['active', 'inactive', 'pending']
-    const newStatus = statuses[Math.floor(Math.random() * statuses.length)]
-    
-    this.emit('node_status_update', {
-      node_id: randomNode.id,
-      node_name: randomNode.node_name,
-      status: newStatus,
-      previous_status: randomNode.status,
-      timestamp: new Date().toISOString()
-    })
-  }
-  
-  // 模拟路由状态更新
-  private simulateRouteStatusUpdate() {
-    const randomRoute = mockRoutes[Math.floor(Math.random() * mockRoutes.length)]
-    const statuses = ['active', 'inactive']
-    const newStatus = statuses[Math.floor(Math.random() * statuses.length)]
-    
-    this.emit('route_status_update', {
-      route_id: randomRoute.id,
-      route_name: randomRoute.name,
-      status: newStatus,
-      previous_status: randomRoute.status,
-      timestamp: new Date().toISOString()
-    })
-  }
-  
-  // 模拟用户活动
-  private simulateUserActivity() {
-    const activities = ['login', 'logout', 'zone_switch', 'node_access']
-    const activity = activities[Math.floor(Math.random() * activities.length)]
-    
-    this.emit('user_activity', {
-      user_id: 'user_' + Math.floor(Math.random() * 100),
-      activity: activity,
-      timestamp: new Date().toISOString(),
-      details: `User performed ${activity}`
-    })
-  }
-  
-  // 模拟系统通知
-  private simulateSystemNotification() {
-    const notifications = [
-      { type: 'info', title: 'System Update', message: 'System maintenance completed successfully' },
-      { type: 'warning', title: 'High Load', message: 'Server load is above 80%' },
-      { type: 'error', title: 'Connection Lost', message: 'Lost connection to node AP-Gateway-01' },
-      { type: 'success', title: 'Backup Complete', message: 'Daily backup completed successfully' }
-    ]
-    
-    const notification = notifications[Math.floor(Math.random() * notifications.length)]
-    
-    this.emit('system_notification', {
-      id: 'notif_' + Date.now(),
-      ...notification,
-      timestamp: new Date().toISOString()
-    })
-  }
-  
-  // 获取连接统计信息
-  getConnectionStats() {
-    return this.connectionStats
-  }
+
 }
 
-// 创建WebSocket服务实例
-export const webSocketService = new MockWebSocketService()
+export const webSocketService = new WebSocketService()
 
-// 导出WebSocket hooks
 export const useWebSocket = () => {
-  const isConnected = ref(false)
-  const connectionStats = ref<ConnectionStats>({
-    connected: false,
-    reconnectAttempts: 0,
-    lastHeartbeat: '',
-    messagesSent: 0,
-    messagesReceived: 0
-  })
-  
   const connect = (token: string, zoneId: string) => {
     webSocketService.connect(token, zoneId)
   }
-  
+
   const disconnect = () => {
     webSocketService.disconnect()
   }
-  
-  const reconnect = () => {
-    webSocketService.reconnect()
-  }
-  
-  const send = (message: WebSocketMessage) => {
-    webSocketService.send(message)
-  }
-  
+
   const on = (event: string, callback: (data: any) => void) => {
     webSocketService.on(event, callback)
   }
-  
+
   const off = (event: string, callback: (data: any) => void) => {
     webSocketService.off(event, callback)
   }
-  
-  // 监听连接状态变化
-  webSocketService.on('connected', () => {
-    isConnected.value = true
-    connectionStats.value = webSocketService.getConnectionStats()
-  })
-  
-  webSocketService.on('disconnected', () => {
-    isConnected.value = false
-    connectionStats.value = webSocketService.getConnectionStats()
-  })
-  
-  webSocketService.on('reconnected', () => {
-    isConnected.value = true
-    connectionStats.value = webSocketService.getConnectionStats()
-  })
-  
-  webSocketService.on('heartbeat', (data) => {
-    connectionStats.value = data.stats
-  })
-  
+
   return {
-    isConnected,
-    connectionStats,
+    isConnected: webSocketService.isConnected,
     connect,
     disconnect,
-    reconnect,
-    send,
     on,
     off
   }
-} 
+}

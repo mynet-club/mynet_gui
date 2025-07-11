@@ -114,13 +114,18 @@ export interface SocialDataResponse {
 }
 
 export interface Invitation {
-  id: string
-  code: string
-  status: 'active' | 'used' | 'expired'
+  id: number
+  invitation_code: string
+  description: string
+  max_uses: number
+  used_count: number
   expires_at: string
+  invitation_status: number
+  is_valid: boolean
+  can_use: boolean
+  created_at: string
   used_at?: string
   used_by?: string
-  created_at: string
 }
 
 export interface FriendRequest {
@@ -138,7 +143,8 @@ export interface FriendRequest {
 }
 
 export interface SearchUser {
-  id: string
+  id: string  // 保留id字段以保持向后兼容
+  user_id: string  // 添加user_id字段，这是业务主键
   name: string
   avatar?: string
   node_count: number
@@ -169,4 +175,153 @@ export interface SocialStats {
   active_invitations: number
   used_invitations: number
   expired_invitations: number
+}
+
+// Routes Module Types
+export interface Route {
+  id: string
+  source_node_id: string
+  target_node_id: string
+  source_node_name: string
+  target_node_name: string
+  source_ip: string
+  target_ip: string
+  source_mask: string
+  target_mask: string
+  friend_id?: string
+  friend_name?: string
+  status: 'active' | 'inactive' | 'connecting' | 'error'
+  connection_type: 'direct' | 'relay'
+  bandwidth_usage: string
+  latency: number
+  packet_loss: number
+  last_active: string
+  created_at: string
+  updated_at: string
+}
+
+export interface RouteOverview {
+  active_routes: number
+  pending_connections: number
+  connected_nodes: number
+  total_bandwidth: string
+}
+
+export interface PendingConnection {
+  id: string
+  requester_id: string
+  target_id: string
+  requester_name: string
+  target_name: string
+  requester_node_id: string
+  target_node_id: string
+  requester_node_name: string
+  target_node_name: string
+  requester_ip: string
+  target_ip: string
+  status: 'pending' | 'approved' | 'rejected'
+  message?: string
+  connection_type: 'direct' | 'relay'
+  created_at: string
+  updated_at: string
+}
+
+export interface FriendNode {
+  id: string
+  node_name: string
+  node_type: string
+  ip_address: string
+  port: number
+  friend_id: string
+  friend_name: string
+  friend_avatar?: string
+  connection_status: 'available' | 'connected' | 'pending' | 'unavailable'
+  last_seen: string
+  zone_id: string
+  zone_name: string
+  created_at: string
+  updated_at: string
+}
+
+export interface RouteConfig {
+  id: string
+  user_id: string
+  config_content: string
+  config_format: 'gnb' | 'tinc' | 'wireguard'
+  routes: RouteConfigEntry[]
+  last_updated: string
+  version: number
+  checksum: string
+}
+
+export interface RouteConfigEntry {
+  node_id: string
+  ip_address: string
+  mask: string
+  gateway?: string
+  metric?: number
+}
+
+export interface RouteConnection {
+  id: string
+  source_node_id: string
+  target_node_id: string
+  connection_type: 'direct' | 'relay'
+  status: 'connecting' | 'connected' | 'disconnected' | 'error'
+  bandwidth_in: string
+  bandwidth_out: string
+  latency: number
+  packet_loss: number
+  bytes_sent: number
+  bytes_received: number
+  last_active: string
+  created_at: string
+}
+
+export interface RouteStats {
+  total_routes: number
+  active_routes: number
+  inactive_routes: number
+  pending_connections: number
+  connected_nodes: number
+  total_bandwidth_in: string
+  total_bandwidth_out: string
+  average_latency: number
+  total_data_transfer: string
+}
+
+export interface RouteDataResponse {
+  routes: Route[]
+  pending_connections: PendingConnection[]
+  outgoing_connections: PendingConnection[]
+  friend_nodes: FriendNode[]
+  config: RouteConfig
+  stats: RouteStats
+}
+
+// Zone Module Types
+export interface ZoneOverview {
+  total_zones: number
+  active_zones: number
+  total_nodes: number
+  total_routes: number
+}
+
+export interface ZoneStatistics {
+  zone_id: string
+  node_count: number
+  active_node_count: number
+  route_count: number
+  ip_pool_count: number
+  user_count: number
+}
+
+export interface PaginatedZoneResponse {
+  data: Zone[]
+  meta: {
+    current_page: number
+    per_page: number
+    total: number
+    last_page: number
+  }
 }

@@ -112,10 +112,7 @@ export function useDashboard() {
     await fetchRealtimeData()
     await fetchRecentActivities()
 
-    // 连接WebSocket
-    const token = authStore.token || 'mock_token'
-    const zoneId = authStore.user?.zone_id || 1
-    connect(token, zoneId.toString())
+    // WebSocket连接由boot/websocket.ts统一管理，这里不再重复连接
     
     // 设置定时器更新实时数据
     updateInterval.value = window.setInterval(fetchRealtimeData, 5000)
@@ -126,7 +123,7 @@ export function useDashboard() {
       clearInterval(updateInterval.value)
       updateInterval.value = null
     }
-    disconnect()
+    // WebSocket断开由boot/websocket.ts统一管理，这里不需要手动断开
   })
 
   return {

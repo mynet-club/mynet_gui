@@ -414,7 +414,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar, date, LocalStorage } from 'quasar'
 import { useAuthStore } from '../stores/auth'
@@ -428,7 +428,7 @@ import { DEFAULT_GLOBAL_ZONE } from '../config/app'
 const $q = useQuasar()
 const router = useRouter()
 const authStore = useAuthStore()
-const { connectionStats: wsConnectionStats, connect, reconnect } = useWebSocket()
+const { isConnected, connect } = useWebSocket()
 const { themeMode: currentThemeMode, setThemeMode, getThemeOptions, initializeTheme } = useTheme()
 const { stats: sidebarStats, init: initSidebarStats } = useSidebarStats()
 const { locale, t } = useI18n()
@@ -550,22 +550,37 @@ const networkNavigationItems = computed((): NavigationItem[] => [
 ])
 
 // 系统工具导航项
-const systemNavigationItems = computed((): NavigationItem[] => [
-  {
-    name: 'apitest',
-    label: 'navigation.apiTest',
-    icon: 'code',
-    path: '/api-test',
-    comingSoon: true
-  },
-  {
-    name: 'help',
-    label: 'navigation.help',
-    icon: 'help',
-    path: '/help',
-    comingSoon: true
+const systemNavigationItems = computed((): NavigationItem[] => {
+  const items: NavigationItem[] = [
+    {
+      name: 'apitest',
+      label: 'navigation.apiTest',
+      icon: 'code',
+      path: '/api-test',
+      comingSoon: true
+    },
+    {
+      name: 'help',
+      label: 'navigation.help',
+      icon: 'help',
+      path: '/help',
+      comingSoon: true
+    }
+  ]
+  
+  // 在开发模式下添加 Token 调试页面
+  if (process.env.NODE_ENV === 'development') {
+    items.unshift({
+      name: 'token-debug',
+      label: 'Token 调试',
+      icon: 'token',
+      path: '/system/token-debug',
+      comingSoon: false
+    })
   }
-])
+  
+  return items
+})
 
 // 方法
 const toggleLeftDrawer = () => {
@@ -643,16 +658,6 @@ const formatTime = (timestamp: string) => {
   return date.formatDate(timestamp, 'YYYY-MM-DD HH:mm:ss')
 }
 
-const reconnectWebSocket = () => {
-  reconnect()
-  showConnectionDialog.value = false
-  $q.notify({
-    type: 'info',
-    message: 'Reconnecting...',
-    timeout: 2000
-  })
-}
-
 // 消息提醒相关方法
 const markAllAsRead = () => {
   notifications.value.forEach(notification => {
@@ -700,6 +705,19 @@ const getNotificationColor = (type: string) => {
     default:
       return 'primary'
   }
+}
+
+// 确保 wsConnectionStats 正确声明
+const wsConnectionStats = reactive({
+  connected: isConnected,
+  lastHeartbeat: new Date().toISOString(),
+  messagesReceived: 0,
+  reconnectAttempts: 0
+});
+
+// 移除 reconnectWebSocket 的引用
+const reconnectWebSocket = () => {
+  console.warn('Reconnect WebSocket is not implemented yet.')
 }
 
 // 生命周期
@@ -791,10 +809,7 @@ onMounted(async () => {
     }
   }
   
-  // 初始化WebSocket连接
-  if (authStore.isAuthenticated && authStore.currentZone) {
-    connect(authStore.token!, authStore.currentZone.zone_id.toString())
-  }
+  // WebSocket连接由boot/websocket.ts统一管理，这里不再重复连接
   
   // 初始化边栏统计数据
   await initSidebarStats()

@@ -237,6 +237,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useSocial } from '../../composables/useSocial'
 import { useNotify } from '../../composables/useNotify'
 import FriendsTab from '../../components/social/FriendsTab.vue'
@@ -245,6 +246,7 @@ import SearchTab from '../../components/social/SearchTab.vue'
 import InvitationsTab from '../../components/social/InvitationsTab.vue'
 
 const { t } = useI18n()
+const router = useRouter()
 const notify = useNotify()
 const {
   loading,
@@ -262,6 +264,7 @@ const {
   rejectFriendRequest,
   removeFriend,
   createInvitation,
+  getFriendNodes,
   handleRequestTypeChange,
   init
 } = useSocial()
@@ -308,9 +311,22 @@ const confirmRemoveFriend = async () => {
   removeDialog.value.show = false
 }
 
-const handleViewNodes = (friendId: string) => {
-  // TODO: 实现查看好友节点功能
-  console.log('View nodes for friend:', friendId)
+const handleViewNodes = async (friendId: string) => {
+  try {
+    const nodes = await getFriendNodes(friendId)
+    if (nodes.length > 0) {
+      // 跳转到路由页面并显示好友节点
+      router.push({
+        name: 'routes',
+        query: { tab: 'friends', friend: friendId }
+      })
+    } else {
+      notify.info(t('social.noFriendNodes'))
+    }
+  } catch (error) {
+    console.error('Failed to get friend nodes:', error)
+    notify.error(t('social.fetchFriendNodesError'))
+  }
 }
 
 const handleAcceptRequest = (requestId: string) => {

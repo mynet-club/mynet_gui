@@ -46,7 +46,7 @@
     <div v-else class="q-gutter-md">
       <q-card
         v-for="user in searchResults"
-        :key="user.id"
+        :key="user.user_id"
         class="user-card"
       >
         <q-card-section>
@@ -85,7 +85,7 @@
               />
               <q-btn
                 v-else
-                @click="$emit('send-request', user.id, user.name)"
+                @click="$emit('send-request', user.user_id, user.name)"
                 color="primary"
                 :label="$t('social.search.addFriend')"
                 size="sm"

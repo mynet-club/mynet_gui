@@ -2,6 +2,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useAuthStore } from '../stores/auth'
+import { apiService } from '../services/api' // 修复导入路径
 
 export function useAuth() {
   const router = useRouter()
@@ -23,7 +24,8 @@ export function useAuth() {
     email: '',
     password: '',
     confirmPassword: '',
-    agreeTerms: false
+    agreeTerms: false,
+    invitation: '' // 添加邀请码字段
   })
 
   // 忘记密码表单
@@ -50,7 +52,24 @@ export function useAuth() {
         email: loginForm.email, 
         password: loginForm.password 
       })
-      router.push('/dashboard')
+      
+      console.log('🔧 [useAuth] Login successful, checking auth state:', {
+        isAuthenticated: authStore.isAuthenticated,
+        hasUser: !!authStore.user,
+        hasToken: !!authStore.token,
+        tokenExpiry: authStore.tokenExpiry,
+        currentTime: Date.now(),
+        tokenExpired: authStore.tokenExpiry <= Date.now()
+      })
+      
+      // 确保认证状态已经更新
+      if (authStore.isAuthenticated) {
+        console.log('🔧 [useAuth] Navigating to dashboard...')
+        await router.push('/dashboard')
+        console.log('🔧 [useAuth] Navigation to dashboard completed')
+      } else {
+        console.error('🔧 [useAuth] Login succeeded but not authenticated')
+      }
     } catch (error) {
       console.error('Login failed:', error)
       $q.notify({
@@ -67,25 +86,23 @@ export function useAuth() {
   const register = async () => {
     isLoading.value = true
     try {
-      // TODO: 实现注册逻辑
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
+      const response = await apiService.register(registerForm);
       $q.notify({
         type: 'positive',
-        message: 'Registration successful! Please check your email for verification.',
+        message: response.message || 'Registration successful! Please check your email for verification.',
         timeout: 3000
-      })
-      
-      router.push('/auth/login')
+      });
+      router.push('/auth/login');
     } catch (error) {
-      console.error('Registration failed:', error)
+      console.error('Registration failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed. Please try again.';
       $q.notify({
         type: 'negative',
-        message: 'Registration failed. Please try again.',
+        message: errorMessage,
         timeout: 3000
-      })
+      });
     } finally {
-      isLoading.value = false
+      isLoading.value = false;
     }
   }
 
@@ -182,4 +199,4 @@ export function useAuth() {
     verifyEmail,
     resendCode
   }
-} 
+}

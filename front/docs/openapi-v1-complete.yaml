@@ -1,58 +1,29 @@
 openapi: 3.0.3
 info:
-  title: MyNet API v1 - 社交化分布式组网管理平台
+  title: MyNet API
   description: |
-    # MyNet 社交化分布式组网管理平台 API
+    MyNet 是一个基于 DDD 架构的虚拟网络管理平台 API。
     
-    ## 🚀 项目概述
-    MyNet是一个基于GNB(Open GNB)的社交化分布式组网管理平台，通过"加好友"的方式实现节点间的安全通信。
+    支持功能：
+    - 节点管理（Node Management）
+    - 路由管理（Route Management）
+    - 区域管理（Zone Management）
+    - IP 池管理（IP Pool Management）
+    - 社交网络（Social Network）
+    - 用户管理（User Management）
+    - ID 管理（ID Management）
     
-    ## 🔑 核心特性
-    - **社交化组网**: 通过好友关系建立网络信任机制
-    - **Zone多租户隔离**: 完全物理隔离的多租户架构  
-    - **DDD架构**: 领域驱动设计，业务逻辑清晰
-    - **request_id追踪**: 所有API响应包含唯一请求ID
-    - **统一响应格式**: 标准化的JSON响应结构
+    认证方式：
+    - Bearer Token (Laravel Sanctum)
+    - Session Authentication
     
-    ## 🔐 认证方式
-    使用Laravel Sanctum Token认证：
-    ```
-    Authorization: Bearer {your-token}
-    X-Zone-ID: {zone-id}
-    ```
-    
-    ## 📡 响应格式 (包含request_id)
-    所有API响应遵循统一格式，包含request_id用于追踪：
-    ```json
-    {
-      "success": true,
-      "code": 200,
-      "message": "操作成功",
-      "data": {...},
-      "request_id": "550e8400-e29b-41d4-a716-446655440000",
-      "timestamp": "2024-01-01T12:00:00.000Z"
-    }
-    ```
-    
-    ## 🛡️ 错误处理
-    错误响应包含详细信息和request_id：
-    ```json
-    {
-      "success": false,
-      "code": 400,
-      "message": "错误描述",
-      "error_code": "BUSINESS_ERROR_CODE",
-      "errors": {...},
-      "request_id": "550e8400-e29b-41d4-a716-446655440000",
-      "timestamp": "2024-01-01T12:00:00.000Z"
-    }
-    ```
-    
-  version: "1.0.0"
+    Zone 隔离：
+    - 所有 API 都基于用户的 Zone 进行数据隔离
+    - 确保跨 Zone 访问的安全性
+  version: 1.0.0
   contact:
     name: MyNet API Support
-    email: api@mynet.com
-    url: https://mynet.com/support
+    url: https://github.com/mynet-project
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
@@ -60,1575 +31,711 @@ info:
 servers:
   - url: https://api.mynet.com/api/v1
     description: Production server
-  - url: https://staging-api.mynet.com/api/v1
+  - url: https://staging.mynet.com/api/v1
     description: Staging server
   - url: http://localhost:8000/api/v1
     description: Development server
 
 security:
   - bearerAuth: []
+  - sessionAuth: []
 
 paths:
-  # ==================== 认证相关 ====================
+  # 认证相关
   /auth/login:
     post:
-      tags: [Authentication]
+      tags:
+        - Authentication
       summary: 用户登录
-      description: 使用邮箱和密码进行登录，返回访问令牌
-      security: []
+      description: 用户登录获取访问令牌
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [email, password]
+              required:
+                - email
+                - password
               properties:
                 email:
                   type: string
                   format: email
-                  example: user@example.com
+                  description: 用户邮箱
                 password:
                   type: string
-                  minLength: 6
-                  example: password123
+                  format: password
+                  description: 用户密码
                 remember:
                   type: boolean
-                  default: false
+                  description: 记住登录状态
       responses:
         '200':
           description: 登录成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: object
-                        properties:
-                          token:
-                            type: string
-                            description: 访问令牌
-                          user:
-                            $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/LoginResponse'
         '401':
-          $ref: '#/components/responses/Unauthorized'
-        '422':
-          $ref: '#/components/responses/ValidationError'
+          description: 认证失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /auth/logout:
     post:
-      tags: [Authentication]
+      tags:
+        - Authentication
       summary: 用户登出
-      description: 注销当前用户的访问令牌
+      description: 用户登出并撤销令牌
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: 登出成功
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BaseResponse'
-
-  /auth/validate-session:
-    post:
-      tags: [Authentication]
-      summary: 验证会话
-      description: 验证当前用户会话是否有效
-      responses:
-        '200':
-          description: 会话验证成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+                $ref: '#/components/schemas/SuccessResponse'
 
   /auth/verify-token:
     get:
-      tags: [Authentication]
+      tags:
+        - Authentication
       summary: 验证令牌
-      description: 验证访问令牌是否有效
+      description: 验证当前访问令牌的有效性
+      security:
+        - bearerAuth: []
       responses:
         '200':
-          description: 令牌验证成功
+          description: 令牌有效
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BaseResponse'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+                $ref: '#/components/schemas/TokenVerifyResponse'
 
-  # ==================== 节点相关 ====================
+  # 用户信息
+  /user:
+    get:
+      tags:
+        - User
+      summary: 获取当前用户信息
+      description: 获取当前认证用户的基本信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 用户信息获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponse'
+
+  # MyNet 统计数据
+  /mynet/stats:
+    get:
+      tags:
+        - MyNet
+      summary: 获取系统统计数据
+      description: 获取系统初始化数据和统计信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 统计数据获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyNetStatsResponse'
+
+  /mynet/health:
+    get:
+      tags:
+        - MyNet
+      summary: 获取系统健康状态
+      description: 获取系统健康状态和运行状态
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 健康状态获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  # 节点管理
   /nodes:
     get:
-      tags: [Nodes]
+      tags:
+        - Nodes
       summary: 获取节点列表
-      description: 获取当前用户的节点列表，支持分页和筛选
+      description: 获取当前用户在当前 Zone 的节点列表
+      security:
+        - bearerAuth: []
       parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/PerPageParameter'
-        - name: status
+        - name: page
           in: query
           schema:
-            type: string
-            enum: [active, inactive, pending]
-            description: 节点状态过滤
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+            maximum: 100
         - name: search
           in: query
           schema:
             type: string
-            description: 搜索关键词
+          description: 搜索关键词
+        - name: vpn_type
+          in: query
+          schema:
+            type: string
+            enum: [gnb, wireguard]
+          description: VPN 类型筛选
+        - name: status
+          in: query
+          schema:
+            type: integer
+            enum: [0, 1, 2]
+          description: 状态筛选
       responses:
         '200':
           description: 节点列表获取成功
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedNodeResponse'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+                $ref: '#/components/schemas/NodeListResponse'
 
     post:
-      tags: [Nodes]
+      tags:
+        - Nodes
       summary: 创建新节点
-      description: 创建一个新的节点
+      description: 创建新的节点
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [node_name]
-              properties:
-                node_name:
-                  type: string
-                  description: 节点名称
-                  example: "Gateway-01"
-                description:
-                  type: string
-                  description: 节点描述
-                  example: "主网关节点"
+              $ref: '#/components/schemas/CreateNodeRequest'
       responses:
         '201':
           description: 节点创建成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Node'
+                $ref: '#/components/schemas/NodeResponse'
         '422':
-          $ref: '#/components/responses/ValidationError'
+          description: 验证错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
 
   /nodes/{id}:
     get:
-      tags: [Nodes]
+      tags:
+        - Nodes
       summary: 获取节点详情
       description: 获取指定节点的详细信息
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
           required: true
           schema:
-            type: string
-          description: 节点ID
+            type: integer
+          description: 节点 ID
       responses:
         '200':
           description: 节点详情获取成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Node'
+                $ref: '#/components/schemas/NodeResponse'
+        '404':
+          description: 节点不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     put:
-      tags: [Nodes]
-      summary: 更新节点信息
+      tags:
+        - Nodes
+      summary: 更新节点
       description: 更新指定节点的信息
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
           required: true
           schema:
-            type: string
-          description: 节点ID
+            type: integer
+          description: 节点 ID
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                node_name:
-                  type: string
-                  description: 节点名称
-                description:
-                  type: string
-                  description: 节点描述
+              $ref: '#/components/schemas/UpdateNodeRequest'
       responses:
         '200':
           description: 节点更新成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Node'
+                $ref: '#/components/schemas/NodeResponse'
 
     delete:
-      tags: [Nodes]
+      tags:
+        - Nodes
       summary: 删除节点
-      description: 删除指定的节点
+      description: 删除指定节点
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
           required: true
           schema:
-            type: string
-          description: 节点ID
+            type: integer
+          description: 节点 ID
       responses:
         '200':
           description: 节点删除成功
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BaseResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
-  /nodes/{id}/status:
-    patch:
-      tags: [Nodes]
-      summary: 更新节点状态
-      description: 更新指定节点的状态
+  # 节点配置管理
+  /nodes/{id}/config:
+    get:
+      tags:
+        - Nodes
+      summary: 获取节点配置
+      description: 获取指定节点的完整配置信息
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: 节点ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [status]
-              properties:
-                status:
-                  type: string
-                  enum: [active, inactive, pending]
-                  description: 新的节点状态
-      responses:
-        '200':
-          description: 节点状态更新成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-
-  /nodes/{id}/keys:
-    get:
-      tags: [Nodes]
-      summary: 获取节点密钥
-      description: 获取指定节点的所有密钥
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: 节点ID
-      responses:
-        '200':
-          description: 节点密钥获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/NodeKey'
-
-    post:
-      tags: [Nodes]
-      summary: 生成节点密钥
-      description: 为指定节点生成新的密钥
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: 节点ID
-      responses:
-        '201':
-          description: 节点密钥生成成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/NodeKey'
-
-    delete:
-      tags: [Nodes]
-      summary: 撤销节点密钥
-      description: 撤销指定节点的所有密钥
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: 节点ID
-      responses:
-        '200':
-          description: 节点密钥撤销成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-
-  # ==================== Zone相关 ====================
-  /zones:
-    get:
-      tags: [Zones]
-      summary: 获取Zone列表
-      description: 获取当前用户可访问的Zone列表，支持分页和筛选
-      parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/PerPageParameter'
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [active, inactive]
-            description: Zone状态过滤
-        - name: search
-          in: query
-          schema:
-            type: string
-            description: 搜索关键词
-      responses:
-        '200':
-          description: Zone列表获取成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedZoneResponse'
-
-    post:
-      tags: [Zones]
-      summary: 创建新Zone
-      description: 创建一个新的Zone
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [name]
-              properties:
-                name:
-                  type: string
-                  description: Zone名称
-                  example: "Production"
-                description:
-                  type: string
-                  description: Zone描述
-                  example: "生产环境Zone"
-      responses:
-        '201':
-          description: Zone创建成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Zone'
-
-  /zones/overview:
-    get:
-      tags: [Zones]
-      summary: 获取Zone概览
-      description: 获取所有Zone的统计信息和概览数据
-      responses:
-        '200':
-          description: Zone概览获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/ZoneOverview'
-
-  /zones/{id}:
-    get:
-      tags: [Zones]
-      summary: 获取Zone详情
-      description: 获取指定Zone的详细信息
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Zone ID
-      responses:
-        '200':
-          description: Zone详情获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Zone'
-
-    put:
-      tags: [Zones]
-      summary: 更新Zone信息
-      description: 更新指定Zone的信息
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Zone ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  description: Zone名称
-                description:
-                  type: string
-                  description: Zone描述
-      responses:
-        '200':
-          description: Zone更新成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Zone'
-
-    delete:
-      tags: [Zones]
-      summary: 删除Zone
-      description: 删除指定的Zone
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Zone ID
-      responses:
-        '200':
-          description: Zone删除成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-
-  /zones/{id}/status:
-    patch:
-      tags: [Zones]
-      summary: 更新Zone状态
-      description: 更新指定Zone的状态
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Zone ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [status]
-              properties:
-                status:
-                  type: string
-                  enum: [active, inactive]
-                  description: 新的Zone状态
-      responses:
-        '200':
-          description: Zone状态更新成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-
-  /zones/{id}/statistics:
-    get:
-      tags: [Zones]
-      summary: 获取Zone统计信息
-      description: 获取指定Zone的统计信息
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Zone ID
-      responses:
-        '200':
-          description: Zone统计信息获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/ZoneStatistics'
-
-  # ==================== IP池相关 ====================
-  /ippools:
-    get:
-      tags: [IPPools]
-      summary: 获取IP池列表
-      description: 获取当前用户可访问的IP池列表，支持分页和筛选
-      parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/PerPageParameter'
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [allocated, available]
-            description: IP池状态过滤
-        - name: zone_id
-          in: query
-          schema:
-            type: string
-            description: Zone ID过滤
-      responses:
-        '200':
-          description: IP池列表获取成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedIPPoolResponse'
-
-    post:
-      tags: [IPPools]
-      summary: 创建新IP池
-      description: 创建一个新的IP池
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [zone_id, ip_range]
-              properties:
-                zone_id:
-                  type: string
-                  description: 所属Zone ID
-                  example: "Z20240101123456"
-                ip_range:
-                  type: object
-                  required: [start, end]
-                  properties:
-                    start:
-                      type: string
-                      format: ipv4
-                      description: 起始IP地址
-                      example: "192.168.1.1"
-                    end:
-                      type: string
-                      format: ipv4
-                      description: 结束IP地址
-                      example: "192.168.1.254"
-      responses:
-        '201':
-          description: IP池创建成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/IPPool'
-
-  /ippools/statistics:
-    get:
-      tags: [IPPools]
-      summary: 获取IP池统计信息
-      description: 获取IP池的统计信息
-      responses:
-        '200':
-          description: IP池统计信息获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/IPPoolStatistics'
-
-  /ippools/auto-allocate:
-    post:
-      tags: [IPPools]
-      summary: 自动分配IP池
-      description: 根据需求自动分配IP池
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [zone_id]
-              properties:
-                zone_id:
-                  type: string
-                  description: Zone ID
-                  example: "Z20240101123456"
-                size:
-                  type: integer
-                  description: 需要的IP地址数量
-                  minimum: 1
-                  maximum: 254
-                  default: 254
-                  example: 254
-      responses:
-        '201':
-          description: IP池自动分配成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/IPPool'
-
-  /ippools/user-resources:
-    get:
-      tags: [IPPools]
-      summary: 获取用户IP资源
-      description: 获取当前用户的IP资源使用情况
-      responses:
-        '200':
-          description: 用户IP资源获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/UserIPResources'
-
-  /ippools/available-ips:
-    get:
-      tags: [IPPools]
-      summary: 获取可用IP列表
-      description: 获取指定Zone中可用的IP地址列表
-      parameters:
-        - name: zone_id
-          in: query
-          required: true
-          schema:
-            type: string
-            description: Zone ID
-      responses:
-        '200':
-          description: 可用IP列表获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          type: string
-                          format: ipv4
-
-  /ippools/check-availability:
-    post:
-      tags: [IPPools]
-      summary: 检查IP可用性
-      description: 检查指定IP地址是否可用
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [zone_id, ip_address]
-              properties:
-                zone_id:
-                  type: string
-                  description: Zone ID
-                  example: "Z20240101123456"
-                ip_address:
-                  type: string
-                  format: ipv4
-                  description: 要检查的IP地址
-                  example: "192.168.1.100"
-      responses:
-        '200':
-          description: IP可用性检查成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: object
-                        properties:
-                          is_available:
-                            type: boolean
-                            description: IP是否可用
-                          reason:
-                            type: string
-                            description: 如果不可用，说明原因
-
-  /ippools/{id}:
-    get:
-      tags: [IPPools]
-      summary: 获取IP池详情
-      description: 获取指定IP池的详细信息
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: IP池ID
-      responses:
-        '200':
-          description: IP池详情获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/IPPool'
-
-  /ippools/{sequence}:
-    delete:
-      tags: [IPPools]
-      summary: 释放IP池
-      description: 根据序列号释放指定的IP池
-      parameters:
-        - name: sequence
           in: path
           required: true
           schema:
             type: integer
-          description: IP池序列号 (sequence_number)
-          example: 100002
+          description: 节点 ID
       responses:
         '200':
-          description: IP池释放成功
+          description: 配置获取成功
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BaseResponse'
-        '404':
-          description: 未找到指定的IP池
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
+                $ref: '#/components/schemas/NodeConfigResponse'
 
-  /ippools/create-multiple:
-    post:
-      tags: [IPPools]
-      summary: 批量创建IP池
-      description: 根据指定参数批量创建IP池，支持连续和不连续选项
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [zone_id]
-              properties:
-                zone_id:
-                  type: string
-                  description: 所属Zone ID
-                  example: "Z20240101123456"
-                pools_count:
-                  type: integer
-                  description: 要创建的IP池数量
-                  minimum: 1
-                  maximum: 3
-                  default: 1
-                  example: 2
-                continuous:
-                  type: boolean
-                  description: 是否要求连续IP池
-                  default: false
-                  example: true
-                target_pool_id:
-                  type: string
-                  description: 目标连续池ID（仅当continuous=true且存在不连续池时）
-                  example: "pool_123"
-                ip_range:
-                  type: object
-                  description: 自定义IP范围
-                  properties:
-                    start:
-                      type: string
-                      format: ipv4
-                      description: 起始IP地址
-                      example: "192.168.1.1"
-                    end:
-                      type: string
-                      format: ipv4
-                      description: 结束IP地址
-                      example: "192.168.1.254"
-                size:
-                  type: integer
-                  description: 每个池的IP地址数量
-                  minimum: 1
-                  maximum: 254
-                  default: 254
-                  example: 100
-      responses:
-        '201':
-          description: IP池批量创建成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: object
-                        properties:
-                          pools:
-                            type: array
-                            items:
-                              $ref: '#/components/schemas/IPPool'
-                          total_count:
-                            type: integer
-                            description: 创建的IP池总数
-                            example: 2
-                          allocated_count:
-                            type: integer
-                            description: 已分配的IP池数量
-                            example: 2
-
-  /ippools/user-quota:
-    get:
-      tags: [IPPools]
-      summary: 获取用户IP池配额
-      description: 获取当前用户的IP池配额信息
-      responses:
-        '200':
-          description: 用户IP池配额获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/IPPoolUserQuota'
-
-  /ippools/check-create-availability:
-    get:
-      tags: [IPPools]
-      summary: 检查创建IP池的可用性
-      description: 检查指定Zone中创建IP池的可用性和推荐方案
-      parameters:
-        - name: zone_id
-          in: query
-          required: true
-          schema:
-            type: string
-            description: Zone ID
-      responses:
-        '200':
-          description: 可用性检查成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/IPPoolAvailabilityCheck'
-
-  /ippools/{id}/extend:
-    post:
-      tags: [IPPools]
-      summary: 扩展IP池
-      description: 扩展指定IP池的容量
+    put:
+      tags:
+        - Nodes
+      summary: 保存节点配置
+      description: 保存节点的基本信息和自定义配置
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
           required: true
           schema:
-            type: string
-          description: IP池ID
+            type: integer
+          description: 节点 ID
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [size]
-              properties:
-                size:
-                  type: integer
-                  description: 扩展的IP地址数量
-                  minimum: 1
-                  maximum: 254
-                  example: 50
+              $ref: '#/components/schemas/SaveNodeConfigRequest'
       responses:
         '200':
-          description: IP池扩展成功
+          description: 配置保存成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/IPPool'
+                $ref: '#/components/schemas/NodeConfigResponse'
 
-  # ==================== 路由相关 ====================
+  # 节点密钥管理
+  /nodes/{id}/keys/generate:
+    post:
+      tags:
+        - Nodes
+      summary: 生成节点密钥
+      description: 为指定节点生成密钥对
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateNodeKeyRequest'
+      responses:
+        '200':
+          description: 密钥生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeKeyResponse'
+
+  /nodes/{id}/keys:
+    get:
+      tags:
+        - Nodes
+      summary: 获取节点密钥
+      description: 获取指定节点的密钥信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 密钥获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeKeyResponse'
+
+    delete:
+      tags:
+        - Nodes
+      summary: 撤销节点密钥
+      description: 撤销指定节点的密钥
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 密钥撤销成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # 节点网络配置
+  /nodes/{id}/network-config:
+    get:
+      tags:
+        - Nodes
+      summary: 获取节点网络配置
+      description: 获取指定节点的网络配置信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 网络配置获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeNetworkConfigResponse'
+
+    put:
+      tags:
+        - Nodes
+      summary: 设置节点网络配置
+      description: 设置指定节点的网络配置
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetNodeNetworkConfigRequest'
+      responses:
+        '200':
+          description: 网络配置设置成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeNetworkConfigResponse'
+
+  # 路由管理
   /routes:
     get:
-      tags: [Routes]
+      tags:
+        - Routes
       summary: 获取路由列表
-      description: 获取当前用户的路由列表，支持分页和筛选
+      description: 获取当前用户的路由列表
+      security:
+        - bearerAuth: []
       parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/PerPageParameter'
-        - name: status
+        - name: page
           in: query
           schema:
-            type: string
-            enum: [active, inactive, pending]
-            description: 路由状态过滤
-        - name: node_id
+            type: integer
+            default: 1
+        - name: per_page
           in: query
           schema:
-            type: string
-            description: 节点ID过滤
-        - name: friend_id
-          in: query
-          schema:
-            type: string
-            description: 好友ID过滤
+            type: integer
+            default: 15
       responses:
         '200':
           description: 路由列表获取成功
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedRouteResponse'
+                $ref: '#/components/schemas/RouteListResponse'
 
     post:
-      tags: [Routes]
+      tags:
+        - Routes
       summary: 创建新路由
-      description: 创建一个新的路由连接
+      description: 创建新的路由连接
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [source_node_id, target_node_id]
-              properties:
-                source_node_id:
-                  type: string
-                  description: 源节点ID
-                  example: "N20240101123456"
-                target_node_id:
-                  type: string
-                  description: 目标节点ID
-                  example: "N20240101654321"
-                description:
-                  type: string
-                  description: 路由描述
-                  example: "主干线路由"
+              $ref: '#/components/schemas/CreateRouteRequest'
       responses:
         '201':
           description: 路由创建成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Route'
+                $ref: '#/components/schemas/RouteResponse'
 
-  /routes/overview:
+  # 区域管理
+  /zones:
     get:
-      tags: [Routes]
-      summary: 获取路由概览
-      description: 获取所有路由的统计信息和概览数据
+      tags:
+        - Zones
+      summary: 获取区域列表
+      description: 获取用户可访问的区域列表
+      security:
+        - bearerAuth: []
       responses:
         '200':
-          description: 路由概览获取成功
+          description: 区域列表获取成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/RouteOverview'
+                $ref: '#/components/schemas/ZoneListResponse'
 
-  /routes/check-connectivity:
-    post:
-      tags: [Routes]
-      summary: 检查连通性
-      description: 检查两个节点之间的连通性
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [source_node_id, target_node_id]
-              properties:
-                source_node_id:
-                  type: string
-                  description: 源节点ID
-                  example: "N20240101123456"
-                target_node_id:
-                  type: string
-                  description: 目标节点ID
-                  example: "N20240101654321"
-      responses:
-        '200':
-          description: 连通性检查成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/ConnectivityResult'
-
-  /routes/find-path:
-    post:
-      tags: [Routes]
-      summary: 查找路径
-      description: 查找两个节点之间的可用路径
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [source_node_id, target_node_id]
-              properties:
-                source_node_id:
-                  type: string
-                  description: 源节点ID
-                  example: "N20240101123456"
-                target_node_id:
-                  type: string
-                  description: 目标节点ID
-                  example: "N20240101654321"
-                max_hops:
-                  type: integer
-                  description: 最大跳数
-                  minimum: 1
-                  maximum: 10
-                  default: 3
-      responses:
-        '200':
-          description: 路径查找成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/PathResult'
-
-  /routes/{id}:
+  # IP 池管理
+  /ippools:
     get:
-      tags: [Routes]
-      summary: 获取路由详情
-      description: 获取指定路由的详细信息
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: 路由ID
+      tags:
+        - IP Pools
+      summary: 获取 IP 池列表
+      description: 获取当前用户的 IP 池列表
+      security:
+        - bearerAuth: []
       responses:
         '200':
-          description: 路由详情获取成功
+          description: IP 池列表获取成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Route'
+                $ref: '#/components/schemas/IPPoolListResponse'
 
-    put:
-      tags: [Routes]
-      summary: 更新路由信息
-      description: 更新指定路由的信息
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: 路由ID
+    post:
+      tags:
+        - IP Pools
+      summary: 创建 IP 池
+      description: 创建新的 IP 池
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                description:
-                  type: string
-                  description: 路由描述
+              $ref: '#/components/schemas/CreateIPPoolRequest'
       responses:
-        '200':
-          description: 路由更新成功
+        '201':
+          description: IP 池创建成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Route'
+                $ref: '#/components/schemas/IPPoolResponse'
 
-    delete:
-      tags: [Routes]
-      summary: 删除路由
-      description: 删除指定的路由
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: 路由ID
-      responses:
-        '200':
-          description: 路由删除成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-
-  /routes/{id}/status:
-    patch:
-      tags: [Routes]
-      summary: 更新路由状态
-      description: 更新指定路由的状态
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: 路由ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [status]
-              properties:
-                status:
-                  type: string
-                  enum: [active, inactive, pending]
-                  description: 新的路由状态
-      responses:
-        '200':
-          description: 路由状态更新成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-
-  # ==================== 社交网络相关 ====================
+  # 社交网络
   /social/data:
     get:
-      tags: [Social]
+      tags:
+        - Social
       summary: 获取社交数据概览
-      description: 获取当前用户的社交网络数据概览
+      description: 获取用户的社交网络数据概览
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: 社交数据获取成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/SocialOverview'
-
-  /social/search-users:
-    post:
-      tags: [Social]
-      summary: 搜索用户
-      description: 搜索可添加为好友的用户
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [keyword]
-              properties:
-                keyword:
-                  type: string
-                  description: 搜索关键词
-                  example: "张三"
-                page:
-                  type: integer
-                  description: 页码
-                  minimum: 1
-                  default: 1
-                per_page:
-                  type: integer
-                  description: 每页数量
-                  minimum: 1
-                  maximum: 100
-                  default: 20
-      responses:
-        '200':
-          description: 用户搜索成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/UserProfile'
+                $ref: '#/components/schemas/SocialDataResponse'
 
   /social/friends:
     get:
-      tags: [Social]
+      tags:
+        - Social
       summary: 获取好友列表
-      description: 获取当前用户的好友列表
-      parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/PerPageParameter'
+      description: 获取用户的好友列表
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: 好友列表获取成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Friend'
-
-  /social/friends/{friendId}/nodes:
-    get:
-      tags: [Social]
-      summary: 获取好友节点
-      description: 获取指定好友的节点列表
-      parameters:
-        - name: friendId
-          in: path
-          required: true
-          schema:
-            type: string
-          description: 好友ID
-      responses:
-        '200':
-          description: 好友节点获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Node'
-
-  /social/friend-requests:
-    get:
-      tags: [Social]
-      summary: 获取接收到的好友请求列表
-      description: 获取当前用户接收到的好友请求列表
-      parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/PerPageParameter'
-      responses:
-        '200':
-          description: 好友请求列表获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/FriendRequest'
-
-  /social/sent-friend-requests:
-    get:
-      tags: [Social]
-      summary: 获取发送的好友请求列表
-      description: 获取当前用户发送的好友请求列表
-      parameters:
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/PerPageParameter'
-      responses:
-        '200':
-          description: 发送的好友请求列表获取成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/FriendRequest'
+                $ref: '#/components/schemas/FriendListResponse'
 
   /social/friend-request:
     post:
-      tags: [Social]
-      summary: 发送好友请求
-      description: 向指定用户发送好友请求
+      tags:
+        - Social
+      summary: 发送好友申请
+      description: 向指定用户发送好友申请
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [user_id]
-              properties:
-                user_id:
-                  type: string
-                  description: 目标用户ID
-                  example: "U20240101123456"
-                message:
-                  type: string
-                  description: 请求消息
-                  example: "我是张三，请求添加你为好友"
-      responses:
-        '201':
-          description: 好友请求发送成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-
-  /social/friend-request/accept:
-    post:
-      tags: [Social]
-      summary: 接受好友请求
-      description: 接受指定的好友请求
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [request_id]
-              properties:
-                request_id:
-                  type: string
-                  description: 好友请求ID
-                  example: "FR20240101123456"
+              $ref: '#/components/schemas/SendFriendRequestRequest'
       responses:
         '200':
-          description: 好友请求接受成功
+          description: 好友申请发送成功
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BaseResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
-  /social/friend-request/reject:
+  # ID 管理
+  /ids/generate:
     post:
-      tags: [Social]
-      summary: 拒绝好友请求
-      description: 拒绝指定的好友请求
+      tags:
+        - ID Management
+      summary: 生成唯一 ID
+      description: 生成全局唯一 ID
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [request_id]
-              properties:
-                request_id:
-                  type: string
-                  description: 好友请求ID
-                  example: "FR20240101123456"
-                reason:
-                  type: string
-                  description: 拒绝原因
-                  example: "不认识此人"
+              $ref: '#/components/schemas/GenerateIDRequest'
       responses:
         '200':
-          description: 好友请求拒绝成功
+          description: ID 生成成功
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BaseResponse'
+                $ref: '#/components/schemas/GenerateIDResponse'
 
-  /social/friend/remove:
-    post:
-      tags: [Social]
-      summary: 删除好友
-      description: 删除指定的好友关系
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [friend_id]
-              properties:
-                friend_id:
-                  type: string
-                  description: 好友ID
-                  example: "U20240101123456"
-      responses:
-        '200':
-          description: 好友删除成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-
-  /social/invitation:
-    post:
-      tags: [Social]
-      summary: 生成邀请码
-      description: 生成新的邀请码
-      responses:
-        '201':
-          description: 邀请码生成成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Invitation'
-
-  /social/invitations:
+  # 用户节点和区域管理
+  /users/{id}/nodes:
     get:
-      tags: [Social]
-      summary: 获取邀请码列表
-      description: 获取当前用户的邀请码列表
+      tags:
+        - User
+      summary: 获取指定用户的节点列表
+      description: 获取指定用户拥有的所有节点列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 用户 ID
       responses:
         '200':
-          description: 邀请码列表获取成功
+          description: 用户节点列表获取成功
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/BaseResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Invitation'
+                $ref: '#/components/schemas/UserNodesResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{id}/zones:
+    get:
+      tags:
+        - User
+      summary: 获取指定用户的区域列表
+      description: 获取指定用户可访问的区域列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 用户 ID
+      responses:
+        '200':
+          description: 用户区域列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserZonesResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   securitySchemes:
@@ -1636,827 +743,849 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
-  parameters:
-    PageParameter:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
-      description: 页码
-    
-    PerPageParameter:
-      name: per_page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 20
-      description: 每页数量
+      description: Laravel Sanctum Bearer Token
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: laravel_session
+      description: Laravel Session Cookie
 
   schemas:
-    # ==================== 基础响应模式 ====================
-    BaseResponse:
+    # 通用响应
+    SuccessResponse:
       type: object
-      required: [success, code, message, request_id, timestamp]
       properties:
         success:
           type: boolean
-          description: 请求是否成功
           example: true
-        code:
-          type: integer
-          description: HTTP状态码
-          example: 200
         message:
           type: string
-          description: 响应消息
           example: "操作成功"
-        request_id:
-          type: string
-          format: uuid
-          description: 请求唯一标识符，用于追踪和调试
-          example: "550e8400-e29b-41d4-a716-446655440000"
-        timestamp:
-          type: string
-          format: date-time
-          description: 响应时间戳
-          example: "2024-01-01T12:00:00.000Z"
+        data:
+          type: object
 
-    # ==================== 用户相关模式 ====================
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "操作失败"
+        error:
+          type: string
+          example: "详细错误信息"
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "验证失败"
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    PaginationMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+        from:
+          type: integer
+        last_page:
+          type: integer
+        per_page:
+          type: integer
+        to:
+          type: integer
+        total:
+          type: integer
+
+    # 认证相关
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "登录成功"
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              example: "1|abc123def456..."
+            user:
+              $ref: '#/components/schemas/User'
+
+    TokenVerifyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "令牌有效"
+        data:
+          type: object
+          properties:
+            valid:
+              type: boolean
+              example: true
+            user:
+              $ref: '#/components/schemas/User'
+
+    UserInfoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/User'
+
+    # 用户相关
     User:
       type: object
       properties:
         id:
-          type: string
-          description: 用户ID
-          example: "U20240101123456"
+          type: integer
+          example: 1001
         name:
           type: string
-          description: 用户名
           example: "张三"
         email:
           type: string
           format: email
-          description: 邮箱
           example: "zhangsan@example.com"
         zone_id:
-          type: string
-          description: 所属Zone ID
-          example: "Z20240101123456"
+          type: integer
+          example: 1
 
-    # ==================== 节点相关模式 ====================
+    # MyNet 统计
+    MyNetStatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            nodes_count:
+              type: integer
+              example: 10
+            routes_count:
+              type: integer
+              example: 25
+            active_connections:
+              type: integer
+              example: 15
+            total_traffic:
+              type: integer
+              example: 1048576
+
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+              example: "healthy"
+            version:
+              type: string
+              example: "1.0.0"
+            uptime:
+              type: integer
+              example: 3600
+
+    # 节点相关
     Node:
       type: object
       properties:
-        id:
-          type: string
-          description: 节点ID
-          example: "1"
         node_id:
-          type: string
-          description: 节点业务ID
-          example: "N20240101123456"
+          type: integer
+          example: 1001
         node_name:
           type: string
-          description: 节点名称
-          example: "Gateway-01"
-        description:
+          example: "节点名称"
+        user_id:
+          type: integer
+          example: 1001
+        zone_id:
+          type: integer
+          example: 1
+        vpn_type:
           type: string
-          description: 节点描述
-          example: "主网关节点"
-        status:
+          enum: [gnb, wireguard]
+          example: "gnb"
+        node_type:
+          type: integer
+          example: 1
+        node_status:
+          type: integer
+          enum: [0, 1, 2]
+          example: 1
+        endpoint:
           type: string
-          enum: [active, inactive, pending]
-          description: 节点状态
-          example: "active"
+          example: "192.168.1.100:9001"
+        node_port:
+          type: integer
+          example: 9001
+        node_ip:
+          type: string
+          example: "10.0.0.1"
         created_at:
           type: string
           format: date-time
-          description: 创建时间
         updated_at:
           type: string
           format: date-time
-          description: 更新时间
 
-    NodeKey:
+    NodeListResponse:
       type: object
       properties:
-        id:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Node'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    NodeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Node'
+
+    CreateNodeRequest:
+      type: object
+      required:
+        - node_name
+        - vpn_type
+      properties:
+        node_name:
           type: string
-          description: 密钥ID
-        node_id:
+          example: "新节点"
+        vpn_type:
           type: string
-          description: 节点ID
+          enum: [gnb, wireguard]
+          example: "gnb"
+        node_type:
+          type: integer
+          example: 1
+        endpoint:
+          type: string
+          example: "192.168.1.100:9001"
+        node_port:
+          type: integer
+          example: 9001
+        node_remarks:
+          type: string
+          example: "节点备注"
+
+    UpdateNodeRequest:
+      type: object
+      properties:
+        node_name:
+          type: string
+          example: "更新后的节点名称"
+        vpn_type:
+          type: string
+          enum: [gnb, wireguard]
+          example: "gnb"
+        endpoint:
+          type: string
+          example: "192.168.1.100:9001"
+        node_port:
+          type: integer
+          example: 9001
+        node_remarks:
+          type: string
+          example: "更新后的节点备注"
+
+    # 节点配置相关
+    NodeConfigResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            node_info:
+              type: object
+              properties:
+                node_id:
+                  type: integer
+                  example: 1001
+                node_name:
+                  type: string
+                  example: "节点名称"
+                vpn_type:
+                  type: string
+                  example: "gnb"
+                node_type:
+                  type: integer
+                  example: 1
+                endpoint:
+                  type: string
+                  example: "192.168.1.100:9001"
+                node_port:
+                  type: integer
+                  example: 9001
+            network_config:
+              type: object
+              properties:
+                ifname:
+                  type: string
+                  example: "gnb0"
+                virtual_ip:
+                  type: string
+                  example: "10.0.0.1"
+                ip_group_sequence_number:
+                  type: integer
+                  example: 1
+            additional_config:
+              type: object
+              properties:
+                node_remarks:
+                  type: string
+                  example: "节点备注"
+                node_app_version:
+                  type: string
+                  example: "1.0.0"
+                node_status:
+                  type: integer
+                  example: 1
+            custom_config:
+              type: array
+              items:
+                type: object
+                properties:
+                  k:
+                    type: string
+                    example: "listen"
+                  n:
+                    type: string
+                    example: "监听端口"
+                  v:
+                    type: string
+                    example: "9001"
+                  e:
+                    type: object
+                    properties:
+                      desc:
+                        type: string
+                        example: "节点监听的端口号"
+                      memo:
+                        type: string
+                        example: "通过API更新"
+
+    SaveNodeConfigRequest:
+      type: object
+      properties:
+        node_name:
+          type: string
+          example: "节点名称"
+        vpn_type:
+          type: string
+          enum: [gnb, wireguard, openvpn]
+          example: "gnb"
+        endpoint:
+          type: string
+          example: "192.168.1.100:9001"
+        node_port:
+          type: integer
+          example: 9001
+        ifname:
+          type: string
+          example: "gnb0"
+        virtual_ip:
+          type: string
+          example: "10.0.0.1"
+        ip_group_sequence_number:
+          type: integer
+          example: 1
+        node_remarks:
+          type: string
+          example: "节点备注"
+        node_app_version:
+          type: string
+          example: "1.0.0"
+        node_status:
+          type: integer
+          enum: [0, 1, 2]
+          example: 1
+        custom_config:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            listen: "9001"
+            ifname: "gnb0"
+            daemon: "1"
+
+    # 节点密钥相关
+    NodeKeyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            node_id:
+              type: integer
+              example: 1001
+            key_type:
+              type: string
+              enum: [ed25519, wireguard, gnb]
+              example: "ed25519"
+            public_key:
+              type: string
+              example: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJb..."
+            private_key:
+              type: string
+              example: "-----BEGIN OPENSSH PRIVATE KEY-----..."
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    GenerateNodeKeyRequest:
+      type: object
+      properties:
         key_type:
           type: string
           enum: [ed25519, wireguard, gnb]
-          description: 密钥类型
-        public_key:
+          example: "ed25519"
+        force_regenerate:
+          type: boolean
+          example: false
+        custom_private_key:
           type: string
-          description: 公钥
-        private_key:
+          example: "-----BEGIN OPENSSH PRIVATE KEY-----..."
+        custom_public_key:
           type: string
-          description: 私钥
+          example: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJb..."
+
+    # 节点网络配置相关
+    NodeNetworkConfigResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            ifname:
+              type: string
+              example: "gnb0"
+            node_ip:
+              type: string
+              example: "10.0.0.1"
+            ip_group_sequence_number:
+              type: integer
+              example: 1
+            lan_ips:
+              type: array
+              items:
+                type: string
+              example: ["192.168.1.0/24"]
+            public_ips:
+              type: array
+              items:
+                type: string
+              example: ["203.0.113.1"]
+
+    SetNodeNetworkConfigRequest:
+      type: object
+      properties:
+        ifname:
+          type: string
+          example: "gnb0"
+        node_ip:
+          type: string
+          example: "10.0.0.1"
+        ip_group_sequence_number:
+          type: integer
+          example: 1
+        lan_ips:
+          type: array
+          items:
+            type: string
+          example: ["192.168.1.0/24"]
+        public_ips:
+          type: array
+          items:
+            type: string
+          example: ["203.0.113.1"]
+
+    # 路由相关
+    Route:
+      type: object
+      properties:
+        route_id:
+          type: integer
+          example: 1001
+        source_node_id:
+          type: integer
+          example: 1001
+        target_node_id:
+          type: integer
+          example: 1002
+        status:
+          type: string
+          enum: [pending, active, inactive]
+          example: "active"
         created_at:
           type: string
           format: date-time
-          description: 创建时间
-        expires_at:
+        updated_at:
           type: string
           format: date-time
-          description: 过期时间
 
-    PaginatedNodeResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: array
-              items:
-                $ref: '#/components/schemas/Node'
-            meta:
-              type: object
-              properties:
-                current_page:
-                  type: integer
-                  example: 1
-                per_page:
-                  type: integer
-                  example: 20
-                total:
-                  type: integer
-                  example: 50
-                last_page:
-                  type: integer
-                  example: 3
+    RouteListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Route'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
 
-    # ==================== Zone相关模式 ====================
+    RouteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Route'
+
+    CreateRouteRequest:
+      type: object
+      required:
+        - source_node_id
+        - target_node_id
+      properties:
+        source_node_id:
+          type: integer
+          example: 1001
+        target_node_id:
+          type: integer
+          example: 1002
+        description:
+          type: string
+          example: "路由描述"
+
+    # 区域相关
     Zone:
       type: object
       properties:
-        id:
-          type: string
-          description: Zone ID
-          example: "1"
         zone_id:
+          type: integer
+          example: 1
+        zone_name:
           type: string
-          description: Zone业务ID
-          example: "Z20240101123456"
-        name:
-          type: string
-          description: Zone名称
-          example: "Production"
+          example: "默认区域"
         description:
           type: string
-          description: Zone描述
-          example: "生产环境Zone"
-        status:
-          type: string
-          enum: [active, inactive]
-          description: Zone状态
-          example: "active"
-        owner_id:
-          type: string
-          description: 所有者ID
-          example: "U20240101123456"
+          example: "区域描述"
         created_at:
           type: string
           format: date-time
-          description: 创建时间
-        updated_at:
-          type: string
-          format: date-time
-          description: 更新时间
 
-    ZoneOverview:
+    ZoneListResponse:
       type: object
       properties:
-        total_zones:
-          type: integer
-          description: Zone总数
-          example: 5
-        active_zones:
-          type: integer
-          description: 活跃Zone数量
-          example: 3
-        total_nodes:
-          type: integer
-          description: 所有Zone的节点总数
-          example: 25
-        total_routes:
-          type: integer
-          description: 所有Zone的路由总数
-          example: 50
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Zone'
 
-    ZoneStatistics:
-      type: object
-      properties:
-        zone_id:
-          type: string
-          description: Zone ID
-          example: "Z20240101123456"
-        node_count:
-          type: integer
-          description: 节点数量
-          example: 10
-        active_node_count:
-          type: integer
-          description: 活跃节点数量
-          example: 8
-        route_count:
-          type: integer
-          description: 路由数量
-          example: 15
-        ip_pool_count:
-          type: integer
-          description: IP池数量
-          example: 5
-        user_count:
-          type: integer
-          description: 用户数量
-          example: 20
-
-    PaginatedZoneResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: array
-              items:
-                $ref: '#/components/schemas/Zone'
-            meta:
-              type: object
-              properties:
-                current_page:
-                  type: integer
-                  example: 1
-                per_page:
-                  type: integer
-                  example: 20
-                total:
-                  type: integer
-                  example: 50
-                last_page:
-                  type: integer
-                  example: 3
-
-    # ==================== IP池相关模式 ====================
+    # IP 池相关
     IPPool:
       type: object
       properties:
-        id:
+        ip_pool_id:
           type: integer
-          description: IP池ID
-          example: 8
-        sequence_number:
+          example: 1
+        ip_group_sequence:
           type: integer
-          description: IP池序列号，用于删除操作
-          example: 100002
-        zone_id:
-          type: integer
-          description: 所属Zone ID
-          example: 1396569674824134
-        user_id:
-          type: integer
-          description: 用户ID
-          example: 3637361088456532
-        ip_start:
-          type: string
-          format: ipv4
-          description: 起始IP地址
-          example: "10.0.0.17"
-        ip_end:
-          type: string
-          format: ipv4
-          description: 结束IP地址
-          example: "10.0.0.22"
+          example: 1
         ip_range:
-          type: object
-          description: IP范围对象（前端使用）
-          properties:
-            start:
-              type: string
-              format: ipv4
-              description: 起始IP地址
-              example: "10.0.0.17"
-            end:
-              type: string
-              format: ipv4
-              description: 结束IP地址
-              example: "10.0.0.22"
-        ip_count:
-          type: integer
-          description: IP地址数量
-          example: 6
-        is_allocated:
-          type: boolean
-          description: 是否已分配
-          example: true
-        status:
-          type: integer
-          description: 状态码
-          example: 0
-        status_text:
           type: string
-          description: 状态文本
-          example: "allocated"
+          example: "10.0.0.0/24"
+        available_ips:
+          type: integer
+          example: 254
+        used_ips:
+          type: integer
+          example: 10
         created_at:
           type: string
           format: date-time
-          description: 创建时间
-          example: "2025-06-18T12:39:26.000000Z"
-        updated_at:
-          type: string
-          format: date-time
-          description: 更新时间
-          example: "2025-06-18T06:16:17.000000Z"
 
-    IPPoolStatistics:
+    IPPoolListResponse:
       type: object
       properties:
-        total_pools:
-          type: integer
-          description: IP池总数
-          example: 10
-        allocated_pools:
-          type: integer
-          description: 已分配的IP池数量
-          example: 7
-        available_pools:
-          type: integer
-          description: 可用的IP池数量
-          example: 3
-        total_ips:
-          type: integer
-          description: IP地址总数
-          example: 2540
-        allocated_ips:
-          type: integer
-          description: 已分配的IP地址数量
-          example: 1778
-        available_ips:
-          type: integer
-          description: 可用的IP地址数量
-          example: 762
-
-    UserIPResources:
-      type: object
-      properties:
-        user_id:
-          type: string
-          description: 用户ID
-          example: "U20240101123456"
-        total_pools:
-          type: integer
-          description: 用户拥有的IP池总数
-          example: 5
-        total_ips:
-          type: integer
-          description: 用户拥有的IP地址总数
-          example: 1270
-        usage_by_zone:
-          type: array
-          description: 按Zone统计的使用情况
-          items:
-            type: object
-            properties:
-              zone_id:
-                type: string
-                description: Zone ID
-                example: "Z20240101123456"
-              pool_count:
-                type: integer
-                description: IP池数量
-                example: 2
-              ip_count:
-                type: integer
-                description: IP地址数量
-                example: 508
-
-    PaginatedIPPoolResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: array
-              items:
-                $ref: '#/components/schemas/IPPool'
-            meta:
-              type: object
-              properties:
-                current_page:
-                  type: integer
-                  example: 1
-                per_page:
-                  type: integer
-                  example: 20
-                total:
-                  type: integer
-                  example: 50
-                last_page:
-                  type: integer
-                  example: 3
-
-    # ==================== 社交网络相关模式 ====================
-    SocialOverview:
-      type: object
-      properties:
-        friend_count:
-          type: integer
-          description: 好友总数
-          example: 10
-        pending_requests:
-          type: integer
-          description: 待处理的好友请求数
-          example: 2
-        connected_nodes:
-          type: integer
-          description: 已连接的节点数
-          example: 15
-        active_routes:
-          type: integer
-          description: 活跃的路由数
-          example: 8
-
-    UserProfile:
-      type: object
-      properties:
-        id:
-          type: string
-          description: 用户ID
-          example: "U20240101123456"
-        name:
-          type: string
-          description: 用户名
-          example: "张三"
-        avatar:
-          type: string
-          description: 头像URL
-          example: "https://example.com/avatar.jpg"
-        node_count:
-          type: integer
-          description: 节点数量
-          example: 5
-        is_friend:
+        success:
           type: boolean
-          description: 是否已是好友
-          example: false
-        friend_status:
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/IPPool'
+
+    IPPoolResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/IPPool'
+
+    CreateIPPoolRequest:
+      type: object
+      required:
+        - ip_range
+      properties:
+        ip_range:
           type: string
-          enum: [none, pending, accepted]
-          description: 好友关系状态
-          example: "none"
+          example: "10.0.0.0/24"
+        description:
+          type: string
+          example: "IP 池描述"
+
+    # 社交网络相关
+    SocialDataResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            friends_count:
+              type: integer
+              example: 10
+            pending_requests:
+              type: integer
+              example: 2
+            shared_nodes:
+              type: integer
+              example: 5
 
     Friend:
       type: object
       properties:
-        id:
-          type: string
-          description: 好友ID
-          example: "U20240101123456"
+        user_id:
+          type: integer
+          example: 1001
         name:
           type: string
-          description: 好友名称
-          example: "张三"
-        avatar:
+          example: "好友名称"
+        email:
           type: string
-          description: 头像URL
-          example: "https://example.com/avatar.jpg"
-        node_count:
-          type: integer
-          description: 节点数量
-          example: 5
-        connected_node_count:
-          type: integer
-          description: 已连接的节点数量
-          example: 3
-        active_route_count:
-          type: integer
-          description: 活跃的路由数量
-          example: 2
-        friendship_date:
+          example: "friend@example.com"
+        status:
+          type: string
+          enum: [active, pending]
+          example: "active"
+        created_at:
           type: string
           format: date-time
-          description: 成为好友的时间
 
-    FriendRequest:
+    FriendListResponse:
       type: object
       properties:
-        id:
-          type: string
-          description: 好友请求ID
-          example: "FR20240101123456"
-        requester_id:
-          type: string
-          description: 请求发送者ID
-          example: "U20240101123456"
-        requester_name:
-          type: string
-          description: 请求发送者名称
-          example: "张三"
-        requester_avatar:
-          type: string
-          description: 请求发送者头像URL
-          example: "https://example.com/avatar.jpg"
-        target_id:
-          type: string
-          description: 请求接收者ID
-          example: "U20240101654321"
-        target_name:
-          type: string
-          description: 请求接收者名称
-          example: "李四"
-        target_avatar:
-          type: string
-          description: 请求接收者头像URL
-          example: "https://example.com/avatar2.jpg"
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Friend'
+
+    SendFriendRequestRequest:
+      type: object
+      required:
+        - target_user_id
+      properties:
+        target_user_id:
+          type: integer
+          example: 1002
         message:
           type: string
-          description: 请求消息
-          example: "我是张三，请求添加你为好友"
-        status:
-          type: string
-          enum: [pending, accepted, rejected]
-          description: 请求状态
-          example: "pending"
-        created_at:
-          type: string
-          format: date-time
-          description: 请求创建时间
-        updated_at:
-          type: string
-          format: date-time
-          description: 请求更新时间
+          example: "好友申请消息"
 
-    Invitation:
+    # ID 管理相关
+    GenerateIDRequest:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [node, user, zone, route]
+          example: "node"
+        count:
+          type: integer
+          default: 1
+          example: 1
+
+    GenerateIDResponse:
       type: object
       properties:
-        id:
-          type: string
-          description: 邀请码ID
-          example: "I20240101123456"
-        code:
-          type: string
-          description: 邀请码
-          example: "ABCD1234"
-        status:
-          type: string
-          enum: [active, used, expired]
-          description: 邀请码状态
-          example: "active"
-        expires_at:
-          type: string
-          format: date-time
-          description: 过期时间
-        used_at:
-          type: string
-          format: date-time
-          description: 使用时间
-        used_by:
-          type: string
-          description: 使用者ID
-          example: "U20240101123456"
-
-    # ==================== 路由相关模式 ====================
-    Route:
-      type: object
-      properties:
-        id:
-          type: string
-          description: 路由ID
-          example: "1"
-        route_id:
-          type: string
-          description: 路由业务ID
-          example: "R20240101123456"
-        source_node_id:
-          type: string
-          description: 源节点ID
-          example: "N20240101123456"
-        target_node_id:
-          type: string
-          description: 目标节点ID
-          example: "N20240101654321"
-        description:
-          type: string
-          description: 路由描述
-          example: "主干线路由"
-        status:
-          type: string
-          enum: [active, inactive, pending]
-          description: 路由状态
-          example: "active"
-        metrics:
-          type: object
-          properties:
-            latency:
-              type: integer
-              description: 延迟(ms)
-              example: 50
-            packet_loss:
-              type: number
-              description: 丢包率(%)
-              example: 0.1
-            bandwidth:
-              type: integer
-              description: 带宽(Mbps)
-              example: 100
-        created_at:
-          type: string
-          format: date-time
-          description: 创建时间
-        updated_at:
-          type: string
-          format: date-time
-          description: 更新时间
-
-    RouteOverview:
-      type: object
-      properties:
-        total_routes:
-          type: integer
-          description: 路由总数
-          example: 20
-        active_routes:
-          type: integer
-          description: 活跃路由数量
-          example: 15
-        average_latency:
-          type: integer
-          description: 平均延迟(ms)
-          example: 45
-        total_bandwidth:
-          type: integer
-          description: 总带宽(Mbps)
-          example: 1000
-
-    ConnectivityResult:
-      type: object
-      properties:
-        is_connected:
+        success:
           type: boolean
-          description: 是否连通
           example: true
-        route_count:
-          type: integer
-          description: 可用路由数量
-          example: 2
-        best_route:
-          $ref: '#/components/schemas/Route'
-        metrics:
+        data:
           type: object
           properties:
-            min_latency:
+            ids:
+              type: array
+              items:
+                type: integer
+              example: [1001, 1002]
+            type:
+              type: string
+              example: "node"
+            count:
               type: integer
-              description: 最小延迟(ms)
-              example: 45
-            max_bandwidth:
-              type: integer
-              description: 最大带宽(Mbps)
-              example: 100
+              example: 2
 
-    PathResult:
+    UserNodesResponse:
       type: object
       properties:
-        source_node_id:
+        success:
+          type: boolean
+          example: true
+        message:
           type: string
-          description: 源节点ID
-          example: "N20240101123456"
-        target_node_id:
-          type: string
-          description: 目标节点ID
-          example: "N20240101654321"
-        paths:
+          example: "User nodes retrieved successfully"
+        data:
           type: array
-          description: 可用路径列表
           items:
             type: object
             properties:
-              hops:
-                type: array
-                description: 路径上的节点
-                items:
-                  type: string
-              total_latency:
+              node_id:
                 type: integer
-                description: 总延迟(ms)
-                example: 150
-              min_bandwidth:
-                type: integer
-                description: 最小带宽(Mbps)
-                example: 50
-        recommended_path:
-          type: object
-          description: 推荐路径
-          properties:
-            hops:
-              type: array
-              description: 路径上的节点
-              items:
+                example: 1001
+              node_name:
                 type: string
-            metrics:
-              type: object
-              properties:
-                total_latency:
-                  type: integer
-                  description: 总延迟(ms)
-                  example: 100
-                min_bandwidth:
-                  type: integer
-                  description: 最小带宽(Mbps)
-                  example: 100
+                example: "用户节点"
+              vpn_type:
+                type: string
+                enum: [gnb, wireguard]
+                example: "gnb"
+              node_type:
+                type: integer
+                example: 1
+              node_status:
+                type: integer
+                enum: [0, 1, 2]
+                example: 1
+              endpoint:
+                type: string
+                example: "192.168.1.100:9001"
+              node_port:
+                type: integer
+                example: 9001
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
 
-    PaginatedRouteResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: array
-              items:
-                $ref: '#/components/schemas/Route'
-            meta:
-              type: object
-              properties:
-                current_page:
-                  type: integer
-                  example: 1
-                per_page:
-                  type: integer
-                  example: 20
-                total:
-                  type: integer
-                  example: 50
-                last_page:
-                  type: integer
-                  example: 3
-
-  responses:
-    Unauthorized:
-      description: 未授权访问
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/BaseResponse'
-              - type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  code:
-                    type: integer
-                    example: 401
-                  message:
-                    type: string
-                    example: "未授权访问"
-
-    ValidationError:
-      description: 验证错误
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/BaseResponse'
-              - type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  code:
-                    type: integer
-                    example: 422
-                  message:
-                    type: string
-                    example: "验证失败"
-                  errors:
-                    type: object
-                    description: 验证错误详情
-                    example:
-                      email: ["邮箱格式不正确"]
-                      password: ["密码不能为空"]
+    UserZonesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "User zones retrieved successfully"
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              zone_id:
+                type: integer
+                example: 1
+              zone_name:
+                type: string
+                example: "用户区域"
+              description:
+                type: string
+                example: "区域描述"
+              is_primary:
+                type: boolean
+                example: true
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
 
 tags:
   - name: Authentication
-    description: 认证和授权相关接口
-  - name: Users
-    description: 用户管理相关接口
+    description: 认证相关接口
+  - name: User
+    description: 用户相关接口
+  - name: MyNet
+    description: 系统统计和健康状态
   - name: Nodes
-    description: 节点管理相关接口
+    description: 节点管理接口
   - name: Routes
-    description: 路由管理相关接口
+    description: 路由管理接口
   - name: Zones
-    description: Zone管理相关接口
-  - name: IPPools
-    description: IP池管理相关接口
+    description: 区域管理接口
+  - name: IP Pools
+    description: IP 池管理接口
   - name: Social
-    description: 社交网络相关接口
-  - name: IDs
-    description: ID管理相关接口
+    description: 社交网络接口
+  - name: ID Management
+    description: ID 管理接口

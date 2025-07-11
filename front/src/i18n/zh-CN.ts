@@ -91,7 +91,13 @@ export default {
     verificationCodeSent: '验证码已发送！',
     resendCooldown: '{seconds}秒后可重新发送',
     verificationSuccess: '验证成功',
-    verificationSuccessSubtitle: '您的邮箱已验证，现在可以登录了'
+    verificationSuccessSubtitle: '您的邮箱已验证，现在可以登录了',
+    namePlaceholder: '请输入您的姓名',
+    emailPlaceholder: '请输入您的邮箱',
+    passwordPlaceholder: '请输入您的密码',
+    confirmPasswordPlaceholder: '请再次输入您的密码',
+    invitationPlaceholder: '请输入邀请码（可选）',
+    invitationRequired: '请输入邀请码'
   },
   dashboard: {
     title: '仪表板',
@@ -136,11 +142,198 @@ export default {
     help: '帮助文档'
   },
   routes: {
+    subtitle: '网络路由管理和配置',
     title: '路由管理',
     name: '路由名称',
     destination: '目标地址',
     gateway: '网关',
-    status: '状态'
+    
+    // 概览统计
+    overview: {
+      activeRoutes: '活跃路由',
+      pendingConnections: '待处理连接',
+      connectedNodes: '已连接节点',
+      totalBandwidth: '总带宽'
+    },
+    
+    // 标签页
+    tabs: {
+      activeRoutes: '活跃路由',
+      pendingConnections: '待处理连接',
+      friendNodes: '好友节点',
+      configuration: '配置管理'
+    },
+    
+    // 路由状态
+    status: {
+      active: '活跃',
+      inactive: '非活跃',
+      connecting: '连接中',
+      error: '错误'
+    },
+    
+    // 连接类型
+    connectionType: {
+      direct: '直连',
+      relay: '中继'
+    },
+    
+    // 节点状态
+    nodeStatus: {
+      available: '可用',
+      connected: '已连接',
+      pending: '待处理',
+      unavailable: '不可用'
+    },
+    
+    // 连接状态
+    connectionStatus: {
+      pending: '待处理',
+      approved: '已批准',
+      rejected: '已拒绝'
+    },
+    
+    // 活跃路由
+    activeRoutes: {
+      searchPlaceholder: '搜索路由...',
+      statusFilter: '状态过滤',
+      noRoutes: '暂无活跃路由',
+      noSearchResults: '未找到匹配路由',
+      bandwidth: '带宽',
+      latency: '延迟',
+      packetLoss: '丢包率',
+      connectionType: '连接类型',
+      lastActive: '最后活跃',
+      unknownUser: '未知用户',
+      viewDetails: '查看详情',
+      disconnect: '断开连接'
+    },
+    
+    // 待处理连接
+    pendingConnections: {
+      incoming: '接收请求',
+      outgoing: '发送请求',
+      noIncomingConnections: '暂无接收的连接请求',
+      noOutgoingConnections: '暂无发送的连接请求',
+      connectionType: '连接类型',
+      requestedAt: '请求时间',
+      approve: '批准',
+      reject: '拒绝'
+    },
+    
+    // 好友节点
+    friendNodes: {
+      searchPlaceholder: '搜索好友节点...',
+      statusFilter: '状态过滤',
+      noNodes: '暂无好友节点',
+      noSearchResults: '未找到匹配节点',
+      ipAddress: 'IP地址',
+      port: '端口',
+      nodeType: '节点类型',
+      zone: '区域',
+      lastSeen: '最后在线',
+      viewFriend: '查看好友',
+      connect: '连接',
+      pending: '待处理',
+      connected: '已连接'
+    },
+    
+    // 配置管理
+    config: {
+      description: '路由配置文件包含了所有必要的网络路由信息，可以下载并应用到您的网络设备。',
+      configStatus: '配置状态',
+      configReady: '配置已就绪',
+      configNotReady: '配置尚未生成',
+      lastUpdated: '最后更新',
+      never: '从未',
+      configDetails: '配置详情',
+      version: '版本',
+      format: '格式',
+      entries: '条目数',
+      preview: '预览',
+      copy: '复制',
+      copied: '已复制到剪贴板',
+      download: '下载配置',
+      refresh: '刷新配置',
+      routeEntries: '路由条目',
+      nodeId: '节点ID',
+      ipAddress: 'IP地址',
+      mask: '子网掩码',
+      gateway: '网关',
+      metric: '跃点数',
+      actions: '操作',
+      entryDetails: '条目详情'
+    },
+    
+    // 路由详情
+    details: {
+      basicInfo: '基本信息',
+      routeId: '路由ID',
+      status: '状态',
+      connectionType: '连接类型',
+      createdAt: '创建时间',
+      lastActive: '最后活跃',
+      nodeInfo: '节点信息',
+      sourceNode: '源节点',
+      targetNode: '目标节点',
+      nodeName: '节点名称',
+      ipAddress: 'IP地址',
+      mask: '子网掩码',
+      friendName: '好友名称',
+      performance: '性能指标',
+      bandwidth: '带宽',
+      latency: '延迟',
+      packetLoss: '丢包率',
+      uptime: '运行时间',
+      connectionStats: '连接统计',
+      bandwidthIn: '入站带宽',
+      bandwidthOut: '出站带宽',
+      bytesSent: '发送字节',
+      bytesReceived: '接收字节',
+      disconnect: '断开连接'
+    },
+    
+    // 操作
+    actions: {
+      refreshRoutes: '刷新路由',
+      connect: '连接',
+      disconnect: '断开连接',
+      approve: '批准',
+      reject: '拒绝',
+      viewDetails: '查看详情'
+    },
+    
+    // 对话框
+    dialogs: {
+      routeDetails: {
+        title: '路由详情'
+      },
+      connectNode: {
+        title: '连接节点',
+        message: '您要连接到 {friendName} 的节点 {nodeName}，请输入连接说明：',
+        messagePlaceholder: '请输入连接说明（可选）...'
+      }
+    },
+    
+    // 错误消息
+    fetchOverviewError: '获取路由概览失败',
+    fetchActiveRoutesError: '获取活跃路由失败',
+    fetchPendingConnectionsError: '获取待处理连接失败',
+    fetchFriendNodesError: '获取好友节点失败',
+    fetchConfigError: '获取配置失败',
+    fetchRouteDetailsError: '获取路由详情失败',
+    connectionRequestSent: '连接请求已发送',
+    connectionRequestError: '发送连接请求失败',
+    connectionApproved: '连接已批准',
+    connectionApproveError: '批准连接失败',
+    connectionRejected: '连接已拒绝',
+    connectionRejectError: '拒绝连接失败',
+    routeDisconnected: '路由已断开',
+    routeDisconnectError: '断开路由失败',
+    configDownloaded: '配置已下载',
+    configDownloadError: '下载配置失败',
+    configRefreshed: '配置已刷新',
+    configRefreshError: '刷新配置失败'
   },
   zones: {
     subtitle: '网络区域管理和配置',
@@ -148,7 +341,61 @@ export default {
     selectZone: '选择区域',
     switchedTo: '已切换到 {zoneName}',
     switchFailed: '切换区域失败',
-    comingSoonMessage: '区域管理功能正在开发中，敬请期待！'
+    comingSoonMessage: '区域管理功能正在开发中，敬请期待！',
+    
+    // 扩展的zone管理功能
+    currentZone: '当前区域',
+    availableZones: '可用区域',
+    noCurrentZone: '未选择区域',
+    noAvailableZones: '暂无可用区域',
+    adminRole: '管理员',
+    domain: '域名',
+    admin: '管理员',
+    switchToZone: '切换到此区域',
+    
+    // 统计信息
+    stats: {
+      totalNodes: '总节点数',
+      activeNodes: '活跃节点',
+      routes: '路由数',
+      users: '用户数'
+    },
+    
+    // 操作
+    actions: {
+      switch: '切换',
+      create: '创建区域',
+      edit: '编辑',
+      delete: '删除',
+      refresh: '刷新'
+    },
+    
+    // 对话框
+    dialogs: {
+      switchZone: {
+        title: '切换区域',
+        message: '确定要切换到区域 "{zoneName}" 吗？',
+        warning: '切换区域后，您将看到该区域的网络配置和数据。'
+      },
+      createZone: {
+        title: '创建新区域',
+        nameLabel: '区域名称',
+        descriptionLabel: '区域描述',
+        create: '创建'
+      }
+    },
+    
+    // 错误信息
+    fetchOverviewError: '获取区域概览失败',
+    fetchAvailableZonesError: '获取可用区域失败',
+    fetchZonesError: '获取区域列表失败',
+    fetchDetailsError: '获取区域详情失败',
+    createSuccess: '区域创建成功',
+    createError: '创建区域失败',
+    updateSuccess: '区域更新成功',
+    updateError: '更新区域失败',
+    deleteSuccess: '区域删除成功',
+    deleteError: '删除区域失败'
   },
   social: {
     subtitle: '社交网络连接和用户管理',
@@ -212,8 +459,8 @@ export default {
       expiresAt: '过期时间',
       usedAt: '使用时间',
       usedBy: '使用者',
-      createdAt: '创建时间',
-      copyCode: '复制邀请码',
+      createdAt: '创建时间', 
+      copyInviteLink: '复制邀请码链接',
       active: '有效',
       used: '已使用',
       expired: '已过期',
@@ -259,6 +506,9 @@ export default {
     friendRemoveError: '删除好友失败',
     fetchInvitationsError: '获取邀请码列表失败',
     invitationCreateError: '创建邀请码失败',
+    
+    // 新增的错误和成功消息
+    noFriendNodes: '该好友暂无节点',
     fetchFriendNodesError: '获取好友节点失败'
   },
   ippools: {

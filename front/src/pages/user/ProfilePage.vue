@@ -23,7 +23,7 @@
               <q-item>
                 <q-item-section>
                   <q-item-label caption>{{ $t('user.userId') }}</q-item-label>
-                  <q-item-label>{{ user?.id }}</q-item-label>
+                  <q-item-label>{{ user?.user_id }}</q-item-label>
                 </q-item-section>
               </q-item>
               <q-item>

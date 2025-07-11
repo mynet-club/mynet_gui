@@ -9,7 +9,7 @@
       <q-form @submit="login" class="auth-form">
         <q-input 
           v-model="loginForm.email"
-          :label="$t('auth.email')"
+          :placeholder="$t('auth.email')"
           type="email"
           outlined
           class="form-field"
@@ -18,7 +18,7 @@
         
         <q-input 
           v-model="loginForm.password"
-          :label="$t('auth.password')"
+          :placeholder="$t('auth.password')"
           type="password"
           outlined
           class="form-field"

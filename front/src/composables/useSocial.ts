@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import { apiService } from '../services/api'
+import { socialService } from '../services/socialService'
 import { useNotify } from './useNotify'
 import { useI18n } from 'vue-i18n'
 import type { 
@@ -33,7 +33,7 @@ export function useSocial() {
   const searchLoading = ref(false)
   const currentRequestType = ref<'received' | 'sent'>('received')
 
-  // 分页状态
+  // 分页状态 
   const currentPage = ref(1)
   const perPage = ref(10)
   const totalPages = ref(1)
@@ -56,38 +56,38 @@ export function useSocial() {
   const fetchOverview = async () => {
     try {
       loading.value = true
-      const response = await apiService.social.getOverview()
+      const response = await socialService.getOverview()
       
       // 设置概览数据
       overview.value = {
-        friend_count: response.data.stats?.friends_count || response.data.friends?.length || 0,
-        pending_requests: response.data.stats?.pending_count || response.data.pending_requests?.length || 0,
-        connected_nodes: response.data.stats?.connected_nodes || 0,
-        active_routes: response.data.stats?.active_routes || 0
+        friend_count: response.stats?.friends_count || response.friends?.length || 0,
+        pending_requests: response.stats?.pending_count || response.pending_requests?.length || 0,
+        connected_nodes: response.stats?.connected_nodes || 0,
+        active_routes: response.stats?.active_routes || 0
       }
       
       // 同时设置好友数据（避免额外的API调用）
-      if (response.data.friends) {
-        friends.value = response.data.friends
+      if (response.friends) {
+        friends.value = response.friends
         // 模拟分页数据
         currentPage.value = 1
         totalPages.value = 1
-        totalItems.value = response.data.friends.length
+        totalItems.value = response.friends.length
       }
       
       // 设置好友请求数据
-      if (response.data.pending_requests) {
-        friendRequests.value = response.data.pending_requests
+      if (response.pending_requests) {
+        friendRequests.value = response.pending_requests
       }
       
       // 设置发送的请求数据
-      if (response.data.outgoing_requests) {
-        sentRequests.value = response.data.outgoing_requests
+      if (response.outgoing_requests) {
+        sentRequests.value = response.outgoing_requests
       }
       
       // 设置邀请码数据
-      if (response.data.invitations) {
-        invitations.value = response.data.invitations
+      if (response.invitations) {
+        invitations.value = response.invitations
       }
     } catch (error) {
       console.error('获取社交概览失败:', error)
@@ -132,8 +132,8 @@ export function useSocial() {
     
     try {
       searchLoading.value = true
-      const response = await apiService.social.searchUsers(query)
-      searchResults.value = response.data
+      const response = await socialService.searchUsers(query)
+      searchResults.value = response
     } catch (error) {
       console.error('搜索用户失败:', error)
       notify.error(t('social.searchUsersError'))
@@ -173,7 +173,7 @@ export function useSocial() {
   const sendFriendRequest = async (targetId: string, message?: string) => {
     try {
       loading.value = true
-      const response = await apiService.social.sendFriendRequest(targetId, message)
+      const response = await socialService.sendFriendRequest(targetId, message)
       if (response.success) {
         notify.success(t('social.friendRequestSent'))
         // 更新搜索结果中的状态
@@ -196,7 +196,7 @@ export function useSocial() {
   const acceptFriendRequest = async (requestId: string) => {
     try {
       loading.value = true
-      const response = await apiService.social.acceptFriendRequest(requestId)
+      const response = await socialService.acceptFriendRequest(requestId)
       if (response.success) {
         notify.success(t('social.friendRequestAccepted'))
         // 从请求列表中移除
@@ -218,7 +218,7 @@ export function useSocial() {
   const rejectFriendRequest = async (requestId: string) => {
     try {
       loading.value = true
-      const response = await apiService.social.rejectFriendRequest(requestId)
+      const response = await socialService.rejectFriendRequest(requestId)
       if (response.success) {
         notify.success(t('social.friendRequestRejected'))
         // 从请求列表中移除
@@ -240,7 +240,7 @@ export function useSocial() {
   const removeFriend = async (friendId: string, friendName: string) => {
     try {
       loading.value = true
-      const response = await apiService.social.removeFriend(friendId)
+      const response = await socialService.removeFriend(friendId)
       if (response.success) {
         notify.success(t('social.friendRemoved', { name: friendName }))
         // 从好友列表中移除
@@ -282,10 +282,10 @@ export function useSocial() {
   const createInvitation = async (expiresIn = 7) => {
     try {
       loading.value = true
-      const response = await apiService.social.createInvitation(expiresIn)
-      if (response.data) {
+      const response = await socialService.createInvitation(expiresIn)
+      if (response) {
         notify.success(t('social.invitationCreated'))
-        invitations.value.unshift(response.data)
+        invitations.value.unshift(response)
       }
     } catch (error) {
       console.error('创建邀请码失败:', error)
@@ -298,8 +298,8 @@ export function useSocial() {
   // 获取好友的节点
   const getFriendNodes = async (friendId: string) => {
     try {
-      const response = await apiService.social.getFriendNodes(friendId)
-      return response.data
+      const response = await socialService.getFriendNodes(friendId)
+      return response
     } catch (error) {
       console.error('获取好友节点失败:', error)
       notify.error(t('social.fetchFriendNodesError'))

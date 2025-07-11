@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { LocalStorage } from 'quasar'
 import { apiService } from '../services/api'
+import { tokenManager } from '../utils/tokenManager'
 import type { User, Zone } from '../types'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -14,20 +15,22 @@ export const useAuthStore = defineStore('auth', () => {
   
   // 修改认证状态的判断逻辑
   const isAuthenticated = computed(() => {
-    const hasValidToken = !!token.value && !isTokenExpired.value
+    const hasValidToken = !!token.value && tokenExpiry.value > Date.now()
     const hasUser = !!user.value
-    console.log('🔧 [AUTH] Authentication check:', { hasValidToken, hasUser, token: token.value ? '***' : null, user: user.value?.name })
+    console.log('🔧 [AUTH] Authentication check:', { 
+      hasValidToken, 
+      hasUser, 
+      token: token.value ? '***' : null, 
+      user: user.value?.name,
+      tokenExpiry: tokenExpiry.value,
+      currentTime: Date.now(),
+      tokenExpired: tokenExpiry.value <= Date.now()
+    })
     return hasValidToken && hasUser
   })
   
   const isTokenExpired = computed(() => {
-    const isExpired = Date.now() > tokenExpiry.value
-    console.log('🔧 [AUTH] Token expiry check:', { 
-      currentTime: new Date().toISOString(),
-      expiryTime: new Date(tokenExpiry.value).toISOString(),
-      isExpired 
-    })
-    return isExpired
+    return tokenExpiry.value <= Date.now()
   })
   
   const login = async (credentials: { email: string; password: string }) => {
@@ -37,7 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
       
       console.log('🔧 [AUTH] Login response received:', response.data)
       
-      token.value = response.data.access_token
+      token.value = response.data.auth_token
       user.value = response.data.user
       tokenExpiry.value = response.data.expires_at
       
@@ -45,17 +48,9 @@ export const useAuthStore = defineStore('auth', () => {
       console.log('🔧 [AUTH] Token expiry set:', tokenExpiry.value)
       console.log('🔧 [AUTH] Token expiry (human readable):', new Date(tokenExpiry.value).toLocaleString())
       console.log('🔧 [AUTH] Current time:', Date.now())
-      console.log('🔧 [AUTH] Time until expiry (minutes):', Math.round((tokenExpiry.value - Date.now()) / 60000))
+      console.log('🔧 [AUTH] Token expired check:', tokenExpiry.value <= Date.now())
       
-      // 存储token和过期时间
-      LocalStorage.set('auth_token', token.value)
-      LocalStorage.set('token_expiry', tokenExpiry.value.toString())
-      
-      console.log('🔧 [AUTH] Stored to localStorage - token_expiry:', tokenExpiry.value.toString())
-      
-      // 验证localStorage存储
-      const storedExpiry = LocalStorage.getItem('token_expiry')
-      console.log('🔧 [AUTH] Verified localStorage token_expiry:', storedExpiry)
+      // tokenManager 已经在 apiService.login 中保存了 token，这里不需要再次保存
       
       // 存储用户信息
       if (user.value) {
@@ -77,6 +72,12 @@ export const useAuthStore = defineStore('auth', () => {
         }
       }
       
+      console.log('🔧 [AUTH] Login completed successfully:', {
+        user: user.value?.name,
+        token: token.value ? '***' : null,
+        isAuthenticated: isAuthenticated.value
+      })
+      
       return response.data
     } finally {
       isLoading.value = false
@@ -97,9 +98,10 @@ export const useAuthStore = defineStore('auth', () => {
     availableZones.value = []
     tokenExpiry.value = 0
     
-    // 清除本地存储
-    LocalStorage.remove('auth_token')
-    LocalStorage.remove('token_expiry')
+    // 使用 tokenManager 清除所有 token
+    tokenManager.clearTokens()
+    
+    // 清除其他本地存储
     LocalStorage.remove('user_info')
     LocalStorage.remove('current_zone')
     console.log('🔧 [AUTH] Cleared all auth data')
@@ -157,9 +159,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
   
   const checkTokenExpiry = () => {
-    if (token.value && isTokenExpired.value) {
-      console.log('Token expired, refreshing...')
-      // Token会在API拦截器中自动刷新
+    if (token.value && tokenExpiry.value <= Date.now()) {
+      console.log('Token expired, will be refreshed automatically by API interceptor')
       return false
     }
     return true
@@ -179,6 +180,13 @@ export const useAuthStore = defineStore('auth', () => {
     return user.value?.permissions?.includes(role) || false
   }
   
+  // 设置当前zone
+  const setCurrentZone = (zone: Zone) => {
+    currentZone.value = zone
+    // 可以在这里添加更多的zone切换逻辑，比如更新本地存储
+    LocalStorage.set('current_zone', zone)
+  }
+  
   return {
     user,
     token,
@@ -196,6 +204,7 @@ export const useAuthStore = defineStore('auth', () => {
     initializeAuth,
     loadUserZones,
     hasPermission,
-    hasRole
+    hasRole,
+    setCurrentZone
   }
 })

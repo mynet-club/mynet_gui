@@ -12,6 +12,7 @@
           :label="$t('auth.name')"
           outlined
           class="form-field"
+          :placeholder="$t('auth.namePlaceholder')"
           :rules="[val => !!val || $t('auth.nameRequired')]"
         />
         
@@ -21,6 +22,7 @@
           type="email"
           outlined
           class="form-field"
+          :placeholder="$t('auth.emailPlaceholder')"
           :rules="[
             val => !!val || $t('auth.emailRequired'),
             val => validateEmail(val) || $t('auth.emailInvalid')
@@ -33,6 +35,7 @@
           type="password"
           outlined
           class="form-field"
+          :placeholder="$t('auth.passwordPlaceholder')"
           :rules="[
             val => !!val || $t('auth.passwordRequired'),
             val => val.length >= 8 || $t('auth.passwordMinLength')
@@ -45,10 +48,20 @@
           type="password"
           outlined
           class="form-field"
+          :placeholder="$t('auth.confirmPasswordPlaceholder')"
           :rules="[
             val => !!val || $t('auth.confirmPasswordRequired'),
             val => val === registerForm.password || $t('auth.passwordMismatch')
           ]"
+        />
+        
+        <q-input 
+          v-model="registerForm.invitation"
+          :label="$t('auth.invitationCode')"
+          outlined
+          class="form-field"
+          :placeholder="$t('auth.invitationPlaceholder')"
+          :rules="[val => !!val || $t('auth.invitationRequired')]"
         />
         
         <q-checkbox 
@@ -82,11 +95,20 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useAuth } from '../../composables/useAuth'
 
 const { registerForm, isLoading, validateEmail, register } = useAuth()
+
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const invitationCode = urlParams.get('invitation');
+  if (invitationCode) {
+    registerForm.invitation = invitationCode;
+  }
+});
 </script>
 
 <style lang="scss" scoped>
 @import '../../styles/auth.scss';
-</style> 
+</style>
