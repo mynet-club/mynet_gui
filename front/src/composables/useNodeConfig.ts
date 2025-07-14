@@ -7,7 +7,7 @@ import type {
   ConfigImport,
   ConfigExport
 } from '../types/nodeConfig'
-import { nodeConfigService } from '../services/nodeConfigService'
+import { nodeConfigService } from '../services/node/nodeConfigService'
 import { useNotify } from './useNotify'
 
 /**

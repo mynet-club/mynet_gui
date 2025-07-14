@@ -6,7 +6,7 @@ import type {
   KeyGenerationRequest, 
   KeyUploadRequest 
 } from '../types/nodeKeys'
-import { nodeKeysService } from '../services/nodeKeysService'
+import { nodeKeysService } from '../services/node/nodeKeysService'
 import { useNotify } from './useNotify'
 
 /**

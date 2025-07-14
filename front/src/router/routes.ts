@@ -12,25 +12,25 @@ const routes: RouteRecordRaw[] = [
       { 
         path: 'nodes', 
         name: 'nodes',
-        component: () => import('../pages/network/NodesPage.vue'),
+        component: () => import('../pages/node/NodeListPage.vue'),
         meta: { title: '节点管理', requiresAuth: true }
       },
       { 
         path: 'nodes/create', 
         name: 'node-create',
-        component: () => import('../pages/network/NodeCreatePage.vue'),
+        component: () => import('../pages/node/NodeCreatePage.vue'),
         meta: { title: '创建节点', requiresAuth: true }
       },
       { 
         path: 'nodes/:id', 
         name: 'node-detail',
-        component: () => import('../pages/network/NodeDetailPage.vue'),
+        component: () => import('../pages/node/NodeDetailPage.vue'),
         meta: { title: '节点详情', requiresAuth: true },
         props: true
       },
       { 
         path: 'nodes/:id/edit', 
-        component: () => import('../pages/network/node-edit/NodeEditPage.vue'),
+        component: () => import('../pages/node/edit/NodeEditPage.vue'),
         meta: { title: '编辑节点', requiresAuth: true },
         props: true,
         children: [
@@ -42,28 +42,28 @@ const routes: RouteRecordRaw[] = [
           {
             path: 'basic',
             name: 'node-edit-basic',
-            component: () => import('../pages/network/node-edit/BasicInfoPage.vue'),
+            component: () => import('../pages/node/edit/BasicInfoPage.vue'),
             meta: { title: '基础信息', requiresAuth: true },
             props: true
           },
           {
             path: 'network',
             name: 'node-edit-network',
-            component: () => import('../pages/network/node-edit/NetworkConfigPage.vue'),
+            component: () => import('../pages/node/edit/NetworkConfigPage.vue'),
             meta: { title: '网络配置', requiresAuth: true },
             props: true
           },
           {
             path: 'config',
             name: 'node-edit-config',
-            component: () => import('../pages/network/node-edit/NodeConfigPage.vue'),
+            component: () => import('../pages/node/edit/NodeConfigPage.vue'),
             meta: { title: '节点配置', requiresAuth: true },
             props: true
           },
           {
             path: 'keys',
             name: 'node-edit-keys',
-            component: () => import('../pages/network/node-edit/KeyManagementPage.vue'),
+            component: () => import('../pages/node/edit/KeyManagementPage.vue'),
             meta: { title: '密钥管理', requiresAuth: true },
             props: true
           }
@@ -74,25 +74,25 @@ const routes: RouteRecordRaw[] = [
       { 
         path: 'routes', 
         name: 'routes',
-        component: () => import('../pages/network/RoutesPage.vue'),
+        component: () => import('../pages/route/RouteListPage.vue'),
         meta: { title: '路由管理', requiresAuth: true }
       },
       { 
         path: 'ippools', 
         name: 'ippools',
-        component: () => import('../pages/network/IpPoolsPage.vue'),
+        component: () => import('../pages/ippool/IpPoolListPage.vue'),
         meta: { title: 'IP池管理', requiresAuth: true }
       },
       { 
         path: 'zones', 
         name: 'zones',
-        component: () => import('../pages/network/ZonesPage.vue'),
+        component: () => import('../pages/zone/ZoneListPage.vue'),
         meta: { title: '区域管理', requiresAuth: true }
       },
       { 
         path: 'social', 
         name: 'social',
-        component: () => import('../pages/network/SocialPage.vue'),
+        component: () => import('../pages/social/SocialPage.vue'),
         meta: { title: '社交网络', requiresAuth: true }
       },
       

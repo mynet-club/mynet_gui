@@ -159,7 +159,7 @@
 import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import { useNode, useNotify } from '../../../composables'
-import { nodeService } from '../../../services/nodeService'
+import { nodeService } from '../../../services/node/nodeService'
 import { NodeType, UpdateNodeRequest, VpnType } from '../../../types/node'
 
 const route = useRoute()

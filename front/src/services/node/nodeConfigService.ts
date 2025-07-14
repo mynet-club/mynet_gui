@@ -3,7 +3,7 @@
  * 基于OpenAPI文档 v1.0.0 和 GNB/WireGuard 配置规范
  */
 
-import { api } from './api'
+import { api } from '../api'
 import type {
   NodeConfig,
   ConfigUpdateRequest,
@@ -17,11 +17,11 @@ import type {
   ConfigDiff,
   VPNType,
   ConfigMode
-} from '../types/nodeConfig'
+} from '../../types/nodeConfig'
 import type {
   ApiResponse,
   PaginatedApiResponse
-} from '../types/api'
+} from '../../types/api'
 
 /**
  * 节点配置服务类

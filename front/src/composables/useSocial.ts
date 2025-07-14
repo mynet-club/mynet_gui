@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import { socialService } from '../services/socialService'
+import { socialService } from '../services/social/socialService'
 import { useNotify } from './useNotify'
 import { useI18n } from 'vue-i18n'
 import type { 

@@ -3,7 +3,7 @@ import { useNotify } from './useNotify'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import type { Zone, ZoneOverview } from '../types'
-import { zoneService } from '../services/zoneService'
+import { zoneService } from '../services/zone/zoneService'
 
 export function useZones() {
   const { t } = useI18n()

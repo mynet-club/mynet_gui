@@ -1,5 +1,5 @@
-import { api } from './api'
-import type { BaseResponse } from '../types'
+import { api } from '../api'
+import type { BaseResponse } from '../../types'
 
 export const routesService = {
   // 获取路由数据概览

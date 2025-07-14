@@ -214,11 +214,11 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useRoutes } from '../../composables/useRoutes'
 import { useNotify } from '../../composables/useNotify'
-import ActiveRoutesTab from '../../components/routes/ActiveRoutesTab.vue'
-import PendingConnectionsTab from '../../components/routes/PendingConnectionsTab.vue'
-import FriendNodesTab from '../../components/routes/FriendNodesTab.vue'
-import RouteConfigTab from '../../components/routes/RouteConfigTab.vue'
-import RouteDetailsDialog from '../../components/routes/RouteDetailsDialog.vue'
+import ActiveRoutesTab from '../../components/route/ActiveRoutesTab.vue'
+import PendingConnectionsTab from '../../components/route/PendingConnectionsTab.vue'
+import FriendNodesTab from '../../components/route/FriendNodesTab.vue'
+import RouteConfigTab from '../../components/route/RouteConfigTab.vue'
+import RouteDetailsDialog from '../../components/route/RouteDetailsDialog.vue'
 
 const { t } = useI18n()
 const router = useRouter()

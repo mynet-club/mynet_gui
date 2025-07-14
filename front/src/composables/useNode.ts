@@ -1,6 +1,6 @@
 import { ref, computed, reactive, watch } from 'vue'
 import type { Node, CreateNodeRequest, UpdateNodeRequest } from '../types/node'
-import { nodeService } from '../services/nodeService'
+import { nodeService } from '../services/node/nodeService'
 import { useNotify } from './useNotify'
 
 /**

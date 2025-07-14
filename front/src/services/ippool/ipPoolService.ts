@@ -1,5 +1,5 @@
-import { api } from './api'
-import type { IPPool, IPPoolForm, IPPoolStatistics, IPAllocation } from '../types/ippool'
+import { api } from '../api'
+import type { IPPool, IPPoolForm, IPPoolStatistics, IPAllocation } from '../../types/ippool'
 
 export class IPPoolService {
   // 获取IP池列表

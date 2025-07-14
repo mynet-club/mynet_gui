@@ -3,7 +3,7 @@
  * 基于OpenAPI文档 v1.0.0
  */
 
-import { api } from './api'
+import { api } from '../api'
 import type { 
   Node, 
   CreateNodeRequest, 
@@ -14,12 +14,12 @@ import type {
   NodeNetworkConfig,
   UpdateNodeNetworkConfigRequest,
   AvailableIPsResponse
-} from '../types/node'
+} from '../../types/node'
 import type { 
   ApiResponse, 
   PaginatedApiResponse,
   NodesListApiResponse
-} from '../types/api'
+} from '../../types/api'
 
 /**
  * 节点服务类

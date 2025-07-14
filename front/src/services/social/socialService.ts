@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api } from '../api'
 import type { 
   SocialDataResponse,
   Friend, 
@@ -7,7 +7,7 @@ import type {
   BaseResponse, 
   Invitation,
   Node
-} from '../types'
+} from '../../types'
 
 export const socialService = {
   // 获取社交数据概览

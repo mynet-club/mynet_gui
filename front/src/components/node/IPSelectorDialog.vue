@@ -114,7 +114,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { nodeService } from '../../services/nodeService'
+import { nodeService } from '../../services/node/nodeService'
 import type { AvailableIP, IPGroup } from '../../types/node'
 
 interface Props {

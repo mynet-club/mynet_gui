@@ -1,4 +1,4 @@
-import type { IPPool, IPPoolStatistics, IPAllocation } from '../types/ippool'
+import type { IPPool, IPPoolStatistics, IPAllocation } from '../../types/ippool'
 
 // 模拟IP池数据
 const mockPools: IPPool[] = [

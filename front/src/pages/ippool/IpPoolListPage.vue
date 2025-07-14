@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import IPPoolManager from '../../components/network/IPPoolManager.vue'
+import IPPoolManager from '../../components/ippool/IPPoolManager.vue'
 </script>
 
 <style lang="scss" scoped>

@@ -3,7 +3,7 @@
  * 基于OpenAPI文档 v1.0.0 和 ed25519 密钥规范
  */
 
-import { api } from './api'
+import { api } from '../api'
 import type {
   NodeKey,
   NodeKeyApiResponse,
@@ -16,12 +16,12 @@ import type {
   LocalKeyPair,
   KeyValidationResult,
   KeyType
-} from '../types/nodeKeys'
-import { ED25519_KEY_SPEC } from '../types/nodeKeys'
+} from '../../types/nodeKeys'
+import { ED25519_KEY_SPEC } from '../../types/nodeKeys'
 import type {
   ApiResponse,
   PaginatedApiResponse
-} from '../types/api'
+} from '../../types/api'
 
 /**
  * 节点密钥服务类

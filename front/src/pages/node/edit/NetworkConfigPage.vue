@@ -271,9 +271,9 @@ import { ref, computed, onMounted, watch, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useNode, useNotify } from '../../../composables'
-import { nodeService } from '../../../services/nodeService'
+import { nodeService } from '../../../services/node/nodeService'
 import type { NodeNetworkConfig, UpdateNodeNetworkConfigRequest } from '../../../types/node'
-import IPSelectorDialog from '../../../components/network/IPSelectorDialog.vue'
+import IPSelectorDialog from '../../../components/node/IPSelectorDialog.vue'
 
 const route = useRoute()
 const $q = useQuasar()
