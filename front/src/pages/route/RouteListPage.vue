@@ -11,6 +11,13 @@
         </div>
         <div class="col-auto">
           <q-btn
+            color="positive"
+            icon="add"
+            :label="$t('routes.actions.createRoute')"
+            @click="handleCreateRoute"
+            class="q-mr-md"
+          />
+          <q-btn
             color="primary"
             icon="sync"
             :label="$t('routes.actions.refreshRoutes')"
@@ -21,71 +28,29 @@
       </div>
 
       <!-- 统计卡片 -->
-      <div class="row q-gutter-md q-mb-lg">
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="stats-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ overview.active_routes }}</div>
-                  <div class="text-body2 text-grey-6">{{ $t('routes.overview.activeRoutes') }}</div>
-                </div>
-                <div>
-                  <q-icon name="route" size="2rem" color="primary" />
-                </div>
+      <ResponsiveCardGrid
+        :items="statsCards"
+        :loading="loading"
+        :loading-count="4"
+        variant="compact"
+        spacing="normal"
+        :clickable="false"
+        class="q-mb-lg"
+      >
+        <template #default="{ item }">
+          <q-card-section>
+            <div class="row items-center">
+              <div class="col">
+                <div class="text-h6">{{ item.value }}</div>
+                <div class="text-body2 text-grey-6">{{ item.title }}</div>
               </div>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="stats-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ overview.pending_connections }}</div>
-                  <div class="text-body2 text-grey-6">{{ $t('routes.overview.pendingConnections') }}</div>
-                </div>
-                <div>
-                  <q-icon name="schedule" size="2rem" color="orange" />
-                </div>
+              <div>
+                <q-icon :name="item.icon" size="2rem" :color="item.color" />
               </div>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="stats-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ overview.connected_nodes }}</div>
-                  <div class="text-body2 text-grey-6">{{ $t('routes.overview.connectedNodes') }}</div>
-                </div>
-                <div>
-                  <q-icon name="lan" size="2rem" color="positive" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="stats-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ overview.total_bandwidth }}</div>
-                  <div class="text-body2 text-grey-6">{{ $t('routes.overview.totalBandwidth') }}</div>
-                </div>
-                <div>
-                  <q-icon name="network_check" size="2rem" color="info" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-      </div>
+            </div>
+          </q-card-section>
+        </template>
+      </ResponsiveCardGrid>
 
       <!-- 标签页 -->
       <q-card>
@@ -101,7 +66,6 @@
           <q-tab name="active" :label="$t('routes.tabs.activeRoutes')" />
           <q-tab name="pending" :label="$t('routes.tabs.pendingConnections')" />
           <q-tab name="friends" :label="$t('routes.tabs.friendNodes')" />
-          <q-tab name="config" :label="$t('routes.tabs.configuration')" />
         </q-tabs>
 
         <q-separator />
@@ -130,23 +94,15 @@
 
           <!-- 好友节点 -->
           <q-tab-panel name="friends">
-            <FriendNodesTab
-              :friend-nodes="friendNodes"
-              :loading="loading"
-              @connect="handleConnectToNode"
+            <AllFriendNodesTab
+              :friends-data="allFriendNodesData"
+              :loading="friendNodesLoading"
               @view-friend="handleViewFriend"
+              @refresh="handleRefreshAllFriendNodes"
             />
           </q-tab-panel>
 
-          <!-- 配置管理 -->
-          <q-tab-panel name="config">
-            <RouteConfigTab
-              :config="routeConfig"
-              :loading="loading"
-              @download="handleDownloadConfig"
-              @refresh="handleRefreshConfig"
-            />
-          </q-tab-panel>
+
         </q-tab-panels>
       </q-card>
     </div>
@@ -169,55 +125,20 @@
         </q-card-section>
       </q-card>
     </q-dialog>
-
-    <!-- 连接确认对话框 -->
-    <q-dialog v-model="connectionDialog.show" persistent>
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">{{ $t('routes.dialogs.connectNode.title') }}</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <div class="q-mb-md">
-            {{ $t('routes.dialogs.connectNode.message', { 
-              nodeName: connectionDialog.nodeName,
-              friendName: connectionDialog.friendName 
-            }) }}
-          </div>
-          <q-input
-            v-model="connectionDialog.message"
-            :label="$t('routes.dialogs.connectNode.messagePlaceholder')"
-            type="textarea"
-            rows="3"
-            outlined
-          />
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat :label="$t('common.cancel')" color="primary" v-close-popup />
-          <q-btn 
-            flat 
-            :label="$t('routes.actions.connect')" 
-            color="primary" 
-            @click="confirmConnectToNode"
-            :loading="loading"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useRoutes } from '../../composables/useRoutes'
+import { useSocial } from '../../composables/useSocial'
 import { useNotify } from '../../composables/useNotify'
+import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import ActiveRoutesTab from '../../components/route/ActiveRoutesTab.vue'
 import PendingConnectionsTab from '../../components/route/PendingConnectionsTab.vue'
-import FriendNodesTab from '../../components/route/FriendNodesTab.vue'
-import RouteConfigTab from '../../components/route/RouteConfigTab.vue'
+import AllFriendNodesTab from '../../components/route/AllFriendNodesTab.vue'
 import RouteDetailsDialog from '../../components/route/RouteDetailsDialog.vue'
 
 const { t } = useI18n()
@@ -230,22 +151,58 @@ const {
   activeRoutes,
   pendingConnections,
   friendNodes,
-  routeConfig,
   currentConnectionType,
   fetchOverview,
   fetchActiveRoutes,
   fetchPendingConnections,
   fetchFriendNodes,
-  fetchRouteConfig,
   connectToNode,
   approveConnection,
   rejectConnection,
   disconnectRoute,
-  downloadRouteConfig,
-  refreshRouteConfig,
   handleConnectionTypeChange,
   init
 } = useRoutes()
+
+const {
+  getAllFriendNodes
+} = useSocial()
+
+// 好友节点相关状态
+const allFriendNodesData = ref(null)
+const friendNodesLoading = ref(false)
+
+// 统计卡片数据
+const statsCards = computed(() => [
+  {
+    id: 'active_routes',
+    title: t('routes.overview.activeRoutes'),
+    value: overview.value.active_routes,
+    icon: 'route',
+    color: 'primary'
+  },
+  {
+    id: 'pending_connections',
+    title: t('routes.overview.pendingConnections'),
+    value: overview.value.pending_connections,
+    icon: 'schedule',
+    color: 'orange'
+  },
+  {
+    id: 'connected_nodes',
+    title: t('routes.overview.connectedNodes'),
+    value: overview.value.connected_nodes,
+    icon: 'lan',
+    color: 'positive'
+  },
+  {
+    id: 'total_bandwidth',
+    title: t('routes.overview.totalBandwidth'),
+    value: overview.value.total_bandwidth,
+    icon: 'network_check',
+    color: 'info'
+  }
+])
 
 // 响应式状态
 const tab = ref('active')
@@ -254,14 +211,6 @@ const tab = ref('active')
 const routeDetailsDialog = ref({
   show: false,
   route: null as any
-})
-
-const connectionDialog = ref({
-  show: false,
-  nodeId: '',
-  nodeName: '',
-  friendName: '',
-  message: ''
 })
 
 // 事件处理
@@ -284,34 +233,26 @@ const handleRejectConnection = (connectionId: string) => {
   rejectConnection(connectionId)
 }
 
-const handleConnectToNode = (nodeId: string, nodeName: string, friendName: string) => {
-  connectionDialog.value = {
-    show: true,
-    nodeId,
-    nodeName,
-    friendName,
-    message: ''
-  }
-}
-
-const confirmConnectToNode = async () => {
-  await connectToNode(
-    connectionDialog.value.nodeId,
-    connectionDialog.value.message
-  )
-  connectionDialog.value.show = false
-}
-
-const handleViewFriend = (friendId: string) => {
+const handleViewFriend = (friendId: string | number) => {
   router.push(`/social?friend=${friendId}`)
 }
 
-const handleDownloadConfig = () => {
-  downloadRouteConfig()
+// 好友节点相关方法
+const handleRefreshAllFriendNodes = async () => {
+  await fetchAllFriendNodes()
 }
 
-const handleRefreshConfig = () => {
-  refreshRouteConfig()
+const fetchAllFriendNodes = async () => {
+  try {
+    friendNodesLoading.value = true
+    const response = await getAllFriendNodes()
+    allFriendNodesData.value = response
+  } catch (error) {
+    console.error('获取所有好友节点失败:', error)
+    notify.error(t('routes.fetchAllFriendNodesError'))
+  } finally {
+    friendNodesLoading.value = false
+  }
 }
 
 const handleRefreshRoutes = () => {
@@ -319,11 +260,18 @@ const handleRefreshRoutes = () => {
   fetchActiveRoutes()
   fetchPendingConnections()
   fetchFriendNodes()
+  fetchAllFriendNodes() // 添加刷新所有好友节点
+}
+
+// 创建路由
+const handleCreateRoute = () => {
+  router.push('/routes/create/prev_1')
 }
 
 // 初始化
-onMounted(() => {
-  init()
+onMounted(async () => {
+  await init()
+  await fetchAllFriendNodes() // 初始化时获取所有好友节点
   
   // 处理来自社交页面的跳转
   const route = router.currentRoute.value
@@ -331,7 +279,7 @@ onMounted(() => {
     tab.value = route.query.tab as string
   }
   if (route.query.friend) {
-    // 如果指定了好友ID，可以在友节点标签页中高亮显示
+    // 如果指定了好友ID，可以在好友节点标签页中高亮显示
     console.log('Show friend nodes for:', route.query.friend)
   }
 })

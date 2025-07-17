@@ -77,6 +77,30 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/route/RouteListPage.vue'),
         meta: { title: '路由管理', requiresAuth: true }
       },
+      {
+        path: 'routes/create/prev_1',
+        name: 'route-create-step1',
+        component: () => import('../pages/route/create/Step1FriendSelection.vue'),
+        meta: { title: '创建路由 - 选择好友', requiresAuth: true }
+      },
+      {
+        path: 'routes/create/prev_2',
+        name: 'route-create-step2',
+        component: () => import('../pages/route/create/Step2FriendNodeSelection.vue'),
+        meta: { title: '创建路由 - 选择好友节点', requiresAuth: true }
+      },
+      {
+        path: 'routes/create/prev_3',
+        name: 'route-create-step3',
+        component: () => import('../pages/route/create/Step3MyNodeSelection.vue'),
+        meta: { title: '创建路由 - 选择我的节点', requiresAuth: true }
+      },
+      {
+        path: 'routes/create/prev_4',
+        name: 'route-create-step4',
+        component: () => import('../pages/route/create/Step4RequestForm.vue'),
+        meta: { title: '创建路由 - 提交申请', requiresAuth: true }
+      },
       { 
         path: 'ippools', 
         name: 'ippools',
@@ -88,6 +112,12 @@ const routes: RouteRecordRaw[] = [
         name: 'zones',
         component: () => import('../pages/zone/ZoneListPage.vue'),
         meta: { title: '区域管理', requiresAuth: true }
+      },
+      { 
+        path: 'zone-sharing', 
+        name: 'zone-sharing',
+        component: () => import('../pages/zone/ZoneSharingPage.vue'),
+        meta: { title: '区域分享', requiresAuth: true }
       },
       { 
         path: 'social', 

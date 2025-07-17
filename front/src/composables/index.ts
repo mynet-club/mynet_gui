@@ -14,6 +14,10 @@ export { useKeyGeneration } from './useKeyGeneration'
 export { useNodeConfig } from './useNodeConfig'
 export { useVpnConfig } from './useVpnConfig'
 
+// 区域管理相关
+export { useZones } from './useZones'
+export { useZoneServices } from './useZoneServices'
+
 // 通用工具
 export { useNotify } from './useNotify'
 export { useAuth } from './useAuth'

@@ -15,114 +15,105 @@
     </div>
 
     <!-- 连接列表 -->
-    <div v-if="loading" class="row justify-center q-py-lg">
-      <q-spinner-dots color="primary" size="2em" />
-    </div>
-
-    <div v-else-if="connections.length === 0" class="text-center q-py-lg">
-      <q-icon name="schedule" size="3rem" color="grey-5" class="q-mb-md" />
-      <div class="text-h6 text-grey-6">
-        {{ $t(`routes.pendingConnections.no${currentType === 'incoming' ? 'Incoming' : 'Outgoing'}Connections`) }}
-      </div>
-    </div>
-
-    <div v-else class="row q-gutter-md">
-      <div
-        v-for="connection in connections"
-        :key="connection.id"
-        class="col-12"
-      >
-        <q-card class="connection-card">
-          <q-card-section>
-            <div class="row items-center">
-              <div class="col">
-                <div class="row items-center q-mb-sm">
-                  <q-avatar size="40px" class="q-mr-sm">
-                    <q-icon name="person" size="24px" />
-                  </q-avatar>
-                  <div>
-                    <div class="text-h6">
-                      {{ currentType === 'incoming' ? connection.requester_name : connection.target_name }}
-                    </div>
-                    <div class="text-subtitle2 text-grey-6">
-                      {{ currentType === 'incoming' ? connection.requester_node_name : connection.target_node_name }}
-                    </div>
-                    <div class="text-caption text-grey-6">
-                      {{ currentType === 'incoming' ? connection.requester_ip : connection.target_ip }}
-                    </div>
+    <ResponsiveCardGrid
+      :items="connections"
+      :loading="loading"
+      variant="standard"
+      spacing="normal"
+      empty-icon="schedule"
+      :empty-title="$t(`routes.pendingConnections.no${currentType === 'incoming' ? 'Incoming' : 'Outgoing'}Connections`)"
+    >
+      <template #default="{ item: connection }">
+        <q-card-section>
+          <div class="row items-center">
+            <div class="col">
+              <div class="row items-center q-mb-sm">
+                <q-avatar size="40px" class="q-mr-sm">
+                  <q-icon name="person" size="24px" />
+                </q-avatar>
+                <div>
+                  <div class="text-h6">
+                    {{ currentType === 'incoming' ? connection.requester_name : connection.target_name }}
+                  </div>
+                  <div class="text-subtitle2 text-grey-6">
+                    {{ currentType === 'incoming' ? connection.requester_node_name : connection.target_node_name }}
+                  </div>
+                  <div class="text-caption text-grey-6">
+                    {{ currentType === 'incoming' ? connection.requester_ip : connection.target_ip }}
                   </div>
                 </div>
               </div>
-              <div class="col-auto">
-                <q-chip
-                  :color="getStatusColor(connection.status)"
-                  :label="$t(`routes.connectionStatus.${connection.status}`)"
-                  size="sm"
-                />
-              </div>
-              <div class="col-auto" v-if="currentType === 'incoming' && connection.status === 'pending'">
-                <q-btn
-                  flat
-                  round
-                  icon="check"
-                  color="positive"
-                  size="sm"
-                  @click="$emit('approve', connection.id)"
-                  :title="$t('routes.pendingConnections.approve')"
-                />
-                <q-btn
-                  flat
-                  round
-                  icon="close"
-                  color="negative"
-                  size="sm"
-                  @click="$emit('reject', connection.id)"
-                  :title="$t('routes.pendingConnections.reject')"
-                />
-              </div>
             </div>
-          </q-card-section>
+            <div class="col-auto">
+              <q-chip
+                :color="getStatusColor(connection.status)"
+                :label="$t(`routes.connectionStatus.${connection.status}`)"
+                size="sm"
+              />
+            </div>
+            <div class="col-auto" v-if="currentType === 'incoming' && connection.status === 'pending'">
+              <q-btn
+                flat
+                round
+                icon="check"
+                color="positive"
+                size="sm"
+                @click="$emit('approve', connection.id)"
+                :title="$t('routes.pendingConnections.approve')"
+              />
+              <q-btn
+                flat
+                round
+                icon="close"
+                color="negative"
+                size="sm"
+                @click="$emit('reject', connection.id)"
+                :title="$t('routes.pendingConnections.reject')"
+              />
+            </div>
+          </div>
+        </q-card-section>
 
-          <q-card-section class="q-pt-none" v-if="connection.message">
-            <div class="row">
-              <div class="col">
-                <q-banner class="bg-blue-1 text-primary">
-                  <template v-slot:avatar>
-                    <q-icon name="message" />
-                  </template>
-                  {{ connection.message }}
-                </q-banner>
-              </div>
+        <q-card-section class="q-pt-none" v-if="connection.message">
+          <div class="row">
+            <div class="col">
+              <q-banner class="bg-blue-1 text-primary">
+                <template v-slot:avatar>
+                  <q-icon name="message" />
+                </template>
+                {{ connection.message }}
+              </q-banner>
             </div>
-          </q-card-section>
+          </div>
+        </q-card-section>
 
-          <q-card-section class="q-pt-none">
-            <div class="row q-gutter-md">
-              <div class="col-12 col-md-6">
-                <div class="text-body2">
-                  <q-icon name="device_hub" size="sm" class="q-mr-xs" />
-                  {{ $t('routes.pendingConnections.connectionType') }}: 
-                  {{ $t(`routes.connectionType.${connection.connection_type}`) }}
-                </div>
-              </div>
-              <div class="col-12 col-md-6">
-                <div class="text-body2">
-                  <q-icon name="schedule" size="sm" class="q-mr-xs" />
-                  {{ $t('routes.pendingConnections.requestedAt') }}: 
-                  {{ formatDate(connection.created_at) }}
-                </div>
+        <q-card-section class="q-pt-none">
+          <div class="row q-gutter-md">
+            <div class="col-12 col-md-6">
+              <div class="text-body2">
+                <q-icon name="device_hub" size="sm" class="q-mr-xs" />
+                {{ $t('routes.pendingConnections.connectionType') }}: 
+                {{ $t(`routes.connectionType.${connection.connection_type}`) }}
               </div>
             </div>
-          </q-card-section>
-        </q-card>
-      </div>
-    </div>
+            <div class="col-12 col-md-6">
+              <div class="text-body2">
+                <q-icon name="schedule" size="sm" class="q-mr-xs" />
+                {{ $t('routes.pendingConnections.requestedAt') }}: 
+                {{ formatDate(connection.created_at) }}
+              </div>
+            </div>
+          </div>
+        </q-card-section>
+      </template>
+    </ResponsiveCardGrid>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ResponsiveCardGrid from '../common/ResponsiveCardGrid.vue'
 import type { PendingConnection } from '../../types'
 
 interface Props {

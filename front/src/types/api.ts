@@ -249,3 +249,11 @@ export function isApiErrorResponse(response: any): response is ApiErrorResponse 
 export function isPaginatedResponse<T>(response: any): response is PaginatedApiResponse<T> {
   return isApiResponse(response) && 'meta' in response && Array.isArray(response.data)
 }
+
+// 路由连接请求的接口
+export interface RouteRequest {
+  source_node_id: string     // 源节点ID（发起连接的节点）
+  target_node_id: string     // 目标节点ID（接收连接的节点）
+  target_user_id: string     // 目标用户ID
+  message: string            // 连接请求消息
+}

@@ -1,6 +1,7 @@
 /* 导入分离的样式文件 */
 @import '../styles/auth.scss';
 @import '../styles/dashboard.scss';
+@import '../styles/card-layout.scss';
 
 /* 全局样式 */
 body {

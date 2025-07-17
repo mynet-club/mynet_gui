@@ -131,6 +131,7 @@ export default {
     routes: 'Route Management',
     ippools: 'IP Pool Management',
     zones: 'Zone Management',
+    zoneSharing: 'Zone Sharing',
     social: 'Social Network',
     apiTest: 'API Testing',
     help: 'Help Documentation'
@@ -437,5 +438,101 @@ export default {
     connected: 'Connected',
     disconnected: 'Disconnected',
     heartbeat: 'Heartbeat'
+  },
+  zoneServices: {
+    subtitle: 'Zone service sharing and management',
+    currentZone: 'Current Zone',
+    servicesCount: 'services',
+    addService: 'Add Service',
+    editService: 'Edit Service',
+    addFirstService: 'Add First Service',
+    shareService: 'Share Service',
+    shareServiceDesc: 'Select friends to share with and add sharing information',
+    shareMessage: 'Share Message',
+    shareMessagePlaceholder: 'Tell your friends about this service...',
+    confirmShare: 'Confirm Share',
+    requestPublic: 'Request Public',
+    requestPublicDesc: 'Request to make this service public for all users',
+    approvalReason: 'Approval Reason',
+    approvalReasonPlaceholder: 'Explain why this service should be public...',
+    submitRequest: 'Submit Request',
+    confirmDelete: 'Confirm Delete',
+    deleteWarning: 'Are you sure you want to delete service "{name}"? This action cannot be undone.',
+    connect: 'Connect',
+    authRequired: 'Auth Required',
+    noAuth: 'No Auth',
+    
+    categories: {
+      public: 'Public Services',
+      publicDesc: 'Public services approved by administrators',
+      friend: 'Friend Sharing',
+      friendDesc: 'Services shared by your friends',
+      anonymous: 'Anonymous Sharing',
+      anonymousDesc: 'Services shared by anonymous users',
+      my: 'My Services',
+      myDesc: 'Services you created and manage'
+    },
+    
+    types: {
+      gnbIndex: 'GNB Index',
+      gnbIndexDesc: 'GNB node index service',
+      music: 'Music Service',
+      musicDesc: 'Music streaming service',
+      video: 'Video Service',
+      videoDesc: 'Video streaming service',
+      netbridge: 'NetBridge',
+      netbridgeDesc: 'Network bridge service'
+    },
+    
+    form: {
+      serviceName: 'Service Name',
+      serviceNameRequired: 'Please enter service name',
+      serviceType: 'Service Type',
+      serviceTypeRequired: 'Please select service type',
+      serviceDescription: 'Service Description',
+      serviceUrl: 'Service URL',
+      serviceUrlRequired: 'Please enter service URL',
+      servicePort: 'Port',
+      servicePortRequired: 'Please enter port',
+      servicePortInvalid: 'Port should be between 1-65535',
+      serviceProtocol: 'Protocol',
+      serviceProtocolRequired: 'Please select protocol',
+      authRequired: 'Auth Required',
+      authType: 'Auth Type',
+      authToken: 'Auth Token',
+      authTypes: {
+        none: 'No Auth',
+        bearer: 'Bearer Token',
+        basic: 'Basic Auth'
+      }
+    },
+    
+    empty: {
+      publicServices: 'No Public Services',
+      publicServicesDesc: 'No public services have been approved by administrators yet',
+      friendServices: 'No Friend Sharing',
+      friendServicesDesc: 'No services have been shared by your friends yet',
+      anonymousServices: 'No Anonymous Sharing',
+      anonymousServicesDesc: 'No services have been shared anonymously yet',
+      myServices: 'You haven\'t created any services yet',
+      myServicesDesc: 'Click the button below to create your first service'
+    },
+    
+    messages: {
+      createSuccess: 'Service created successfully',
+      updateSuccess: 'Service updated successfully',
+      deleteSuccess: 'Service deleted successfully',
+      shareSuccess: 'Service shared successfully',
+      approvalRequested: 'Public approval request submitted'
+    },
+    
+    errors: {
+      loadFailed: 'Failed to load service list',
+      createFailed: 'Failed to create service',
+      updateFailed: 'Failed to update service',
+      deleteFailed: 'Failed to delete service',
+      shareFailed: 'Failed to share service',
+      approvalFailed: 'Failed to request approval'
+    }
   }
 }

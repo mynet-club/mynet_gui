@@ -32,7 +32,9 @@ export default {
     usage: '使用情况',
     refresh: '刷新',
     apply: '应用',
-    reset: '重置'
+    reset: '重置',
+    back: '返回',
+    previous: '上一步'
   },
   settings: {
     language: '语言设置',
@@ -137,6 +139,7 @@ export default {
     routes: '路由管理',
     ippools: 'IP池管理',
     zones: '区域管理',
+    zoneSharing: '区域分享',
     social: '社交网络',
     apiTest: 'API测试',
     help: '帮助文档'
@@ -226,16 +229,43 @@ export default {
       searchPlaceholder: '搜索好友节点...',
       statusFilter: '状态过滤',
       noNodes: '暂无好友节点',
+      noNodesDescription: '您还没有任何好友的节点信息',
       noSearchResults: '未找到匹配节点',
       ipAddress: 'IP地址',
       port: '端口',
       nodeType: '节点类型',
+      vpnType: 'VPN类型',
+      endpoint: '端点',
       zone: '区域',
       lastSeen: '最后在线',
+      createdAt: '创建时间',
+      noDescription: '暂无描述',
+      totalFriends: '好友总数',
+      totalNodes: '节点总数',
+      onlineNodes: '在线节点',
+      availableNodes: '可用节点',
       viewFriend: '查看好友',
       connect: '连接',
       pending: '待处理',
-      connected: '已连接'
+      connected: '已连接',
+      offline: '离线',
+      selectMyNode: '选择我的节点',
+      selectMyNodeHint: '请选择要用于连接的节点',
+      noAvailableNodes: '没有可用的节点',
+      loadNodesError: '加载节点失败',
+      myNode: '我的节点',
+      confirmConnection: '确认连接',
+      confirmConnectionHint: '请确认连接信息并填写请求消息',
+      requestMessage: '请求消息',
+      messagePlaceholder: '请描述您的连接需求和使用场景...',
+      messageRequired: '请输入请求消息',
+      messageMinLength: '消息至少需要10个字符',
+      messageMaxLength: '消息不能超过500个字符',
+      sendRequest: '发送请求',
+      incompleteSelection: '选择信息不完整',
+      connectionError: '连接失败',
+      defaultMessage: '我希望通过我的节点 {myNodeName} 连接到您的节点 {friendNodeName}，用于网络通信。谢谢！',
+      goToSocial: '前往社交网络'
     },
     
     // 配置管理
@@ -296,11 +326,176 @@ export default {
     // 操作
     actions: {
       refreshRoutes: '刷新路由',
+      createRoute: '创建路由',
       connect: '连接',
       disconnect: '断开连接',
       approve: '批准',
       reject: '拒绝',
       viewDetails: '查看详情'
+    },
+
+    // 创建路由流程
+    create: {
+      // 步骤名称
+      steps: {
+        selectFriend: '选择好友',
+        selectFriendNode: '选择好友节点',
+        selectMyNode: '选择我的节点',
+        submitRequest: '提交申请'
+      },
+      
+      // 第一步 - 选择好友
+      step1: {
+        title: '创建路由 - 选择好友',
+        subtitle: '选择要建立连接的好友',
+        selectFriend: '选择好友',
+        searchFriends: '搜索好友...',
+        noFriends: '暂无好友',
+        friendInfo: '节点: {nodes} | 状态: {status}',
+        availableNodes: '可用节点',
+        totalNodes: '总节点数',
+        nextStep: '下一步',
+        pleaseSelectFriend: '请选择一个好友'
+      },
+      
+      // 第二步 - 选择好友节点
+      step2: {
+        title: '创建路由 - 选择好友节点',
+        subtitle: '选择 {friendName} 的节点进行连接',
+        selectedFriend: '已选择的好友',
+        changeFriend: '更换好友',
+        selectFriendNode: '选择好友节点',
+        loadingNodes: '加载节点中...',
+        noNodes: '该好友暂无可用节点',
+        unknownLocation: '未知位置',
+        nodeStatus: '状态',
+        connections: '连接数',
+        latency: '延迟',
+        connectionsFull: '连接数已满',
+        nextStep: '下一步',
+        pleaseSelectNode: '请选择一个节点',
+        nodeCannotConnect: '该节点暂时无法连接',
+        fetchNodesError: '获取好友节点失败',
+        noFriendSelected: '未选择好友'
+      },
+      
+      // 第三步 - 选择我的节点
+      step3: {
+        title: '创建路由 - 选择我的节点',
+        subtitle: '选择您的节点进行连接',
+        selectionSummary: '选择总结',
+        selectedFriend: '选择的好友',
+        selectedFriendNode: '选择的好友节点',
+        selectMyNode: '选择我的节点',
+        searchNodes: '搜索节点...',
+        filterByStatus: '按状态筛选',
+        allStatus: '全部状态',
+        onlineOnly: '仅在线',
+        availableOnly: '仅可用',
+        connectedOnly: '已连接',
+        pendingOnly: '待处理',
+        loadingNodes: '加载节点中...',
+        noAvailableNodes: '暂无可用节点',
+        createNodeHint: '您可以先创建节点',
+        unknownLocation: '未知位置',
+        nodeStatus: '状态',
+        connections: '连接数',
+        bandwidth: '带宽',
+        connectionStatusLabel: '连接状态',
+        alreadyConnected: '已建立连接',
+        requestSent: '已发送申请',
+        requestReceived: '收到申请',
+        requestRejected: '申请被拒绝',
+        connectionsFull: '连接数已满',
+        nextStep: '下一步',
+        pleaseSelectNode: '请选择一个节点',
+        nodeAlreadyConnected: '该节点已与目标节点建立连接',
+        requestAlreadySent: '已向该节点发送连接申请',
+        requestAlreadyReceived: '已收到该节点的连接申请',
+        nodeCannotConnect: '该节点暂时无法连接',
+        cannotProceedWithConnection: '该节点存在连接关系，无法继续',
+        fetchNodesError: '获取节点失败',
+        noFriendSelected: '未选择好友',
+        noFriendNodeSelected: '未选择好友节点',
+        
+        // 连接状态
+        connectionStatus: {
+          connected: '已连接',
+          pendingSent: '申请已发送',
+          pendingReceived: '申请已接收',
+          rejected: '申请被拒绝',
+          none: '无连接',
+          unknown: '状态未知'
+        }
+      },
+      
+      // 第四步 - 提交申请
+      step4: {
+        title: '创建路由 - 提交申请',
+        subtitle: '填写连接申请信息',
+        selectionSummary: '选择总结',
+        targetFriend: '目标好友',
+        targetNode: '目标节点',
+        sourceNode: '源节点',
+        requestForm: '申请表单',
+        requestMessage: '申请消息',
+        messagePlaceholder: '请描述您的连接需求和使用场景...',
+        messageHint: '请详细说明连接用途，这有助于好友快速审批',
+        messageRequired: '请输入申请消息',
+        messageMinLength: '申请消息至少需要10个字符',
+        messageMaxLength: '申请消息不能超过500个字符',
+        connectionPriority: '连接优先级',
+        priorityHint: '高优先级连接会优先处理',
+        expectedBandwidth: '预期带宽',
+        bandwidthRequired: '请输入预期带宽',
+        bandwidthMaxValue: '带宽不能超过1000Mbps',
+        bandwidthHint: '根据您的实际需求设置',
+        connectionDuration: '连接持续时间',
+        durationHint: '设置连接的有效期',
+        autoReconnect: '自动重连',
+        connectionProtocol: '连接协议',
+        protocolHint: '推荐使用自动协议',
+        submitRequest: '提交申请',
+        incompleteSelection: '选择信息不完整',
+        submitError: '提交申请失败',
+        requestSubmitted: '申请已提交',
+        requestSubmittedMessage: '您的连接申请已成功提交，等待好友审批',
+        viewRoutes: '查看路由',
+        createAnother: '创建另一个',
+        defaultMessage: '您好 {friendName}，我希望将我的节点 {myNode} 与您的节点 {friendNode} 建立连接，用于网络通信。',
+        
+        // 优先级选项
+        priorities: {
+          low: '低优先级',
+          normal: '普通',
+          high: '高优先级',
+          urgent: '紧急'
+        },
+        
+        // 持续时间选项
+        durations: {
+          '1hour': '1小时',
+          '6hours': '6小时',
+          '1day': '1天',
+          '3days': '3天',
+          '7days': '7天',
+          '30days': '30天',
+          permanent: '永久'
+        },
+        
+        // 协议选项
+        protocols: {
+          auto: '自动选择',
+          tcp: 'TCP',
+          udp: 'UDP',
+          wireguard: 'WireGuard',
+          openvpn: 'OpenVPN'
+        }
+      },
+      
+      // 通用消息
+      requestSubmitted: '路由申请已提交',
+      submitError: '提交申请失败'
     },
     
     // 对话框
@@ -320,6 +515,7 @@ export default {
     fetchActiveRoutesError: '获取活跃路由失败',
     fetchPendingConnectionsError: '获取待处理连接失败',
     fetchFriendNodesError: '获取好友节点失败',
+    fetchAllFriendNodesError: '获取所有好友节点失败',
     fetchConfigError: '获取配置失败',
     fetchRouteDetailsError: '获取路由详情失败',
     connectionRequestSent: '连接请求已发送',
@@ -693,5 +889,109 @@ export default {
     connected: '已连接',
     disconnected: '未连接',
     heartbeat: '心跳'
+  },
+  node: {
+    status: {
+      online: '在线',
+      offline: '离线',
+      connecting: '连接中',
+      error: '错误'
+    }
+  },
+  zoneServices: {
+    subtitle: '区域服务分享和管理',
+    currentZone: '当前区域',
+    servicesCount: '个服务',
+    addService: '添加服务',
+    editService: '编辑服务',
+    addFirstService: '添加第一个服务',
+    shareService: '分享服务',
+    shareServiceDesc: '选择要分享给的好友并添加分享信息',
+    shareMessage: '分享信息',
+    shareMessagePlaceholder: '告诉好友这个服务的用途...',
+    confirmShare: '确认分享',
+    requestPublic: '申请公开',
+    requestPublicDesc: '申请将此服务公开给所有用户访问',
+    approvalReason: '申请理由',
+    approvalReasonPlaceholder: '说明为什么要公开此服务...',
+    submitRequest: '提交申请',
+    confirmDelete: '确认删除',
+    deleteWarning: '确定要删除服务 "{name}" 吗？此操作不可恢复。',
+    connect: '连接',
+    authRequired: '需要认证',
+    noAuth: '无需认证',
+    
+    categories: {
+      public: '公共服务',
+      publicDesc: '由管理员审核通过的公共服务',
+      friend: '好友分享',
+      friendDesc: '好友与你分享的服务',
+      anonymous: '匿名共享',
+      anonymousDesc: '匿名用户共享的服务',
+      my: '我的服务',
+      myDesc: '你创建和管理的服务'
+    },
+    
+    types: {
+      gnbIndex: 'GNB索引',
+      gnbIndexDesc: 'GNB节点索引服务',
+      music: '音乐服务',
+      musicDesc: '音乐流媒体服务',
+      video: '视频服务',
+      videoDesc: '视频流媒体服务',
+      netbridge: 'NetBridge',
+      netbridgeDesc: '网络桥接服务'
+    },
+    
+    form: {
+      serviceName: '服务名称',
+      serviceNameRequired: '请输入服务名称',
+      serviceType: '服务类型',
+      serviceTypeRequired: '请选择服务类型',
+      serviceDescription: '服务描述',
+      serviceUrl: '服务地址',
+      serviceUrlRequired: '请输入服务地址',
+      servicePort: '端口',
+      servicePortRequired: '请输入端口',
+      servicePortInvalid: '端口范围应为1-65535',
+      serviceProtocol: '协议',
+      serviceProtocolRequired: '请选择协议',
+      authRequired: '需要认证',
+      authType: '认证类型',
+      authToken: '认证令牌',
+      authTypes: {
+        none: '无认证',
+        bearer: 'Bearer Token',
+        basic: 'Basic Auth'
+      }
+    },
+    
+    empty: {
+      publicServices: '暂无公共服务',
+      publicServicesDesc: '管理员还未审核通过任何公共服务',
+      friendServices: '暂无好友分享',
+      friendServicesDesc: '好友还未与你分享任何服务',
+      anonymousServices: '暂无匿名共享',
+      anonymousServicesDesc: '暂时没有匿名用户共享的服务',
+      myServices: '你还没有创建任何服务',
+      myServicesDesc: '点击下方按钮创建你的第一个服务'
+    },
+    
+    messages: {
+      createSuccess: '服务创建成功',
+      updateSuccess: '服务更新成功',
+      deleteSuccess: '服务删除成功',
+      shareSuccess: '服务分享成功',
+      approvalRequested: '公开申请已提交'
+    },
+    
+    errors: {
+      loadFailed: '加载服务列表失败',
+      createFailed: '创建服务失败',
+      updateFailed: '更新服务失败',
+      deleteFailed: '删除服务失败',
+      shareFailed: '分享服务失败',
+      approvalFailed: '申请公开失败'
+    }
   }
 }

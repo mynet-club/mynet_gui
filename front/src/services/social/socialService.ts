@@ -52,7 +52,12 @@ export const socialService = {
     const response = await api.post('/social/friend-request/reject', { request_id: requestId })
     return response.data
   },
-
+ 
+  // 取消好友请求
+  async cancelFriendRequest(requestId: number): Promise<BaseResponse> {
+    const response = await api.post('/social/friend-request/cancel', { request_id: requestId })
+    return response.data
+  },
   // 删除好友
   async removeFriend(friendId: string): Promise<BaseResponse> {
     const response = await api.post('/social/friend/remove', { friend_id: friendId })
@@ -75,5 +80,11 @@ export const socialService = {
   async getFriendNodes(friendId: string): Promise<Node[]> {
     const response = await api.get(`/social/friends/${friendId}/nodes`)
     return response.data.data
+  },
+
+  // 获取所有好友的节点
+  async getAllFriendNodes(): Promise<any> {
+    const response = await api.get('/social/friends/all/nodes')
+    return response.data
   }
 }

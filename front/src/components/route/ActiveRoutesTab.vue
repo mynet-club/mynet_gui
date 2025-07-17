@@ -30,125 +30,116 @@
     </div>
 
     <!-- 路由列表 -->
-    <div v-if="loading" class="row justify-center q-py-lg">
-      <q-spinner-dots color="primary" size="2em" />
-    </div>
-
-    <div v-else-if="filteredRoutes.length === 0" class="text-center q-py-lg">
-      <q-icon name="route" size="3rem" color="grey-5" class="q-mb-md" />
-      <div class="text-h6 text-grey-6">
-        {{ searchQuery ? $t('routes.activeRoutes.noSearchResults') : $t('routes.activeRoutes.noRoutes') }}
-      </div>
-    </div>
-
-    <div v-else class="row q-gutter-md">
-      <div
-        v-for="route in filteredRoutes"
-        :key="route.id"
-        class="col-12"
-      >
-        <q-card class="route-card">
-          <q-card-section>
-            <div class="row items-center">
-              <div class="col">
-                <div class="row items-center q-mb-sm">
-                  <q-icon 
-                    :name="getRouteIcon(route.status)" 
-                    :color="getRouteColor(route.status)"
-                    size="md"
-                    class="q-mr-sm"
-                  />
-                  <div>
-                    <div class="text-h6">{{ route.source_node_name }} ↔ {{ route.target_node_name }}</div>
-                    <div class="text-subtitle2 text-grey-6">
-                      {{ route.source_ip }} → {{ route.target_ip }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-auto">
-                <q-chip
+    <ResponsiveCardGrid
+      :items="filteredRoutes"
+      :loading="loading"
+      variant="standard"
+      spacing="normal"
+      empty-icon="route"
+      :empty-title="searchQuery ? $t('routes.activeRoutes.noSearchResults') : $t('routes.activeRoutes.noRoutes')"
+    >
+      <template #default="{ item: route }">
+        <q-card-section>
+          <div class="row items-center">
+            <div class="col">
+              <div class="row items-center q-mb-sm">
+                <q-icon 
+                  :name="getRouteIcon(route.status)" 
                   :color="getRouteColor(route.status)"
-                  :label="$t(`routes.status.${route.status}`)"
-                  size="sm"
+                  size="md"
+                  class="q-mr-sm"
                 />
-              </div>
-              <div class="col-auto">
-                <q-btn-dropdown
-                  flat
-                  round
-                  icon="more_vert"
-                  size="sm"
-                  no-caps
-                >
-                  <q-list>
-                    <q-item clickable @click="$emit('view-details', route)">
-                      <q-item-section avatar>
-                        <q-icon name="info" />
-                      </q-item-section>
-                      <q-item-section>{{ $t('routes.activeRoutes.viewDetails') }}</q-item-section>
-                    </q-item>
-                    <q-separator />
-                    <q-item clickable @click="$emit('disconnect', route.id)">
-                      <q-item-section avatar>
-                        <q-icon name="link_off" color="negative" />
-                      </q-item-section>
-                      <q-item-section class="text-negative">{{ $t('routes.activeRoutes.disconnect') }}</q-item-section>
-                    </q-item>
-                  </q-list>
-                </q-btn-dropdown>
+                <div>
+                  <div class="text-h6">{{ route.source_node_name }} ↔ {{ route.target_node_name }}</div>
+                  <div class="text-subtitle2 text-grey-6">
+                    {{ route.source_ip }} → {{ route.target_ip }}
+                  </div>
+                </div>
               </div>
             </div>
-          </q-card-section>
+            <div class="col-auto">
+              <q-chip
+                :color="getRouteColor(route.status)"
+                :label="$t(`routes.status.${route.status}`)"
+                size="sm"
+              />
+            </div>
+            <div class="col-auto">
+              <q-btn-dropdown
+                flat
+                round
+                icon="more_vert"
+                size="sm"
+                no-caps
+              >
+                <q-list>
+                  <q-item clickable @click="$emit('view-details', route)">
+                    <q-item-section avatar>
+                      <q-icon name="info" />
+                    </q-item-section>
+                    <q-item-section>{{ $t('routes.activeRoutes.viewDetails') }}</q-item-section>
+                  </q-item>
+                  <q-separator />
+                  <q-item clickable @click="$emit('disconnect', route.id)">
+                    <q-item-section avatar>
+                      <q-icon name="link_off" color="negative" />
+                    </q-item-section>
+                    <q-item-section class="text-negative">{{ $t('routes.activeRoutes.disconnect') }}</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-btn-dropdown>
+            </div>
+          </div>
+        </q-card-section>
 
-          <q-card-section class="q-pt-none">
-            <div class="row q-gutter-md">
-              <div class="col-12 col-md-6">
-                <div class="row q-gutter-md text-center">
-                  <div class="col">
-                    <div class="text-h6 text-info">{{ route.bandwidth_usage }}</div>
-                    <div class="text-caption text-grey-6">{{ $t('routes.activeRoutes.bandwidth') }}</div>
+        <q-card-section class="q-pt-none">
+          <div class="row q-gutter-md">
+            <div class="col-12 col-md-6">
+              <div class="row q-gutter-md text-center">
+                <div class="col">
+                  <div class="text-h6 text-info">{{ route.bandwidth_usage }}</div>
+                  <div class="text-caption text-grey-6">{{ $t('routes.activeRoutes.bandwidth') }}</div>
+                </div>
+                <div class="col">
+                  <div class="text-h6 text-positive">{{ route.latency }}ms</div>
+                  <div class="text-caption text-grey-6">{{ $t('routes.activeRoutes.latency') }}</div>
+                </div>
+                <div class="col">
+                  <div class="text-h6" :class="route.packet_loss > 5 ? 'text-negative' : 'text-positive'">
+                    {{ route.packet_loss }}%
                   </div>
-                  <div class="col">
-                    <div class="text-h6 text-positive">{{ route.latency }}ms</div>
-                    <div class="text-caption text-grey-6">{{ $t('routes.activeRoutes.latency') }}</div>
-                  </div>
-                  <div class="col">
-                    <div class="text-h6" :class="route.packet_loss > 5 ? 'text-negative' : 'text-positive'">
-                      {{ route.packet_loss }}%
-                    </div>
-                    <div class="text-caption text-grey-6">{{ $t('routes.activeRoutes.packetLoss') }}</div>
-                  </div>
+                  <div class="text-caption text-grey-6">{{ $t('routes.activeRoutes.packetLoss') }}</div>
                 </div>
               </div>
-              <div class="col-12 col-md-6">
-                <div class="row items-center">
-                  <div class="col">
-                    <div class="text-body2">
-                      <q-icon name="person" size="sm" class="q-mr-xs" />
-                      <span v-if="route.friend_name">{{ route.friend_name }}</span>
-                      <span v-else class="text-grey-6">{{ $t('routes.activeRoutes.unknownUser') }}</span>
-                    </div>
-                    <div class="text-caption text-grey-6">
-                      {{ $t('routes.activeRoutes.connectionType') }}: {{ $t(`routes.connectionType.${route.connection_type}`) }}
-                    </div>
-                    <div class="text-caption text-grey-6">
-                      {{ $t('routes.activeRoutes.lastActive') }}: {{ formatDate(route.last_active) }}
-                    </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="row items-center">
+                <div class="col">
+                  <div class="text-body2">
+                    <q-icon name="person" size="sm" class="q-mr-xs" />
+                    <span v-if="route.friend_name">{{ route.friend_name }}</span>
+                    <span v-else class="text-grey-6">{{ $t('routes.activeRoutes.unknownUser') }}</span>
+                  </div>
+                  <div class="text-caption text-grey-6">
+                    {{ $t('routes.activeRoutes.connectionType') }}: {{ $t(`routes.connectionType.${route.connection_type}`) }}
+                  </div>
+                  <div class="text-caption text-grey-6">
+                    {{ $t('routes.activeRoutes.lastActive') }}: {{ formatDate(route.last_active) }}
                   </div>
                 </div>
               </div>
             </div>
-          </q-card-section>
-        </q-card>
-      </div>
-    </div>
+          </div>
+        </q-card-section>
+      </template>
+    </ResponsiveCardGrid>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ResponsiveCardGrid from '../common/ResponsiveCardGrid.vue'
 import type { Route } from '../../types'
 
 interface Props {

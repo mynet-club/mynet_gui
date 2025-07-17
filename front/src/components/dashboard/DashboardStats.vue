@@ -1,55 +1,30 @@
 <template>
   <div class="dashboard-stats">
-    <div class="row q-gutter-md">
-      <!-- 总节点数 -->
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card">
-          <q-card-section class="text-center">
-            <q-icon name="dns" size="2rem" color="primary" />
-            <div class="text-h4 q-mt-sm">{{ dashboardData.totalNodes }}</div>
-            <div class="text-caption text-grey-6">{{ $t('dashboard.stats.totalNodes') }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <!-- 在线节点数 -->
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card">
-          <q-card-section class="text-center">
-            <q-icon name="wifi" size="2rem" color="positive" />
-            <div class="text-h4 q-mt-sm">{{ dashboardData.onlineNodes }}</div>
-            <div class="text-caption text-grey-6">{{ $t('dashboard.stats.onlineNodes') }}</div>
-            <div class="text-caption text-positive">{{ onlineRate }}% {{ $t('dashboard.stats.onlineRate') }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <!-- 总路由数 -->
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card">
-          <q-card-section class="text-center">
-            <q-icon name="router" size="2rem" color="secondary" />
-            <div class="text-h4 q-mt-sm">{{ dashboardData.totalRoutes }}</div>
-            <div class="text-caption text-grey-6">{{ $t('dashboard.stats.totalRoutes') }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <!-- 活跃路由数 -->
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card">
-          <q-card-section class="text-center">
-            <q-icon name="check_circle" size="2rem" color="accent" />
-            <div class="text-h4 q-mt-sm">{{ dashboardData.activeRoutes }}</div>
-            <div class="text-caption text-grey-6">{{ $t('dashboard.stats.activeRoutes') }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
-    </div>
+    <ResponsiveCardGrid
+      :items="statsCards"
+      variant="compact"
+      spacing="normal"
+      :clickable="false"
+    >
+      <template #default="{ item }">
+        <q-card-section class="text-center">
+          <q-icon :name="item.icon" size="2rem" :color="item.color" />
+          <div class="text-h4 q-mt-sm">{{ item.value }}</div>
+          <div class="text-caption text-grey-6">{{ item.title }}</div>
+          <div v-if="item.subtitle" class="text-caption" :class="item.subtitleClass">
+            {{ item.subtitle }}
+          </div>
+        </q-card-section>
+      </template>
+    </ResponsiveCardGrid>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import ResponsiveCardGrid from '../common/ResponsiveCardGrid.vue'
+
 interface Props {
   dashboardData: {
     totalNodes: number
@@ -63,7 +38,42 @@ interface Props {
   onlineRate: number
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+const { t } = useI18n()
+
+// 统计卡片数据
+const statsCards = computed(() => [
+  {
+    id: 'total_nodes',
+    title: t('dashboard.stats.totalNodes'),
+    value: props.dashboardData.totalNodes,
+    icon: 'dns',
+    color: 'primary'
+  },
+  {
+    id: 'online_nodes',
+    title: t('dashboard.stats.onlineNodes'),
+    value: props.dashboardData.onlineNodes,
+    icon: 'wifi',
+    color: 'positive',
+    subtitle: `${props.onlineRate}% ${t('dashboard.stats.onlineRate')}`,
+    subtitleClass: 'text-positive'
+  },
+  {
+    id: 'total_routes',
+    title: t('dashboard.stats.totalRoutes'),
+    value: props.dashboardData.totalRoutes,
+    icon: 'router',
+    color: 'secondary'
+  },
+  {
+    id: 'active_routes',
+    title: t('dashboard.stats.activeRoutes'),
+    value: props.dashboardData.activeRoutes,
+    icon: 'check_circle',
+    color: 'accent'
+  }
+])
 </script>
 
 <style lang="scss" scoped>

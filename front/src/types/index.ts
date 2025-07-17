@@ -86,7 +86,9 @@ export interface Friend {
   node_count: number
   connected_node_count: number
   active_route_count: number
+  available_node_count?: number // 新增：可用节点数量
   friendship_date: string
+  created_at: string // 添加 created_at 属性
   status: 'online' | 'offline'
   last_active: string
 }
@@ -129,7 +131,9 @@ export interface Invitation {
 }
 
 export interface FriendRequest {
-  id: string
+  request_id: number
+  from_user_name: string
+  to_user_name: string
   requester_id: string
   target_id: string
   requester_name: string

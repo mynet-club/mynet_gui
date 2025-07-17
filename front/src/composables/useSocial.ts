@@ -68,21 +68,60 @@ export function useSocial() {
       
       // 同时设置好友数据（避免额外的API调用）
       if (response.friends) {
-        friends.value = response.friends
+        friends.value = await Promise.all(response.friends.map(async (friend: any) => {
+          // 获取每个好友的节点数量统计
+          try {
+            const friendNodes = await getFriendNodes(friend.id)
+            return {
+              ...friend,
+              friendship_date: friend.created_at, // 将 created_at 映射为 friendship_date
+              node_count: friendNodes.length, // 总节点数
+              available_node_count: friendNodes.filter((node: any) => 
+                node.status === 'online' && node.current_connections < node.max_connections
+              ).length // 可用节点数
+            }
+          } catch (error) {
+            console.error(`获取好友 ${friend.id} 的节点失败:`, error)
+            return {
+              ...friend,
+              friendship_date: friend.created_at,
+              node_count: 0,
+              available_node_count: 0
+            }
+          }
+        }))
         // 模拟分页数据
-        currentPage.value = 1
-        totalPages.value = 1
-        totalItems.value = response.friends.length
+        currentPage.value = 1;
+        totalPages.value = 1;
+        totalItems.value = response.friends.length;
       }
       
       // 设置好友请求数据
       if (response.pending_requests) {
-        friendRequests.value = response.pending_requests
+        friendRequests.value = response.pending_requests.map(request => {
+          if (!request.status) {
+            console.error(`好友请求状态缺失:`, request);
+            notify.error(t('social.friendRequests.statusError'));
+          }
+          return {
+            ...request,
+            status: request.status || 'undefined' // 保留原始逻辑，但记录错误
+          };
+        });
       }
-      
+
       // 设置发送的请求数据
       if (response.outgoing_requests) {
-        sentRequests.value = response.outgoing_requests
+        sentRequests.value = response.outgoing_requests.map(request => {
+          if (!request.status) {
+            console.error(`发送的好友请求状态缺失:`, request);
+            notify.error(t('social.friendRequests.statusError'));
+          }
+          return {
+            ...request,
+            status: request.status || 'undefined' // 保留原始逻辑，但记录错误
+          };
+        });
       }
       
       // 设置邀请码数据
@@ -200,7 +239,7 @@ export function useSocial() {
       if (response.success) {
         notify.success(t('social.friendRequestAccepted'))
         // 从请求列表中移除
-        friendRequests.value = friendRequests.value.filter(r => r.id !== requestId)
+        friendRequests.value = friendRequests.value.filter(r => r.request_id !== parseInt(requestId))
         // 刷新好友列表和概览
         await fetchOverview()
       } else {
@@ -222,7 +261,7 @@ export function useSocial() {
       if (response.success) {
         notify.success(t('social.friendRequestRejected'))
         // 从请求列表中移除
-        friendRequests.value = friendRequests.value.filter(r => r.id !== requestId)
+        friendRequests.value = friendRequests.value.filter(r => r.request_id !== parseInt(requestId))
         // 刷新概览
         await fetchOverview()
       } else {
@@ -307,10 +346,74 @@ export function useSocial() {
     }
   }
 
+  // 获取所有好友的节点
+  const getAllFriendNodes = async () => {
+    try {
+      const response = await socialService.getAllFriendNodes()
+      return response
+    } catch (error) {
+      console.error('获取所有好友节点失败:', error)
+      notify.error(t('social.fetchAllFriendNodesError'))
+      return null
+    }
+  }
+
   // 初始化数据
   const init = async () => {
     // 只需要调用 fetchOverview，它会获取所有必要的数据
     await fetchOverview()
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'accepted':
+        return 'positive';
+      case 'rejected':
+        return 'negative';
+      case 'pending':
+        return 'orange';
+      case 'undefined':
+        return 'grey';
+      default:
+        return 'grey';
+    }
+  };
+
+  const getStatusDescription = (status: string) => {
+    switch (status) {
+      case 'accepted':
+        return t('social.friendRequests.status.accepted');
+      case 'rejected':
+        return t('social.friendRequests.status.rejected');
+      case 'pending':
+        return t('social.friendRequests.status.pending');
+      case 'undefined':
+        return t('social.friendRequests.status.undefined');
+      default:
+        return t('social.friendRequests.status.undefined');
+    }
+  };
+
+  // 取消好友请求
+  const cancelFriendRequest = async (requestId: number) => {
+    try {
+      loading.value = true
+      const response = await socialService.cancelFriendRequest(requestId)
+      if (response.success) {
+        notify.success(t('social.friendRequestCancelled'))
+        // 从发送的请求列表中移除
+        sentRequests.value = sentRequests.value.filter(r => r.request_id !== requestId)
+        // 刷新概览
+        await fetchOverview()
+      } else {
+        notify.error(response.message || t('social.friendRequestCancelError'))
+      }
+    } catch (error) {
+      console.error('取消好友请求失败:', error)
+      notify.error(t('social.friendRequestCancelError'))
+    } finally {
+      loading.value = false
+    }
   }
 
   return {
@@ -318,7 +421,7 @@ export function useSocial() {
     loading,
     overview,
     friends,
-    friendRequests: currentRequests, // 使用计算属性返回当前类型的请求
+    friendRequests: currentRequests,
     invitations,
     searchResults,
     searchLoading,
@@ -339,16 +442,20 @@ export function useSocial() {
     // 方法
     fetchOverview,
     fetchFriends,
+    fetchInvitations,
     searchUsers,
     fetchFriendRequests,
     sendFriendRequest,
     acceptFriendRequest,
     rejectFriendRequest,
+    cancelFriendRequest,
     removeFriend,
-    fetchInvitations,
     createInvitation,
     getFriendNodes,
+    getAllFriendNodes,
     handleRequestTypeChange,
-    init
+    init,
+    getStatusColor,
+    getStatusDescription
   }
 }

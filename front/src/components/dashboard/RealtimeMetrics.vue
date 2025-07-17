@@ -5,64 +5,32 @@
     </q-card-section>
     
     <q-card-section>
-      <div class="row q-gutter-md">
-        <!-- CPU使用率 -->
-        <div class="col-12 col-sm-6 col-md-3">
+      <ResponsiveCardGrid
+        :items="metricsCards"
+        variant="compact"
+        :show-borders="false"
+      >
+        <template #default="{ item }">
           <div class="metric-item">
-            <div class="metric-label">{{ $t('dashboard.cpuUsage') }}</div>
-            <div class="metric-value">{{ realtimeData.cpuUsage }}%</div>
+            <div class="metric-label">{{ item.title }}</div>
+            <div class="metric-value">{{ item.displayValue }}</div>
             <q-linear-progress 
-              :value="realtimeData.cpuUsage / 100" 
-              color="primary"
+              :value="item.progress" 
+              :color="item.color"
               class="q-mt-sm"
             />
           </div>
-        </div>
-
-        <!-- 内存使用率 -->
-        <div class="col-12 col-sm-6 col-md-3">
-          <div class="metric-item">
-            <div class="metric-label">{{ $t('dashboard.memoryUsage') }}</div>
-            <div class="metric-value">{{ realtimeData.memoryUsage }}%</div>
-            <q-linear-progress 
-              :value="realtimeData.memoryUsage / 100" 
-              color="secondary"
-              class="q-mt-sm"
-            />
-          </div>
-        </div>
-
-        <!-- 网络流量 -->
-        <div class="col-12 col-sm-6 col-md-3">
-          <div class="metric-item">
-            <div class="metric-label">{{ $t('dashboard.networkTraffic') }}</div>
-            <div class="metric-value">{{ realtimeData.networkTraffic }} MB/s</div>
-            <q-linear-progress 
-              :value="Math.min(realtimeData.networkTraffic / 1000, 1)" 
-              color="accent"
-              class="q-mt-sm"
-            />
-          </div>
-        </div>
-
-        <!-- 活跃连接数 -->
-        <div class="col-12 col-sm-6 col-md-3">
-          <div class="metric-item">
-            <div class="metric-label">{{ $t('dashboard.activeConnections') }}</div>
-            <div class="metric-value">{{ realtimeData.activeConnections }}</div>
-            <q-linear-progress 
-              :value="Math.min(realtimeData.activeConnections / 100, 1)" 
-              color="positive"
-              class="q-mt-sm"
-            />
-          </div>
-        </div>
-      </div>
+        </template>
+      </ResponsiveCardGrid>
     </q-card-section>
   </q-card>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import ResponsiveCardGrid from '../common/ResponsiveCardGrid.vue'
+
 interface Props {
   realtimeData: {
     cpuUsage: number
@@ -72,7 +40,40 @@ interface Props {
   }
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+const { t } = useI18n()
+
+// 实时指标卡片数据
+const metricsCards = computed(() => [
+  {
+    id: 'cpu_usage',
+    title: t('dashboard.cpuUsage'),
+    displayValue: `${props.realtimeData.cpuUsage}%`,
+    progress: props.realtimeData.cpuUsage / 100,
+    color: 'primary'
+  },
+  {
+    id: 'memory_usage',
+    title: t('dashboard.memoryUsage'),
+    displayValue: `${props.realtimeData.memoryUsage}%`,
+    progress: props.realtimeData.memoryUsage / 100,
+    color: 'secondary'
+  },
+  {
+    id: 'network_traffic',
+    title: t('dashboard.networkTraffic'),
+    displayValue: `${props.realtimeData.networkTraffic} MB/s`,
+    progress: Math.min(props.realtimeData.networkTraffic / 1000, 1),
+    color: 'accent'
+  },
+  {
+    id: 'active_connections',
+    title: t('dashboard.activeConnections'),
+    displayValue: props.realtimeData.activeConnections.toString(),
+    progress: Math.min(props.realtimeData.activeConnections / 100, 1),
+    color: 'positive'
+  }
+])
 </script>
 
 <style lang="scss" scoped>

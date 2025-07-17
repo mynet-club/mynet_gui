@@ -530,13 +530,13 @@ const networkNavigationItems = computed((): NavigationItem[] => [
     badgeColor: 'accent'
   },
   {
-    name: 'zones',
-    label: 'navigation.zones',
-    icon: 'public',
-    path: '/zones',
+    name: 'zone-sharing',
+    label: 'navigation.zoneSharing',
+    icon: 'share',
+    path: '/zone-sharing',
     badge: sidebarStats.value.zones || 0,
     badgeColor: 'info',
-    comingSoon: true
+    comingSoon: false
   },
   {
     name: 'social',

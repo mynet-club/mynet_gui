@@ -12,71 +12,29 @@
       </div>
 
       <!-- 统计卡片 -->
-      <div class="row q-gutter-md q-mb-lg">
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="stats-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ overview.friend_count }}</div>
-                  <div class="text-body2 text-grey-6">{{ $t('social.overview.friends') }}</div>
-                </div>
-                <div>
-                  <q-icon name="group" size="2rem" color="primary" />
-                </div>
+      <ResponsiveCardGrid
+        :items="statsCards"
+        :loading="loading"
+        :loading-count="4"
+        variant="compact"
+        spacing="normal"
+        :clickable="false"
+        class="q-mb-lg"
+      >
+        <template #default="{ item }">
+          <q-card-section>
+            <div class="row items-center">
+              <div class="col">
+                <div class="text-h6">{{ item.value }}</div>
+                <div class="text-body2 text-grey-6">{{ item.title }}</div>
               </div>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="stats-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ overview.pending_requests }}</div>
-                  <div class="text-body2 text-grey-6">{{ $t('social.overview.pendingRequests') }}</div>
-                </div>
-                <div>
-                  <q-icon name="person_add" size="2rem" color="orange" />
-                </div>
+              <div>
+                <q-icon :name="item.icon" size="2rem" :color="item.color" />
               </div>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="stats-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ overview.connected_nodes }}</div>
-                  <div class="text-body2 text-grey-6">{{ $t('social.overview.connectedNodes') }}</div>
-                </div>
-                <div>
-                  <q-icon name="lan" size="2rem" color="positive" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="stats-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ overview.active_routes }}</div>
-                  <div class="text-body2 text-grey-6">{{ $t('social.overview.activeRoutes') }}</div>
-                </div>
-                <div>
-                  <q-icon name="route" size="2rem" color="info" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-      </div>
+            </div>
+          </q-card-section>
+        </template>
+      </ResponsiveCardGrid>
 
       <!-- 标签页 -->
       <q-card>
@@ -117,6 +75,7 @@
               :loading="loading"
               @accept="handleAcceptRequest"
               @reject="handleRejectRequest"
+              @cancel="handleCancelRequest"
               @type-change="handleRequestTypeChange"
             />
           </q-tab-panel>
@@ -235,11 +194,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useSocial } from '../../composables/useSocial'
 import { useNotify } from '../../composables/useNotify'
+import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import FriendsTab from '../../components/social/FriendsTab.vue'
 import FriendRequestsTab from '../../components/social/FriendRequestsTab.vue'
 import SearchTab from '../../components/social/SearchTab.vue'
@@ -262,6 +222,7 @@ const {
   sendFriendRequest,
   acceptFriendRequest,
   rejectFriendRequest,
+  cancelFriendRequest,
   removeFriend,
   createInvitation,
   getFriendNodes,
@@ -272,6 +233,38 @@ const {
 // 响应式状态
 const tab = ref('friends')
 const friendsSearch = ref('')
+
+// 统计卡片数据
+const statsCards = computed(() => [
+  {
+    id: 'friend_count',
+    title: t('social.overview.friends'),
+    value: overview.value.friend_count,
+    icon: 'group',
+    color: 'primary'
+  },
+  {
+    id: 'pending_requests',
+    title: t('social.overview.pendingRequests'),
+    value: overview.value.pending_requests,
+    icon: 'person_add',
+    color: 'orange'
+  },
+  {
+    id: 'connected_nodes',
+    title: t('social.overview.connectedNodes'),
+    value: overview.value.connected_nodes,
+    icon: 'lan',
+    color: 'positive'
+  },
+  {
+    id: 'active_routes',
+    title: t('social.overview.activeRoutes'),
+    value: overview.value.active_routes,
+    icon: 'route',
+    color: 'info'
+  }
+])
 
 // 对话框状态
 const removeDialog = ref({
@@ -335,6 +328,10 @@ const handleAcceptRequest = (requestId: string) => {
 
 const handleRejectRequest = (requestId: string) => {
   rejectFriendRequest(requestId)
+}
+
+const handleCancelRequest = (requestId: number) => {
+  cancelFriendRequest(requestId)
 }
 
 const handleUserSearch = (query: string) => {

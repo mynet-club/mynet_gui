@@ -6,10 +6,10 @@ import type {
   Route, 
   PendingConnection, 
   FriendNode, 
-  RouteConfig,
   RouteOverview,
   RouteConnection
 } from '../types'
+import type { RouteRequest } from '../types/api'
 
 export function useRoutes() {
   const { t } = useI18n()
@@ -28,7 +28,6 @@ export function useRoutes() {
   const pendingConnections = ref<PendingConnection[]>([])
   const outgoingConnections = ref<PendingConnection[]>([])
   const friendNodes = ref<FriendNode[]>([])
-  const routeConfig = ref<RouteConfig | null>(null)
   const currentConnectionType = ref<'incoming' | 'outgoing'>('incoming')
 
   // 计算属性
@@ -52,32 +51,47 @@ export function useRoutes() {
       loading.value = true
       const response = await routesService.getOverview()
       
+      console.log('路由概览原始数据:', response)
+      
+      // 根据实际返回的数据结构设置概览统计
       overview.value = {
-        active_routes: response.stats?.active_routes || response.routes?.length || 0,
-        pending_connections: response.stats?.pending_connections || response.pending_connections?.length || 0,
-        connected_nodes: response.stats?.connected_nodes || 0,
-        total_bandwidth: response.stats?.total_bandwidth || '0 MB/s'
+        active_routes: response.statistics?.active_routes || response.routes?.length || 0,
+        pending_connections: response.statistics?.pending_routes || 
+                           (response.requests?.pending?.length || 0) + (response.requests?.sent?.length || 0),
+        connected_nodes: response.statistics?.total_routes || response.connections?.length || 0,
+        total_bandwidth: response.statistics?.total_bandwidth || '0 MB/s'
       }
       
-      // 同时设置路由数据
+      // 设置活跃路由数据（已建立的连接）
       if (response.routes) {
         activeRoutes.value = response.routes
+      } else if (response.connections) {
+        // 如果 routes 不存在，使用 connections
+        activeRoutes.value = response.connections
+      } else {
+        activeRoutes.value = []
       }
       
-      // 设置待处理连接数据
-      if (response.pending_connections) {
-        pendingConnections.value = response.pending_connections
+      // 设置待处理连接数据（incoming）
+      if (response.requests?.pending) {
+        pendingConnections.value = response.requests.pending
+      } else {
+        pendingConnections.value = []
       }
       
-      // 设置发出的连接数据
-      if (response.outgoing_connections) {
-        outgoingConnections.value = response.outgoing_connections
+      // 设置发出的连接数据（outgoing）
+      if (response.requests?.sent) {
+        outgoingConnections.value = response.requests.sent
+      } else {
+        outgoingConnections.value = []
       }
       
-      // 设置好友节点数据
-      if (response.friend_nodes) {
-        friendNodes.value = response.friend_nodes
-      }
+      console.log('解析后的路由数据:', {
+        activeRoutes: activeRoutes.value,
+        pendingConnections: pendingConnections.value,
+        outgoingConnections: outgoingConnections.value,
+        overview: overview.value
+      })
       
     } catch (error) {
       console.error('获取路由概览失败:', error)
@@ -328,7 +342,25 @@ export function useRoutes() {
   // 初始化数据
   const init = async () => {
     await fetchOverview()
-    await fetchRouteConfig()
+  }
+
+  // 创建路由请求
+  const createRouteRequest = async (requestData: RouteRequest) => {
+    try {
+      loading.value = true
+      const response = await routesService.createRouteRequest(requestData)
+      if (response.success) {
+        notify.success(t('routes.create.requestSubmitted'))
+        return response
+      } else {
+        throw new Error(response.message || t('routes.create.submitError'))
+      }
+    } catch (error) {
+      console.error('创建路由请求失败:', error)
+      throw error
+    } finally {
+      loading.value = false
+    }
   }
 
   return {
@@ -338,8 +370,11 @@ export function useRoutes() {
     activeRoutes,
     pendingConnections: currentConnections, // 使用计算属性返回当前类型的连接
     friendNodes,
-    routeConfig,
     currentConnectionType,
+    
+    // 原始连接数据（用于判断状态）
+    incomingConnections: pendingConnections,
+    outgoingConnections,
     
     // 计算属性
     hasActiveRoutes,
@@ -352,16 +387,14 @@ export function useRoutes() {
     fetchActiveRoutes,
     fetchPendingConnections,
     fetchFriendNodes,
-    fetchRouteConfig,
     connectToNode,
     approveConnection,
     rejectConnection,
     disconnectRoute,
-    downloadRouteConfig,
-    refreshRouteConfig,
     handleConnectionTypeChange,
     getRouteDetails,
     getConnectionStats,
+    createRouteRequest,
     init
   }
 }

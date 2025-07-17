@@ -42,95 +42,37 @@
     </div>
 
     <!-- 快速统计 -->
-    <div class="quick-stats q-mb-md">
-      <div class="row q-gutter-md">
-        <div class="col-12 col-md-3">
-          <q-card class="stat-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ statistics.total_pools }}</div>
-                  <div class="text-caption text-grey-6">{{ $t('ippools.totalPools') }}</div>
-                </div>
-                <div class="col-auto">
-                  <q-icon name="storage" size="24px" color="primary" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-        
-        <div class="col-12 col-md-3">
-          <q-card class="stat-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ statistics.total_ips }}</div>
-                  <div class="text-caption text-grey-6">{{ $t('ippools.totalIPs') }}</div>
-                </div>
-                <div class="col-auto">
-                  <q-icon name="language" size="24px" color="info" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-        
-        <div class="col-12 col-md-3">
-          <q-card class="stat-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ statistics.allocated_ips }}</div>
-                  <div class="text-caption text-grey-6">{{ $t('ippools.allocatedIPs') }}</div>
-                </div>
-                <div class="col-auto">
-                  <q-icon name="assignment" size="24px" color="positive" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-        
-        <div class="col-12 col-md-3">
-          <q-card class="stat-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ statistics.free_ips || statistics.available_ips || 0 }}</div>
-                  <div class="text-caption text-grey-6">{{ $t('ippools.availableIPs') }}</div>
-                </div>
-                <div class="col-auto">
-                  <q-icon name="check_circle" size="24px" color="positive" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-        
-        <div class="col-12 col-md-3">
-          <q-card class="stat-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ statistics.usage_percentage?.toFixed(1) || usagePercentage }}%</div>
-                  <div class="text-caption text-grey-6">{{ $t('ippools.usageRate') }}</div>
-                </div>
-                <div class="col-auto">
-                  <q-circular-progress
-                    :value="statistics.usage_percentage || usagePercentage"
-                    size="24px"
-                    :thickness="0.2"
-                    color="warning"
-                    track-color="grey-3"
-                  />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-      </div>
-    </div>
+    <ResponsiveCardGrid
+      :items="statsCards"
+      :loading="loading"
+      :loading-count="5"
+      variant="compact"
+      spacing="normal"
+      :clickable="false"
+      class="q-mb-md"
+    >
+      <template #default="{ item }">
+        <q-card-section>
+          <div class="row items-center">
+            <div class="col">
+              <div class="text-h6">{{ item.value }}</div>
+              <div class="text-caption text-grey-6">{{ item.title }}</div>
+            </div>
+            <div class="col-auto">
+              <q-icon v-if="item.id !== 'usage_rate'" :name="item.icon" size="24px" :color="item.color" />
+              <q-circular-progress
+                v-else
+                :value="statistics.usage_percentage || usagePercentage"
+                size="24px"
+                :thickness="0.2"
+                color="warning"
+                track-color="grey-3"
+              />
+            </div>
+          </div>
+        </q-card-section>
+      </template>
+    </ResponsiveCardGrid>
 
     <!-- 卡片视图 -->
     <div class="card-view">
@@ -172,6 +114,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useIPPools } from '../../composables/useIPPools'
+import ResponsiveCardGrid from '../common/ResponsiveCardGrid.vue'
 import IPPoolCard from './IPPoolCard.vue'
 import IPPoolCreateDialog from './IPPoolCreateDialog.vue'
 import type { IPPool } from '../../types/ippool'
@@ -197,6 +140,45 @@ const usagePercentage = computed(() => {
   if (statistics.value.total_ips === 0) return 0
   return Math.round((statistics.value.allocated_ips / statistics.value.total_ips) * 100)
 })
+
+// 统计卡片数据
+const statsCards = computed(() => [
+  {
+    id: 'total_pools',
+    title: t('ippools.totalPools'),
+    value: statistics.value.total_pools,
+    icon: 'storage',
+    color: 'primary'
+  },
+  {
+    id: 'total_ips',
+    title: t('ippools.totalIPs'),
+    value: statistics.value.total_ips,
+    icon: 'language',
+    color: 'info'
+  },
+  {
+    id: 'allocated_ips',
+    title: t('ippools.allocatedIPs'),
+    value: statistics.value.allocated_ips,
+    icon: 'assignment',
+    color: 'positive'
+  },
+  {
+    id: 'available_ips',
+    title: t('ippools.availableIPs'),
+    value: statistics.value.free_ips || statistics.value.available_ips || 0,
+    icon: 'check_circle',
+    color: 'positive'
+  },
+  {
+    id: 'usage_rate',
+    title: t('ippools.usageRate'),
+    value: `${(statistics.value.usage_percentage?.toFixed(1) || usagePercentage.value)}%`,
+    icon: 'donut_small',
+    color: 'warning'
+  }
+])
 
 // 方法
 const handlePoolsCreated = (createdPools: IPPool[]) => {

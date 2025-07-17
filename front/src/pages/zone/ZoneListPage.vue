@@ -56,70 +56,11 @@
       </div>
 
       <!-- Zone概览统计 -->
-      <div class="row q-gutter-md q-mb-lg" v-if="currentZone && zoneStatistics[currentZone.zone_id]">
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="stats-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ zoneStatistics[currentZone.zone_id].node_count }}</div>
-                  <div class="text-body2 text-grey-6">{{ $t('zones.stats.totalNodes') }}</div>
-                </div>
-                <div>
-                  <q-icon name="dns" size="2rem" color="primary" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="stats-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ zoneStatistics[currentZone.zone_id].active_node_count }}</div>
-                  <div class="text-body2 text-grey-6">{{ $t('zones.stats.activeNodes') }}</div>
-                </div>
-                <div>
-                  <q-icon name="wifi" size="2rem" color="positive" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="stats-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ zoneStatistics[currentZone.zone_id].route_count }}</div>
-                  <div class="text-body2 text-grey-6">{{ $t('zones.stats.routes') }}</div>
-                </div>
-                <div>
-                  <q-icon name="route" size="2rem" color="info" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="stats-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ zoneStatistics[currentZone.zone_id].user_count }}</div>
-                  <div class="text-body2 text-grey-6">{{ $t('zones.stats.users') }}</div>
-                </div>
-                <div>
-                  <q-icon name="group" size="2rem" color="orange" />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
+      <div v-if="currentZone && zoneStatistics[currentZone.zone_id]" class="q-mb-lg">
+        <ResponsiveCardGrid
+          :items="zoneStatsCards"
+          variant="standard"
+        />
       </div>
 
       <!-- 可用Zones列表 -->
@@ -246,10 +187,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useZones } from '../../composables/useZones'
 import { useNotify } from '../../composables/useNotify'
+import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import type { Zone } from '../../types'
 
 const { t } = useI18n()
@@ -265,6 +207,45 @@ const {
   getZoneStatistics,
   initForUser
 } = useZones()
+
+// Zone统计卡片数据
+const zoneStatsCards = computed(() => {
+  if (!currentZone.value || !zoneStatistics.value[currentZone.value.zone_id]) {
+    return []
+  }
+  
+  const stats = zoneStatistics.value[currentZone.value.zone_id]
+  return [
+    {
+      id: 'total_nodes',
+      title: t('zones.stats.totalNodes'),
+      value: stats.node_count,
+      icon: 'dns',
+      color: 'primary'
+    },
+    {
+      id: 'active_nodes',
+      title: t('zones.stats.activeNodes'),
+      value: stats.active_node_count,
+      icon: 'wifi',
+      color: 'positive'
+    },
+    {
+      id: 'routes',
+      title: t('zones.stats.routes'),
+      value: stats.route_count,
+      icon: 'route',
+      color: 'info'
+    },
+    {
+      id: 'users',
+      title: t('zones.stats.users'),
+      value: stats.user_count,
+      icon: 'group',
+      color: 'orange'
+    }
+  ]
+})
 
 // 对话框状态
 const switchDialog = ref({

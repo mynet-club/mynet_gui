@@ -27,164 +27,106 @@
       </div>
     </div>
 
-    <!-- 搜索和筛选 -->
-    <q-card class="q-mb-md">
-      <q-card-section>
-        <div class="row q-gutter-md">
-          <div class="col-12 col-md-4">
-            <q-input
-              v-model="searchText"
-              placeholder="搜索节点..."
-              outlined
-              dense
-              clearable
-            >
-              <template v-slot:prepend>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </div>
-          
-          <div class="col-12 col-md-3">
-            <q-select
-              v-model="statusFilter"
-              :options="statusOptions"
-              label="状态筛选"
-              outlined
-              dense
-              clearable
-              emit-value
-              map-options
-            />
-          </div>
-          
-          <div class="col-12 col-md-3">
-            <q-select
-              v-model="typeFilter"
-              :options="typeOptions"
-              label="类型筛选"
-              outlined
-              dense
-              clearable
-              emit-value
-              map-options
-            />
-          </div>
-        </div>
-      </q-card-section>
-    </q-card>
-
     <!-- 节点列表 - 卡片布局 -->
-    <div class="row q-gutter-md">
-      <div 
-        v-for="node in filteredNodes" 
-        :key="node.node_id"
-        class="col-12 col-sm-6 col-md-4 col-lg-3"
-      >
-        <q-card class="node-card cursor-pointer" @click="goToDetail(node.node_id)">
-          <q-card-section>
-            <div class="row items-center justify-between q-mb-sm">
-              <div class="text-h6 text-primary">{{ node.node_name }}</div>
-              <q-chip
-                :color="getStatusColor(node.status || node.node_status)"
-                text-color="white"
-                :icon="getStatusIcon(node.status || node.node_status)"
-                size="sm"
-              >
-                {{ getStatusText(node.status || node.node_status) }}
-              </q-chip>
-            </div>
-            
-            <div class="text-grey-6 q-mb-sm">{{ node.node_id }}</div>
-            
-            <div v-if="node.description || node.node_remarks" class="text-body2 q-mb-sm">
-              {{ node.description || node.node_remarks }}
-            </div>
-            
-            <div class="row q-gutter-xs q-mb-sm">
-              <q-chip
-                v-if="node.node_type"
-                color="blue-grey"
-                text-color="white"
-                size="sm"
-                icon="category"
-              >
-                {{ node.node_type }}
-              </q-chip>
-              
-              <q-chip
-                v-if="node.node_ip || node.ip_address"
-                color="secondary"
-                text-color="white"
-                size="sm"
-                icon="lan"
-              >
-                {{ node.node_ip || node.ip_address }}
-              </q-chip>
-            </div>
-            
-            <div class="text-caption text-grey-6">
-              创建于 {{ formatDate(node.created_at) }}
-            </div>
-          </q-card-section>
+    <ResponsiveCardGrid
+      :items="filteredNodes"
+      :loading="loading"
+      variant="standard"
+      spacing="normal"
+      empty-icon="device_hub"
+      empty-title="暂无节点数据"
+      empty-description="开始创建你的第一个节点"
+    >
+      <template #default="{ item: node }">
+        <q-card-section>
+          <div class="row items-center justify-between q-mb-sm">
+            <div class="text-h6 text-primary">{{ node.node_name }}</div>
+            <q-chip
+              :color="getStatusColor(node.status || node.node_status)"
+              text-color="white"
+              :icon="getStatusIcon(node.status || node.node_status)"
+              size="sm"
+            >
+              {{ getStatusText(node.status || node.node_status) }}
+            </q-chip>
+          </div>
           
-          <q-card-actions>
-            <q-btn
-              flat
-              color="primary"
-              icon="visibility"
-              @click.stop="goToDetail(node.node_id)"
+          <div class="text-grey-6 q-mb-sm">{{ node.node_id }}</div>
+          
+          <div v-if="node.description || node.node_remarks" class="text-body2 q-mb-sm">
+            {{ node.description || node.node_remarks }}
+          </div>
+          
+          <div class="row q-gutter-xs q-mb-sm">
+            <q-chip
+              v-if="node.node_type"
+              color="blue-grey"
+              text-color="white"
+              size="sm"
+              icon="category"
             >
-              查看
-            </q-btn>
+              {{ node.node_type }}
+            </q-chip>
             
-            <q-btn
-              flat
+            <q-chip
+              v-if="node.node_ip || node.ip_address"
               color="secondary"
-              icon="edit"
-              @click.stop="goToEdit(node.node_id)"
+              text-color="white"
+              size="sm"
+              icon="lan"
             >
-              编辑
-            </q-btn>
-            
-            <q-space />
-            
-            <q-btn
-              flat
-              color="negative"
-              icon="delete"
-              @click.stop="confirmDelete(node)"
-            >
-              删除
-            </q-btn>
-          </q-card-actions>
-        </q-card>
-      </div>
-      
-      <!-- 无数据时的显示 -->
-      <div v-if="filteredNodes.length === 0" class="col-12">
-        <q-card class="text-center q-pa-lg">
-          <q-card-section>
-            <q-icon size="4em" name="device_hub" color="grey-5" />
-            <div class="text-h6 q-mt-md text-grey-6">
-              {{ loading ? '加载中...' : '暂无节点数据' }}
-            </div>
-            <div v-if="!loading" class="text-body2 text-grey-6 q-mt-sm">
-              {{ searchText || statusFilter || typeFilter ? '没有找到匹配的节点' : '开始创建你的第一个节点' }}
-            </div>
-            <q-btn
-              v-if="!loading && !searchText && !statusFilter && !typeFilter"
-              color="primary"
-              @click="goToCreate"
-              class="q-mt-md"
-            >
-              <q-icon name="add" class="q-mr-sm" />
-              创建第一个节点
-            </q-btn>
-          </q-card-section>
-        </q-card>
-      </div>
-    </div>
+              {{ node.node_ip || node.ip_address }}
+            </q-chip>
+          </div>
+          
+          <div class="text-caption text-grey-6">
+            创建于 {{ formatDate(node.created_at) }}
+          </div>
+        </q-card-section>
+        
+        <q-card-actions>
+          <q-btn
+            flat
+            color="primary"
+            icon="visibility"
+            @click.stop="goToDetail(node.node_id)"
+          >
+            查看
+          </q-btn>
+          
+          <q-btn
+            flat
+            color="secondary"
+            icon="edit"
+            @click.stop="goToEdit(node.node_id)"
+          >
+            编辑
+          </q-btn>
+          
+          <q-space />
+          
+          <q-btn
+            flat
+            color="negative"
+            icon="delete"
+            @click.stop="confirmDelete(node)"
+          >
+            删除
+          </q-btn>
+        </q-card-actions>
+      </template>
+
+      <template #emptyAction>
+        <q-btn
+          color="primary"
+          @click="goToCreate"
+          class="q-mt-md"
+        >
+          <q-icon name="add" class="q-mr-sm" />
+          创建第一个节点
+        </q-btn>
+      </template>
+    </ResponsiveCardGrid>
 
     <!-- 删除确认对话框 -->
     <q-dialog v-model="showDeleteDialog" persistent>
@@ -214,8 +156,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import { useNodes, useNotify } from '../../composables'
-import { Node, NodeStatus, NodeType } from '../../types/node'
+import { Node, NodeStatus } from '../../types/node'
 
 const router = useRouter()
 const $q = useQuasar()
@@ -223,11 +166,6 @@ const { success: notifySuccess, error: notifyError } = useNotify()
 
 // 使用组合式函数
 const { nodes, loading, loadNodes, deleteNode: removeNode } = useNodes()
-
-// 搜索和筛选
-const searchText = ref('')
-const statusFilter = ref<NodeStatus | ''>('')
-const typeFilter = ref<NodeType | ''>('')
 
 // 删除确认
 const showDeleteDialog = ref(false)
@@ -242,20 +180,6 @@ const pagination = ref({
   rowsPerPage: 10,
   rowsNumber: 0
 })
-
-// 筛选选项
-const statusOptions = ref([
-  { label: '在线', value: 'active' },
-  { label: '离线', value: 'inactive' },
-  { label: '待连接', value: 'pending' }
-])
-
-const typeOptions = ref([
-  { label: '网关', value: 'Gateway' },
-  { label: '服务器', value: 'Server' },
-  { label: '客户端', value: 'Client' },
-  { label: '路由器', value: 'Router' }
-])
 
 // 表格列定义
 const columns = [
@@ -312,30 +236,7 @@ const columns = [
 
 // 计算属性
 const filteredNodes = computed(() => {
-  let result = nodes.value || []
-
-  // 搜索筛选
-  if (searchText.value) {
-    const search = searchText.value.toLowerCase()
-    result = result.filter(node => 
-      node.node_name.toLowerCase().includes(search) ||
-      String(node.node_id).toLowerCase().includes(search) ||
-      (node.description && node.description.toLowerCase().includes(search)) ||
-      (node.node_remarks && node.node_remarks.toLowerCase().includes(search))
-    )
-  }
-
-  // 状态筛选
-  if (statusFilter.value) {
-    result = result.filter(node => node.status === statusFilter.value)
-  }
-
-  // 类型筛选
-  if (typeFilter.value) {
-    result = result.filter(node => node.node_type === typeFilter.value)
-  }
-
-  return result
+  return [...(nodes.value || [])]
 })
 
 // 工具函数

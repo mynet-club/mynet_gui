@@ -29,38 +29,32 @@
     </div>
 
     <!-- 搜索结果 -->
-    <div v-if="loading" class="row justify-center q-py-lg">
-      <q-spinner-dots color="primary" size="2em" />
-    </div>
-
-    <div v-else-if="searchResults.length === 0 && searchQuery.trim()" class="text-center q-py-lg">
-      <q-icon name="search_off" size="3rem" color="grey-5" class="q-mb-md" />
-      <div class="text-h6 text-grey-6">{{ $t('social.search.noResults') }}</div>
-    </div>
-
-    <div v-else-if="searchResults.length === 0" class="text-center q-py-lg">
-      <q-icon name="search" size="3rem" color="grey-5" class="q-mb-md" />
-      <div class="text-h6 text-grey-6">{{ $t('social.search.title') }}</div>
-    </div>
-
-    <div v-else class="q-gutter-md">
-      <q-card
-        v-for="user in searchResults"
-        :key="user.user_id"
-        class="user-card"
-      >
+    <ResponsiveCardGrid
+      :items="searchResults"
+      :loading="loading"
+      :loading-count="6"
+      variant="standard"
+      spacing="normal"
+      :empty-icon="searchQuery.trim() ? 'search_off' : 'search'"
+      :empty-title="searchQuery.trim() ? $t('social.search.noResults') : $t('social.search.title')"
+      :clickable="false"
+    >
+      <template #default="{ item: user, index }">
         <q-card-section>
           <div class="row items-center">
             <div class="col">
               <div class="row items-center q-mb-sm">
-                <q-avatar size="40px" class="q-mr-sm">
+                <q-avatar size="50px" class="q-mr-md">
                   <img v-if="user.avatar" :src="user.avatar" :alt="user.name" />
-                  <q-icon v-else name="person" size="24px" />
+                  <q-icon v-else name="person" size="30px" />
                 </q-avatar>
                 <div>
-                  <div class="text-subtitle1 text-weight-medium">{{ user.name }}</div>
+                  <div class="text-h6 text-weight-bold">{{ user.name }}</div>
                   <div class="text-caption text-grey-6">
                     {{ $t('social.search.zone') }}: {{ user.zone_name }}
+                  </div>
+                  <div class="text-caption text-grey-6">
+                    {{ $t('social.search.lastActive') }}: {{ formatDate(user.last_active) }}
                   </div>
                 </div>
               </div>
@@ -74,6 +68,7 @@
                 size="sm"
                 no-caps
                 disabled
+                icon="check"
               />
               <q-btn
                 v-else-if="user.has_pending_request"
@@ -82,6 +77,7 @@
                 size="sm"
                 no-caps
                 disabled
+                icon="schedule"
               />
               <q-btn
                 v-else
@@ -90,6 +86,7 @@
                 :label="$t('social.search.addFriend')"
                 size="sm"
                 no-caps
+                icon="person_add"
               />
             </div>
           </div>
@@ -102,20 +99,20 @@
               <div class="text-caption text-grey-6">{{ $t('social.friends.nodes') }}</div>
             </div>
             <div class="col">
-              <div class="text-caption text-grey-6">
-                {{ $t('social.search.lastActive') }}: {{ formatDate(user.last_active) }}
-              </div>
+              <div class="text-h6 text-secondary">{{ (user as any).mutual_friends || 0 }}</div>
+              <div class="text-caption text-grey-6">{{ $t('social.friends.mutualFriends') }}</div>
             </div>
           </div>
         </q-card-section>
-      </q-card>
-    </div>
+      </template>
+    </ResponsiveCardGrid>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ResponsiveCardGrid from '../common/ResponsiveCardGrid.vue'
 import type { SearchUser } from '../../types'
 
 interface Props {
@@ -148,13 +145,5 @@ const formatDate = (dateString: string) => {
 </script>
 
 <style lang="scss" scoped>
-.search-tab {
-  .user-card {
-    transition: transform 0.2s ease;
-    
-    &:hover {
-      transform: translateY(-2px);
-    }
-  }
-}
+/* 组件特定的样式，响应式卡片布局样式由 ResponsiveCardGrid 和全局样式提供 */
 </style>
