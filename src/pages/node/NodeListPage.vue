@@ -1,7 +1,7 @@
 <template>
   <PageLayout
-    title="节点管理"
-    subtitle="管理和监控您的网络节点"
+    :title="$t('nodes.title')"
+    :subtitle="$t('nodes.subtitle')"
     icon="device_hub"
   >
     <template #actions>
@@ -9,14 +9,14 @@
         <q-btn
           color="primary"
           icon="add"
-          label="创建节点"
+          :label="$t('nodes.createNode')"
           @click="goToCreate"
           :disable="loading"
         />
         <q-btn
           color="secondary"
           icon="refresh"
-          label="刷新"
+          :label="$t('common.refresh')"
           @click="refreshNodes"
           :loading="loading"
         />
@@ -30,8 +30,8 @@
       variant="standard"
       spacing="normal"
       empty-icon="device_hub"
-      empty-title="暂无节点数据"
-      empty-description="开始创建你的第一个节点"
+      :empty-title="$t('nodes.noData')"
+      :empty-description="$t('nodes.noDataDescription')"
     >
       <template #default="{ item: node }">
         <q-card-section>
