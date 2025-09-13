@@ -27,7 +27,7 @@ const getStoredLocale = (): 'zh-CN' | 'en-US' => {
       return stored
     }
   }
-  return 'zh-CN'
+  return 'en-US'  // 默认使用英文
 }
 
 const initialLocale = getStoredLocale()
@@ -38,7 +38,7 @@ const createStableTranslator = () => {
   return (key: string, params?: Record<string, any>): string => {
     const keys = key.split('.')
     const currentLocale = getStoredLocale()
-    let value: any = messages[currentLocale] || messages['zh-CN']
+    let value: any = messages[currentLocale] || messages['en-US']
     
     for (const k of keys) {
       value = value?.[k]
@@ -59,7 +59,7 @@ const createStableTranslator = () => {
 const i18n = createI18n({
   legacy: false,
   locale: initialLocale,
-  fallbackLocale: 'zh-CN',
+  fallbackLocale: 'en-US',  // fallback改为英文
   messages: messages,
   globalInjection: true,
   missingWarn: false,

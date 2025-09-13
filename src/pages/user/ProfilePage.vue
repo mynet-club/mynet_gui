@@ -14,7 +14,7 @@
               @edit="changeAvatar"
               class="q-mb-md"
             />
-            <div class="text-h6 q-mb-xs">{{ user?.name || '未知用户' }}</div>
+            <div class="text-h6 q-mb-xs">{{ user?.name || $t('common.unknown') }}</div>
             <div class="text-caption text-grey-7">{{ user?.email || '' }}</div>
           </q-card-section>
         </q-card>
@@ -354,7 +354,7 @@ const loading = computed(() => ({
 
 // 支持的语言选项
 const supportedLanguages = computed(() => [
-  { label: '中文', value: 'zh-CN', icon: 'translate', nativeName: '中文' },
+  { label: 'Chinese', value: 'zh-CN', icon: 'translate', nativeName: 'Chinese' },
   { label: 'English', value: 'en-US', icon: 'translate', nativeName: 'English' }
 ])
 
@@ -405,14 +405,14 @@ const copyUserId = async () => {
     const $q = useQuasar()
     $q.notify({
       type: 'positive',
-      message: '用户ID已复制到剪贴板'
+      message: t('common.copiedToClipboard')
     })
   } catch (error) {
     console.error('复制失败:', error)
     const $q = useQuasar()
     $q.notify({
       type: 'negative',
-      message: '复制失败'
+      message: t('common.copyFailed')
     })
   }
 }

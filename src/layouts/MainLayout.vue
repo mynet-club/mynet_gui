@@ -152,7 +152,7 @@
                 <q-icon name="settings" />
               </q-item-section>
               <q-item-section>
-                <q-item-label>个人设置</q-item-label>
+                <q-item-label>{{ $t('common.profile') }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-separator />
@@ -457,7 +457,7 @@ const unreadNotifications = computed(() => notifications.value.filter(n => !n.re
 
 const supportedLanguages = computed(() => [
   { code: 'en-US', name: 'English', nativeName: 'English' },
-  { code: 'zh-CN', name: 'Chinese', nativeName: '中文' }
+  { code: 'zh-CN', name: 'Chinese', nativeName: 'Chinese' }
 ])
 const themeOptions = computed(() => getThemeOptions())
 
@@ -540,7 +540,7 @@ const systemNavigationItems = computed((): NavigationItem[] => {
   if (process.env.NODE_ENV === 'development') {
     items.unshift({
       name: 'token-debug',
-      label: 'Token 调试',
+      label: 'Token Debug',
       icon: 'token',
       path: '/system/token-debug'
     })

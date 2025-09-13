@@ -3,7 +3,7 @@
     <!-- 页面标题和VPN类型显示 -->
     <div class="row items-center justify-between q-mb-lg">
       <div class="column">
-        <div class="text-h6">节点配置</div>
+        <div class="text-h6">{{ $t('nodes.configTitle') }}</div>
         <div class="text-caption text-grey-6">
           {{ currentVpnConfig?.name }} - {{ currentVpnConfig?.description }}
         </div>
@@ -27,7 +27,7 @@
       <div class="col-12">
         <q-card flat bordered>
           <q-card-section class="q-py-sm">
-            <div class="text-caption text-grey-6 q-mb-sm">版本选择</div>
+            <div class="text-caption text-grey-6 q-mb-sm">{{ $t('nodes.versionSelect') }}</div>
             <q-btn-group outline>
               <q-btn
                 v-for="version in currentVpnConfig.supported_versions"
@@ -196,7 +196,7 @@
                   no-caps
                 >
                   <q-icon name="save" class="q-mr-sm" />
-                  保存配置
+                  {{ $t('nodes.saveConfig') }}
                 </q-btn>
                 
                 <q-btn
@@ -207,7 +207,7 @@
                   no-caps
                 >
                   <q-icon name="refresh" class="q-mr-sm" />
-                  重置
+                  {{ $t('nodes.resetConfig') }}
                 </q-btn>
                 
                 <q-btn
@@ -218,7 +218,7 @@
                   no-caps
                 >
                   <q-icon name="download" class="q-mr-sm" />
-                  导出配置
+                  {{ $t('nodes.exportConfig') }}
                 </q-btn>
               </div>
             </q-form>
