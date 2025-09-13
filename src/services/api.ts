@@ -200,10 +200,18 @@ export const apiService = {
           }
         };
       } else {
-        throw new Error(response.data.message || 'Login failed');
+        // 保留原始响应数据，创建一个带有响应数据的错误
+        const error = new Error(response.data.message || 'Login failed') as any;
+        error.response = { data: response.data, status: response.status };
+        throw error;
       }
     } catch (error: any) {
       console.error('🔧 [API] Login error:', error);
+      // 如果是axios错误或已经包含响应数据的错误，直接抛出
+      if (error.response) {
+        throw error;
+      }
+      // 其他错误，保持原来的处理方式
       throw new Error(error.message || '登录请求失败');
     }
   },

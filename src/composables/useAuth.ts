@@ -1,12 +1,14 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { apiService } from '../services/api' // 修复导入路径
 
 export function useAuth() {
   const router = useRouter()
   const $q = useQuasar()
+  const { t } = useI18n()
   const authStore = useAuthStore()
 
   const isLoading = ref(false)
@@ -59,6 +61,77 @@ export function useAuth() {
     loginError.value = null
   }
 
+  // 处理账户激活错误
+  const handleActivationError = (code: number, email: string, message?: string) => {
+    if (code === 4031) {
+      // 4031: 提醒用户去邮箱激活（可选择重新发送）
+      $q.dialog({
+        title: t('auth.accountNeedsActivation'),
+        message: message || t('auth.accountNeedsActivationMessage'),
+        persistent: true,
+        ok: {
+          label: t('auth.gotoActivationPage'),
+          color: 'primary'
+        },
+        cancel: {
+          label: t('auth.resendActivationEmail'),
+          color: 'secondary',
+          flat: true
+        }
+      }).onOk(() => {
+        router.push(`/auth/activate?email=${encodeURIComponent(email)}`)
+      }).onCancel(() => {
+        resendActivationEmail(email)
+      })
+    } else if (code === 4032) {
+      // 4032: 激活邮件已失效，必须重新发送
+      $q.dialog({
+        title: t('auth.activationEmailExpired'),
+        message: message || t('auth.activationEmailExpiredMessage'),
+        persistent: true,
+        ok: {
+          label: t('auth.resendActivationEmail'),
+          color: 'primary'
+        },
+        cancel: {
+          label: t('auth.gotoActivationPage'),
+          color: 'secondary',
+          flat: true
+        }
+      }).onOk(() => {
+        resendActivationEmail(email)
+      }).onCancel(() => {
+        router.push(`/auth/activate?email=${encodeURIComponent(email)}&expired=1`)
+      })
+    }
+  }
+
+  // 重新发送激活邮件
+  const resendActivationEmail = async (email: string) => {
+    try {
+      const response = await apiService.resendActivationEmail({ email })
+      
+      if (response.data.success) {
+        $q.notify({
+          type: 'positive',
+          message: t('auth.activationEmailResent'),
+          timeout: 3000
+        })
+        
+        // 跳转到激活页面
+        router.push(`/auth/activate?email=${encodeURIComponent(email)}&resent=1`)
+      } else {
+        throw new Error(response.data.message || 'Failed to send')
+      }
+    } catch (error: any) {
+      $q.notify({
+        type: 'negative',
+        message: error.message || t('auth.resendActivationFailed'),
+        timeout: 3000
+      })
+    }
+  }
+
   // 登录
   const login = async () => {
     isLoading.value = true
@@ -101,7 +174,21 @@ export function useAuth() {
             errorMessage = data?.message || 'Invalid email or password. Please check your credentials.'
             break
           case 403:
-            errorMessage = data?.message || 'Account is disabled or not activated.'
+            // 检查是否是账户激活相关的错误 (403 + error_code)
+            // error_code 可能是字符串或数字，都要兼容
+            const errorCode = data?.error_code
+            if (errorCode === 4031 || errorCode === '4031' || errorCode === 4032 || errorCode === '4032') {
+              // 统一转换为数字
+              const numericCode = typeof errorCode === 'string' ? parseInt(errorCode) : errorCode
+              handleActivationError(numericCode, loginForm.email, data.message)
+              return // 不继续执行后面的错误处理
+            }
+            // 兼容处理：如果没有 error_code 但消息提示未激活，也进入激活流程
+            else if (data?.message?.includes('not activated') || data?.message?.includes('activation')) {
+              handleActivationError(4031, loginForm.email, data.message)
+              return
+            }
+            errorMessage = data?.message || 'Account is disabled or access forbidden.'
             break
           case 422:
             errorMessage = data?.message || 'Invalid input data. Please check your email and password format.'
@@ -323,6 +410,8 @@ export function useAuth() {
     forgotPassword,
     verifyEmail,
     resendCode,
-    resetPassword
+    resetPassword,
+    handleActivationError,
+    resendActivationEmail
   }
 }

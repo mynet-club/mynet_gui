@@ -124,6 +124,8 @@ const { t } = useI18n()
 
 const email = ref(route.query.email as string || '')
 const token = ref(route.query.token as string || '')
+// 处理可能的 HTML 编码问题，检查 user_id 和 amp;user_id
+const userId = ref((route.query.user_id as string) || (route.query['amp;user_id'] as string) || '')
 const fromRegister = ref(route.query.from === 'register')
 const activationCode = ref('')
 const isLoading = ref(false)
@@ -168,14 +170,39 @@ const statusConfig = computed(() => {
 })
 
 onMounted(() => {
-  // 如果没有邮箱参数，跳转回注册页面
-  if (!email.value) {
-    router.replace('/auth/register')
-    return
-  }
+  // 调试信息：打印URL参数
+  console.log('🔧 [AccountActivation] URL parameters:', {
+    email: email.value,
+    token: token.value,
+    user_id: userId.value,
+    fromRegister: fromRegister.value,
+    allQuery: route.query
+  })
+  
+  // 详细检查 route.query 对象
+  console.log('🔧 [AccountActivation] route.query keys:', Object.keys(route.query))
+  console.log('🔧 [AccountActivation] route.query.user_id:', route.query.user_id)
+  console.log('🔧 [AccountActivation] route.query["amp;user_id"]:', route.query['amp;user_id'])
+  
+  // 调试条件判断
+  console.log('🔧 [AccountActivation] Condition check:', {
+    'email.value': email.value,
+    'userId.value': userId.value,
+    'token.value': token.value,
+    'email.value || userId.value': email.value || userId.value,
+    '(email.value || userId.value) && token.value': (email.value || userId.value) && token.value
+  })
+  
+  // 暂时注释掉跳转逻辑用于调试
+  // if (!email.value && !userId.value) {
+  //   console.log('🔧 [AccountActivation] No email or user_id, redirecting to register')
+  //   router.replace('/auth/register')
+  //   return
+  // }
 
-  // 如果有token参数，尝试自动激活
-  if (email.value && token.value) {
+  // 如果有token参数，尝试自动激活（支持email或user_id）
+  if ((email.value || userId.value) && token.value) {
+    console.log('🔧 [AccountActivation] Auto-activating with token')
     autoActivate()
   } else if (fromRegister.value) {
     // 从注册页面跳转过来，显示成功提示并开始倒计时
@@ -185,6 +212,8 @@ onMounted(() => {
       timeout: 3000
     })
     startCountdown()
+  } else {
+    console.log('🔧 [AccountActivation] No auto-activation conditions met')
   }
 })
 
@@ -208,10 +237,18 @@ const startCountdown = () => {
 const autoActivate = async () => {
   isAutoActivating.value = true
   try {
-    const response = await apiService.activateAccount({
-      email: email.value,
+    const activationData: any = {
       token: token.value
-    })
+    }
+    
+    // 优先使用email，如果没有则使用user_id
+    if (email.value) {
+      activationData.email = email.value
+    } else if (userId.value) {
+      activationData.user_id = userId.value
+    }
+    
+    const response = await apiService.activateAccount(activationData)
     
     if (response.data.success) {
       isActivated.value = true
@@ -220,6 +257,11 @@ const autoActivate = async () => {
         message: t('auth.activationSuccess'),
         timeout: 3000
       })
+      
+      // 3秒后自动跳转到登录页面
+      setTimeout(() => {
+        router.push('/auth/login')
+      }, 3000)
     } else {
       throw new Error(response.data.message || t('auth.activationFailed'))
     }
@@ -251,6 +293,11 @@ const handleActivation = async () => {
         message: t('auth.activationSuccess'),
         timeout: 3000
       })
+      
+      // 3秒后自动跳转到登录页面
+      setTimeout(() => {
+        router.push('/auth/login')
+      }, 3000)
     } else {
       throw new Error(response.data.message || t('auth.activationFailed'))
     }

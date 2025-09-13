@@ -50,7 +50,11 @@ export default {
     pending: 'Pending',
     maintenance: 'Maintenance',
     unconfigured: 'Unconfigured',
-    notAllocated: 'Not Allocated'
+    notAllocated: 'Not Allocated',
+    seconds: 'seconds',
+    minutes: 'minutes',
+    hours: 'hours',
+    days: 'days'
   },
   settings: {
     language: 'Language Settings',
@@ -109,7 +113,18 @@ export default {
     verificationCodeSent: 'Verification code sent!',
     resendCooldown: 'Resend available in {seconds} seconds',
     verificationSuccess: 'Verification Successful',
-    verificationSuccessSubtitle: 'Your email has been verified. You can now sign in'
+    verificationSuccessSubtitle: 'Your email has been verified. You can now sign in',
+    
+    // Account activation related
+    accountNeedsActivation: 'Account Needs Activation',
+    accountNeedsActivationMessage: 'Your account has not been activated yet. Please check the activation email in your mailbox.',
+    activationEmailExpired: 'Activation Email Expired',
+    activationEmailExpiredMessage: 'Your activation email has expired. A new activation email needs to be resent.',
+    goToEmailCheck: 'Check Email',
+    resendActivationEmail: 'Resend Activation Email',
+    gotoActivationPage: 'Go to Activation Page',
+    activationEmailResent: 'Activation email has been resent, please check your mailbox',
+    resendActivationFailed: 'Failed to resend activation email, please try again later'
   },
   dashboard: {
     title: 'Dashboard',

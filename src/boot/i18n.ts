@@ -27,7 +27,7 @@ const getStoredLocale = (): 'zh-CN' | 'en-US' => {
       return stored
     }
   }
-  return 'en-US'  // 默认使用英文
+  return 'zh-CN'  // 恢复默认使用中文，保持和之前一致
 }
 
 const initialLocale = getStoredLocale()
@@ -38,7 +38,7 @@ const createStableTranslator = () => {
   return (key: string, params?: Record<string, any>): string => {
     const keys = key.split('.')
     const currentLocale = getStoredLocale()
-    let value: any = messages[currentLocale] || messages['en-US']
+    let value: any = messages[currentLocale] || messages['zh-CN']
     
     for (const k of keys) {
       value = value?.[k]
@@ -59,12 +59,18 @@ const createStableTranslator = () => {
 const i18n = createI18n({
   legacy: false,
   locale: initialLocale,
-  fallbackLocale: 'en-US',  // fallback改为英文
+  fallbackLocale: 'zh-CN',  // 恢复fallback为中文，保持和之前一致
   messages: messages,
   globalInjection: true,
   missingWarn: false,
   fallbackWarn: false,
-  silentTranslationWarn: true
+  silentTranslationWarn: true,
+  // 强制运行时模式，避免编译时优化问题
+  allowComposition: true,
+  warnHtmlMessage: false,
+  // 禁用所有编译时优化
+  runtimeOnly: false,
+  compositionOnly: false
 })
 
 // 创建稳定的翻译实例
@@ -129,73 +135,70 @@ export default boot(({ app }: { app: any }) => {
     const stableTranslation = stableTranslator('auth.loginTitle')
     console.log('🌐 [Boot] Stable translation:', stableTranslation)
     
-    if (vueTranslation === 'auth.loginTitle' && stableTranslation !== 'auth.loginTitle') {
-      console.log('🌐 [Boot] Vue i18n failed, applying comprehensive fix...')
+    // 强制修复生产环境翻译问题
+    if (vueTranslation === 'auth.loginTitle' || typeof vueTranslation !== 'string' || vueTranslation.length === 0) {
+      console.log('🌐 [Boot] Vue i18n failed in production, applying comprehensive fix...')
       
       // 1. 修复全局 t() 函数
       const originalGlobalT = i18n.global.t.bind(i18n.global)
       i18n.global.t = (key: string, params?: any) => {
-        const result = originalGlobalT(key, params)
-        if (result === key) {
+        try {
+          const result = originalGlobalT(key, params)
+          if (result === key || typeof result !== 'string' || result.length === 0) {
+            return stableTranslator(key, params)
+          }
+          return result
+        } catch (error) {
+          console.warn('🌐 [Boot] Global t() error, using stable translator:', error)
           return stableTranslator(key, params)
         }
-        return result
       }
       
-      // 2. 拦截并修复所有 useI18n() 创建的局部实例
-      const originalUseI18n = app.config.globalProperties.$i18n?.constructor
-      
-      // 重写 Vue I18n 的内部创建函数
-      if (typeof window !== 'undefined') {
-        // 将我们的修复函数注入到全局，供所有组件使用
-        ;(window as any).__vue_i18n_fix = stableTranslator
-        
-        // 创建一个全局的翻译函数修复器
-        ;(window as any).__fixTranslateFunction = (translateFn: Function) => {
-          return (key: string, params?: any) => {
-            const result = translateFn(key, params)
-            if (result === key) {
-              return stableTranslator(key, params)
-            }
-            return result
-          }
-        }
-      }
-      
-      // 3. 为所有新创建的组件实例修复 t() 函数
+      // 2. 修复所有组件实例的 $t() 函数 - 这是关键！
       app.mixin({
         beforeCreate() {
-          // 在组件创建前修复其 t() 函数
           if (this.$t && typeof this.$t === 'function') {
+            console.log('🌐 [Boot] Patching component $t() function')
             const originalT = this.$t.bind(this)
             this.$t = (key: string, params?: any) => {
-              const result = originalT(key, params)
-              if (result === key) {
+              try {
+                const result = originalT(key, params)
+                if (result === key || typeof result !== 'string' || result.length === 0) {
+                  return stableTranslator(key, params)
+                }
+                return result
+              } catch (error) {
+                console.warn('🌐 [Boot] Component $t() error, using stable translator:', error)
                 return stableTranslator(key, params)
               }
-              return result
             }
           }
         }
       })
       
+      // 3. 为全局提供备用翻译
+      if (typeof window !== 'undefined') {
+        (window as any).__stable_translate = stableTranslator
+        console.log('🌐 [Boot] Stable translator mounted to window.__stable_translate')
+      }
+      
+      // 4. 强制重新设置locale
+      try {
+        i18n.global.locale.value = currentLocale
+        console.log('🌐 [Boot] Forced locale reset to:', currentLocale)
+      } catch (error) {
+        console.warn('🌐 [Boot] Failed to reset locale:', error)
+      }
+      
       // 验证修复效果
       const fixedTranslation = i18n.global.t('auth.loginTitle')
       console.log('🌐 [Boot] Fixed global t() function result:', fixedTranslation)
       
-      if (fixedTranslation !== 'auth.loginTitle') {
+      if (fixedTranslation !== 'auth.loginTitle' && typeof fixedTranslation === 'string') {
         console.log('🌐 [Boot] ✅ Comprehensive t() function fix applied successfully!')
-        console.log('🌐 [Boot] All components should now display translations correctly.')
       }
-      
-      // 为全局提供备用翻译
-      if (typeof window !== 'undefined') {
-        (window as any).__stable_translate = stableTranslator
-      }
-    } else if (vueTranslation !== 'auth.loginTitle') {
-      console.log('🌐 [Boot] ✅ Vue i18n working correctly!')
     } else {
-      console.error('🌐 [Boot] ⚠️ Both translation systems failed!')
+      console.log('🌐 [Boot] ✅ Vue i18n working correctly!')
     }
   })
 })

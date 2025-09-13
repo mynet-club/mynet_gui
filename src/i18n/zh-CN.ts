@@ -51,7 +51,11 @@ export default {
     pending: '待连接',
     maintenance: '维护模式',
     unconfigured: '未完成配置',
-    notAllocated: '未分配'
+    notAllocated: '未分配',
+    seconds: '秒',
+    minutes: '分钟',
+    hours: '小时',
+    days: '天'
   },
   settings: {
     language: '语言设置',
@@ -136,6 +140,15 @@ export default {
     
     // 账号激活相关
     accountActivation: '账号激活',
+    accountNeedsActivation: '账户需要激活',
+    accountNeedsActivationMessage: '您的账户尚未激活，请查看邮箱中的激活邮件。',
+    activationEmailExpired: '激活邮件已失效',
+    activationEmailExpiredMessage: '您的激活邮件已经失效，需要重新发送新的激活邮件。',
+    goToEmailCheck: '去邮箱查看',
+    resendActivationEmail: '重新发送激活邮件',
+    gotoActivationPage: '前往激活页面',
+    activationEmailResent: '激活邮件已重新发送，请查看您的邮箱',
+    resendActivationFailed: '重新发送激活邮件失败，请稍后重试',
     activationInstruction: '请选择激活方式',
     useCode: '使用验证码',
     checkEmail: '查看邮件',

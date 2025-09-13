@@ -15,7 +15,7 @@
               color="primary"
               outline
               icon="edit"
-              label="编辑"
+              label="{{ $t('common.edit') }}"
               :disable="!node || isLoading"
             >
               <q-list>
@@ -104,7 +104,7 @@
               </div>
               <div class="col-6 col-sm-6">
                 <div class="text-caption text-grey-6">最后在线</div>
-                <div class="text-body2">{{ node.last_seen ? formatDate(node.last_seen) : '未知' }}</div>
+                <div class="text-body2">{{ node.last_seen ? formatDate(node.last_seen) : $t('common.unknown') }}</div>
               </div>
               
               <!-- 第三行 -->
@@ -137,7 +137,7 @@
               <!-- 第五行 - 描述 -->
               <div class="col-12" v-if="node.description || node.node_remarks">
                 <div class="text-caption text-grey-6">描述</div>
-                <div class="text-body2">{{ node.description || node.node_remarks || '无描述' }}</div>
+                <div class="text-body2">{{ node.description || node.node_remarks || $t('common.noDescription') }}</div>
               </div>
             </div>
           </q-card-section>
@@ -174,11 +174,11 @@
                   </div>
                   <div class="col-6 col-sm-4">
                     <div class="text-caption text-grey-6">应用版本</div>
-                    <div class="text-body2">{{ node?.node_app_version || '未知' }}</div>
+                    <div class="text-body2">{{ node?.node_app_version || $t('common.unknown') }}</div>
                   </div>
                   <div class="col-6 col-sm-4">
                     <div class="text-caption text-grey-6">监听端口</div>
-                    <div class="text-body2">{{ node?.node_port || node?.port || '未设置' }}</div>
+                    <div class="text-body2">{{ node?.node_port || node?.port || $t('common.notSet') }}</div>
                   </div>
                 </div>
               </div>
@@ -192,16 +192,16 @@
                 <div class="row q-col-gutter-md">
                   <div class="col-6 col-sm-4">
                     <div class="text-caption text-grey-6">CPU型号</div>
-                    <div class="text-body2">{{ deviceInfo.cpu_model || '未知' }}</div>
+                    <div class="text-body2">{{ deviceInfo.cpu_model || $t('common.unknown') }}</div>
                   </div>
                   <div class="col-6 col-sm-4">
                     <div class="text-caption text-grey-6">CPU架构</div>
-                    <div class="text-body2">{{ deviceInfo.cpu_arch || '未知' }}</div>
+                    <div class="text-body2">{{ deviceInfo.cpu_arch || $t('common.unknown') }}</div>
                   </div>
                   <div class="col-6 col-sm-4">
                     <div class="text-caption text-grey-6">CPU核心</div>
                     <div class="text-body2">
-                      {{ deviceInfo.cpu_cores || '未知' }}核
+                      {{ deviceInfo.cpu_cores || $t('common.unknown') }} {{ $t('common.cores') }}
                       <span v-if="deviceInfo.cpu_threads && deviceInfo.cpu_threads !== deviceInfo.cpu_cores">
                         / {{ deviceInfo.cpu_threads }}线程
                       </span>
@@ -235,11 +235,11 @@
                   </div>
                   <div class="col-6 col-sm-4">
                     <div class="text-caption text-grey-6">内核版本</div>
-                    <div class="text-body2">{{ deviceInfo.kernel_version || '未知' }}</div>
+                    <div class="text-body2">{{ deviceInfo.kernel_version || $t('common.unknown') }}</div>
                   </div>
                   <div class="col-6 col-sm-4">
                     <div class="text-caption text-grey-6">系统架构</div>
-                    <div class="text-body2">{{ deviceInfo.system_arch || '未知' }}</div>
+                    <div class="text-body2">{{ deviceInfo.system_arch || $t('common.unknown') }}</div>
                   </div>
                   <div class="col-6 col-sm-4" v-if="deviceInfo.libc_type">
                     <div class="text-caption text-grey-6">C库</div>
@@ -277,7 +277,7 @@
                         size="xs"
                         class="q-ml-xs"
                       >
-                        {{ deviceInfo.firewall_enabled ? '启用' : '禁用' }}
+                        {{ deviceInfo.firewall_enabled ? $t('common.enabled') : $t('common.disabled') }}
                       </q-chip>
                     </div>
                   </div>
@@ -289,7 +289,7 @@
                         text-color="white" 
                         size="xs"
                       >
-                        {{ deviceInfo.ip_forwarding ? '启用' : '禁用' }}
+                        {{ deviceInfo.ip_forwarding ? $t('common.enabled') : $t('common.disabled') }}
                       </q-chip>
                     </div>
                   </div>
@@ -319,7 +319,7 @@
                 outline
                 size="sm"
                 icon="settings"
-                label="网络配置"
+                label="{{ $t('nodes.networkConfig') }}"
                 @click="goToNetworkConfig"
                 :disable="!node || isLoading"
               />
@@ -328,7 +328,7 @@
             <div v-else class="row q-col-gutter-md">
               <div class="col-6 col-sm-6">
                 <div class="text-caption text-grey-6">虚拟网卡名</div>
-                <div class="text-body2">{{ networkConfig?.ifname || '未设置' }}</div>
+                <div class="text-body2">{{ networkConfig?.ifname || $t('common.notSet') }}</div>
               </div>
               <div class="col-6 col-sm-6">
                 <div class="text-caption text-grey-6">虚拟IP地址</div>
@@ -342,7 +342,7 @@
               </div>
               <div class="col-6 col-sm-6">
                 <div class="text-caption text-grey-6">IP组序号</div>
-                <div class="text-body2">{{ networkConfig?.ip_group_sequence_number || node?.ip_group_sequence_number || '未设置' }}</div>
+                <div class="text-body2">{{ networkConfig?.ip_group_sequence_number || node?.ip_group_sequence_number || $t('common.notSet') }}</div>
               </div>
               
               <!-- LAN IPs -->
@@ -397,7 +397,7 @@
                 outline
                 size="sm"
                 icon="settings"
-                label="IP管理"
+                label="{{ $t('nodes.fields.ipManagement') }}"
                 @click="goToIPManagement"
                 :disable="!node || isLoading"
               />
@@ -434,7 +434,7 @@
                     size="xs"
                     class="q-ml-xs"
                   >
-                    {{ service.is_active ? '活跃' : '停用' }}
+                    {{ service.is_active ? $t('common.active') : $t('common.inactive') }}
                   </q-chip>
                 </div>
               </div>
@@ -472,7 +472,7 @@
                 outline
                 block
                 icon="refresh"
-                label="刷新数据"
+                label="{{ $t('nodes.refreshData') }}"
                 @click="refreshData"
                 :loading="isRefreshing"
               />
@@ -487,13 +487,13 @@
       <q-card>
         <q-card-section class="row items-center">
           <q-avatar icon="warning" color="negative" text-color="white" />
-          <span class="q-ml-sm">确定要删除节点 "{{ node?.node_name }}" 吗？</span>
+          <span class="q-ml-sm">{{ $t('nodes.deleteConfirm', { name: node?.node_name }) }}</span>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="取消" v-close-popup />
+          <q-btn flat :label="$t('common.cancel')" v-close-popup />
           <q-btn
             flat
-            label="删除"
+            :label="$t('common.delete')"
             color="negative"
             @click="deleteNode"
             :loading="isDeleting"
@@ -508,11 +508,13 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import { useNode, useNotify } from '../../composables'
 import { NodeStatus, VpnType, NODE_STATUS, NODE_TYPE, NODE_TYPE_NAMES, type NodeIndexService, type NodeDeviceInfo } from '../../types/node'
 import { nodeService } from '../../services/node/nodeService'
 import type { NodeNetworkConfig } from '../../types/node'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const $q = useQuasar()
@@ -588,22 +590,22 @@ const getStatusText = (status?: NodeStatus | string | number) => {
   // 处理数字状态码
   if (typeof status === 'number') {
     switch (status) {
-      case NODE_STATUS.UNCONFIGURED: return '未完成配置'
-      case NODE_STATUS.DISABLED: return '已禁用'
-      case NODE_STATUS.ENABLED: return '已启用'
-      case NODE_STATUS.ONLINE: return '在线'
-      case NODE_STATUS.MAINTENANCE: return '维护模式'
-      default: return '未知'
+      case NODE_STATUS.UNCONFIGURED: return t('nodes.status.unconfigured')
+      case NODE_STATUS.DISABLED: return t('nodes.status.disabled')
+      case NODE_STATUS.ENABLED: return t('nodes.status.enabled')
+      case NODE_STATUS.ONLINE: return t('nodes.status.online')
+      case NODE_STATUS.MAINTENANCE: return t('nodes.status.maintenance')
+      default: return t('common.unknown')
     }
   }
   
   // 处理字符串状态
   switch (status) {
-    case 'active': return '在线'
-    case 'inactive': return '离线'
-    case 'pending': return '待连接'
-    case 'maintenance': return '维护模式'
-    default: return '未知'
+    case 'active': return t('nodes.status.active')
+    case 'inactive': return t('nodes.status.inactive')
+    case 'pending': return t('nodes.status.pending')
+    case 'maintenance': return t('nodes.status.maintenance')
+    default: return t('common.unknown')
   }
 }
 
@@ -622,7 +624,7 @@ const getVpnTypeText = (vpnType?: VpnType | string) => {
     case 'gnb': return 'GNB'
     case 'wireguard': return 'WireGuard'
     case 'openvpn': return 'OpenVPN'
-    default: return '未知'
+    default: return t('common.unknown')
   }
 }
 
@@ -686,24 +688,24 @@ const formatBytes = (bytes?: number) => {
 }
 
 const formatUptime = (seconds?: number) => {
-  if (!seconds) return '0 秒'
+  if (!seconds) return `0 ${t('common.seconds')}`
   
   const days = Math.floor(seconds / 86400)
   const hours = Math.floor((seconds % 86400) / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
   
   if (days > 0) {
-    return `${days}天 ${hours}小时`
+    return `${days}${t('common.days')} ${hours}${t('common.hours')}`
   } else if (hours > 0) {
-    return `${hours}小时 ${minutes}分钟`
+    return `${hours}${t('common.hours')} ${minutes}${t('common.minutes')}`
   } else {
-    return `${minutes}分钟`
+    return `${minutes}${t('common.minutes')}`
   }
 }
 
 // 设备信息格式化函数
 const formatMemory = (mb?: number) => {
-  if (!mb) return '未知'
+  if (!mb) return t('common.unknown')
   
   if (mb >= 1024) {
     return `${(mb / 1024).toFixed(1)} GB`
@@ -834,7 +836,7 @@ const getVirtualIPWithSequence = () => {
   const virtualIP = networkConfig.value?.node_ip || node.value?.node_ip || node.value?.ip_address
   const sequence = networkConfig.value?.ip_group_sequence_number || node.value?.ip_group_sequence_number
   
-  if (!virtualIP) return '未分配'
+  if (!virtualIP) return t('common.notAllocated')
   if (!sequence) return virtualIP
   
   return `${virtualIP}@${sequence}`
@@ -852,7 +854,7 @@ const getEndpointAddress = () => {
     return publicIPs[0] // 取第一个公网IP
   }
   
-  return '未设置'
+  return t('common.notSet')
 }
 
 // 新增的快速操作方法
@@ -874,10 +876,10 @@ const refreshData = async () => {
       loadDeviceInfo(),
       loadRouteCount()
     ])
-    notifySuccess('数据已刷新')
+    notifySuccess(t('nodes.dataRefreshed'))
   } catch (error) {
     console.error('刷新数据失败:', error)
-    notifyError('刷新数据失败')
+    notifyError(t('nodes.refreshFailed'))
   } finally {
     isRefreshing.value = false
   }
@@ -894,7 +896,7 @@ const deleteNode = async () => {
     isDeleting.value = true
     const success = await removeNode()
     if (success) {
-      notifySuccess('节点删除成功')
+      notifySuccess(t('nodes.deleteSuccess'))
       router.push('/nodes')
     }
   } catch (error) {

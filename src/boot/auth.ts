@@ -1,6 +1,7 @@
 import { boot } from 'quasar/wrappers'
 import { LocalStorage } from 'quasar'
 import { tokenManager } from '../utils/tokenManager'
+import { APP_CONFIG } from '../config/app'
 
 // 立即执行的日志，确认文件被加载
 console.log('🔐 [Boot] Auth module loaded and executing...')
@@ -68,7 +69,8 @@ export default boot(async ({ router, app }) => {
       // 检查和修复头像URL
       if (user.avatar && user.avatar.startsWith('blob:')) {
         console.log('🔐 [Boot] Blob avatar URL detected, replacing with backend URL')
-        user.avatar = 'http://localhost:8000/api/v1/assets/avatar'
+        const apiBaseUrl = APP_CONFIG.api.baseUrl.replace('/api', '')
+        user.avatar = `${apiBaseUrl}/api/v1/assets/avatar`
         // 更新LocalStorage
         LocalStorage.set('user_info', JSON.stringify(user))
       }

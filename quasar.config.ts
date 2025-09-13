@@ -57,6 +57,12 @@ export default defineConfig((/* ctx */) => {
         VITE_REVERB_SCHEME: process.env.VITE_REVERB_SCHEME
       },
       
+      // extendViteConf (viteConf) {},
+      // viteVuePluginOptions: {},
+
+      // 移除Vue i18n编译插件，使用纯运行时模式
+      // vitePlugins: []
+      
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
       // publicPath: '/',
@@ -68,7 +74,6 @@ export default defineConfig((/* ctx */) => {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
 
       // 移除Vue i18n编译插件，使用纯运行时模式

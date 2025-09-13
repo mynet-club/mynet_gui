@@ -30,7 +30,7 @@ export const APP_CONFIG = {
   
   // API相关配置
   api: {
-    baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
+    baseUrl: import.meta.env.VITE_API_BASE_URL,
     timeout: 30000
   },
   

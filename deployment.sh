@@ -11,7 +11,7 @@ set -e  # 遇到错误立即退出
 PROJECT_NAME="MyNet Frontend"
 BUILD_DIR="dist/spa"
 REMOTE_USER="root"
-REMOTE_HOST="18.138.109.228"
+REMOTE_HOST="52.77.179.176"
 REMOTE_PATH="/data/app/mynet.club/my/public"
 NGINX_PATH="/usr/sbin/nginx"
 WEB_USER="www"
