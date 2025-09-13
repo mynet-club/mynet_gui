@@ -570,16 +570,12 @@ const getThemeLabel = () => {
 
 const changeLanguage = async (newLocale: string) => {
   try {
-    // 使用 Vue I18n 的 locale 设置
-    locale.value = newLocale
+    // 使用统一的 setLocale 函数
+    const { setLocale } = await import('../boot/i18n')
+    await setLocale(newLocale as 'zh-CN' | 'en-US')
+    
+    // 更新当前语言状态
     currentLanguage.value = newLocale
-    
-    // 保存到 LocalStorage
-    LocalStorage.set('locale', newLocale)
-    
-    // 更新文档属性
-    document.documentElement.lang = newLocale
-    document.documentElement.setAttribute('data-locale', newLocale)
     
     // 使用 $q.notify
     $q.notify({
@@ -697,7 +693,7 @@ onMounted(async () => {
   initializeTheme()
   
   // 确保语言设置正确
-  const savedLocale = LocalStorage.getItem('locale') as string || 'zh-CN'
+  const savedLocale = LocalStorage.getItem('app-locale') as string || 'zh-CN'
   if (locale.value !== savedLocale) {
     locale.value = savedLocale
     currentLanguage.value = savedLocale
