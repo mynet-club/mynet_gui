@@ -295,6 +295,75 @@ export default {
       networkInterface: '网络接口',
       ipGroupSequence: 'IP组序号',
       ipManagement: 'IP管理'
+    },
+    
+    // 节点详情页
+    detail: {
+      title: '节点详情',
+      basicInfo: '基本信息',
+      nodeConfig: '节点配置',
+      networkConfig: '网络配置',
+      keyManagement: '密钥管理',
+      deviceInfo: '设备信息',
+      networkInfo: '网络信息',
+      ipGrouping: 'IP分组',
+      statistics: '统计信息',
+      quickActions: '快速操作',
+      
+      // 基本信息字段
+      nodeName: '节点名称',
+      nodeId: '节点ID',
+      status: '状态',
+      lastOnline: '最后在线',
+      createdAt: '创建时间',
+      updatedAt: '更新时间',
+      nodeType: '节点类型',
+      
+      // 应用信息
+      appInfo: '应用信息',
+      vpnType: 'VPN类型',
+      appVersion: '应用版本',
+      listenPort: '监听端口',
+      
+      // 硬件信息
+      hardwareInfo: '硬件信息',
+      cpuModel: 'CPU型号',
+      cpuArch: 'CPU架构',
+      cpuCores: 'CPU核心',
+      threads: '线程',
+      totalMemory: '内存总量',
+      availableMemory: '可用内存',
+      virtualization: '虚拟化',
+      
+      // 系统信息
+      systemInfo: '系统信息',
+      operatingSystem: '操作系统',
+      kernelVersion: '内核版本',
+      systemArch: '系统架构',
+      cLibrary: 'C库',
+      containerType: '容器类型',
+      infoCollectedAt: '信息采集时间',
+      
+      // 网络设备信息
+      networkDevice: '网络设备',
+      nicCount: '网卡数量',
+      firewall: '防火墙',
+      ipForwarding: 'IP转发',
+      units: '个',
+      
+      // 网络字段
+      virtualInterface: '虚拟网卡名',
+      virtualIpAddress: '虚拟IP地址',
+      endpointAddress: '端点地址',
+      ipGroupSequence: 'IP组序号',
+      lanIpAddress: 'LAN IP地址',
+      publicIpAddress: '公网IP地址',
+      
+      // 消息
+      noDeviceInfo: '暂无设备信息',
+      deviceInfoNote: '设备信息需要客户端上报',
+      statisticsInDevelopment: '统计功能开发中...',
+      defaultGroup: '默认'
     }
   },
   navigation: {

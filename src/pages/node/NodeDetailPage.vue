@@ -7,7 +7,7 @@
         <div class="row items-center justify-between q-mb-md">
           <div class="text-h4">
             <q-icon name="device_hub" class="q-mr-sm" />
-            节点详情
+            {{ $t('nodes.detail.title') }}
           </div>
           <div class="row q-gutter-sm">
             <!-- 编辑下拉菜单 -->
@@ -24,7 +24,7 @@
                     <q-icon name="info" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>基本信息</q-item-label>
+                    <q-item-label>{{ $t('nodes.detail.basicInfo') }}</q-item-label>
                   </q-item-section>
                 </q-item>
                 <q-item clickable v-close-popup @click="goToEditConfig">
@@ -32,7 +32,7 @@
                     <q-icon name="settings" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>节点配置</q-item-label>
+                    <q-item-label>{{ $t('nodes.detail.nodeConfig') }}</q-item-label>
                   </q-item-section>
                 </q-item>
                 <q-item clickable v-close-popup @click="goToEditNetwork">
@@ -40,7 +40,7 @@
                     <q-icon name="router" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>网络配置</q-item-label>
+                    <q-item-label>{{ $t('nodes.detail.networkConfig') }}</q-item-label>
                   </q-item-section>
                 </q-item>
                 <q-item clickable v-close-popup @click="goToEditKeys">
@@ -48,7 +48,7 @@
                     <q-icon name="vpn_key" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>密钥管理</q-item-label>
+                    <q-item-label>{{ $t('nodes.detail.keyManagement') }}</q-item-label>
                   </q-item-section>
                 </q-item>
               </q-list>
@@ -60,7 +60,7 @@
               :disable="!node || isLoading"
             >
               <q-icon name="delete" class="q-mr-xs" />
-              删除
+              {{ $t('common.delete') }}
             </q-btn>
           </div>
         </div>
@@ -70,17 +70,17 @@
           <q-card-section>
             <div class="row items-center q-mb-md">
               <q-icon name="info" class="q-mr-sm text-primary" size="sm" />
-              <div class="text-h6">基本信息</div>
+              <div class="text-h6">{{ $t('nodes.detail.basicInfo') }}</div>
             </div>
             <q-skeleton-loader v-if="isLoading" type="QCard" />
             <div v-else-if="node" class="row q-col-gutter-md">
               <!-- 第一行 -->
               <div class="col-6 col-sm-6">
-                <div class="text-caption text-grey-6">节点名称</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.nodeName') }}</div>
                 <div class="text-body1 text-weight-medium">{{ node.node_name }}</div>
               </div>
               <div class="col-6 col-sm-6">
-                <div class="text-caption text-grey-6">节点ID</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.nodeId') }}</div>
                 <div class="text-body2">
                   <q-chip color="blue-grey-2" text-color="dark" square size="sm">
                     {{ node.node_id }}
@@ -90,7 +90,7 @@
               
               <!-- 第二行 -->
               <div class="col-6 col-sm-6">
-                <div class="text-caption text-grey-6">状态</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.status') }}</div>
                 <div class="text-body2">
                   <q-chip
                     :color="getStatusColor(node.node_status || node.status)"
@@ -103,23 +103,23 @@
                 </div>
               </div>
               <div class="col-6 col-sm-6">
-                <div class="text-caption text-grey-6">最后在线</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.lastOnline') }}</div>
                 <div class="text-body2">{{ node.last_seen ? formatDate(node.last_seen) : $t('common.unknown') }}</div>
               </div>
               
               <!-- 第三行 -->
               <div class="col-6 col-sm-6">
-                <div class="text-caption text-grey-6">创建时间</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.createdAt') }}</div>
                 <div class="text-body2">{{ formatDate(node.created_at) }}</div>
               </div>
               <div class="col-6 col-sm-6">
-                <div class="text-caption text-grey-6">更新时间</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.updatedAt') }}</div>
                 <div class="text-body2">{{ formatDate(node.updated_at) }}</div>
               </div>
               
               <!-- 第四行 - 节点类型 -->
               <div class="col-12" v-if="getNodeTypeNames(node.node_type).length > 0">
-                <div class="text-caption text-grey-6">节点类型</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.nodeType') }}</div>
                 <div class="text-body2 q-pt-xs">
                   <q-chip
                     v-for="typeName in getNodeTypeNames(node.node_type)"
@@ -136,7 +136,7 @@
               
               <!-- 第五行 - 描述 -->
               <div class="col-12" v-if="node.description || node.node_remarks">
-                <div class="text-caption text-grey-6">描述</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.fields.description') }}</div>
                 <div class="text-body2">{{ node.description || node.node_remarks || $t('common.noDescription') }}</div>
               </div>
             </div>
@@ -148,7 +148,7 @@
           <q-card-section>
             <div class="row items-center q-mb-md">
               <q-icon name="computer" class="q-mr-sm text-secondary" size="sm" />
-              <div class="text-h6">设备信息</div>
+              <div class="text-h6">{{ $t('nodes.detail.deviceInfo') }}</div>
             </div>
             <q-skeleton-loader v-if="isLoading || loadingDeviceInfo" type="QCard" />
             <div v-else-if="deviceInfo || node" class="column q-gutter-md">
@@ -157,11 +157,11 @@
               <div class="q-pa-sm rounded-borders" style="background-color: rgba(33, 150, 243, 0.1);">
                 <div class="text-subtitle2 text-primary q-mb-sm">
                   <q-icon name="apps" class="q-mr-xs" />
-                  应用信息
+                  {{ $t('nodes.detail.appInfo') }}
                 </div>
                 <div class="row q-col-gutter-md">
                   <div class="col-6 col-sm-4">
-                    <div class="text-caption text-grey-6">VPN类型</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.vpnType') }}</div>
                     <div class="text-body2">
                       <q-chip 
                         :color="getVpnTypeColor(node?.vpn_type)" 
@@ -173,11 +173,11 @@
                     </div>
                   </div>
                   <div class="col-6 col-sm-4">
-                    <div class="text-caption text-grey-6">应用版本</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.appVersion') }}</div>
                     <div class="text-body2">{{ node?.node_app_version || $t('common.unknown') }}</div>
                   </div>
                   <div class="col-6 col-sm-4">
-                    <div class="text-caption text-grey-6">监听端口</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.listenPort') }}</div>
                     <div class="text-body2">{{ node?.node_port || node?.port || $t('common.notSet') }}</div>
                   </div>
                 </div>
@@ -187,36 +187,36 @@
               <div v-if="deviceInfo" class="q-pa-sm rounded-borders" style="background-color: rgba(76, 175, 80, 0.1);">
                 <div class="text-subtitle2 text-green q-mb-sm">
                   <q-icon name="memory" class="q-mr-xs" />
-                  硬件信息
+                  {{ $t('nodes.detail.hardwareInfo') }}
                 </div>
                 <div class="row q-col-gutter-md">
                   <div class="col-6 col-sm-4">
-                    <div class="text-caption text-grey-6">CPU型号</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.cpuModel') }}</div>
                     <div class="text-body2">{{ deviceInfo.cpu_model || $t('common.unknown') }}</div>
                   </div>
                   <div class="col-6 col-sm-4">
-                    <div class="text-caption text-grey-6">CPU架构</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.cpuArch') }}</div>
                     <div class="text-body2">{{ deviceInfo.cpu_arch || $t('common.unknown') }}</div>
                   </div>
                   <div class="col-6 col-sm-4">
-                    <div class="text-caption text-grey-6">CPU核心</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.cpuCores') }}</div>
                     <div class="text-body2">
                       {{ deviceInfo.cpu_cores || $t('common.unknown') }} {{ $t('common.cores') }}
                       <span v-if="deviceInfo.cpu_threads && deviceInfo.cpu_threads !== deviceInfo.cpu_cores">
-                        / {{ deviceInfo.cpu_threads }}线程
+                        / {{ deviceInfo.cpu_threads }}{{ $t('nodes.detail.threads') }}
                       </span>
                     </div>
                   </div>
                   <div class="col-6 col-sm-4">
-                    <div class="text-caption text-grey-6">内存总量</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.totalMemory') }}</div>
                     <div class="text-body2">{{ formatMemory(deviceInfo.memory_total_mb) }}</div>
                   </div>
                   <div class="col-6 col-sm-4">
-                    <div class="text-caption text-grey-6">可用内存</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.availableMemory') }}</div>
                     <div class="text-body2">{{ formatMemory(deviceInfo.memory_free_mb) }}</div>
                   </div>
                   <div class="col-6 col-sm-4" v-if="deviceInfo.virtualization">
-                    <div class="text-caption text-grey-6">虚拟化</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.virtualization') }}</div>
                     <div class="text-body2">{{ deviceInfo.virtualization }}</div>
                   </div>
                 </div>
@@ -226,31 +226,31 @@
               <div v-if="deviceInfo" class="q-pa-sm rounded-borders" style="background-color: rgba(255, 152, 0, 0.1);">
                 <div class="text-subtitle2 text-orange q-mb-sm">
                   <q-icon name="desktop_windows" class="q-mr-xs" />
-                  系统信息
+                  {{ $t('nodes.detail.systemInfo') }}
                 </div>
                 <div class="row q-col-gutter-md">
                   <div class="col-6 col-sm-4">
-                    <div class="text-caption text-grey-6">操作系统</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.operatingSystem') }}</div>
                     <div class="text-body2">{{ formatOSInfo(deviceInfo) }}</div>
                   </div>
                   <div class="col-6 col-sm-4">
-                    <div class="text-caption text-grey-6">内核版本</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.kernelVersion') }}</div>
                     <div class="text-body2">{{ deviceInfo.kernel_version || $t('common.unknown') }}</div>
                   </div>
                   <div class="col-6 col-sm-4">
-                    <div class="text-caption text-grey-6">系统架构</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.systemArch') }}</div>
                     <div class="text-body2">{{ deviceInfo.system_arch || $t('common.unknown') }}</div>
                   </div>
                   <div class="col-6 col-sm-4" v-if="deviceInfo.libc_type">
-                    <div class="text-caption text-grey-6">C库</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.cLibrary') }}</div>
                     <div class="text-body2">{{ formatLibcInfo(deviceInfo) }}</div>
                   </div>
                   <div class="col-6 col-sm-4" v-if="deviceInfo.container_type">
-                    <div class="text-caption text-grey-6">容器类型</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.containerType') }}</div>
                     <div class="text-body2">{{ deviceInfo.container_type }}</div>
                   </div>
                   <div class="col-6 col-sm-4" v-if="deviceInfo.collected_at">
-                    <div class="text-caption text-grey-6">信息采集时间</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.infoCollectedAt') }}</div>
                     <div class="text-body2">{{ formatDate(deviceInfo.collected_at) }}</div>
                   </div>
                 </div>
@@ -260,15 +260,15 @@
               <div v-if="deviceInfo" class="q-pa-sm rounded-borders" style="background-color: rgba(156, 39, 176, 0.1);">
                 <div class="text-subtitle2 text-purple q-mb-sm">
                   <q-icon name="router" class="q-mr-xs" />
-                  网络设备
+                  {{ $t('nodes.detail.networkDevice') }}
                 </div>
                 <div class="row q-col-gutter-md">
                   <div class="col-6 col-sm-4" v-if="deviceInfo.nic_count">
-                    <div class="text-caption text-grey-6">网卡数量</div>
-                    <div class="text-body2">{{ deviceInfo.nic_count }} 个</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.nicCount') }}</div>
+                    <div class="text-body2">{{ deviceInfo.nic_count }} {{ $t('nodes.detail.units') }}</div>
                   </div>
                   <div class="col-6 col-sm-4" v-if="deviceInfo.firewall_type">
-                    <div class="text-caption text-grey-6">防火墙</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.firewall') }}</div>
                     <div class="text-body2">
                       {{ deviceInfo.firewall_type }}
                       <q-chip 
@@ -282,7 +282,7 @@
                     </div>
                   </div>
                   <div class="col-6 col-sm-4">
-                    <div class="text-caption text-grey-6">IP转发</div>
+                    <div class="text-caption text-grey-6">{{ $t('nodes.detail.ipForwarding') }}</div>
                     <div class="text-body2">
                       <q-chip 
                         :color="deviceInfo.ip_forwarding ? 'positive' : 'negative'" 
@@ -299,8 +299,8 @@
               <!-- 无设备信息时的占位 -->
               <div v-if="!deviceInfo" class="text-center q-pa-lg text-grey-6">
                 <q-icon name="device_unknown" size="md" class="q-mb-sm" />
-                <div>暂无设备信息</div>
-                <div class="text-caption">设备信息需要客户端上报</div>
+                <div>{{ $t('nodes.detail.noDeviceInfo') }}</div>
+                <div class="text-caption">{{ $t('nodes.detail.deviceInfoNote') }}</div>
               </div>
             </div>
           </q-card-section>
@@ -312,7 +312,7 @@
             <div class="row items-center justify-between q-mb-md">
               <div class="row items-center">
                 <q-icon name="network_check" class="q-mr-sm text-green" size="sm" />
-                <div class="text-h6">网络信息</div>
+                <div class="text-h6">{{ $t('nodes.detail.networkInfo') }}</div>
               </div>
               <q-btn
                 color="green"
@@ -327,27 +327,27 @@
             <q-skeleton-loader v-if="isLoading || loadingNetworkConfig" type="QCard" />
             <div v-else class="row q-col-gutter-md">
               <div class="col-6 col-sm-6">
-                <div class="text-caption text-grey-6">虚拟网卡名</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.virtualInterface') }}</div>
                 <div class="text-body2">{{ networkConfig?.ifname || $t('common.notSet') }}</div>
               </div>
               <div class="col-6 col-sm-6">
-                <div class="text-caption text-grey-6">虚拟IP地址</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.virtualIpAddress') }}</div>
                 <div class="text-body2">
                   {{ getVirtualIPWithSequence() }}
                 </div>
               </div>
               <div class="col-6 col-sm-6">
-                <div class="text-caption text-grey-6">端点地址</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.endpointAddress') }}</div>
                 <div class="text-body2">{{ getEndpointAddress() }}</div>
               </div>
               <div class="col-6 col-sm-6">
-                <div class="text-caption text-grey-6">IP组序号</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.ipGroupSequence') }}</div>
                 <div class="text-body2">{{ networkConfig?.ip_group_sequence_number || node?.ip_group_sequence_number || $t('common.notSet') }}</div>
               </div>
               
               <!-- LAN IPs -->
               <div v-if="networkConfig?.lan_ips && networkConfig.lan_ips.length > 0" class="col-12">
-                <div class="text-caption text-grey-6">LAN IP地址</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.lanIpAddress') }}</div>
                 <div class="text-body2 q-pt-xs">
                   <q-chip 
                     v-for="(lanIp, index) in (networkConfig.lan_ips || []).filter((ip: string) => ip.trim())" 
@@ -364,7 +364,7 @@
               
               <!-- Public IPs -->
               <div v-if="(networkConfig?.public_ips && networkConfig.public_ips.length > 0) || node?.public_ip" class="col-12">
-                <div class="text-caption text-grey-6">公网IP地址</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.detail.publicIpAddress') }}</div>
                 <div class="text-body2 q-pt-xs">
                   <q-chip 
                     v-for="(publicIp, index) in getPublicIPs()" 
@@ -390,7 +390,7 @@
             <div class="row items-center justify-between q-mb-md">
               <div class="row items-center">
                 <q-icon name="dns" class="q-mr-sm text-secondary" size="sm" />
-                <div class="text-h6">IP分组</div>
+                <div class="text-h6">{{ $t('nodes.detail.ipGrouping') }}</div>
               </div>
               <q-btn
                 color="secondary"
@@ -426,7 +426,7 @@
                     text-color="white" 
                     size="xs"
                   >
-                    默认
+                    {{ $t('nodes.detail.defaultGroup') }}
                   </q-chip>
                   <q-chip 
                     :color="service.is_active ? 'positive' : 'grey'" 
@@ -447,11 +447,11 @@
           <q-card-section>
             <div class="row items-center q-mb-md">
               <q-icon name="analytics" class="q-mr-sm text-purple" size="sm" />
-              <div class="text-h6">统计信息</div>
+              <div class="text-h6">{{ $t('nodes.detail.statistics') }}</div>
             </div>
             <div class="text-center q-pa-lg text-grey-6">
               <q-icon name="construction" size="md" class="q-mb-sm" />
-              <div>统计功能开发中...</div>
+              <div>{{ $t('nodes.detail.statisticsInDevelopment') }}</div>
             </div>
           </q-card-section>
         </q-card>
@@ -464,7 +464,7 @@
           <q-card-section>
             <div class="row items-center q-mb-md">
               <q-icon name="flash_on" class="q-mr-sm text-orange" size="sm" />
-              <div class="text-h6">快速操作</div>
+              <div class="text-h6">{{ $t('nodes.detail.quickActions') }}</div>
             </div>
             <div class="q-gutter-sm">
               <q-btn
@@ -725,7 +725,7 @@ const formatOSInfo = (deviceInfo: NodeDeviceInfo) => {
     parts.push(deviceInfo.os_version)
   }
   
-  return parts.length > 0 ? parts.join(' ') : '未知'
+  return parts.length > 0 ? parts.join(' ') : t('common.unknown')
 }
 
 const formatLibcInfo = (deviceInfo: NodeDeviceInfo) => {
@@ -739,7 +739,7 @@ const formatLibcInfo = (deviceInfo: NodeDeviceInfo) => {
     parts.push(deviceInfo.libc_version)
   }
   
-  return parts.length > 0 ? parts.join(' ') : '未知'
+  return parts.length > 0 ? parts.join(' ') : t('common.unknown')
 }
 
 // 数据加载函数

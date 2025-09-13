@@ -205,6 +205,75 @@ export default {
       networkInterface: 'Network Interface',
       ipGroupSequence: 'IP Group Sequence',
       ipManagement: 'IP Management'
+    },
+    
+    // Node detail page
+    detail: {
+      title: 'Node Details',
+      basicInfo: 'Basic Information',
+      nodeConfig: 'Node Configuration',
+      networkConfig: 'Network Configuration',
+      keyManagement: 'Key Management',
+      deviceInfo: 'Device Information',
+      networkInfo: 'Network Information',
+      ipGrouping: 'IP Grouping',
+      statistics: 'Statistics',
+      quickActions: 'Quick Actions',
+      
+      // Basic info fields
+      nodeName: 'Node Name',
+      nodeId: 'Node ID',
+      status: 'Status',
+      lastOnline: 'Last Online',
+      createdAt: 'Created At',
+      updatedAt: 'Updated At',
+      nodeType: 'Node Type',
+      
+      // Application info
+      appInfo: 'Application Information',
+      vpnType: 'VPN Type',
+      appVersion: 'App Version',
+      listenPort: 'Listen Port',
+      
+      // Hardware info
+      hardwareInfo: 'Hardware Information',
+      cpuModel: 'CPU Model',
+      cpuArch: 'CPU Architecture',
+      cpuCores: 'CPU Cores',
+      threads: 'threads',
+      totalMemory: 'Total Memory',
+      availableMemory: 'Available Memory',
+      virtualization: 'Virtualization',
+      
+      // System info
+      systemInfo: 'System Information',
+      operatingSystem: 'Operating System',
+      kernelVersion: 'Kernel Version',
+      systemArch: 'System Architecture',
+      cLibrary: 'C Library',
+      containerType: 'Container Type',
+      infoCollectedAt: 'Information Collected At',
+      
+      // Network device info
+      networkDevice: 'Network Device',
+      nicCount: 'Network Cards',
+      firewall: 'Firewall',
+      ipForwarding: 'IP Forwarding',
+      units: 'units',
+      
+      // Network fields
+      virtualInterface: 'Virtual Interface',
+      virtualIpAddress: 'Virtual IP Address',
+      endpointAddress: 'Endpoint Address',
+      ipGroupSequence: 'IP Group Sequence',
+      lanIpAddress: 'LAN IP Address',
+      publicIpAddress: 'Public IP Address',
+      
+      // Messages
+      noDeviceInfo: 'No device information available',
+      deviceInfoNote: 'Device information needs to be reported by the client',
+      statisticsInDevelopment: 'Statistics feature is under development...',
+      defaultGroup: 'Default'
     }
   },
   navigation: {
