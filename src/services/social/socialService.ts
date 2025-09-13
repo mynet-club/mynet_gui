@@ -76,6 +76,12 @@ export const socialService = {
     return response.data.data
   },
 
+  // 删除邀请码
+  async deleteInvitation(invitationId: string | number): Promise<BaseResponse> {
+    const response = await api.delete(`/social/invitation/${invitationId}`)
+    return response.data
+  },
+
   // 获取好友的节点
   async getFriendNodes(friendId: string): Promise<Node[]> {
     const response = await api.get(`/social/friends/${friendId}/nodes`)

@@ -13,10 +13,12 @@ export default boot(({ app }) => {
       
       switch (status) {
         case 401:
-          // 未授权，清除认证信息并跳转到登录页
+          // 未授权，清除认证信息，但不自动跳转
           localStorage.removeItem('auth_token')
           localStorage.removeItem('user_info')
-          window.location.href = '/auth/login'
+          // 移除强制跳转，让路由守卫或组件处理认证失败
+          // window.location.href = '/auth/login'
+          console.warn('🔧 [Axios] 401 Unauthorized - Auth tokens cleared')
           break
         case 403:
           // 权限不足

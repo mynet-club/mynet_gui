@@ -1,31 +1,61 @@
 <template>
-  <q-page class="ippools-page">
-    <div class="q-pa-md">
-      <!-- 页面标题 -->
-      <div class="row items-center justify-between q-mb-lg">
-        <div class="col">
-          <h4 class="q-my-none">{{ $t('ippools.title') }}</h4>
-          <p class="text-grey-6 q-mt-xs q-mb-none">
-            {{ $t('ippools.subtitle') }}
-          </p>
-        </div>
+  <PageLayout
+    :title="$t('ippools.title')"
+    :subtitle="$t('ippools.subtitle')"
+    icon="network_wired"
+  >
+    <template #actions>
+      <div class="row q-gutter-sm items-center">
+        <q-btn-group>
+          <q-btn
+            color="primary"
+            icon="add"
+            :label="$t('ippools.createPool')"
+            @click="showCreateDialog = true"
+          />
+          <q-btn
+            color="secondary"
+            icon="refresh"
+            :label="$t('common.refresh')"
+            @click="handleRefresh"
+          />
+        </q-btn-group>
       </div>
+    </template>
 
-      <!-- IP池管理器组件 -->
-      <IPPoolManager />
+    <!-- IP池管理器组件（使用原有组件，但隐藏工具栏） -->
+    <div class="ip-pool-content">
+      <IPPoolManager :hideToolbar="true" />
     </div>
-  </q-page>
+
+    <!-- IP池创建对话框 -->
+    <IPPoolCreateDialog
+      v-model="showCreateDialog"
+      :existing-pools="pools"
+      @created="handlePoolCreated"
+    />
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import PageLayout from '../../components/layout/PageLayout.vue'
 import IPPoolManager from '../../components/ippool/IPPoolManager.vue'
-</script>
+import IPPoolCreateDialog from '../../components/ippool/IPPoolCreateDialog.vue'
+import { useIPPools } from '../../composables'
 
-<style lang="scss" scoped>
-.ippools-page {
-  h4 {
-    font-weight: 600;
-    color: var(--q-primary);
-  }
+const { t } = useI18n()
+const { pools, loading, fetchPools } = useIPPools()
+
+const showCreateDialog = ref(false)
+
+const handleRefresh = async () => {
+  await fetchPools()
 }
-</style>
+
+const handlePoolCreated = async () => {
+  showCreateDialog.value = false
+  await handleRefresh()
+}
+</script>

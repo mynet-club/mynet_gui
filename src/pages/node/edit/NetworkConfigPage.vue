@@ -14,22 +14,6 @@
         <q-card-section>
           <div class="text-subtitle1 q-mb-md">基础配置</div>
           
-          <!-- 网络接口名称 -->
-          <q-input
-            v-model="form.ifname"
-            label="网络接口名称"
-            outlined
-            class="q-mb-md"
-            :rules="[
-              val => !!val || '网络接口名称不能为空',
-              val => val.length <= 15 || '接口名称不能超过15个字符',
-              val => /^[a-zA-Z][a-zA-Z0-9_-]*$/.test(val) || '接口名称必须以字母开头，只能包含字母、数字、下划线和短划线'
-            ]"
-            :disable="loading"
-            hint="网络接口名称，如: eth0, wlan0, tun0 等"
-            placeholder="例如: tun0"
-          />
-
           <!-- 节点虚拟IP -->
           <div class="q-mb-md">
             <div class="text-subtitle2 q-mb-sm">节点虚拟IP</div>
@@ -37,10 +21,9 @@
               <div class="col">
                 <q-input
                   v-model="form.node_ip"
-                  label="虚拟IP地址"
                   outlined
                   readonly
-                  placeholder="点击右侧按钮选择IP"
+                  placeholder="虚拟IP地址 - 点击右侧按钮选择IP"
                   :rules="[
                     val => !!val || '请选择节点虚拟IP'
                   ]"
@@ -77,7 +60,10 @@
 
           <!-- 索引服务器 -->
           <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-sm">索引服务器 (可多选)</div>
+            <div class="text-subtitle2 q-mb-sm">
+              索引服务器 
+              <span class="text-caption text-grey-6">(选填)</span>
+            </div>
             <div class="q-gutter-sm">
               <div
                 v-for="(server, index) in form.index_servers"
@@ -87,12 +73,12 @@
                 <div class="col">
                   <q-input
                     v-model="form.index_servers[index]"
-                    label="索引服务器"
                     outlined
                     dense
-                    placeholder="例如: 192.168.1.1:8080"
+                    placeholder="索引服务器 (例如: 192.168.1.1:8080)"
                     :rules="[validateIPPort]"
                     :disable="loading"
+                    @focus="!isProcessingSelection && (showIndexServerSelector = true)"
                   />
                 </div>
                 <div class="col-auto">
@@ -117,6 +103,9 @@
                 class="q-mt-sm"
               />
             </div>
+            <div class="text-caption text-grey-6 q-mt-sm">
+              配置节点的索引服务器，点击输入框可从列表中选择
+            </div>
           </div>
         </q-card-section>
       </q-card>
@@ -128,7 +117,10 @@
           
           <!-- 局域网IP -->
           <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-sm">局域网IP</div>
+            <div class="text-subtitle2 q-mb-sm">
+              局域网IP 
+              <span class="text-caption text-grey-6">(选填)</span>
+            </div>
             <div class="q-gutter-sm">
               <div
                 v-for="(lanIP, index) in form.lan_ips"
@@ -138,10 +130,9 @@
                 <div class="col">
                   <q-input
                     v-model="form.lan_ips[index]"
-                    label="局域网IP"
                     outlined
                     dense
-                    placeholder="例如: 192.168.1.100"
+                    placeholder="局域网IP (例如: 192.168.1.100)"
                     :rules="[validateIPv4Address]"
                     :disable="loading"
                   />
@@ -175,7 +166,10 @@
 
           <!-- 公网IP -->
           <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-sm">公网IP</div>
+            <div class="text-subtitle2 q-mb-sm">
+              公网IP 
+              <span class="text-caption text-grey-6">(选填)</span>
+            </div>
             <div class="q-gutter-sm">
               <div
                 v-for="(publicIP, index) in form.public_ips"
@@ -185,10 +179,9 @@
                 <div class="col">
                   <q-input
                     v-model="form.public_ips[index]"
-                    label="公网IP"
                     outlined
                     dense
-                    placeholder="例如: 1.2.3.4 或 2001:db8::1"
+                    placeholder="公网IP (例如: 1.2.3.4 或 2001:db8::1)"
                     :rules="[validateIPAddress]"
                     :disable="loading"
                   />
@@ -263,6 +256,14 @@
       :current-ip-group-sequence-number="form.ip_group_sequence_number"
       @selected="onIPSelected"
     />
+
+    <!-- 索引服务器选择对话框 -->
+    <IndexServerSelectorDialog
+      v-model="showIndexServerSelector"
+      :current-servers="form.index_servers.filter(s => s.trim())"
+      @selected="onIndexServersSelected"
+      @update:model-value="onIndexDialogClose"
+    />
   </div>
 </template>
 
@@ -274,6 +275,7 @@ import { useNode, useNotify } from '../../../composables'
 import { nodeService } from '../../../services/node/nodeService'
 import type { NodeNetworkConfig, UpdateNodeNetworkConfigRequest } from '../../../types/node'
 import IPSelectorDialog from '../../../components/node/IPSelectorDialog.vue'
+import IndexServerSelectorDialog from '../../../components/node/IndexServerSelectorDialog.vue'
 
 const route = useRoute()
 const $q = useQuasar()
@@ -290,7 +292,6 @@ const { node, loading, saving, loadNode, updateNode } = injectedNodeData || useN
 
 // 表单数据
 const form = ref({
-  ifname: '',
   node_ip: '',
   ip_group_sequence_number: 0,
   index_servers: [''],
@@ -300,7 +301,6 @@ const form = ref({
 
 // 原始数据
 const originalData = ref({
-  ifname: '',
   node_ip: '',
   ip_group_sequence_number: 0,
   index_servers: [''],
@@ -308,15 +308,19 @@ const originalData = ref({
   public_ips: ['']
 })
 
+// 选择的索引服务器列表（保留用于其他可能的用途）
+const selectedIndexServers = ref<string[]>([])
+
 // 对话框状态
 const showIPSelector = ref(false)
+const showIndexServerSelector = ref(false)
+const isProcessingSelection = ref(false)
 const loadingNetworkConfig = ref(false)
 const formRef = ref<any>(null)
 
 // 计算属性
 const hasChanges = computed(() => {
   // 基础字段比较
-  if (form.value.ifname !== originalData.value.ifname) return true
   if (form.value.node_ip !== originalData.value.node_ip) return true
   if (form.value.ip_group_sequence_number !== originalData.value.ip_group_sequence_number) return true
   
@@ -337,19 +341,6 @@ const hasChanges = computed(() => {
 })
 
 // 工具函数
-const getDefaultIfnameByVpnType = (vpnType: string): string => {
-  switch (vpnType) {
-    case 'gnb':
-      return 'gnb_tun'
-    case 'wireguard':
-      return 'WG01'
-    case 'openvpn':
-      return 'tun0'
-    default:
-      return 'tun0'
-  }
-}
-
 const isValidIPAddress = (ip: string): boolean => {
   const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
   const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^::1$|^::$/
@@ -412,21 +403,33 @@ const loadNetworkConfig = async () => {
   try {
     loadingNetworkConfig.value = true
     
-    // 加载网络配置数据
-    const response = await nodeService.getNodeNetworkConfig(String(node.value.node_id))
-    const networkConfig = response.data || {}
+    // 并行加载网络配置数据和索引服务器数据
+    const [networkResponse, indexServicesResponse] = await Promise.all([
+      nodeService.getNodeNetworkConfig(String(node.value.node_id)),
+      nodeService.getNodeIndexServices(String(node.value.node_id)).catch(() => ({ data: { index_services: [] } }))
+    ])
     
-    // 根据VPN类型设置默认网络接口名称
-    let defaultIfname = ''
-    if (node.value.vpn_type) {
-      defaultIfname = getDefaultIfnameByVpnType(node.value.vpn_type)
+    const networkConfig = networkResponse.data || {}
+    const nodeIndexServices = indexServicesResponse.data?.index_services || []
+    
+    // 初始化索引服务器：使用已保存的配置 + 当前节点的索引服务器
+    let indexServers: string[] = []
+    if (networkConfig.index_servers?.length) {
+      // 如果有保存的配置，使用保存的配置
+      indexServers = [...networkConfig.index_servers]
+    } else if (nodeIndexServices.length) {
+      // 如果没有保存的配置但有节点索引服务器，使用节点的endpoint
+      indexServers = nodeIndexServices.map(service => service.endpoint)
+    }
+    // 确保至少有一个空的输入框
+    if (indexServers.length === 0 || indexServers.every(s => s.trim())) {
+      indexServers.push('')
     }
     
     const data = {
-      ifname: networkConfig.ifname || defaultIfname,
       node_ip: networkConfig.node_ip || node.value.node_ip || '',
       ip_group_sequence_number: networkConfig.ip_group_sequence_number || node.value.ip_group_sequence_number || 0,
-      index_servers: networkConfig.index_servers?.length ? [...networkConfig.index_servers] : [''],
+      index_servers: indexServers,
       lan_ips: networkConfig.lan_ips?.length ? [...networkConfig.lan_ips] : [''],
       public_ips: networkConfig.public_ips?.length ? [...networkConfig.public_ips] : (node.value.public_ip ? [node.value.public_ip] : [''])
     }
@@ -435,38 +438,48 @@ const loadNetworkConfig = async () => {
     originalData.value = JSON.parse(JSON.stringify(data))
     
     console.log('网络配置数据加载成功:', data)
+    console.log('节点索引服务器:', nodeIndexServices)
   } catch (error: any) {
     console.error('加载网络配置数据失败:', error)
     
     // 如果是404错误，说明网络配置不存在，使用默认值
     if (error?.response?.status === 404) {
       console.log('网络配置不存在，使用默认值初始化')
-      initializeForm()
+      await initializeForm()
     } else {
       // 其他错误，显示错误信息但仍使用默认值
       notifyError('加载网络配置失败，使用默认值')
-      initializeForm()
+      await initializeForm()
     }
   } finally {
     loadingNetworkConfig.value = false
   }
 }
 
-const initializeForm = () => {
+const initializeForm = async () => {
   if (node.value) {
     const networkConfig = node.value.network_config || {}
     
-    // 根据VPN类型设置默认网络接口名称
-    let defaultIfname = ''
-    if (node.value.vpn_type) {
-      defaultIfname = getDefaultIfnameByVpnType(node.value.vpn_type)
+    // 尝试加载节点的索引服务器作为初始值
+    let indexServers: string[] = ['']
+    try {
+      const indexServicesResponse = await nodeService.getNodeIndexServices(String(node.value.node_id))
+      const nodeIndexServices = indexServicesResponse.data?.index_services || []
+      if (nodeIndexServices.length) {
+        indexServers = nodeIndexServices.map(service => service.endpoint)
+        // 确保至少有一个空的输入框
+        if (indexServers.every(s => s.trim())) {
+          indexServers.push('')
+        }
+      }
+    } catch (error) {
+      console.log('获取节点索引服务器失败，使用默认值:', error)
     }
     
     const data = {
-      ifname: networkConfig.ifname || defaultIfname,
       node_ip: networkConfig.node_ip || node.value.node_ip || '',
       ip_group_sequence_number: networkConfig.ip_group_sequence_number || node.value.ip_group_sequence_number || 0,
-      index_servers: networkConfig.index_servers?.length ? [...networkConfig.index_servers] : [''],
+      index_servers: networkConfig.index_servers?.length ? [...networkConfig.index_servers] : indexServers,
       lan_ips: networkConfig.lan_ips?.length ? [...networkConfig.lan_ips] : [''],
       public_ips: networkConfig.public_ips?.length ? [...networkConfig.public_ips] : (node.value.public_ip ? [node.value.public_ip] : [''])
     }
@@ -478,6 +491,8 @@ const initializeForm = () => {
 
 const resetForm = () => {
   form.value = JSON.parse(JSON.stringify(originalData.value))
+  // 重置选择的索引服务器列表
+  selectedIndexServers.value = []
   notifySuccess('表单已重置')
 }
 
@@ -530,6 +545,65 @@ const onIPSelected = (ip: string, ipGroupSequenceNumber: number) => {
   notifySuccess(`已选择IP: ${ip} (组序号: ${ipGroupSequenceNumber})`)
 }
 
+// 索引服务器选择处理
+const onIndexServersSelected = (servers: string[]) => {
+  // 设置处理状态，防止focus事件触发对话框
+  isProcessingSelection.value = true
+  
+  // 去重：过滤掉已存在的服务器
+  const existingServers = form.value.index_servers.filter(s => s.trim())
+  const newServers = servers.filter(server => !existingServers.includes(server))
+  
+  if (newServers.length === 0) {
+    notifyError('所选服务器已存在，未添加任何新服务器')
+    setTimeout(() => {
+      isProcessingSelection.value = false
+    }, 300)
+    return
+  }
+  
+  // 找到第一个空的输入框，如果没有则添加新的
+  let targetIndex = form.value.index_servers.findIndex(server => !server.trim())
+  
+  // 如果没有空的输入框，从当前位置开始添加
+  if (targetIndex === -1) {
+    targetIndex = form.value.index_servers.length
+  }
+  
+  // 确保有足够的输入框
+  while (form.value.index_servers.length < targetIndex + newServers.length) {
+    form.value.index_servers.push('')
+  }
+  
+  // 将选择的服务器填入输入框
+  newServers.forEach((server, index) => {
+    form.value.index_servers[targetIndex + index] = server
+  })
+  
+  // 确保最后有一个空的输入框
+  if (form.value.index_servers.every(s => s.trim())) {
+    form.value.index_servers.push('')
+  }
+  
+  notifySuccess(`已添加 ${newServers.length} 个索引服务器`)
+  
+  // 延迟重置处理状态，避免立即触发focus
+  setTimeout(() => {
+    isProcessingSelection.value = false
+  }, 300)
+}
+
+// 处理对话框关闭事件（包括取消操作）
+const onIndexDialogClose = (value: boolean) => {
+  if (!value) {
+    // 对话框被关闭（取消或点击外部），设置处理状态防止立即重新打开
+    isProcessingSelection.value = true
+    setTimeout(() => {
+      isProcessingSelection.value = false
+    }, 300)
+  }
+}
+
 const testConnection = async () => {
   if (!form.value.node_ip) {
     notifyError('请先选择节点虚拟IP')
@@ -577,11 +651,6 @@ const onSubmit = async () => {
     }
     
     // 验证必填字段
-    if (!form.value.ifname?.trim()) {
-      notifyError('请填写网络接口名称')
-      return
-    }
-    
     if (!form.value.node_ip?.trim()) {
       notifyError('请选择节点虚拟IP')
       return
@@ -591,10 +660,6 @@ const onSubmit = async () => {
     const updateData: Partial<UpdateNodeNetworkConfigRequest> = {}
     
     // 检查基础字段的变化
-    if (form.value.ifname !== originalData.value.ifname) {
-      updateData.ifname = form.value.ifname.trim()
-    }
-    
     if (form.value.node_ip !== originalData.value.node_ip) {
       updateData.node_ip = form.value.node_ip.trim()
     }
@@ -664,22 +729,6 @@ watch(
     }
   },
   { immediate: true }
-)
-
-// 监听VPN类型变化，自动更新网络接口名称
-watch(
-  () => node.value?.vpn_type,
-  (newVpnType, oldVpnType) => {
-    if (newVpnType && newVpnType !== oldVpnType) {
-      // 如果接口名称为空，或者是旧的默认值，则更新为新的默认值
-      const currentIfname = form.value.ifname
-      const oldDefaultIfname = oldVpnType ? getDefaultIfnameByVpnType(oldVpnType) : ''
-      
-      if (!currentIfname || currentIfname === oldDefaultIfname) {
-        form.value.ifname = getDefaultIfnameByVpnType(newVpnType)
-      }
-    }
-  }
 )
 
 // 组件挂载时初始化

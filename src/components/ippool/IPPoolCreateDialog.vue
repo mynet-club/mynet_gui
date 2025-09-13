@@ -28,7 +28,16 @@
             <template #avatar>
               <q-icon name="info" />
             </template>
-            {{ $t('ippools.quotaInfo', { current: currentPoolsCount, max: MAX_POOLS_PER_ZONE }) }}
+            {{ $t('ippools.quotaInfo', { 
+              current: currentPoolsCount, 
+              max: statistics?.user_quota || MAX_POOLS_PER_ZONE 
+            }) }}
+            <!-- 调试信息（生产环境应移除） -->
+            <div class="text-caption q-mt-xs" style="opacity: 0.7;">
+              调试: 统计池数={{ statistics?.total_pools || 0 }}, 
+              传入池数={{ existingPools.length }}, 
+              配额={{ statistics?.user_quota || MAX_POOLS_PER_ZONE }}
+            </div>
           </q-banner>
 
           <!-- 创建数量 -->
@@ -136,7 +145,7 @@ const MAX_POOLS_PER_ZONE = 3
 
 // Composables
 const { t } = useI18n()
-const { createLoading, autoAllocatePool } = useIPPools()
+const { createLoading, autoAllocatePool, statistics, fetchStatistics } = useIPPools()
 
 // Reactive data
 const isOpen = computed({
@@ -151,10 +160,33 @@ const form = ref({
 })
 
 // Computed properties
-const currentPoolsCount = computed(() => props.existingPools.length)
+const currentPoolsCount = computed(() => {
+  // 优先使用统计数据中的池数量，如果没有则使用传入的 pools 数量
+  const statsCount = statistics.value?.total_pools || 0
+  const propsCount = props.existingPools.length
+  const result = statsCount || propsCount
+  
+  console.log('currentPoolsCount computed:', {
+    statsCount,
+    propsCount,
+    result,
+    statisticsValue: statistics.value
+  })
+  
+  return result
+})
 
 const remainingPools = computed(() => {
-  return Math.max(0, MAX_POOLS_PER_ZONE - currentPoolsCount.value)
+  const userQuota = statistics.value?.user_quota || MAX_POOLS_PER_ZONE
+  const result = Math.max(0, userQuota - currentPoolsCount.value)
+  
+  console.log('remainingPools computed:', {
+    userQuota,
+    currentCount: currentPoolsCount.value,
+    result
+  })
+  
+  return result
 })
 
 const poolsCountOptions = computed(() => {
@@ -346,9 +378,19 @@ watch(() => props.existingPools.length, (newLength) => {
   }
 })
 
-watch(isOpen, (open) => {
+watch(isOpen, async (open) => {
   if (open) {
     resetForm()
+    // 获取最新的统计数据
+    try {
+      await fetchStatistics()
+      console.log('Create dialog - Statistics loaded:', statistics.value)
+      console.log('Create dialog - Current pools count:', currentPoolsCount.value)
+      console.log('Create dialog - Remaining pools:', remainingPools.value)
+    } catch (error) {
+      console.warn('Failed to fetch statistics in create dialog:', error)
+    }
+    
     if (remainingPools.value === 1) {
       form.value.poolsCount = 1
     }

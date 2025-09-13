@@ -43,9 +43,9 @@ export function useSocial() {
   const hasMoreFriends = computed(() => currentPage.value < totalPages.value)
   const onlineFriends = computed(() => friends.value.filter(f => f.status === 'online'))
   const offlineFriends = computed(() => friends.value.filter(f => f.status === 'offline'))
-  const pendingInvitations = computed(() => invitations.value.filter(i => i.status === 'active'))
-  const usedInvitations = computed(() => invitations.value.filter(i => i.status === 'used'))
-  const expiredInvitations = computed(() => invitations.value.filter(i => i.status === 'expired'))
+  const pendingInvitations = computed(() => invitations.value.filter(i => i.invitation_status === 1))
+  const usedInvitations = computed(() => invitations.value.filter(i => i.invitation_status === 2))
+  const expiredInvitations = computed(() => invitations.value.filter(i => i.invitation_status === 0))
   
   // 根据当前请求类型返回相应的请求列表
   const currentRequests = computed(() => {
@@ -334,6 +334,30 @@ export function useSocial() {
     }
   }
 
+  // 删除邀请码
+  const deleteInvitation = async (invitation: Invitation) => {
+    try {
+      loading.value = true
+      const response = await socialService.deleteInvitation(invitation.id)
+      if (response.success) {
+        notify.success(t('social.invitationDeleted'))
+        // 从列表中移除已删除的邀请码
+        const index = invitations.value.findIndex(inv => inv.id === invitation.id)
+        if (index > -1) {
+          invitations.value.splice(index, 1)
+        }
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('删除邀请码失败:', error)
+      notify.error(t('social.invitationDeleteError'))
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
   // 获取好友的节点
   const getFriendNodes = async (friendId: string) => {
     try {
@@ -451,6 +475,7 @@ export function useSocial() {
     cancelFriendRequest,
     removeFriend,
     createInvitation,
+    deleteInvitation,
     getFriendNodes,
     getAllFriendNodes,
     handleRequestTypeChange,

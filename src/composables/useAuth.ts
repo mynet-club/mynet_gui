@@ -10,6 +10,7 @@ export function useAuth() {
   const authStore = useAuthStore()
 
   const isLoading = ref(false)
+  const loginError = ref<string | null>(null)
 
   // 登录表单
   const loginForm = reactive({
@@ -35,7 +36,16 @@ export function useAuth() {
 
   // 邮件验证表单
   const emailVerificationForm = reactive({
+    email: '',
     verificationCode: ''
+  })
+
+  // 重置密码表单
+  const resetPasswordForm = reactive({
+    token: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
   })
 
   // 验证邮箱格式
@@ -44,9 +54,15 @@ export function useAuth() {
     return emailRegex.test(email)
   }
 
+  // 清除登录错误
+  const clearError = () => {
+    loginError.value = null
+  }
+
   // 登录
   const login = async () => {
     isLoading.value = true
+    loginError.value = null // 清除之前的错误
     try {
       await authStore.login({ 
         email: loginForm.email, 
@@ -70,13 +86,55 @@ export function useAuth() {
       } else {
         console.error('🔧 [useAuth] Login succeeded but not authenticated')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error)
+      
+      // 根据不同的错误类型显示不同的错误信息
+      let errorMessage = 'Login failed. Please try again.'
+      
+      if (error.response) {
+        // 服务器响应了错误状态码
+        const { status, data } = error.response
+        
+        switch (status) {
+          case 401:
+            errorMessage = data?.message || 'Invalid email or password. Please check your credentials.'
+            break
+          case 403:
+            errorMessage = data?.message || 'Account is disabled or not activated.'
+            break
+          case 422:
+            errorMessage = data?.message || 'Invalid input data. Please check your email and password format.'
+            break
+          case 429:
+            errorMessage = 'Too many login attempts. Please try again later.'
+            break
+          case 500:
+            errorMessage = 'Server error. Please try again later.'
+            break
+          default:
+            errorMessage = data?.message || `Login failed (${status}). Please try again.`
+        }
+      } else if (error.request) {
+        // 网络错误
+        errorMessage = 'Network error. Please check your internet connection and try again.'
+      } else {
+        // 其他错误
+        errorMessage = error.message || 'An unexpected error occurred. Please try again.'
+      }
+      
+      // 设置错误状态供组件显示
+      loginError.value = errorMessage
+      
+      // 也保留通知，但缩短显示时间
       $q.notify({
         type: 'negative',
-        message: 'Login failed. Please check your credentials.',
-        timeout: 3000
+        message: errorMessage,
+        timeout: 3000, // 缩短通知时间
+        position: 'top'
       })
+      
+      // 不刷新页面，让用户有机会重新尝试或查看错误信息
     } finally {
       isLoading.value = false
     }
@@ -86,71 +144,89 @@ export function useAuth() {
   const register = async () => {
     isLoading.value = true
     try {
-      const response = await apiService.register(registerForm);
+      const response = await apiService.register({
+        name: registerForm.name,
+        email: registerForm.email,
+        password: registerForm.password,
+        invitation: registerForm.invitation,
+        device_name: 'Web Browser',
+        activation_url: `${window.location.origin}/auth/activate`
+      });
+      
       $q.notify({
         type: 'positive',
-        message: response.message || 'Registration successful! Please check your email for verification.',
-        timeout: 3000
+        message: response.data.message || 'Registration successful! Please check your email or enter the activation code.',
+        timeout: 5000
       });
-      router.push('/auth/login');
-    } catch (error) {
+      
+      // 不再自动跳转，而是由调用组件处理后续逻辑
+    } catch (error: any) {
       console.error('Registration failed:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Registration failed. Please try again.';
+      const errorMessage = error.response?.data?.message || error.message || 'Registration failed. Please try again.';
       $q.notify({
         type: 'negative',
         message: errorMessage,
         timeout: 3000
       });
+      throw error; // 重新抛出错误供调用组件处理
     } finally {
       isLoading.value = false;
     }
   }
 
-  // 忘记密码
-  const forgotPassword = async () => {
+    // 忘记密码
+  const forgotPassword = async (data?: { email: string; redirect_url?: string }) => {
     isLoading.value = true
     try {
-      // TODO: 实现忘记密码逻辑
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      $q.notify({
-        type: 'positive',
-        message: 'Password reset link sent to your email!',
-        timeout: 3000
+      const email = data?.email || forgotPasswordForm.email
+      const response = await apiService.forgotPassword({
+        email,
+        redirect_url: data?.redirect_url || `${window.location.origin}/auth/reset-password`
       })
       
-      router.push('/auth/login')
-    } catch (error) {
+      if (response.data.success) {
+        return response.data
+      } else {
+        throw new Error(response.data.message || '发送重置邮件失败')
+      }
+    } catch (error: any) {
       console.error('Forgot password failed:', error)
-      $q.notify({
-        type: 'negative',
-        message: 'Failed to send reset link. Please try again.',
-        timeout: 3000
-      })
+      throw error
     } finally {
       isLoading.value = false
     }
   }
 
   // 邮件验证
-  const verifyEmail = async () => {
+  const verifyEmail = async (email?: string) => {
     isLoading.value = true
     try {
-      // TODO: 实现邮件验证逻辑
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const emailToVerify = email || emailVerificationForm.email || forgotPasswordForm.email || registerForm.email
+      if (!emailToVerify) {
+        throw new Error('邮箱地址不能为空')
+      }
       
-      $q.notify({
-        type: 'positive',
-        message: 'Email verified successfully!',
-        timeout: 3000
+      const response = await apiService.activateAccount({
+        email: emailToVerify,
+        token: emailVerificationForm.verificationCode
       })
       
-      return true
-    } catch (error) {
+      if (response.data.success) {
+        $q.notify({
+          type: 'positive',
+          message: response.data.message || '邮箱验证成功！',
+          timeout: 3000
+        })
+        
+        return true
+      } else {
+        throw new Error(response.data.message || '邮箱验证失败')
+      }
+    } catch (error: any) {
       console.error('Email verification failed:', error)
       $q.notify({
         type: 'negative',
-        message: 'Email verification failed. Please try again.',
+        message: error.message || '邮箱验证失败，请检查验证码',
         timeout: 3000
       })
       return false
@@ -160,43 +236,93 @@ export function useAuth() {
   }
 
   // 重新发送验证码
-  const resendCode = async () => {
+  const resendCode = async (email?: string) => {
     try {
-      // TODO: 实现重新发送验证码逻辑
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const emailToSend = email || emailVerificationForm.email || forgotPasswordForm.email || registerForm.email
+      if (!emailToSend) {
+        throw new Error('邮箱地址不能为空')
+      }
       
-      $q.notify({
-        type: 'positive',
-        message: 'Verification code sent!',
-        timeout: 3000
+      const response = await apiService.resendActivationEmail({ 
+        email: emailToSend,
+        activation_url: `${window.location.origin}/auth/activate`
       })
       
-      return 60 // 返回倒计时秒数
-    } catch (error) {
-      console.error('Resend code failed:', error)
+      if (response.data.success) {
+        $q.notify({
+          type: 'positive',
+          message: response.data.message || '验证码已重新发送',
+          timeout: 3000
+        })
+        
+        // 返回冷却时间（秒）
+        return response.data.cooldown_seconds || 60
+      } else {
+        throw new Error(response.data.message || '重新发送验证码失败')
+      }
+    } catch (error: any) {
+      console.error('Resend verification code failed:', error)
       $q.notify({
         type: 'negative',
-        message: 'Failed to resend code. Please try again.',
+        message: error.message || '重新发送验证码失败，请稍后再试',
         timeout: 3000
       })
       return 0
     }
   }
 
+  // 重置密码
+  const resetPassword = async () => {
+    isLoading.value = true
+    try {
+      const response = await apiService.resetPassword({
+        token: resetPasswordForm.token,
+        email: resetPasswordForm.email,
+        password: resetPasswordForm.password,
+        password_confirmation: resetPasswordForm.confirmPassword
+      })
+      
+      if (response.data.success) {
+        $q.notify({
+          type: 'positive',
+          message: response.data.message || '密码重置成功！',
+          timeout: 3000
+        })
+        
+        router.push('/auth/login')
+      } else {
+        throw new Error(response.data.message || '密码重置失败')
+      }
+    } catch (error: any) {
+      console.error('Reset password failed:', error)
+      $q.notify({
+        type: 'negative',
+        message: error.message || '密码重置失败，请稍后再试',
+        timeout: 3000
+      })
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     // 状态
     isLoading,
+    loginError,
     loginForm,
     registerForm,
     forgotPasswordForm,
     emailVerificationForm,
+    resetPasswordForm,
     
     // 方法
     validateEmail,
+    clearError,
     login,
     register,
     forgotPassword,
     verifyEmail,
-    resendCode
+    resendCode,
+    resetPassword
   }
 }

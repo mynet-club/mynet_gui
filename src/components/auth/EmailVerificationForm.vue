@@ -14,9 +14,9 @@
         <q-form @submit="verifyEmail" class="verification-form">
           <q-input 
             v-model="emailVerificationForm.verificationCode"
-            :label="$t('auth.verificationCode')"
             outlined
             class="form-field"
+            :placeholder="$t('auth.verificationCodePlaceholder')"
             :rules="[val => !!val || $t('auth.verificationCodeRequired')]"
           />
           

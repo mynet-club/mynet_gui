@@ -132,16 +132,121 @@ export default {
     ippools: 'IP Pool Management',
     zones: 'Zone Management',
     zoneSharing: 'Zone Sharing',
+    zoneServices: 'Zone Services',
+    services: 'Service Management',
     social: 'Social Network',
     apiTest: 'API Testing',
     help: 'Help Documentation'
   },
   routes: {
     title: 'Route Management',
+    subtitle: 'Network routing management and configuration',
     name: 'Route Name',
     destination: 'Destination',
     gateway: 'Gateway',
-    status: 'Status'
+    
+    // Overview statistics
+    overview: {
+      activeRoutes: 'Active Routes',
+      pendingConnections: 'Pending Connections',
+      connectedNodes: 'Connected Nodes',
+      totalBandwidth: 'Total Bandwidth'
+    },
+    
+    // Tabs
+    tabs: {
+      activeRoutes: 'Active Routes',
+      pendingConnections: 'Pending Connections',
+      friendNodes: 'Friend Nodes',
+      configuration: 'Configuration'
+    },
+    
+    // Route status
+    status: {
+      active: 'Active',
+      inactive: 'Inactive',
+      connecting: 'Connecting',
+      error: 'Error',
+      unknown: 'Unknown'
+    },
+    
+    // Connection types
+    connectionType: {
+      direct: 'Direct',
+      relay: 'Relay'
+    },
+    
+    // Active routes
+    activeRoutes: {
+      searchPlaceholder: 'Search routes...',
+      statusFilter: 'Status Filter',
+      noRoutes: 'No active routes',
+      noSearchResults: 'No matching routes found',
+      bandwidth: 'Bandwidth',
+      latency: 'Latency',
+      packetLoss: 'Packet Loss',
+      connectionType: 'Connection Type',
+      lastActive: 'Last Active',
+      lastUpdate: 'Last Update',
+      unknownUser: 'Unknown User',
+      viewDetails: 'View Details',
+      editRoute: 'Edit Route',
+      disconnect: 'Disconnect',
+      relayMode: 'Relay Mode',
+      priority: 'Priority',
+      vpnType: 'VPN Type',
+      targetUser: 'Target User',
+      sourceNode: 'Source Node',
+      targetNode: 'Target Node',
+      unknownType: 'Unknown Type',
+      unknownMode: 'Unknown Mode'
+    },
+
+    // Node-based route management
+    nodeBased: {
+      selectNode: 'Select My Node',
+      selectNodeDescription: 'Click on your node card to view route information for that node',
+      viewRoutes: 'View Routes',
+      backToNodes: 'Back to Node List',
+      noNodes: 'No Nodes',
+      noNodesDescription: 'You haven\'t created any nodes yet, please create a node first',
+      noDescription: 'No Description',
+      nodeId: 'Node ID',
+      totalRoutes: 'Total Routes',
+      totalNodes: 'Total Nodes',
+      routeCount: 'Route Count',
+      nodeType: 'Node Type',
+      vpnType: 'VPN Type',
+      status: 'Status',
+      unknown: 'Unknown',
+      routesList: 'Routes List',
+      nodesList: 'Nodes List',
+      noRoutesForNode: 'No routes for this node',
+      noNodesForNode: 'No nodes for this node',
+      statusLabels: {
+        active: 'Active',
+        inactive: 'Inactive',
+        pending: 'Pending Configuration',
+        unknown: 'Unknown'
+      }
+    },
+
+    // Relay modes
+    relayModes: {
+      direct: 'Direct',
+      relay: 'Relay',
+      p2p: 'P2P',
+      hybrid: 'Hybrid'
+    },
+
+    // Actions
+    actions: {
+      createRoute: 'Create Route',
+      refreshRoutes: 'Refresh Routes'
+    },
+
+    // Error messages
+    fetchActiveRoutesError: 'Failed to fetch active routes'
   },
   zones: {
     subtitle: 'Network zone management and configuration',
@@ -214,6 +319,7 @@ export default {
       usedAt: 'Used At',
       usedBy: 'Used By',
       createdAt: 'Created At',
+      usageCount: 'Usage Count',
       copyCode: 'Copy Code',
       active: 'Active',
       used: 'Used',
@@ -248,7 +354,9 @@ export default {
     friendRequestRejected: 'Friend request rejected',
     friendRemoved: 'Friend "{name}" removed',
     invitationCreated: 'Invitation code created',
+    invitationDeleted: 'Invitation code deleted',
     invitationCopied: 'Invitation code copied to clipboard',
+    confirmDeleteInvitation: 'Are you sure you want to delete invitation code "{code}"?',
     // Error messages
     fetchOverviewError: 'Failed to fetch social overview',
     fetchFriendsError: 'Failed to fetch friends list',
@@ -260,6 +368,7 @@ export default {
     friendRemoveError: 'Failed to remove friend',
     fetchInvitationsError: 'Failed to fetch invitations',
     invitationCreateError: 'Failed to create invitation',
+    invitationDeleteError: 'Failed to delete invitation',
     fetchFriendNodesError: 'Failed to fetch friend nodes'
   },
   ippools: {
@@ -277,11 +386,13 @@ export default {
     noPoolsFound: 'No IP pools found',
     // Statistics cards
     totalPools: 'Total Pools',
+    createdPools: 'Created Pools',
     availablePools: 'Available Pools',
     allocatedPools: 'Allocated Pools',
     totalIPs: 'Total IPs',
     availableIPs: 'Available IPs',
     allocatedIPs: 'Allocated IPs',
+    poolUsageRate: 'Pool Usage Rate',
     usageRate: 'Usage Rate',
     // Table fields
     poolName: 'Pool Name',
@@ -490,8 +601,9 @@ export default {
       serviceType: 'Service Type',
       serviceTypeRequired: 'Please select service type',
       serviceDescription: 'Service Description',
-      serviceUrl: 'Service URL',
-      serviceUrlRequired: 'Please enter service URL',
+      serviceAddress: 'Service Address',
+      serviceAddressRequired: 'Please enter service address',
+      associatedNode: 'Associated Node',
       servicePort: 'Port',
       servicePortRequired: 'Please enter port',
       servicePortInvalid: 'Port should be between 1-65535',
@@ -500,6 +612,8 @@ export default {
       authRequired: 'Auth Required',
       authType: 'Auth Type',
       authToken: 'Auth Token',
+      authUsername: 'Username',
+      authPassword: 'Password',
       authTypes: {
         none: 'No Auth',
         bearer: 'Bearer Token',

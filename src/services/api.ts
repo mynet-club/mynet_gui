@@ -5,8 +5,14 @@ import { mockDashboardData, mockDelay } from './mockData'
 import type { Zone } from '../types'
 
 // 配置 API 基础URL
+const getApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL
+  const baseUrl = envUrl || 'http://localhost:8000'
+  return `${baseUrl}/api/v1`
+}
+
 export const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
+  baseURL: getApiBaseUrl(),
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
@@ -70,11 +76,16 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // 排除登录、注册等不需要token刷新的请求
+    const excludePaths = ['/auth/login', '/auth/register', '/auth/refresh-token']
+    const shouldExclude = excludePaths.some(path => originalRequest.url?.includes(path))
+
+    if (error.response?.status === 401 && !originalRequest._retry && !shouldExclude) {
       console.log('🔧 [API] 401 error received, checking token refresh status:', {
         isRefreshing,
         hasRefreshToken: !!tokenManager.getRefreshToken(),
-        isTokenExpired: tokenManager.isTokenExpired()
+        isTokenExpired: tokenManager.isTokenExpired(),
+        url: originalRequest.url
       })
       
       if (isRefreshing) {
@@ -124,7 +135,8 @@ api.interceptors.response.use(
         console.error('🔧 [API] Token refresh failed, clearing tokens:', refreshError)
         processQueue(refreshError, null)
         tokenManager.clearTokens()
-        window.location.href = '/login'
+        // 移除自动跳转，让组件或页面处理登录失败
+        // window.location.href = '/login'
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false
@@ -158,9 +170,14 @@ export const apiService = {
   },
 
   // 认证相关
-  async login(credentials: { email: string; password: string }) {
+  async login(credentials: { email: string; password: string; device_name?: string }) {
     try {
-      const response = await api.post('/auth/login', credentials);
+      const loginData = {
+        ...credentials,
+        device_name: credentials.device_name || 'Web Browser'
+      };
+      
+      const response = await api.post('/auth/login', loginData);
 
       console.log('🔧 [API] Raw login response:', response.data);
 
@@ -193,6 +210,106 @@ export const apiService = {
 
   async logout() {
     return api.post('/auth/logout')
+  },
+
+  async verifyToken() {
+    return api.get('/auth/verify-token')
+  },
+
+  async register(data: {
+    name: string;
+    email: string;
+    password: string;
+    invitation: string;
+    device_name?: string;
+    activation_url?: string;
+  }) {
+    const registerData = {
+      ...data,
+      device_name: data.device_name || 'Web Browser',
+      activation_url: data.activation_url || `${window.location.origin}/auth/activate`
+    };
+    return await api.post('/auth/register', registerData);
+  },
+
+  // 密码重置相关
+  async forgotPassword(data: { email: string; redirect_url?: string }) {
+    const requestData = {
+      ...data,
+      redirect_url: data.redirect_url || `${window.location.origin}/auth/reset-password`
+    };
+    return await api.post('/auth/forgot-password', requestData);
+  },
+
+  async resetPassword(data: {
+    email: string;
+    token: string;
+    password: string;
+    password_confirmation: string;
+  }) {
+    return await api.post('/auth/reset-password', data);
+  },
+
+  async validateResetToken(data: { email: string; token: string }) {
+    return await api.post('/auth/validate-reset-token', data);
+  },
+
+  async cancelPasswordReset(email: string) {
+    return await api.delete('/auth/cancel-password-reset', { data: { email } });
+  },
+
+  // 修改密码
+  async changePassword(data: {
+    current_password: string;
+    password: string;
+    password_confirmation: string;
+  }) {
+    return await api.post('/auth/change-password', data);
+  },
+
+  // 账号激活相关
+  async activateAccount(data: { email: string; token: string }) {
+    return await api.post('/auth/activate-account', data);
+  },
+
+  async resendActivationEmail(data: { email: string; activation_url?: string }) {
+    const requestData = {
+      ...data,
+      activation_url: data.activation_url || `${window.location.origin}/auth/activate`
+    };
+    return await api.post('/auth/resend-activation-email', requestData);
+  },
+
+  async checkActivationStatus(email: string) {
+    return await api.get('/auth/check-activation-status', { params: { email } });
+  },
+
+  // 会话和令牌管理
+  async validateSession(data: {
+    user_id: string;
+    token_hash: string;
+    last_sync: number;
+    client_version: string;
+    timestamp: number;
+  }) {
+    return await api.post('/auth/validate-session', data);
+  },
+
+  async generateToken() {
+    return await api.post('/auth/token/generate');
+  },
+
+  async getAuthStatus() {
+    return await api.get('/auth/status');
+  },
+
+  // 向后兼容的方法
+  async verifyEmail(data: { email: string; token: string }) {
+    return await this.activateAccount(data);
+  },
+
+  async resendVerificationCode(email: string) {
+    return await this.resendActivationEmail({ email });
   },
 
   // Token 刷新
@@ -231,6 +348,28 @@ export const apiService = {
         throw new Error(error.response.data.message || 'Failed to get user info')
       }
       throw error
+    }
+  },
+
+  // 更新用户资料
+  async updateUserProfile(data: {
+    name?: string;
+    phone?: string;
+    signature?: string;
+  }) {
+    try {
+      const response = await api.put('/users/profile', data);
+      
+      if (response.data.success) {
+        return { data: response.data.data };
+      } else {
+        throw new Error(response.data.message || 'Failed to update profile');
+      }
+    } catch (error: any) {
+      if (error.response?.data) {
+        throw new Error(error.response.data.message || 'Failed to update profile');
+      }
+      throw error;
     }
   },
 
@@ -332,14 +471,22 @@ export const apiService = {
     return api.get(`/i18n/${locale}`)
   },
 
-  // 注册相关
-  async register(data: { name: string; email: string; password: string; invitation?: string }) {
-    try {
-      const response = await api.post('/auth/register', data);
-      return response.data;
-    } catch (error: any) {
-      console.error('🔧 [API] Register error:', error);
-      throw new Error(error.message || '注册请求失败');
-    }
+  // 头像相关
+  async uploadAvatar(file: File) {
+    const formData = new FormData()
+    formData.append('avatar', file)
+    
+    return api.post('/assets/avatar/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  async getAvatar(userId?: string) {
+    const url = userId ? `/assets/avatar/${userId}` : '/assets/avatar'
+    return api.get(url, {
+      responseType: 'blob'
+    })
   },
 }

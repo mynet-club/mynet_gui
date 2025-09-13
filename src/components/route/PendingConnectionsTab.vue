@@ -33,13 +33,13 @@
                 </q-avatar>
                 <div>
                   <div class="text-h6">
-                    {{ currentType === 'incoming' ? connection.requester_name : connection.target_name }}
+                    {{ currentType === 'incoming' ? connection.source_user_name : connection.target_user_name }}
                   </div>
                   <div class="text-subtitle2 text-grey-6">
-                    {{ currentType === 'incoming' ? connection.requester_node_name : connection.target_node_name }}
+                    {{ currentType === 'incoming' ? connection.source_node_name : connection.target_node_name }}
                   </div>
                   <div class="text-caption text-grey-6">
-                    {{ currentType === 'incoming' ? connection.requester_ip : connection.target_ip }}
+                    {{ currentType === 'incoming' ? connection.source_endpoint : connection.target_endpoint }}
                   </div>
                 </div>
               </div>
@@ -58,7 +58,7 @@
                 icon="check"
                 color="positive"
                 size="sm"
-                @click="$emit('approve', connection.id)"
+                @click="$emit('approve', String(connection.id))"
                 :title="$t('routes.pendingConnections.approve')"
               />
               <q-btn
@@ -67,21 +67,21 @@
                 icon="close"
                 color="negative"
                 size="sm"
-                @click="$emit('reject', connection.id)"
+                @click="$emit('reject', String(connection.id))"
                 :title="$t('routes.pendingConnections.reject')"
               />
             </div>
           </div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none" v-if="connection.message">
+        <q-card-section class="q-pt-none" v-if="connection.request_message">
           <div class="row">
             <div class="col">
               <q-banner class="bg-blue-1 text-primary">
                 <template v-slot:avatar>
                   <q-icon name="message" />
                 </template>
-                {{ connection.message }}
+                {{ connection.request_message }}
               </q-banner>
             </div>
           </div>
@@ -92,8 +92,8 @@
             <div class="col-12 col-md-6">
               <div class="text-body2">
                 <q-icon name="device_hub" size="sm" class="q-mr-xs" />
-                {{ $t('routes.pendingConnections.connectionType') }}: 
-                {{ $t(`routes.connectionType.${connection.connection_type}`) }}
+                {{ $t('routes.pendingConnections.vpnType') }}: 
+                {{ connection.vpn_type }}
               </div>
             </div>
             <div class="col-12 col-md-6">
@@ -122,8 +122,8 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'approve', connectionId: string): void
-  (e: 'reject', connectionId: string): void
+  (e: 'approve', connectionId: string | number): void
+  (e: 'reject', connectionId: string | number): void
   (e: 'type-change', type: 'incoming' | 'outgoing'): void
 }
 

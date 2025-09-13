@@ -62,13 +62,23 @@ export class TokenManager {
   
   // 检查 token 是否过期
   isTokenExpired(): boolean {
+    const token = this.getAccessToken()
+    if (!token) {
+      return true // 没有token就认为是过期的
+    }
+    
     const expiry = this.getTokenExpiry()
+    if (!expiry || expiry === 0) {
+      return true // 没有过期时间也认为是过期的
+    }
+    
     const isExpired = Date.now() > expiry
     
     console.log('🔧 [TokenManager] Token expiry check:', {
       currentTime: new Date().toISOString(),
       expiryTime: new Date(expiry).toISOString(),
-      isExpired
+      isExpired,
+      hasToken: !!token
     })
     
     return isExpired

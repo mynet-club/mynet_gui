@@ -1,227 +1,179 @@
 <template>
-  <q-page class="zone-sharing-page">
-    <div class="q-pa-md">
-      <!-- 页面标题 -->
-      <div class="row items-center q-mb-lg">
-        <div class="col">
-          <h4 class="q-my-none">{{ $t('navigation.zoneSharing') }}</h4>
+  <PageLayout
+    :title="$t('navigation.services')"
+    :subtitle="$t('zoneServices.subtitle')"
+    icon="apps"
+  >
+    <template #actions>
+      <div class="row q-gutter-sm items-center">
+        <q-btn
+          color="primary"
+          icon="add"
+          :label="$t('zoneServices.addService')"
+          @click="handleAddService"
+        />
+        <q-btn
+          color="grey-7"
+          icon="refresh"
+          :label="$t('common.refresh')"
+          @click="handleRefresh"
+          :loading="loading"
+        />
+      </div>
+    </template>
+
+    <!-- 服务分类标签 -->
+    <div class="category-tabs q-mb-lg">
+      <q-tabs
+        v-model="activeCategory"
+        dense
+        class="text-grey"
+        active-color="primary"
+        indicator-color="primary"
+        align="justify"
+        narrow-indicator
+      >
+        <q-tab
+          v-for="category in serviceCategories"
+          :key="category.key"
+          :name="category.key"
+          :icon="category.icon"
+          :label="category.title"
+        />
+      </q-tabs>
+    </div>
+
+    <!-- 服务内容区域 -->
+    <q-tab-panels v-model="activeCategory" animated>
+      <!-- 公共服务 -->
+      <q-tab-panel name="public" class="q-pa-none">
+        <div class="section-header q-mb-md">
+          <h5 class="q-my-none">{{ $t('zoneServices.categories.public') }}</h5>
           <p class="text-grey-6 q-mt-xs q-mb-none">
-            {{ $t('zoneServices.subtitle') }}
+            {{ $t('zoneServices.categories.publicDesc') }}
           </p>
         </div>
-        <div class="col-auto q-gutter-sm">
-          <q-btn
-            color="primary"
-            icon="add"
-            :label="$t('zoneServices.addService')"
-            @click="showServiceDialog = true"
-          />
-          <q-btn
-            color="grey-7"
-            icon="refresh"
-            :label="$t('common.refresh')"
-            @click="handleRefresh"
-            :loading="loading"
-          />
-        </div>
-      </div>
-
-      <!-- 当前区域信息 -->
-      <div v-if="currentZone" class="row q-mb-lg">
-        <div class="col-12">
-          <q-card class="zone-info-card">
-            <q-card-section>
-              <div class="row items-center">
-                <div class="col">
-                  <div class="text-h6">{{ $t('zoneServices.currentZone') }}</div>
-                  <div class="text-body1 q-mt-sm">
-                    <q-chip 
-                      color="primary"
-                      :label="currentZone.zone_name" 
-                      size="md"
-                      icon="public"
-                    />
-                  </div>
-                </div>
-                <div class="col-auto">
-                  <q-chip
-                    color="info"
-                    :label="`${totalServices} ${$t('zoneServices.servicesCount')}`"
-                    icon="apps"
-                  />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-      </div>
-
-      <!-- 服务分类标签 -->
-      <div class="category-tabs q-mb-lg">
-        <q-tabs
-          v-model="activeCategory"
-          dense
-          class="text-grey"
-          active-color="primary"
-          indicator-color="primary"
-          align="justify"
-          narrow-indicator
+        
+        <ResponsiveCardGrid
+          :items="publicServices"
+          :loading="loading"
+          variant="standard"
+          spacing="normal"
+          :empty-icon="'public'"
+          :empty-title="$t('zoneServices.empty.publicServices')"
+          :empty-description="$t('zoneServices.empty.publicServicesDesc')"
         >
-          <q-tab
-            v-for="category in serviceCategories"
-            :key="category.key"
-            :name="category.key"
-            :icon="category.icon"
-            :label="category.title"
-          />
-        </q-tabs>
-      </div>
+          <template #default="{ item }">
+            <ServiceCard
+              :service="item"
+              category="public"
+              @connect="handleConnect"
+              @details="handleDetails"
+            />
+          </template>
+        </ResponsiveCardGrid>
+      </q-tab-panel>
 
-      <!-- 服务内容区域 -->
-      <q-tab-panels v-model="activeCategory" animated>
-        <!-- 公共服务 -->
-        <q-tab-panel name="public" class="q-pa-none">
-          <div class="section-header q-mb-md">
-            <h5 class="q-my-none">{{ $t('zoneServices.categories.public') }}</h5>
-            <p class="text-grey-6 q-mt-xs q-mb-none">
-              {{ $t('zoneServices.categories.publicDesc') }}
-            </p>
-          </div>
-          
-          <ResponsiveCardGrid
-            :items="publicServices"
-            :loading="loading"
-            variant="standard"
-            spacing="normal"
-            :empty-icon="'public'"
-            :empty-title="$t('zoneServices.empty.publicServices')"
-            :empty-description="$t('zoneServices.empty.publicServicesDesc')"
-          >
-            <template #default="{ item }">
-              <ServiceCard
-                :service="item"
-                @connect="handleConnect"
-                @details="handleDetails"
-              />
-            </template>
-          </ResponsiveCardGrid>
-        </q-tab-panel>
+      <!-- 好友分享 -->
+      <q-tab-panel name="friend" class="q-pa-none">
+        <div class="section-header q-mb-md">
+          <h5 class="q-my-none">{{ $t('zoneServices.categories.friend') }}</h5>
+          <p class="text-grey-6 q-mt-xs q-mb-none">
+            {{ $t('zoneServices.categories.friendDesc') }}
+          </p>
+        </div>
+        
+        <ResponsiveCardGrid
+          :items="friendServices"
+          :loading="loading"
+          variant="standard"
+          spacing="normal"
+          :empty-icon="'group'"
+          :empty-title="$t('zoneServices.empty.friendServices')"
+          :empty-description="$t('zoneServices.empty.friendServicesDesc')"
+        >
+          <template #default="{ item }">
+            <ServiceCard
+              :service="item"
+              category="friend"
+              @connect="handleConnect"
+              @details="handleDetails"
+            />
+          </template>
+        </ResponsiveCardGrid>
+      </q-tab-panel>
 
-        <!-- 好友分享 -->
-        <q-tab-panel name="friend" class="q-pa-none">
-          <div class="section-header q-mb-md">
-            <h5 class="q-my-none">{{ $t('zoneServices.categories.friend') }}</h5>
-            <p class="text-grey-6 q-mt-xs q-mb-none">
-              {{ $t('zoneServices.categories.friendDesc') }}
-            </p>
-          </div>
-          
-          <ResponsiveCardGrid
-            :items="friendServices"
-            :loading="loading"
-            variant="standard"
-            spacing="normal"
-            :empty-icon="'group'"
-            :empty-title="$t('zoneServices.empty.friendServices')"
-            :empty-description="$t('zoneServices.empty.friendServicesDesc')"
-          >
-            <template #default="{ item }">
-              <ServiceCard
-                :service="item"
-                @connect="handleConnect"
-                @details="handleDetails"
-              />
-            </template>
-          </ResponsiveCardGrid>
-        </q-tab-panel>
+      <!-- 匿名共享 -->
+      <q-tab-panel name="anonymous" class="q-pa-none">
+        <div class="section-header q-mb-md">
+          <h5 class="q-my-none">{{ $t('zoneServices.categories.anonymous') }}</h5>
+          <p class="text-grey-6 q-mt-xs q-mb-none">
+            {{ $t('zoneServices.categories.anonymousDesc') }}
+          </p>
+        </div>
+        
+        <ResponsiveCardGrid
+          :items="anonymousServices"
+          :loading="loading"
+          variant="standard"
+          spacing="normal"
+          :empty-icon="'visibility_off'"
+          :empty-title="$t('zoneServices.empty.anonymousServices')"
+          :empty-description="$t('zoneServices.empty.anonymousServicesDesc')"
+        >
+          <template #default="{ item }">
+            <ServiceCard
+              :service="item"
+              category="anonymous"
+              @connect="handleConnect"
+              @details="handleDetails"
+            />
+          </template>
+        </ResponsiveCardGrid>
+      </q-tab-panel>
 
-        <!-- 匿名共享 -->
-        <q-tab-panel name="anonymous" class="q-pa-none">
-          <div class="section-header q-mb-md">
-            <h5 class="q-my-none">{{ $t('zoneServices.categories.anonymous') }}</h5>
-            <p class="text-grey-6 q-mt-xs q-mb-none">
-              {{ $t('zoneServices.categories.anonymousDesc') }}
-            </p>
-          </div>
+      <!-- 我的服务 -->
+      <q-tab-panel name="my" class="q-pa-none">
+        <div class="section-header q-mb-md">
+          <h5 class="q-my-none">{{ $t('zoneServices.categories.my') }}</h5>
+          <p class="text-grey-6 q-mt-xs q-mb-none">
+            {{ $t('zoneServices.categories.myDesc') }}
+          </p>
+        </div>
+        
+        <ResponsiveCardGrid
+          :items="myServices"
+          :loading="loading"
+          variant="standard"
+          spacing="normal"
+          :empty-icon="'person_add'"
+          :empty-title="$t('zoneServices.empty.myServices')"
+          :empty-description="$t('zoneServices.empty.myServicesDesc')"
+        >
+          <template #default="{ item }">
+            <ServiceCard
+              :service="item"
+              category="my"
+              @edit="handleEdit"
+              @delete="handleDelete"
+            />
+          </template>
           
-          <ResponsiveCardGrid
-            :items="anonymousServices"
-            :loading="loading"
-            variant="standard"
-            spacing="normal"
-            :empty-icon="'visibility_off'"
-            :empty-title="$t('zoneServices.empty.anonymousServices')"
-            :empty-description="$t('zoneServices.empty.anonymousServicesDesc')"
-          >
-            <template #default="{ item }">
-              <ServiceCard
-                :service="item"
-                @connect="handleConnect"
-                @details="handleDetails"
-              />
-            </template>
-          </ResponsiveCardGrid>
-        </q-tab-panel>
-
-        <!-- 我的服务 -->
-        <q-tab-panel name="my" class="q-pa-none">
-          <div class="section-header q-mb-md">
-            <div class="row items-center">
-              <div class="col">
-                <h5 class="q-my-none">{{ $t('zoneServices.categories.my') }}</h5>
-                <p class="text-grey-6 q-mt-xs q-mb-none">
-                  {{ $t('zoneServices.categories.myDesc') }}
-                </p>
-              </div>
-              <div class="col-auto">
-                <q-btn
-                  color="primary"
-                  icon="add"
-                  :label="$t('zoneServices.addService')"
-                  @click="showServiceDialog = true"
-                  size="sm"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <ResponsiveCardGrid
-            :items="myServices"
-            :loading="loading"
-            variant="standard"
-            spacing="normal"
-            :empty-icon="'person_add'"
-            :empty-title="$t('zoneServices.empty.myServices')"
-            :empty-description="$t('zoneServices.empty.myServicesDesc')"
-          >
-            <template #default="{ item }">
-              <ServiceCard
-                :service="item"
-                @edit="handleEdit"
-                @delete="handleDelete"
-                @share="handleShare"
-                @requestApproval="handleRequestApproval"
-                @connect="handleConnect"
-                @details="handleDetails"
-              />
-            </template>
-            
-            <template #emptyAction>
-              <q-btn
-                color="primary"
-                :label="$t('zoneServices.addFirstService')"
-                @click="showServiceDialog = true"
-              />
-            </template>
-          </ResponsiveCardGrid>
-        </q-tab-panel>
-      </q-tab-panels>
-    </div>
+          <template #emptyAction>
+            <q-btn
+              color="primary"
+              :label="$t('zoneServices.addFirstService')"
+              @click="handleAddService"
+            />
+          </template>
+        </ResponsiveCardGrid>
+      </q-tab-panel>
+    </q-tab-panels>
 
     <!-- 服务编辑对话框 -->
     <ServiceEditDialog
       v-model="showServiceDialog"
-      :service="editingService || undefined"
+      v-bind="editingService ? { service: editingService } : {}"
       @success="handleServiceSuccess"
     />
 
@@ -290,7 +242,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </q-page>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -299,10 +251,11 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../stores/auth'
 import { useZoneServices } from '../../composables/useZoneServices'
+import PageLayout from '../../components/layout/PageLayout.vue'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import ServiceCard from '../../components/zone/ServiceCard.vue'
 import ServiceEditDialog from '../../components/zone/ServiceEditDialog.vue'
-import type { ZoneService } from '../../types/zoneService'
+import type { ZoneService, ShareZoneServiceRequest } from '../../types/zoneService'
 
 const $q = useQuasar()
 const { t } = useI18n()
@@ -326,15 +279,14 @@ const activeCategory = ref('public')
 const showServiceDialog = ref(false)
 const showShareDialog = ref(false)
 const showApprovalDialog = ref(false)
-const editingService = ref<ZoneService | undefined>()
-const sharingService = ref<ZoneService | undefined>()
-const approvalService = ref<ZoneService | undefined>()
+const editingService = ref<ZoneService | null>(null)
+const sharingService = ref<ZoneService | null>(null)
+const approvalService = ref<ZoneService | null>(null)
 const shareMessage = ref('')
 const approvalReason = ref('')
+const currentZone = ref<ZoneService | null>(null)
 
 // 计算属性
-const currentZone = computed(() => authStore.currentZone)
-
 const totalServices = computed(() => {
   return publicServices.value.length + 
          friendServices.value.length + 
@@ -350,6 +302,12 @@ onMounted(async () => {
 // 刷新数据
 const handleRefresh = async () => {
   await loadAllServices()
+}
+
+// 添加服务
+const handleAddService = () => {
+  editingService.value = null
+  showServiceDialog.value = true
 }
 
 // 编辑服务
@@ -396,13 +354,27 @@ const confirmShare = async () => {
   
   if (success) {
     showShareDialog.value = false
-    sharingService.value = undefined
+    sharingService.value = null
     shareMessage.value = ''
   }
 }
 
 // 申请公开
 const handleRequestApproval = (service: ZoneService) => {
+  approvalService.value = service
+  approvalReason.value = ''
+  showApprovalDialog.value = true
+}
+
+// 分享给好友
+const handleShareToFriends = (service: ZoneService) => {
+  sharingService.value = service
+  shareMessage.value = ''
+  showShareDialog.value = true
+}
+
+// 申请公开分享
+const handleShareToPublic = (service: ZoneService) => {
   approvalService.value = service
   approvalReason.value = ''
   showApprovalDialog.value = true
@@ -419,7 +391,7 @@ const confirmApproval = async () => {
   
   if (success) {
     showApprovalDialog.value = false
-    approvalService.value = undefined
+    approvalService.value = null
     approvalReason.value = ''
     await handleRefresh()
   }
@@ -427,8 +399,8 @@ const confirmApproval = async () => {
 
 // 连接服务
 const handleConnect = (service: ZoneService) => {
-  const serviceUrl = formatServiceUrl(service)
-  window.open(serviceUrl, '_blank')
+  const serviceAddress = formatServiceAddress(service)
+  window.open(serviceAddress, '_blank')
 }
 
 // 查看服务详情
@@ -437,7 +409,7 @@ const handleDetails = (service: ZoneService) => {
     title: service.service_name,
     message: `
       <div><strong>${t('zoneServices.form.serviceType')}:</strong> ${service.service_type}</div>
-      <div><strong>${t('zoneServices.form.serviceUrl')}:</strong> ${formatServiceUrl(service)}</div>
+      <div><strong>${t('zoneServices.form.serviceAddress')}:</strong> ${formatServiceAddress(service)}</div>
       <div><strong>${t('zoneServices.form.serviceProtocol')}:</strong> ${service.service_protocol.toUpperCase()}</div>
       <div><strong>${t('zoneServices.authRequired')}:</strong> ${service.service_auth_required ? t('common.yes') : t('common.no')}</div>
       ${service.service_description ? `<div><strong>${t('zoneServices.form.serviceDescription')}:</strong> ${service.service_description}</div>` : ''}
@@ -448,52 +420,25 @@ const handleDetails = (service: ZoneService) => {
 
 // 服务操作成功回调
 const handleServiceSuccess = async () => {
-  editingService.value = undefined
+  editingService.value = null
   await handleRefresh()
 }
 
-// 格式化服务URL
-const formatServiceUrl = (service: ZoneService) => {
-  const { service_url, service_port, service_protocol } = service
+// 格式化服务地址
+const formatServiceAddress = (service: ZoneService) => {
+  const { service_address, service_port, service_protocol } = service
   
-  // 如果service_url不存在，返回默认值
-  if (!service_url) {
+  // 如果service_address不存在，返回默认值
+  if (!service_address) {
     return 'N/A'
   }
   
-  if (service_url.startsWith('http://') || service_url.startsWith('https://')) {
-    return service_url
+  if (service_address.startsWith('http://') || service_address.startsWith('https://')) {
+    return service_address
   }
   
-  return `${service_protocol}://${service_url}:${service_port}`
+  return `${service_protocol}://${service_address}:${service_port}`
 }
 </script>
 
-<style scoped lang="scss">
-.zone-sharing-page {
-  .zone-info-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    
-    .q-chip {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-    }
-  }
-  
-  .category-tabs {
-    .q-tabs {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-  }
-  
-  .section-header {
-    h5 {
-      color: #1976d2;
-      font-weight: 600;
-    }
-  }
-}
-</style>
+

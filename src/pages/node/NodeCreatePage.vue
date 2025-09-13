@@ -191,9 +191,17 @@ const onSubmit = async () => {
     const newNode = await createNode(nodeData)
     
     if (newNode) {
+      console.log('创建的节点数据:', newNode)
       notifySuccess('节点创建成功')
-      // 跳转到节点详情页
-      router.push(`/nodes/${newNode.id}`)
+      // 跳转到节点详情页 - 使用node_id或id字段
+      const nodeId = newNode.node_id || newNode.id
+      console.log('节点ID:', nodeId, '(node_id:', newNode.node_id, ', id:', newNode.id, ')')
+      if (nodeId) {
+        router.push(`/nodes/${nodeId}`)
+      } else {
+        console.warn('节点创建成功但无法获取节点ID，跳转到节点列表')
+        router.push('/nodes')
+      }
     }
     
   } catch (error) {

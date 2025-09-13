@@ -56,6 +56,12 @@
                 {{ $t('social.invitations.expiresAt') }}: {{ formatDate(invitation.expires_at) }}
               </span>
             </div>
+            <div class="detail-row">
+              <q-icon name="people" size="sm" color="info" class="q-mr-sm" />
+              <span class="text-caption text-grey-6">
+                {{ $t('social.invitations.usageCount') }}: {{ invitation.used_count }} / {{ invitation.max_uses }}
+              </span>
+            </div>
             <div v-if="invitation.used_at" class="detail-row">
               <q-icon name="check_circle" size="sm" color="positive" class="q-mr-sm" />
               <span class="text-caption text-grey-6">
@@ -71,13 +77,24 @@
           </div>
         </q-card-section>
 
-        <q-card-actions v-if="invitation.is_valid" align="right">
+        <q-card-actions v-if="invitation.is_valid || (getInvitationStatus(invitation.invitation_status) === 'expired' && invitation.used_count === 0)" align="right">
           <q-btn
+            v-if="invitation.is_valid"
             @click="$emit('copy', getInvitationLink(invitation.invitation_code))"
             flat
             color="primary"
             :label="$t('social.invitations.copyInviteLink')"
             icon="content_copy"
+            size="sm"
+            no-caps
+          />
+          <q-btn
+            v-if="getInvitationStatus(invitation.invitation_status) === 'expired' && invitation.used_count === 0"
+            @click="$emit('delete', invitation)"
+            flat
+            color="negative"
+            :label="$t('common.delete')"
+            icon="delete"
             size="sm"
             no-caps
           />
@@ -110,6 +127,7 @@ interface Props {
 interface Emits {
   (e: 'create'): void
   (e: 'copy', code: string): void
+  (e: 'delete', invitation: Invitation): void
 }
 
 const props = defineProps<Props>()

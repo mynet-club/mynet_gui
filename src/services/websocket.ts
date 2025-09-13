@@ -52,29 +52,33 @@ export class WebSocketService {
       this.echo = null
     }
     
-    // 确定WebSocket主机和端口
-    const wsHost = process.env.NODE_ENV === 'production' 
-      ? 'api.mynet.com' 
-      : 'localhost'
-    const wsPort = process.env.NODE_ENV === 'production' 
-      ? 443 
-      : 1080  // 根据服务端配置调整端口
+    // 从环境变量获取WebSocket配置
+    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:1080'
+    console.log(`WebSocket: 使用配置的URL: ${wsUrl}`)
     
-    console.log(`WebSocket: 正在连接到 ${wsHost}:${wsPort}`)
+    // 解析WebSocket URL
+    const url = new URL(wsUrl)
+    const wsHost = url.hostname
+    const wsPort = url.port ? parseInt(url.port) : (url.protocol === 'wss:' ? 443 : 80)
+    const useTLS = url.protocol === 'wss:'
+    const wsPath = url.pathname || '/wss'  // 从URL中提取路径，默认为 /wss
+    
+    console.log(`WebSocket: 连接参数 - Host: ${wsHost}, Port: ${wsPort}, Path: ${wsPath}, TLS: ${useTLS}`)
     
     try {
-      // 根据工作样例配置 Laravel Echo
+      // Laravel Reverb 配置
       const config = {
-        broadcaster: 'pusher',
-        key: 'oyzmmhlqzmar2uvanq2k',  // 使用工作样例中的key
-        wsHost: wsHost,
-        wsPort: wsPort,
-        forceTLS: false,  // 本地开发环境不使用TLS
+        broadcaster: 'reverb',
+        key: import.meta.env.VITE_PUSHER_APP_KEY || 'oyzmmhlqzmar2uvanq2k',
+        wsHost: import.meta.env.VITE_REVERB_HOST || wsHost,
+        wsPort: import.meta.env.VITE_REVERB_PORT || wsPort,
+        wsPath: wsPath,  // 使用从URL中提取的路径
+        forceTLS: useTLS,  // 根据URL协议确定是否使用TLS
         enabledTransports: ['ws', 'wss'],
         disableStats: true,
-        encrypted: false,
+        encrypted: useTLS,  // 根据URL协议确定是否加密
         namespace: null,   // 禁用命名空间，直接使用事件名
-        cluster: 'local'   // 添加cluster配置，避免Pusher报错
+        cluster: 'local'   // 添加cluster配置
       }
       
       console.log('WebSocket: Echo 配置', config)
@@ -110,11 +114,32 @@ export class WebSocketService {
       console.log('WebSocket: 正在订阅时间更新频道...')
       const timeChannel = this.echo.channel('time-updates')
 
+      // 添加消息去重机制
+      const processedMessages = new Set<string>()
+      const MESSAGE_DEDUP_WINDOW = 5000 // 5秒内的重复消息将被过滤
+      
+      // 定期清理去重缓存
+      setInterval(() => {
+        processedMessages.clear()
+      }, MESSAGE_DEDUP_WINDOW)
+
       // 监听多种可能的时间事件名称（根据Laravel后端的实际事件名）
       const timeEvents = ['TimeUpdate', 'time.update', 'time_update', 'App\\Events\\TimeUpdate']
       
       timeEvents.forEach(eventName => {
         timeChannel.listen(eventName, (data: any) => {
+          // 生成消息唯一标识，用于去重
+          const messageId = `${eventName}_${data.timestamp || Date.now()}_${JSON.stringify(data)}`
+          
+          // 检查是否为重复消息
+          if (processedMessages.has(messageId)) {
+            console.log(`🕐 [去重] 跳过重复的时间事件 ${eventName}:`, data.timestamp)
+            return
+          }
+          
+          // 标记消息已处理
+          processedMessages.add(messageId)
+          
           console.log(`🕐 收到时间事件 ${eventName}:`, data)
           
           // 格式化时间数据
@@ -139,9 +164,43 @@ export class WebSocketService {
         })
       })
 
-      // 监听原始消息（调试用）
+      // 监听原始消息（调试用） - 添加消息过滤和统计
+      let lastMessageTime = 0
+      let messageCount = 0
+      const messageStats = new Map<string, number>()
+      const MESSAGE_THROTTLE = 50 // 50ms内只处理一次相同类型的消息
+      
       this.echo.connector.pusher.connection.bind('message', (message: any) => {
-        console.log('WebSocket: 收到原始消息', message)
+        const now = Date.now()
+        messageCount++
+        
+        // 统计消息类型
+        const eventType = message.event || 'unknown'
+        messageStats.set(eventType, (messageStats.get(eventType) || 0) + 1)
+        
+        // 过滤掉频繁的 ping/pong 消息，只显示关键消息
+        if (message.event === 'pusher:ping' || message.event === 'pusher:pong') {
+          return // 不输出 ping/pong 消息
+        }
+        
+        // 对 time.update 消息进行节流处理
+        if (message.event === 'time.update') {
+          if (now - lastMessageTime < MESSAGE_THROTTLE) {
+            console.log(`🕐 [节流] 跳过过于频繁的time.update消息 (${now - lastMessageTime}ms间隔)`)
+            return // 跳过过于频繁的消息
+          }
+          lastMessageTime = now
+          
+          // 输出消息统计信息
+          console.log(`📊 [WebSocket] 消息统计: time.update=${messageStats.get('time.update')}次, 总计=${messageCount}条`)
+        }
+        
+        console.log('WebSocket: 收到原始消息', {
+          event: message.event,
+          channel: message.channel,
+          timestamp: new Date().toISOString(),
+          dataPreview: typeof message.data === 'string' ? message.data.substring(0, 100) : message.data
+        })
       })
 
       console.log('WebSocket: Laravel Echo 初始化完成')

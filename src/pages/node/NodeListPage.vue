@@ -1,31 +1,27 @@
 <template>
-  <q-page class="q-pa-md">
-    <!-- 页面标题和操作按钮 -->
-    <div class="row items-center justify-between q-mb-md">
-      <div class="text-h4">
-        <q-icon name="device_hub" class="q-mr-sm" />
-        节点管理
-      </div>
-      <div class="row q-gutter-sm">
+  <PageLayout
+    title="节点管理"
+    subtitle="管理和监控您的网络节点"
+    icon="device_hub"
+  >
+    <template #actions>
+      <q-btn-group>
         <q-btn
           color="primary"
+          icon="add"
+          label="创建节点"
           @click="goToCreate"
           :disable="loading"
-        >
-          <q-icon name="add" class="q-mr-sm" />
-          创建节点
-        </q-btn>
+        />
         <q-btn
           color="secondary"
-          outline
+          icon="refresh"
+          label="刷新"
           @click="refreshNodes"
           :loading="loading"
-        >
-          <q-icon name="refresh" class="q-mr-sm" />
-          刷新
-        </q-btn>
-      </div>
-    </div>
+        />
+      </q-btn-group>
+    </template>
 
     <!-- 节点列表 - 卡片布局 -->
     <ResponsiveCardGrid
@@ -42,12 +38,12 @@
           <div class="row items-center justify-between q-mb-sm">
             <div class="text-h6 text-primary">{{ node.node_name }}</div>
             <q-chip
-              :color="getStatusColor(node.status || node.node_status)"
+              :color="NodeStatusManager.getStatusColor(normalizeNodeStatus(node.node_status, node.status))"
               text-color="white"
-              :icon="getStatusIcon(node.status || node.node_status)"
+              :icon="NodeStatusManager.getStatusIcon(normalizeNodeStatus(node.node_status, node.status))"
               size="sm"
             >
-              {{ getStatusText(node.status || node.node_status) }}
+              {{ NodeStatusManager.getStatusText(normalizeNodeStatus(node.node_status, node.status)) }}
             </q-chip>
           </div>
           
@@ -55,6 +51,35 @@
           
           <div v-if="node.description || node.node_remarks" class="text-body2 q-mb-sm">
             {{ node.description || node.node_remarks }}
+          </div>
+          
+          <!-- 未完成配置状态的建议步骤 -->
+          <div v-if="isUnconfiguredNode(node)" class="q-mb-sm">
+            <div 
+              v-if="nodeStatusInfo[node.node_id]?.next_steps?.length" 
+              class="q-pa-sm rounded-borders"
+              style="background-color: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;"
+            >
+              <div class="text-caption text-orange-8 q-mb-xs">
+                <q-icon name="info" class="q-mr-xs" />
+                下一步建议:
+              </div>
+              <div class="text-body2">
+                <ul class="q-ma-none q-pl-md">
+                  <li 
+                    v-for="step in nodeStatusInfo[node.node_id]?.next_steps || []" 
+                    :key="step"
+                    class="text-orange-9"
+                  >
+                    {{ step }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div v-else-if="loadingStatusInfo[node.node_id]" class="text-center q-pa-sm">
+              <q-spinner color="primary" size="sm" />
+              <span class="q-ml-sm text-caption">获取配置建议...</span>
+            </div>
           </div>
           
           <div class="row q-gutter-xs q-mb-sm">
@@ -76,6 +101,17 @@
               icon="lan"
             >
               {{ node.node_ip || node.ip_address }}
+            </q-chip>
+            
+            <!-- 操作系统信息 -->
+            <q-chip
+              v-if="getNodeOSInfo(node.node_id)"
+              color="teal"
+              text-color="white"
+              size="sm"
+              icon="desktop_windows"
+            >
+              {{ getNodeOSInfo(node.node_id) }}
             </q-chip>
           </div>
           
@@ -104,6 +140,38 @@
           </q-btn>
           
           <q-space />
+          
+          <!-- 状态切换按钮 -->
+          <q-btn-dropdown
+            v-if="!isUnconfiguredNode(node)"
+            flat
+            color="blue"
+            icon="toggle_on"
+            :loading="statusChanging[node.node_id]"
+          >
+            <q-list>
+              <q-item 
+                clickable 
+                @click="changeNodeStatus(node, NODE_STATUS.ENABLED)"
+                :disable="node.status === NODE_STATUS.ENABLED || node.status === NODE_STATUS.ONLINE"
+              >
+                <q-item-section avatar>
+                  <q-icon name="power_settings_new" color="positive" />
+                </q-item-section>
+                <q-item-section>启用</q-item-section>
+              </q-item>
+              <q-item 
+                clickable 
+                @click="changeNodeStatus(node, NODE_STATUS.DISABLED)"
+                :disable="node.status === NODE_STATUS.DISABLED"
+              >
+                <q-item-section avatar>
+                  <q-icon name="power_off" color="negative" />
+                </q-item-section>
+                <q-item-section>禁用</q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
           
           <q-btn
             flat
@@ -149,7 +217,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </q-page>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -157,8 +225,11 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
+import PageLayout from '../../components/layout/PageLayout.vue'
 import { useNodes, useNotify } from '../../composables'
-import { Node, NodeStatus } from '../../types/node'
+import { Node, NodeStatus, NODE_STATUS, NodeStatusInfo, NodeDeviceInfo } from '../../types/node'
+import { nodeService } from '../../services/node/nodeService'
+import { NodeStatusManager, normalizeNodeStatus } from '../../utils/nodeStatus'
 
 const router = useRouter()
 const $q = useQuasar()
@@ -171,6 +242,17 @@ const { nodes, loading, loadNodes, deleteNode: removeNode } = useNodes()
 const showDeleteDialog = ref(false)
 const nodeToDelete = ref<Node | null>(null)
 const deleting = ref(false)
+
+// 状态切换
+const statusChanging = ref<Record<string | number, boolean>>({})
+
+// 节点状态信息管理
+const nodeStatusInfo = ref<Record<string | number, NodeStatusInfo>>({})
+const loadingStatusInfo = ref<Record<string | number, boolean>>({})
+
+// 节点设备信息管理
+const nodeDeviceInfo = ref<Record<string | number, NodeDeviceInfo>>({})
+const loadingDeviceInfo = ref<Record<string | number, boolean>>({})
 
 // 分页
 const pagination = ref({
@@ -239,36 +321,89 @@ const filteredNodes = computed(() => {
   return [...(nodes.value || [])]
 })
 
-// 工具函数
-const getStatusColor = (status: NodeStatus | string | undefined) => {
-  switch (status) {
-    case 'active': return 'positive'
-    case 'inactive': return 'negative'
-    case 'pending': return 'warning'
-    default: return 'grey'
-  }
-}
-
-const getStatusIcon = (status: NodeStatus | string | undefined) => {
-  switch (status) {
-    case 'active': return 'check_circle'
-    case 'inactive': return 'cancel'
-    case 'pending': return 'schedule'
-    default: return 'help'
-  }
-}
-
-const getStatusText = (status: NodeStatus | string | undefined) => {
-  switch (status) {
-    case 'active': return '在线'
-    case 'inactive': return '离线'
-    case 'pending': return '待连接'
-    default: return '未知'
-  }
-}
-
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString('zh-CN')
+}
+
+// 检查是否为未完成配置的节点
+const isUnconfiguredNode = (node: Node): boolean => {
+  const status = normalizeNodeStatus(node.node_status, node.status)
+  return NodeStatusManager.needsConfiguration(status)
+}
+
+// 加载节点状态信息
+const loadNodeStatusInfo = async (nodeId: string | number) => {
+  if (loadingStatusInfo.value[nodeId] || nodeStatusInfo.value[nodeId]) {
+    return // 避免重复加载
+  }
+
+  try {
+    loadingStatusInfo.value[nodeId] = true
+    const response = await nodeService.getNodeStatusInfo(String(nodeId))
+    nodeStatusInfo.value[nodeId] = response.data
+  } catch (error) {
+    console.error(`获取节点 ${nodeId} 状态信息失败:`, error)
+  } finally {
+    loadingStatusInfo.value[nodeId] = false
+  }
+}
+
+// 加载节点设备信息
+const loadNodeDeviceInfo = async (nodeId: string | number) => {
+  if (loadingDeviceInfo.value[nodeId] || nodeDeviceInfo.value[nodeId]) {
+    return // 避免重复加载
+  }
+
+  try {
+    loadingDeviceInfo.value[nodeId] = true
+    const response = await nodeService.getNodeDeviceInfo(String(nodeId))
+    if (response.success && response.data.exists) {
+      nodeDeviceInfo.value[nodeId] = response.data.device_info
+    }
+  } catch (error) {
+    console.error(`获取节点 ${nodeId} 设备信息失败:`, error)
+  } finally {
+    loadingDeviceInfo.value[nodeId] = false
+  }
+}
+
+// 获取节点操作系统信息显示
+const getNodeOSInfo = (nodeId: string | number): string => {
+  const deviceInfo = nodeDeviceInfo.value[nodeId]
+  if (!deviceInfo) return ''
+  
+  const parts: string[] = []
+  
+  if (deviceInfo.os_name) {
+    parts.push(deviceInfo.os_name)
+  }
+  
+  if (deviceInfo.os_version) {
+    parts.push(deviceInfo.os_version)
+  }
+  
+  return parts.join(' ')
+}
+
+// 检查并加载未配置节点的状态信息
+const checkAndLoadUnconfiguredNodes = async () => {
+  const unconfiguredNodes = filteredNodes.value.filter(isUnconfiguredNode)
+  
+  // 并发加载所有未配置节点的状态信息
+  const loadPromises = unconfiguredNodes.map(node => 
+    loadNodeStatusInfo(node.node_id)
+  )
+  
+  await Promise.allSettled(loadPromises)
+}
+
+// 加载所有节点的设备信息（用于显示操作系统信息）
+const loadAllNodesDeviceInfo = async () => {
+  const loadPromises = filteredNodes.value.map(node => 
+    loadNodeDeviceInfo(node.node_id)
+  )
+  
+  await Promise.allSettled(loadPromises)
 }
 
 // 操作方法
@@ -286,6 +421,11 @@ const goToEdit = (nodeId: string | number) => {
 
 const refreshNodes = async () => {
   await loadNodes()
+  // 自动加载未配置节点的状态信息和所有节点的设备信息
+  await Promise.all([
+    checkAndLoadUnconfiguredNodes(),
+    loadAllNodesDeviceInfo()
+  ])
 }
 
 const confirmDelete = (node: Node) => {
@@ -315,6 +455,30 @@ const deleteNode = async () => {
   }
 }
 
+// 状态切换方法
+const changeNodeStatus = async (node: Node, newStatus: number) => {
+  const nodeId = node.node_id
+  
+  try {
+    statusChanging.value[nodeId] = true
+    
+    // 使用新的数字状态码方法
+    await nodeService.updateNodeStatusCode(String(nodeId), newStatus)
+    
+    // 刷新节点列表以获取最新状态
+    await refreshNodes()
+    
+    const statusText = NodeStatusManager.getStatusText(newStatus)
+    notifySuccess(`节点状态已更新为: ${statusText}`)
+    
+  } catch (error) {
+    console.error('更新节点状态失败:', error)
+    notifyError('更新节点状态失败，请重试')
+  } finally {
+    statusChanging.value[nodeId] = false
+  }
+}
+
 const onRequest = (props: any) => {
   const { page, rowsPerPage, sortBy, descending } = props.pagination
 
@@ -332,6 +496,11 @@ onMounted(async () => {
   await loadNodes()
   // 更新分页信息
   pagination.value.rowsNumber = nodes.value?.length || 0
+  // 加载未配置节点的状态信息和所有节点的设备信息
+  await Promise.all([
+    checkAndLoadUnconfiguredNodes(),
+    loadAllNodesDeviceInfo()
+  ])
 })
 </script>
 

@@ -1,0 +1,6068 @@
+openapi: 3.0.3
+info:
+  title: MyNet API
+  description: |
+    MyNet 是一个基于 DDD 架构的虚拟网络管理平台 API。
+    
+    支持功能：
+    - 节点管理（Node Management）
+    - 路由管理（Route Management）
+    - 区域管理（Zone Management）
+    - IP 池管理（IP Pool Management）
+    - 社交网络（Social Network）
+    - 用户管理（User Management）
+    - ID 管理（ID Management）
+    
+    认证方式：
+    - Bearer Token (Laravel Sanctum)
+    - Session Authentication
+    
+    Zone 隔离：
+    - 所有 API 都基于用户的 Zone 进行数据隔离
+    - 确保跨 Zone 访问的安全性
+  version: 1.0.0
+  contact:
+    name: MyNet API Support
+    url: https://github.com/mynet-project
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.mynet.com/api/v1
+    description: Production server
+  - url: https://staging.mynet.com/api/v1
+    description: Staging server
+  - url: http://localhost:8000/api/v1
+    description: Development server
+
+security:
+  - bearerAuth: []
+  - sessionAuth: []
+
+paths:
+  # 认证相关
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: 用户登录
+      description: 用户登录获取访问令牌
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: 用户邮箱
+                password:
+                  type: string
+                  format: password
+                  description: 用户密码
+                device_name:
+                  type: string
+                  maxLength: 255
+                  description: 设备名称
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: 认证失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: 用户登出
+      description: 用户登出并撤销令牌
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 登出成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/verify-token:
+    get:
+      tags:
+        - Authentication
+      summary: 验证令牌
+      description: 验证当前访问令牌的有效性
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 令牌有效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenVerifyResponse'
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: 用户注册
+      description: 用户注册并发送账号激活邮件
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+                - invitation
+                - activation_url
+              properties:
+                name:
+                  type: string
+                  description: 用户名
+                email:
+                  type: string
+                  format: email
+                  description: 用户邮箱
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  description: 用户密码
+                device_name:
+                  type: string
+                  maxLength: 255
+                  description: 设备名称
+                invitation:
+                  type: string
+                  maxLength: 255
+                  description: 邀请码
+                activation_url:
+                  type: string
+                  format: uri
+                  description: 账号激活页面URL
+                  example: "https://app.dsplat.com/activate"
+      responses:
+        '201':
+          description: 注册成功，激活邮件已发送
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '422':
+          description: 验证失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /auth/refresh-token:
+    post:
+      tags:
+        - Authentication
+      summary: 刷新访问令牌
+      description: 使用refresh token刷新访问令牌
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+                  description: 刷新令牌
+      responses:
+        '200':
+          description: 令牌刷新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+        '401':
+          description: 认证失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/token/generate:
+    post:
+      tags:
+        - Authentication
+      summary: 生成新的API令牌
+      description: 为当前用户生成新的API令牌
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 令牌生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateTokenResponse'
+        '401':
+          description: 用户未认证
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/validate-session:
+    post:
+      tags:
+        - Authentication
+      summary: 验证会话状态
+      description: 验证会话状态和数据同步
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - token_hash
+                - last_sync
+                - client_version
+                - timestamp
+              properties:
+                user_id:
+                  type: string
+                  description: 用户ID
+                token_hash:
+                  type: string
+                  description: 令牌哈希
+                last_sync:
+                  type: integer
+                  description: 最后同步时间戳
+                client_version:
+                  type: string
+                  description: 客户端版本
+                timestamp:
+                  type: integer
+                  description: 当前时间戳
+      responses:
+        '200':
+          description: 会话验证成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateSessionResponse'
+        '401':
+          description: 用户未认证
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/status:
+    get:
+      tags:
+        - Authentication
+      summary: 获取认证状态
+      description: 获取当前认证状态（无需认证）
+      responses:
+        '200':
+          description: 认证状态
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  web_auth:
+                    type: boolean
+                    description: Web认证状态
+                  sanctum_auth:
+                    type: boolean
+                    description: Sanctum认证状态
+                  session_id:
+                    type: string
+                    description: 会话ID
+                  csrf_token:
+                    type: string
+                    description: CSRF令牌
+
+  # 密码重置相关API
+  /auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: 忘记密码
+      description: 发送密码重置邮件到用户邮箱
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - redirect_url
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: 用户邮箱
+                  example: "user@example.com"
+                redirect_url:
+                  type: string
+                  format: uri
+                  description: 密码重置页面URL
+                  example: "https://app.dsplat.com/reset-password"
+      responses:
+        '200':
+          description: 密码重置邮件发送成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "密码重置邮件已发送"
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: "user@example.com"
+                      expires_at:
+                        type: string
+                        format: date-time
+                        description: 重置链接过期时间
+        '422':
+          description: 验证失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: 重置密码
+      description: 使用令牌重置用户密码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - token
+                - password
+                - password_confirmation
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: 用户邮箱
+                  example: "user@example.com"
+                token:
+                  type: string
+                  description: 密码重置令牌
+                  example: "abc123def456"
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  description: 新密码
+                password_confirmation:
+                  type: string
+                  format: password
+                  description: 确认新密码
+      responses:
+        '200':
+          description: 密码重置成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "密码重置成功"
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: "user@example.com"
+        '422':
+          description: 验证失败或令牌无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/validate-reset-token:
+    post:
+      tags:
+        - Authentication
+      summary: 验证重置令牌
+      description: 验证密码重置令牌的有效性
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - token
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: 用户邮箱
+                  example: "user@example.com"
+                token:
+                  type: string
+                  description: 密码重置令牌
+                  example: "abc123def456"
+      responses:
+        '200':
+          description: 令牌验证成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "令牌有效"
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: "user@example.com"
+                      expires_at:
+                        type: string
+                        format: date-time
+                        description: 令牌过期时间
+        '422':
+          description: 令牌无效或已过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /auth/cancel-password-reset:
+    delete:
+      tags:
+        - Authentication
+      summary: 取消密码重置
+      description: 取消用户的密码重置请求
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: 用户邮箱
+                  example: "user@example.com"
+      responses:
+        '200':
+          description: 密码重置已取消
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "密码重置已取消"
+        '404':
+          description: 没有找到重置请求
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # 账号激活相关API
+  /auth/activate-account:
+    post:
+      tags:
+        - Authentication
+      summary: 激活账号
+      description: 使用激活令牌激活用户账号
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - token
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: 用户邮箱
+                  example: "user@example.com"
+                token:
+                  type: string
+                  description: 账号激活令牌
+                  example: "xyz789abc123"
+      responses:
+        '200':
+          description: 账号激活成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "账号激活成功"
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: "user@example.com"
+                      activated_at:
+                        type: string
+                        format: date-time
+                        description: 激活时间
+        '422':
+          description: 激活令牌无效或已过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: 账号已经激活
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "账号已经激活"
+
+  /auth/resend-activation-email:
+    post:
+      tags:
+        - Authentication
+      summary: 重新发送激活邮件
+      description: 重新发送账号激活邮件
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - activation_url
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: 用户邮箱
+                  example: "user@example.com"
+                activation_url:
+                  type: string
+                  format: uri
+                  description: 账号激活页面URL
+                  example: "https://app.dsplat.com/activate"
+      responses:
+        '200':
+          description: 激活邮件发送成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "激活邮件已发送"
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: "user@example.com"
+                      expires_at:
+                        type: string
+                        format: date-time
+                        description: 激活链接过期时间
+        '422':
+          description: 验证失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: 账号已经激活
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "账号已经激活"
+
+  /auth/check-activation-status:
+    get:
+      tags:
+        - Authentication
+      summary: 检查激活状态
+      description: 检查指定邮箱的账号激活状态
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+            format: email
+          description: 用户邮箱
+          example: "user@example.com"
+      responses:
+        '200':
+          description: 激活状态查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: "user@example.com"
+                      is_activated:
+                        type: boolean
+                        description: 是否已激活
+                        example: false
+                      activated_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        description: 激活时间（如果已激活）
+                      pending_activation:
+                        type: boolean
+                        description: 是否有待激活的令牌
+                        example: true
+                      token_expires_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        description: 激活令牌过期时间
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # 用户信息
+  /user:
+    get:
+      tags:
+        - User
+      summary: 获取当前用户信息
+      description: 获取当前认证用户的基本信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 用户信息获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponse'
+
+  # MyNet 统计数据
+  /mynet/stats:
+    get:
+      tags:
+        - MyNet
+      summary: 获取系统统计数据
+      description: 获取系统初始化数据和统计信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 统计数据获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyNetStatsResponse'
+
+  /mynet/health:
+    get:
+      tags:
+        - MyNet
+      summary: 获取系统健康状态
+      description: 获取系统健康状态和运行状态
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 健康状态获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  # 节点管理
+  /nodes:
+    get:
+      tags:
+        - Nodes
+      summary: 获取节点列表
+      description: 获取当前用户在当前 Zone 的节点列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+            maximum: 100
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: 搜索关键词
+        - name: vpn_type
+          in: query
+          schema:
+            type: string
+            enum: [gnb, wireguard]
+          description: VPN 类型筛选
+        - name: status
+          in: query
+          schema:
+            type: integer
+            enum: [0, 1, 2]
+          description: 状态筛选
+      responses:
+        '200':
+          description: 节点列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeListResponse'
+
+  /nodes/create:
+    post:
+      tags:
+        - Nodes
+      summary: 创建新节点
+      description: 创建新的节点
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNodeRequest'
+      responses:
+        '201':
+          description: 节点创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeResponse'
+        '422':
+          description: 验证错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  # 节点类型定义
+  /nodes/types_def:
+    get:
+      tags:
+        - Nodes
+      summary: 获取节点类型定义
+      description: 获取所有节点类型的定义信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 节点类型定义获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeTypesDefResponse'
+
+  # 节点统计
+  /nodes/statistics:
+    get:
+      tags:
+        - Nodes
+      summary: 获取节点统计
+      description: 获取节点统计信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 节点统计获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeStatisticsResponse'
+
+  /nodes/{id}:
+    get:
+      tags:
+        - Nodes
+      summary: 获取节点详情
+      description: 获取指定节点的详细信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 节点详情获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeResponse'
+        '404':
+          description: 节点不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Nodes
+      summary: 更新节点
+      description: 更新指定节点的信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNodeRequest'
+      responses:
+        '200':
+          description: 节点更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeResponse'
+
+    delete:
+      tags:
+        - Nodes
+      summary: 删除节点
+      description: 删除指定节点
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 节点删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # 节点状态管理
+  /nodes/{id}/status:
+    patch:
+      tags:
+        - Nodes
+      summary: 更新节点状态
+      description: 更新指定节点的状态
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNodeStatusRequest'
+      responses:
+        '200':
+          description: 节点状态更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeResponse'
+
+  /nodes/{id}/status-check:
+    get:
+      tags:
+        - Nodes
+      summary: 检查节点配置状态
+      description: 检查指定节点的配置状态
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 节点配置状态检查成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeConfigStatusResponse'
+
+  /nodes/{id}/status-info:
+    get:
+      tags:
+        - Nodes
+      summary: 获取节点状态信息
+      description: 获取指定节点的详细状态信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 节点状态信息获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeStatusInfoResponse'
+
+  # 节点索引服务
+  /nodes/{id}/index-services:
+    get:
+      tags:
+        - Nodes
+      summary: 获取节点索引服务
+      description: 获取指定节点的索引服务信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 节点索引服务获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeIndexServicesResponse'
+
+  # 节点IP管理
+  /nodes/{id}/ips:
+    delete:
+      tags:
+        - Nodes
+      summary: 释放节点IP
+      description: 释放指定节点的IP地址
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 节点IP释放成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # 节点配置管理
+  /nodes/{id}/config:
+    get:
+      tags:
+        - Nodes
+      summary: 获取节点配置
+      description: 获取指定节点的完整配置信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 配置获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeConfigResponse'
+
+    put:
+      tags:
+        - Nodes
+      summary: 保存节点配置
+      description: 保存节点的基本信息和自定义配置
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveNodeConfigRequest'
+      responses:
+        '200':
+          description: 配置保存成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeConfigResponse'
+
+  # 节点密钥管理
+  /nodes/{id}/keys/generate:
+    post:
+      tags:
+        - Nodes
+      summary: 生成节点密钥
+      description: 为指定节点生成密钥对
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateNodeKeyRequest'
+      responses:
+        '200':
+          description: 密钥生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeKeyResponse'
+
+  /nodes/{id}/keys:
+    get:
+      tags:
+        - Nodes
+      summary: 获取节点密钥
+      description: 获取指定节点的密钥信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 密钥获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeKeyResponse'
+
+    delete:
+      tags:
+        - Nodes
+      summary: 撤销节点密钥
+      description: 撤销指定节点的密钥
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 密钥撤销成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # 节点网络配置
+  /nodes/{id}/network-config:
+    get:
+      tags:
+        - Nodes
+      summary: 获取节点网络配置
+      description: 获取指定节点的网络配置信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 网络配置获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeNetworkConfigResponse'
+
+    put:
+      tags:
+        - Nodes
+      summary: 设置节点网络配置
+      description: 设置指定节点的网络配置
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetNodeNetworkConfigRequest'
+      responses:
+        '200':
+          description: 网络配置设置成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeNetworkConfigResponse'
+
+  # 路由管理
+  /route:
+    get:
+      tags:
+        - Routes
+      summary: 获取路由列表
+      description: 获取当前用户的路由列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+      responses:
+        '200':
+          description: 路由列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteListResponse'
+
+    post:
+      tags:
+        - Routes
+      summary: 创建新路由
+      description: 创建新的路由连接
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRouteRequest'
+      responses:
+        '201':
+          description: 路由创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteResponse'
+
+  /route/{id}:
+    get:
+      tags:
+        - Routes
+      summary: 获取路由详情
+      description: 获取指定路由的详细信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 路由 ID
+      responses:
+        '200':
+          description: 路由详情获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteResponse'
+
+    put:
+      tags:
+        - Routes
+      summary: 更新路由
+      description: 更新指定路由的信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 路由 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRouteRequest'
+      responses:
+        '200':
+          description: 路由更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteResponse'
+
+    delete:
+      tags:
+        - Routes
+      summary: 删除路由
+      description: 删除指定路由
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 路由 ID
+      responses:
+        '200':
+          description: 路由删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # 路由数据和统计
+  /route/data:
+    get:
+      tags:
+        - Routes
+      summary: 获取路由数据
+      description: 获取路由相关数据
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 路由数据获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteDataResponse'
+
+  /route/statistics:
+    get:
+      tags:
+        - Routes
+      summary: 获取路由统计
+      description: 获取路由统计信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 路由统计获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteStatsResponse'
+
+  /route/stats:
+    get:
+      tags:
+        - Routes
+      summary: 获取路由状态统计
+      description: 获取路由状态统计信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 路由状态统计获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteStatsResponse'
+
+  # 路由连接管理
+  /route/connections:
+    get:
+      tags:
+        - Routes
+      summary: 获取路由连接
+      description: 获取当前用户的路由连接列表
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 路由连接获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteConnectionsResponse'
+
+  /route/connections/{id}:
+    put:
+      tags:
+        - Routes
+      summary: 更新路由连接
+      description: 更新指定的路由连接
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 连接 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRouteConnectionRequest'
+      responses:
+        '200':
+          description: 路由连接更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+    delete:
+      tags:
+        - Routes
+      summary: 删除路由连接
+      description: 删除指定的路由连接
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 连接 ID
+      responses:
+        '200':
+          description: 路由连接删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /route/requests:
+    get:
+      tags:
+        - Routes
+      summary: 获取路由请求
+      description: 获取当前用户的路由请求列表
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 路由请求获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteRequestsResponse'
+
+  /route/send-request:
+    post:
+      tags:
+        - Routes
+      summary: 发送路由请求
+      description: 发送新的路由连接请求
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendRouteRequestRequest'
+      responses:
+        '200':
+          description: 路由请求发送成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /route/accept-request/{id}:
+    post:
+      tags:
+        - Routes
+      summary: 接受路由请求
+      description: 接受指定的路由连接请求
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 请求 ID
+      responses:
+        '200':
+          description: 路由请求接受成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /route/reject-request/{id}:
+    post:
+      tags:
+        - Routes
+      summary: 拒绝路由请求
+      description: 拒绝指定的路由连接请求
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 请求 ID
+      responses:
+        '200':
+          description: 路由请求拒绝成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # 批量操作
+  /route/bulk/status:
+    post:
+      tags:
+        - Routes
+      summary: 批量更新路由状态
+      description: 批量更新多个路由的状态
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkUpdateRouteStatusRequest'
+      responses:
+        '200':
+          description: 批量状态更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /route/bulk:
+    delete:
+      tags:
+        - Routes
+      summary: 批量删除路由
+      description: 批量删除多个路由
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDeleteRouteRequest'
+      responses:
+        '200':
+          description: 批量删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # 路由算法和分析
+  /route/optimal-path:
+    post:
+      tags:
+        - Routes
+      summary: 查找最优路径
+      description: 查找两个节点之间的最优路径
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FindOptimalPathRequest'
+      responses:
+        '200':
+          description: 最优路径查找成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptimalPathResponse'
+
+  /route/connectivity:
+    post:
+      tags:
+        - Routes
+      summary: 分析连通性
+      description: 分析网络连通性
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeConnectivityRequest'
+      responses:
+        '200':
+          description: 连通性分析成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectivityAnalysisResponse'
+
+  # 访问规则管理
+  /route/access-rules/{nodeId}:
+    get:
+      tags:
+        - Routes
+      summary: 获取访问规则
+      description: 获取指定节点的访问规则
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 访问规则获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessRulesResponse'
+
+    post:
+      tags:
+        - Routes
+      summary: 创建访问规则
+      description: 为指定节点创建访问规则
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccessRuleRequest'
+      responses:
+        '201':
+          description: 访问规则创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessRuleResponse'
+
+  /route/access-rules/rule/{ruleId}:
+    put:
+      tags:
+        - Routes
+      summary: 更新访问规则
+      description: 更新指定的访问规则
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 规则 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAccessRuleRequest'
+      responses:
+        '200':
+          description: 访问规则更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessRuleResponse'
+
+    delete:
+      tags:
+        - Routes
+      summary: 删除访问规则
+      description: 删除指定的访问规则
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 规则 ID
+      responses:
+        '200':
+          description: 访问规则删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # 配置生成和管理
+  /route/config/{nodeId}:
+    get:
+      tags:
+        - Routes
+      summary: 获取节点路由配置
+      description: 获取指定节点的路由配置
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 节点路由配置获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeRouteConfigResponse'
+
+  /route/config/{nodeId}/generate:
+    post:
+      tags:
+        - Routes
+      summary: 生成路由配置
+      description: 为指定节点生成路由配置
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRouteConfigRequest'
+      responses:
+        '200':
+          description: 路由配置生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeRouteConfigResponse'
+
+  /route/config/{nodeId}/preview:
+    get:
+      tags:
+        - Routes
+      summary: 预览路由配置
+      description: 预览指定节点的路由配置
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 路由配置预览成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteConfigPreviewResponse'
+
+  /route/config/{nodeId}/download:
+    get:
+      tags:
+        - Routes
+      summary: 下载路由配置
+      description: 下载指定节点的路由配置文件
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 路由配置文件
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  /route/config/{nodeId}/validate:
+    post:
+      tags:
+        - Routes
+      summary: 验证路由配置
+      description: 验证指定节点的路由配置
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateRouteConfigRequest'
+      responses:
+        '200':
+          description: 路由配置验证成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteConfigValidationResponse'
+
+  /route/config/{nodeId}/components:
+    get:
+      tags:
+        - Routes
+      summary: 获取配置组件
+      description: 获取指定节点的配置组件信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 配置组件获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigComponentsResponse'
+
+  /route/config/{nodeId}/recalculate:
+    post:
+      tags:
+        - Routes
+      summary: 重新计算路由
+      description: 重新计算指定节点的路由
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 路由重新计算成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /route/config/simulate:
+    post:
+      tags:
+        - Routes
+      summary: 模拟配置生成
+      description: 模拟路由配置生成（演示用）
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulateRouteConfigRequest'
+      responses:
+        '200':
+          description: 配置模拟成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulateRouteConfigResponse'
+
+  # 网络拓扑和连通性
+  /route/topology/{nodeId}:
+    get:
+      tags:
+        - Routes
+      summary: 获取网络拓扑
+      description: 获取以指定节点为中心的网络拓扑
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 网络拓扑获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkTopologyResponse'
+
+  /route/connectivity/{nodeId}:
+    get:
+      tags:
+        - Routes
+      summary: 获取节点连通性
+      description: 获取指定节点的连通性信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 节点 ID
+      responses:
+        '200':
+          description: 节点连通性获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeConnectivityResponse'
+
+  # 区域管理
+  /zones:
+    get:
+      tags:
+        - Zones
+      summary: 获取区域列表
+      description: 获取用户可访问的区域列表
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 区域列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneListResponse'
+
+    post:
+      tags:
+        - Zones
+      summary: 创建区域
+      description: 创建新的区域
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateZoneRequest'
+      responses:
+        '201':
+          description: 区域创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneResponse'
+
+  # 区域概览
+  /zones/overview:
+    get:
+      tags:
+        - Zones
+      summary: 获取区域概览
+      description: 获取区域的概览信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 区域概览获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneOverviewResponse'
+
+  /zones/{id}:
+    get:
+      tags:
+        - Zones
+      summary: 获取区域详情
+      description: 获取指定区域的详细信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 区域 ID
+      responses:
+        '200':
+          description: 区域详情获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneResponse'
+        '404':
+          description: 区域不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Zones
+      summary: 更新区域
+      description: 更新指定区域的信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 区域 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateZoneRequest'
+      responses:
+        '200':
+          description: 区域更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneResponse'
+
+    delete:
+      tags:
+        - Zones
+      summary: 删除区域
+      description: 删除指定区域
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 区域 ID
+      responses:
+        '200':
+          description: 区域删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # 区域状态管理
+  /zones/{id}/status:
+    patch:
+      tags:
+        - Zones
+      summary: 更新区域状态
+      description: 更新指定区域的状态
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 区域 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateZoneStatusRequest'
+      responses:
+        '200':
+          description: 区域状态更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneResponse'
+
+  # 区域统计
+  /zones/{id}/statistics:
+    get:
+      tags:
+        - Zones
+      summary: 获取区域统计
+      description: 获取指定区域的统计信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 区域 ID
+      responses:
+        '200':
+          description: 区域统计获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneStatisticsResponse'
+
+  # Zone 服务管理
+  /zones/services/public:
+    get:
+      tags:
+        - Zone Services
+      summary: 获取公共服务列表
+      description: 获取公共服务列表，包括已审核通过的服务
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: 页码
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+            maximum: 100
+          description: 每页数量
+        - name: service_type
+          in: query
+          schema:
+            type: string
+            enum: [gnb_index, music, video, netbridge]
+          description: 服务类型筛选
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: 搜索关键词
+      responses:
+        '200':
+          description: 公共服务列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneServiceListResponse'
+
+  /zones/services/friends:
+    get:
+      tags:
+        - Zone Services
+      summary: 获取好友分享服务
+      description: 获取好友分享给当前用户的服务列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: 页码
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+            maximum: 100
+          description: 每页数量
+        - name: service_type
+          in: query
+          schema:
+            type: string
+            enum: [gnb_index, music, video, netbridge]
+          description: 服务类型筛选
+        - name: friend_id
+          in: query
+          schema:
+            type: integer
+          description: 好友用户ID筛选
+      responses:
+        '200':
+          description: 好友分享服务列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneServiceListResponse'
+
+  /zones/services/anonymous:
+    get:
+      tags:
+        - Zone Services
+      summary: 获取匿名共享服务
+      description: 获取匿名共享服务列表（公开访问，无需登录）
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: 页码
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+            maximum: 100
+          description: 每页数量
+        - name: service_type
+          in: query
+          schema:
+            type: string
+            enum: [gnb_index, music, video, netbridge]
+          description: 服务类型筛选
+        - name: zone_id
+          in: query
+          schema:
+            type: integer
+          description: 区域ID筛选
+      responses:
+        '200':
+          description: 匿名共享服务列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneServiceListResponse'
+
+  /zones/services/indexeservices:
+    get:
+      tags:
+        - Zone Services
+      summary: 获取索引服务
+      description: 获取索引服务列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: 页码
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+            maximum: 100
+          description: 每页数量
+      responses:
+        '200':
+          description: 索引服务列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneServiceListResponse'
+
+  /zones/services/my:
+    get:
+      tags:
+        - Zone Services
+      summary: 获取我的服务管理
+      description: 获取当前用户创建的所有服务列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: 页码
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+            maximum: 100
+          description: 每页数量
+        - name: service_type
+          in: query
+          schema:
+            type: string
+            enum: [gnb_index, music, video, netbridge]
+          description: 服务类型筛选
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, inactive, pending]
+          description: 服务状态筛选
+      responses:
+        '200':
+          description: 用户服务列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneServiceListResponse'
+
+  /zones/services/show/{id}:
+    get:
+      tags:
+        - Zone Services
+      summary: 获取服务详情
+      description: 获取指定服务的详细信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 服务ID
+      responses:
+        '200':
+          description: 服务详情获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneServiceResponse'
+        '404':
+          description: 服务不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /zones/services/create:
+    post:
+      tags:
+        - Zone Services
+      summary: 创建服务
+      description: 创建新的Zone服务
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateZoneServiceRequest'
+      responses:
+        '201':
+          description: 服务创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneServiceResponse'
+        '422':
+          description: 验证错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /zones/services/update/{id}:
+    put:
+      tags:
+        - Zone Services
+      summary: 更新服务
+      description: 更新指定的Zone服务
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 服务ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateZoneServiceRequest'
+      responses:
+        '200':
+          description: 服务更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneServiceResponse'
+        '404':
+          description: 服务不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 验证错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /zones/services/delete/{id}:
+    delete:
+      tags:
+        - Zone Services
+      summary: 删除服务
+      description: 删除指定的Zone服务
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 服务ID
+      responses:
+        '200':
+          description: 服务删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: 服务不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /zones/services/share/{id}:
+    post:
+      tags:
+        - Zone Services
+      summary: 分享服务给好友
+      description: 将服务分享给指定的好友
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 服务ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareZoneServiceRequest'
+      responses:
+        '200':
+          description: 服务分享成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: 服务不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 验证错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+    delete:
+      tags:
+        - Zone Services
+      summary: 取消服务分享
+      description: 取消服务的好友分享
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 服务ID
+      responses:
+        '200':
+          description: 服务分享取消成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: 服务不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /zones/services/request-approval/{id}:
+    post:
+      tags:
+        - Zone Services
+      summary: 申请服务审核
+      description: 申请将服务设置为公共服务，需要管理员审核
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 服务ID
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestApprovalRequest'
+      responses:
+        '200':
+          description: 审核申请提交成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: 服务不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 验证错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  # IP 池管理
+  /ippools:
+    get:
+      tags:
+        - IP Pools
+      summary: 获取 IP 池列表
+      description: 获取当前用户的 IP 池列表
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: IP 池列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IPPoolListResponse'
+
+    post:
+      tags:
+        - IP Pools
+      summary: 创建 IP 池
+      description: 创建新的 IP 池
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIPPoolRequest'
+      responses:
+        '201':
+          description: IP 池创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IPPoolResponse'
+
+  /ippools/{id}:
+    get:
+      tags:
+        - IP Pools
+      summary: 获取 IP 池详情
+      description: 获取指定 IP 池的详细信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: IP 池 ID
+      responses:
+        '200':
+          description: IP 池详情获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IPPoolResponse'
+
+  /ippools/{sequence}:
+    delete:
+      tags:
+        - IP Pools
+      summary: 释放 IP 池
+      description: 释放指定序列号的 IP 池
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sequence
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: IP 池序列号
+      responses:
+        '200':
+          description: IP 池释放成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # IP 池统计
+  /ippools/statistics:
+    get:
+      tags:
+        - IP Pools
+      summary: 获取 IP 池统计
+      description: 获取 IP 池统计信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: IP 池统计获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IPPoolStatisticsResponse'
+
+  # IP 自动分配
+  /ippools/auto-allocate:
+    post:
+      tags:
+        - IP Pools
+      summary: 自动分配 IP
+      description: 自动为用户分配可用的 IP 地址
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutoAllocateIPRequest'
+      responses:
+        '200':
+          description: IP 自动分配成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoAllocateIPResponse'
+
+  # 用户资源
+  /ippools/user-resources:
+    get:
+      tags:
+        - IP Pools
+      summary: 获取用户 IP 资源
+      description: 获取当前用户的 IP 资源信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 用户 IP 资源获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserIPResourcesResponse'
+
+  # 可用 IP
+  /ippools/available-ips:
+    get:
+      tags:
+        - IP Pools
+      summary: 获取可用 IP 列表
+      description: 获取系统中所有可用的 IP 地址列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 200
+          description: 返回结果数量限制
+      responses:
+        '200':
+          description: 可用 IP 列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailableIPsResponse'
+
+  # 检查 IP 可用性
+  /ippools/check-availability:
+    post:
+      tags:
+        - IP Pools
+      summary: 检查 IP 可用性
+      description: 检查指定 IP 地址是否可用
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckIPAvailabilityRequest'
+      responses:
+        '200':
+          description: IP 可用性检查完成
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckIPAvailabilityResponse'
+
+  # 社交网络
+  /social/data:
+    get:
+      tags:
+        - Social
+      summary: 获取社交数据概览
+      description: 获取用户的社交网络数据概览
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 社交数据获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialDataResponse'
+
+  # 用户搜索
+  /social/search-users:
+    post:
+      tags:
+        - Social
+      summary: 搜索用户
+      description: 根据关键词搜索系统中的用户
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchUsersRequest'
+      responses:
+        '200':
+          description: 用户搜索成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchUsersResponse'
+
+  /social/friends:
+    get:
+      tags:
+        - Social
+      summary: 获取好友列表
+      description: 获取用户的好友列表
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 好友列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendListResponse'
+
+  # 好友节点管理
+  /social/friends/all/nodes:
+    get:
+      tags:
+        - Social
+      summary: 获取所有好友的节点
+      description: 获取当前用户所有好友的节点列表（聚合接口）
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 所有好友节点获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllFriendsNodesResponse'
+
+  /social/friends/{friendId}/nodes:
+    get:
+      tags:
+        - Social
+      summary: 获取指定好友的节点
+      description: 获取指定好友的节点列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: friendId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 好友用户 ID
+      responses:
+        '200':
+          description: 好友节点获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendNodesResponse'
+        '404':
+          description: 好友不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # 好友申请管理
+  /social/friend-request:
+    post:
+      tags:
+        - Social
+      summary: 发送好友申请
+      description: 向指定用户发送好友申请
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendFriendRequestRequest'
+      responses:
+        '200':
+          description: 好友申请发送成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /social/friend-request/accept:
+    post:
+      tags:
+        - Social
+      summary: 接受好友申请
+      description: 接受收到的好友申请
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptFriendRequestRequest'
+      responses:
+        '200':
+          description: 好友申请接受成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /social/friend-request/reject:
+    post:
+      tags:
+        - Social
+      summary: 拒绝好友申请
+      description: 拒绝收到的好友申请
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectFriendRequestRequest'
+      responses:
+        '200':
+          description: 好友申请拒绝成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /social/friend-request/cancel:
+    post:
+      tags:
+        - Social
+      summary: 取消好友申请
+      description: 取消已发送的好友申请
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelFriendRequestRequest'
+      responses:
+        '200':
+          description: 好友申请取消成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # 好友关系管理
+  /social/friend/remove:
+    post:
+      tags:
+        - Social
+      summary: 删除好友
+      description: 删除好友关系
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveFriendRequest'
+      responses:
+        '200':
+          description: 好友删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # 邀请码管理
+  /social/invitation:
+    post:
+      tags:
+        - Social
+      summary: 生成邀请码
+      description: 生成新的邀请码
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateInvitationRequest'
+      responses:
+        '200':
+          description: 邀请码生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateInvitationResponse'
+
+  /social/invitations:
+    get:
+      tags:
+        - Social
+      summary: 获取邀请码列表
+      description: 获取当前用户创建的邀请码列表
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 邀请码列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationListResponse'
+
+  /social/invitation/{id}:
+    delete:
+      tags:
+        - Social
+      summary: 删除邀请码
+      description: 删除指定的邀请码
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 邀请码 ID
+      responses:
+        '200':
+          description: 邀请码删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: 邀请码不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ID 管理
+  /ids/generate:
+    post:
+      tags:
+        - ID Management
+      summary: 生成唯一 ID
+      description: 生成全局唯一 ID
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateIDRequest'
+      responses:
+        '200':
+          description: ID 生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateIDResponse'
+
+  /ids/generate/batch:
+    post:
+      tags:
+        - ID Management
+      summary: 批量生成 ID
+      description: 批量生成多个唯一 ID
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateBatchIDRequest'
+      responses:
+        '200':
+          description: 批量 ID 生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateBatchIDResponse'
+
+  # ID 验证和解析
+  /ids/validate:
+    post:
+      tags:
+        - ID Management
+      summary: 验证 ID
+      description: 验证指定 ID 的有效性
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateIDRequest'
+      responses:
+        '200':
+          description: ID 验证完成
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateIDResponse'
+
+  /ids/parse:
+    post:
+      tags:
+        - ID Management
+      summary: 解析 ID
+      description: 解析 ID 的详细信息
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParseIDRequest'
+      responses:
+        '200':
+          description: ID 解析成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParseIDResponse'
+
+  # 格式信息
+  /ids/formats:
+    get:
+      tags:
+        - ID Management
+      summary: 获取 ID 格式信息
+      description: 获取所有支持的 ID 格式信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ID 格式信息获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IDFormatsResponse'
+
+  # ID 统计
+  /ids/statistics:
+    get:
+      tags:
+        - ID Management
+      summary: 获取 ID 统计
+      description: 获取 ID 生成和使用的统计信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ID 统计获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IDStatisticsResponse'
+
+  # 用户管理
+  /users:
+    get:
+      tags:
+        - User
+      summary: 获取用户列表
+      description: 获取系统用户列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+            maximum: 100
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: 搜索关键词
+      responses:
+        '200':
+          description: 用户列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+
+  # 用户资料管理
+  /users/profile:
+    get:
+      tags:
+        - User
+      summary: 获取当前用户资料
+      description: 获取当前登录用户的资料信息
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 用户资料获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+
+    put:
+      tags:
+        - User
+      summary: 更新用户资料
+      description: 更新当前用户的资料信息
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
+      responses:
+        '200':
+          description: 用户资料更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+
+  # 用户统计
+  /users/my/statistics:
+    get:
+      tags:
+        - User
+      summary: 获取我的统计数据
+      description: 获取当前用户的统计数据
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 用户统计数据获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserMyStatisticsResponse'
+
+  /users/{id}:
+    get:
+      tags:
+        - User
+      summary: 获取指定用户信息
+      description: 获取指定用户的基本信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 用户 ID
+      responses:
+        '200':
+          description: 用户信息获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - User
+      summary: 更新用户信息
+      description: 更新指定用户的信息（管理员功能）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 用户 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: 用户信息更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+    delete:
+      tags:
+        - User
+      summary: 删除用户
+      description: 删除指定用户（管理员功能）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 用户 ID
+      responses:
+        '200':
+          description: 用户删除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # 用户统计和活动
+  /users/{id}/statistics:
+    get:
+      tags:
+        - User
+      summary: 获取用户统计数据
+      description: 获取指定用户的统计数据
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 用户 ID
+      responses:
+        '200':
+          description: 用户统计数据获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStatisticsResponse'
+
+  /users/{id}/activity:
+    get:
+      tags:
+        - User
+      summary: 获取用户活动记录
+      description: 获取指定用户的活动记录
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 用户 ID
+      responses:
+        '200':
+          description: 用户活动记录获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserActivityResponse'
+
+  /users/{id}/permissions:
+    get:
+      tags:
+        - User
+      summary: 获取用户权限
+      description: 获取指定用户的权限信息
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 用户 ID
+      responses:
+        '200':
+          description: 用户权限获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionsResponse'
+
+  # 用户节点和区域管理
+  /users/{id}/nodes:
+    get:
+      tags:
+        - User
+      summary: 获取指定用户的节点列表
+      description: 获取指定用户拥有的所有节点列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 用户 ID
+      responses:
+        '200':
+          description: 用户节点列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNodesResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{id}/zones:
+    get:
+      tags:
+        - User
+      summary: 获取指定用户的区域列表
+      description: 获取指定用户可访问的区域列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 用户 ID
+      responses:
+        '200':
+          description: 用户区域列表获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserZonesResponse'
+        '404':
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Laravel Sanctum Bearer Token
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: laravel_session
+      description: Laravel Session Cookie
+
+  schemas:
+    # 通用响应
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "操作成功"
+        data:
+          type: object
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "操作失败"
+        error:
+          type: string
+          example: "详细错误信息"
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "验证失败"
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    PaginationMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+        from:
+          type: integer
+        last_page:
+          type: integer
+        per_page:
+          type: integer
+        to:
+          type: integer
+        total:
+          type: integer
+
+    # 认证相关
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "登录成功"
+        data:
+          type: object
+          properties:
+            auth_token:
+              type: string
+              example: "1|abc123def456..."
+            refresh_token:
+              type: string
+              example: "xyz789refresh..."
+            auth_token_expires_in:
+              type: integer
+              example: 1800
+            refresh_token_expires_in:
+              type: integer
+              example: 604800
+            user:
+              $ref: '#/components/schemas/User'
+
+    TokenVerifyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Token有效"
+        data:
+          type: object
+          properties:
+            valid:
+              type: boolean
+              example: true
+            user_id:
+              type: string
+              example: "1001"
+            expires_at:
+              type: string
+              format: date-time
+              example: "2023-01-01T12:00:00Z"
+            is_expiring_soon:
+              type: boolean
+              example: false
+            needs_refresh:
+              type: boolean
+              example: false
+
+    RegisterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "注册成功，激活邮件已发送"
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            activation_required:
+              type: boolean
+              example: true
+              description: 是否需要邮箱激活
+            activation_expires_at:
+              type: string
+              format: date-time
+              description: 激活链接过期时间
+              example: "2024-01-01T12:00:00Z"
+
+    RefreshTokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Token刷新成功"
+        data:
+          type: object
+          properties:
+            auth_token:
+              type: string
+              example: "1|abc123def456..."
+            refresh_token:
+              type: string
+              example: "xyz789refresh..."
+            auth_token_expires_in:
+              type: integer
+              example: 1800
+            refresh_token_expires_in:
+              type: integer
+              example: 604800
+
+    GenerateTokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Token生成成功"
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              example: "1|abc123def456..."
+            expires_in:
+              type: integer
+              example: 1800
+
+    ValidateSessionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "会话校验完成"
+        data:
+          type: object
+          properties:
+            needs_update:
+              type: boolean
+              example: false
+            updates:
+              type: array
+              items:
+                type: string
+              example: ["user_profile", "permissions"]
+            session_info:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  example: "1001"
+                last_activity:
+                  type: integer
+                  example: 1640995200
+                session_valid_until:
+                  type: integer
+                  example: 1641081600
+                server_time:
+                  type: integer
+                  example: 1640995200
+            user_data:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  example: "1001"
+                name:
+                  type: string
+                  example: "张三"
+                email:
+                  type: string
+                  example: "zhangsan@example.com"
+                zone_id:
+                  type: integer
+                  example: 1
+                permissions:
+                  type: array
+                  items:
+                    type: string
+                  example: ["read", "write"]
+                updated_at:
+                  type: integer
+                  example: 1640995200
+
+    # 密码重置和账号激活相关响应
+    ForgotPasswordResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "密码重置邮件已发送"
+        data:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              example: "user@example.com"
+            expires_at:
+              type: string
+              format: date-time
+              description: 重置链接过期时间
+              example: "2024-01-01T12:00:00Z"
+
+    ResetPasswordResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "密码重置成功"
+        data:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              example: "user@example.com"
+            reset_at:
+              type: string
+              format: date-time
+              description: 密码重置时间
+              example: "2024-01-01T12:00:00Z"
+
+    ValidateResetTokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "重置令牌有效"
+        data:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              example: "user@example.com"
+            token_valid:
+              type: boolean
+              example: true
+            expires_at:
+              type: string
+              format: date-time
+              description: 令牌过期时间
+              example: "2024-01-01T12:00:00Z"
+            remaining_time:
+              type: integer
+              description: 剩余有效时间（秒）
+              example: 3600
+
+    ActivateAccountResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "账号激活成功"
+        data:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              example: "user@example.com"
+            activated_at:
+              type: string
+              format: date-time
+              description: 激活时间
+              example: "2024-01-01T12:00:00Z"
+            user:
+              $ref: '#/components/schemas/User'
+
+    ResendActivationEmailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "激活邮件已重新发送"
+        data:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              example: "user@example.com"
+            expires_at:
+              type: string
+              format: date-time
+              description: 激活链接过期时间
+              example: "2024-01-01T12:00:00Z"
+
+    CheckActivationStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "激活状态查询成功"
+        data:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              example: "user@example.com"
+            is_activated:
+              type: boolean
+              description: 是否已激活
+              example: false
+            activated_at:
+              type: string
+              format: date-time
+              nullable: true
+              description: 激活时间（如果已激活）
+              example: null
+            pending_activation:
+              type: boolean
+              description: 是否有待激活的令牌
+              example: true
+            token_expires_at:
+              type: string
+              format: date-time
+              nullable: true
+              description: 激活令牌过期时间
+              example: "2024-01-01T12:00:00Z"
+            user:
+              $ref: '#/components/schemas/User'
+
+    UserInfoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/User'
+
+    # Zone 服务相关
+    ZoneService:
+      type: object
+      properties:
+        service_id:
+          type: integer
+          example: 1001
+        service_name:
+          type: string
+          example: "MyNet VPN"
+        service_type:
+          type: string
+          enum: [gnb_index, music, video, netbridge]
+          example: "gnb_index"
+        service_status:
+          type: string
+          enum: [active, inactive, pending]
+          example: "active"
+        service_description:
+          type: string
+          example: "提供MyNet VPN服务"
+        service_url:
+          type: string
+          example: "https://vpn.example.com"
+        service_port:
+          type: integer
+          example: 443
+        service_protocol:
+          type: string
+          enum: [http, https, tcp, udp]
+          example: "https"
+        service_auth_required:
+          type: boolean
+          example: true
+        service_auth_type:
+          type: string
+          enum: [bearer, basic, none]
+          example: "bearer"
+        service_auth_token:
+          type: string
+          example: "Bearer abc123..."
+        service_created_by:
+          type: integer
+          example: 1001
+        service_zone_id:
+          type: integer
+          example: 1
+        service_shared_with:
+          type: array
+          items:
+            type: integer
+          example: [1002]
+        service_approved_by:
+          type: integer
+          nullable: true
+          example: null
+        service_approval_status:
+          type: string
+          enum: [pending, approved, rejected]
+          example: "approved"
+        service_approval_reason:
+          type: string
+          example: "服务质量良好"
+        service_created_at:
+          type: string
+          format: date-time
+        service_updated_at:
+          type: string
+          format: date-time
+
+    ZoneServiceListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ZoneService'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    ZoneServiceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/ZoneService'
+
+    CreateZoneServiceRequest:
+      type: object
+      required:
+        - service_name
+        - service_type
+        - service_url
+        - service_port
+        - service_protocol
+        - service_auth_required
+        - service_auth_type
+      properties:
+        service_name:
+          type: string
+          example: "MyNet VPN"
+        service_type:
+          type: string
+          enum: [gnb_index, music, video, netbridge]
+          example: "gnb_index"
+        service_description:
+          type: string
+          example: "提供MyNet VPN服务"
+        service_url:
+          type: string
+          example: "https://vpn.example.com"
+        service_port:
+          type: integer
+          example: 443
+        service_protocol:
+          type: string
+          enum: [http, https, tcp, udp]
+          example: "https"
+        service_auth_required:
+          type: boolean
+          example: true
+        service_auth_type:
+          type: string
+          enum: [bearer, basic, none]
+          example: "bearer"
+        service_auth_token:
+          type: string
+          example: "Bearer abc123..."
+
+    UpdateZoneServiceRequest:
+      type: object
+      properties:
+        service_name:
+          type: string
+          example: "MyNet VPN"
+        service_description:
+          type: string
+          example: "提供MyNet VPN服务"
+        service_url:
+          type: string
+          example: "https://vpn.example.com"
+        service_port:
+          type: integer
+          example: 443
+        service_protocol:
+          type: string
+          enum: [http, https, tcp, udp]
+          example: "https"
+        service_auth_required:
+          type: boolean
+          example: true
+        service_auth_type:
+          type: string
+          enum: [bearer, basic, none]
+          example: "bearer"
+        service_auth_token:
+          type: string
+          example: "Bearer abc123..."
+
+    ShareZoneServiceRequest:
+      type: object
+      required:
+        - target_user_id
+      properties:
+        target_user_id:
+          type: integer
+          example: 1002
+        message:
+          type: string
+          example: "服务分享申请"
+
+    RequestApprovalRequest:
+      type: object
+      properties:
+        approval_reason:
+          type: string
+          example: "申请公开此服务"
+
+    # 用户相关
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1001
+        name:
+          type: string
+          example: "张三"
+        email:
+          type: string
+          format: email
+          example: "zhangsan@example.com"
+        zone_id:
+          type: integer
+          example: 1
+
+    # MyNet 统计
+    MyNetStatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            nodes_count:
+              type: integer
+              example: 10
+            routes_count:
+              type: integer
+              example: 25
+            active_connections:
+              type: integer
+              example: 15
+            total_traffic:
+              type: integer
+              example: 1048576
+
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            status:
+              type: string
+              example: "healthy"
+            version:
+              type: string
+              example: "1.0.0"
+            uptime:
+              type: integer
+              example: 3600
+
+    # 节点相关
+    Node:
+      type: object
+      properties:
+        node_id:
+          type: integer
+          example: 1001
+        node_name:
+          type: string
+          example: "节点名称"
+        user_id:
+          type: integer
+          example: 1001
+        zone_id:
+          type: integer
+          example: 1
+        vpn_type:
+          type: string
+          enum: [gnb, wireguard]
+          example: "gnb"
+        node_type:
+          type: integer
+          example: 1
+        node_status:
+          type: integer
+          enum: [0, 1, 2]
+          example: 1
+        endpoint:
+          type: string
+          example: "192.168.1.100:9001"
+        node_port:
+          type: integer
+          example: 9001
+        node_ip:
+          type: string
+          example: "10.0.0.1"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    NodeListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Node'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    NodeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Node'
+
+    CreateNodeRequest:
+      type: object
+      required:
+        - node_name
+        - vpn_type
+      properties:
+        node_name:
+          type: string
+          example: "新节点"
+        vpn_type:
+          type: string
+          enum: [gnb, wireguard]
+          example: "gnb"
+        node_type:
+          type: integer
+          example: 1
+        endpoint:
+          type: string
+          example: "192.168.1.100:9001"
+        node_port:
+          type: integer
+          example: 9001
+        node_remarks:
+          type: string
+          example: "节点备注"
+
+    UpdateNodeRequest:
+      type: object
+      properties:
+        node_name:
+          type: string
+          example: "更新后的节点名称"
+        vpn_type:
+          type: string
+          enum: [gnb, wireguard]
+          example: "gnb"
+        endpoint:
+          type: string
+          example: "192.168.1.100:9001"
+        node_port:
+          type: integer
+          example: 9001
+        node_remarks:
+          type: string
+          example: "更新后的节点备注"
+
+    # 节点配置相关
+    NodeConfigResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            node_info:
+              type: object
+              properties:
+                node_id:
+                  type: integer
+                  example: 1001
+                node_name:
+                  type: string
+                  example: "节点名称"
+                vpn_type:
+                  type: string
+                  example: "gnb"
+                node_type:
+                  type: integer
+                  example: 1
+                endpoint:
+                  type: string
+                  example: "192.168.1.100:9001"
+                node_port:
+                  type: integer
+                  example: 9001
+            network_config:
+              type: object
+              properties:
+                ifname:
+                  type: string
+                  example: "gnb0"
+                virtual_ip:
+                  type: string
+                  example: "10.0.0.1"
+                ip_group_sequence_number:
+                  type: integer
+                  example: 1
+            additional_config:
+              type: object
+              properties:
+                node_remarks:
+                  type: string
+                  example: "节点备注"
+                node_app_version:
+                  type: string
+                  example: "1.0.0"
+                node_status:
+                  type: integer
+                  example: 1
+            custom_config:
+              type: array
+              items:
+                type: object
+                properties:
+                  k:
+                    type: string
+                    example: "listen"
+                  n:
+                    type: string
+                    example: "监听端口"
+                  v:
+                    type: string
+                    example: "9001"
+                  e:
+                    type: object
+                    properties:
+                      desc:
+                        type: string
+                        example: "节点监听的端口号"
+                      memo:
+                        type: string
+                        example: "通过API更新"
+
+    SaveNodeConfigRequest:
+      type: object
+      properties:
+        node_name:
+          type: string
+          example: "节点名称"
+        vpn_type:
+          type: string
+          enum: [gnb, wireguard, openvpn]
+          example: "gnb"
+        endpoint:
+          type: string
+          example: "192.168.1.100:9001"
+        node_port:
+          type: integer
+          example: 9001
+        ifname:
+          type: string
+          example: "gnb0"
+        virtual_ip:
+          type: string
+          example: "10.0.0.1"
+        ip_group_sequence_number:
+          type: integer
+          example: 1
+        node_remarks:
+          type: string
+          example: "节点备注"
+        node_app_version:
+          type: string
+          example: "1.0.0"
+        node_status:
+          type: integer
+          enum: [0, 1, 2]
+          example: 1
+        custom_config:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            listen: "9001"
+            ifname: "gnb0"
+            daemon: "1"
+
+    # 节点密钥相关
+    NodeKeyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            node_id:
+              type: integer
+              example: 1001
+            key_type:
+              type: string
+              enum: [ed25519, wireguard, gnb]
+              example: "ed25519"
+            public_key:
+              type: string
+              example: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJb..."
+            private_key:
+              type: string
+              example: "-----BEGIN OPENSSH PRIVATE KEY-----..."
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    GenerateNodeKeyRequest:
+      type: object
+      properties:
+        key_type:
+          type: string
+          enum: [ed25519, wireguard, gnb]
+          example: "ed25519"
+        force_regenerate:
+          type: boolean
+          example: false
+        custom_private_key:
+          type: string
+          example: "-----BEGIN OPENSSH PRIVATE KEY-----..."
+        custom_public_key:
+          type: string
+          example: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJb..."
+
+    # 节点网络配置相关
+    NodeNetworkConfigResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            ifname:
+              type: string
+              example: "gnb0"
+            node_ip:
+              type: string
+              example: "10.0.0.1"
+            ip_group_sequence_number:
+              type: integer
+              example: 1
+            lan_ips:
+              type: array
+              items:
+                type: string
+              example: ["192.168.1.0/24"]
+            public_ips:
+              type: array
+              items:
+                type: string
+              example: ["203.0.113.1"]
+
+    SetNodeNetworkConfigRequest:
+      type: object
+      properties:
+        ifname:
+          type: string
+          example: "gnb0"
+        node_ip:
+          type: string
+          example: "10.0.0.1"
+        ip_group_sequence_number:
+          type: integer
+          example: 1
+        lan_ips:
+          type: array
+          items:
+            type: string
+          example: ["192.168.1.0/24"]
+        public_ips:
+          type: array
+          items:
+            type: string
+          example: ["203.0.113.1"]
+
+    # 路由相关
+    Route:
+      type: object
+      properties:
+        route_id:
+          type: integer
+          example: 1001
+        source_node_id:
+          type: integer
+          example: 1001
+        target_node_id:
+          type: integer
+          example: 1002
+        status:
+          type: string
+          enum: [pending, active, inactive]
+          example: "active"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    RouteListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Route'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    RouteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Route'
+
+    CreateRouteRequest:
+      type: object
+      required:
+        - source_node_id
+        - target_node_id
+      properties:
+        source_node_id:
+          type: integer
+          example: 1001
+        target_node_id:
+          type: integer
+          example: 1002
+        description:
+          type: string
+          example: "路由描述"
+
+    # 区域相关
+    Zone:
+      type: object
+      properties:
+        zone_id:
+          type: integer
+          example: 1
+        zone_name:
+          type: string
+          example: "默认区域"
+        description:
+          type: string
+          example: "区域描述"
+        created_at:
+          type: string
+          format: date-time
+
+    ZoneListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Zone'
+
+    # IP 池相关
+    IPPool:
+      type: object
+      properties:
+        ip_pool_id:
+          type: integer
+          example: 1
+        ip_group_sequence:
+          type: integer
+          example: 1
+        ip_range:
+          type: string
+          example: "10.0.0.0/24"
+        available_ips:
+          type: integer
+          example: 254
+        used_ips:
+          type: integer
+          example: 10
+        created_at:
+          type: string
+          format: date-time
+
+    IPPoolListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/IPPool'
+
+    IPPoolResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/IPPool'
+
+    CreateIPPoolRequest:
+      type: object
+      required:
+        - ip_range
+      properties:
+        ip_range:
+          type: string
+          example: "10.0.0.0/24"
+        description:
+          type: string
+          example: "IP 池描述"
+
+    # 社交网络相关
+    SocialDataResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            friends_count:
+              type: integer
+              example: 10
+            pending_requests:
+              type: integer
+              example: 2
+            shared_nodes:
+              type: integer
+              example: 5
+
+    Friend:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 1001
+        name:
+          type: string
+          example: "好友名称"
+        email:
+          type: string
+          example: "friend@example.com"
+        status:
+          type: string
+          enum: [active, pending]
+          example: "active"
+        created_at:
+          type: string
+          format: date-time
+
+    FriendListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Friend'
+
+    SendFriendRequestRequest:
+      type: object
+      required:
+        - target_user_id
+      properties:
+        target_user_id:
+          type: integer
+          example: 1002
+        message:
+          type: string
+          example: "好友申请消息"
+
+    # ID 管理相关
+    GenerateIDRequest:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [node, user, zone, route]
+          example: "node"
+        count:
+          type: integer
+          default: 1
+          example: 1
+
+    GenerateIDResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            ids:
+              type: array
+              items:
+                type: integer
+              example: [1001, 1002]
+            type:
+              type: string
+              example: "node"
+            count:
+              type: integer
+              example: 2
+
+    UserNodesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "User nodes retrieved successfully"
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              node_id:
+                type: integer
+                example: 1001
+              node_name:
+                type: string
+                example: "用户节点"
+              vpn_type:
+                type: string
+                enum: [gnb, wireguard]
+                example: "gnb"
+              node_type:
+                type: integer
+                example: 1
+              node_status:
+                type: integer
+                enum: [0, 1, 2]
+                example: 1
+              endpoint:
+                type: string
+                example: "192.168.1.100:9001"
+              node_port:
+                type: integer
+                example: 9001
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+
+    UserZonesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "User zones retrieved successfully"
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              zone_id:
+                type: integer
+                example: 1
+              zone_name:
+                type: string
+                example: "用户区域"
+              description:
+                type: string
+                example: "区域描述"
+              is_primary:
+                type: boolean
+                example: true
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+
+    # 新增缺失的 schema 定义
+    
+    # 路由相关新增 schema
+    RouteDataResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            routes:
+              type: array
+              items:
+                $ref: '#/components/schemas/Route'
+            statistics:
+              type: object
+
+    RouteStatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            total_routes:
+              type: integer
+            active_routes:
+              type: integer
+            pending_routes:
+              type: integer
+
+    RouteConnectionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              connection_id:
+                type: integer
+              source_node_id:
+                type: integer
+              target_node_id:
+                type: integer
+              status:
+                type: string
+
+    UpdateRouteRequest:
+      type: object
+      properties:
+        source_node_id:
+          type: integer
+        target_node_id:
+          type: integer
+        status:
+          type: string
+        description:
+          type: string
+
+    # 节点相关新增 schema
+    NodeTypesDefResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            node_types:
+              type: array
+              items:
+                type: object
+                properties:
+                  type_id:
+                    type: integer
+                  type_name:
+                    type: string
+                  description:
+                    type: string
+
+    NodeStatisticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            total_nodes:
+              type: integer
+            active_nodes:
+              type: integer
+            offline_nodes:
+              type: integer
+
+    UpdateNodeStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: integer
+          enum: [0, 1, 2]
+          example: 1
+
+    NodeConfigStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            config_valid:
+              type: boolean
+            last_check:
+              type: string
+              format: date-time
+            issues:
+              type: array
+              items:
+                type: string
+
+    NodeStatusInfoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            node_id:
+              type: integer
+            status:
+              type: integer
+            last_seen:
+              type: string
+              format: date-time
+            uptime:
+              type: integer
+
+    # IP池相关新增 schema
+    IPPoolStatisticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            total_pools:
+              type: integer
+            used_ips:
+              type: integer
+            available_ips:
+              type: integer
+
+    AutoAllocateIPRequest:
+      type: object
+      required:
+        - node_id
+      properties:
+        node_id:
+          type: integer
+          example: 1001
+        preferred_range:
+          type: string
+          example: "10.0.0.0/24"
+
+    AutoAllocateIPResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            allocated_ip:
+              type: string
+              example: "10.0.0.100"
+            ip_group_sequence:
+              type: integer
+              example: 1
+
+    UserIPResourcesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            allocated_ips:
+              type: array
+              items:
+                type: string
+            ip_pools:
+              type: array
+              items:
+                $ref: '#/components/schemas/IPPool'
+
+    AvailableIPsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            available_ips:
+              type: array
+              items:
+                type: string
+            total_count:
+              type: integer
+
+    CheckIPAvailabilityRequest:
+      type: object
+      required:
+        - ip_address
+      properties:
+        ip_address:
+          type: string
+          example: "10.0.0.100"
+
+    CheckIPAvailabilityResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            available:
+              type: boolean
+            reason:
+              type: string
+
+    # 社交网络相关新增 schema
+    SearchUsersRequest:
+      type: object
+      required:
+        - keyword
+      properties:
+        keyword:
+          type: string
+          example: "张三"
+        limit:
+          type: integer
+          default: 20
+
+    SearchUsersResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              user_id:
+                type: integer
+              name:
+                type: string
+              email:
+                type: string
+              zone_id:
+                type: integer
+
+    AllFriendsNodesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              friend_id:
+                type: integer
+              friend_name:
+                type: string
+              nodes:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Node'
+
+    FriendNodesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Node'
+
+    AcceptFriendRequestRequest:
+      type: object
+      required:
+        - request_id
+      properties:
+        request_id:
+          type: integer
+          example: 1001
+
+    RejectFriendRequestRequest:
+      type: object
+      required:
+        - request_id
+      properties:
+        request_id:
+          type: integer
+          example: 1001
+
+    CancelFriendRequestRequest:
+      type: object
+      required:
+        - request_id
+      properties:
+        request_id:
+          type: integer
+          example: 1001
+
+    RemoveFriendRequest:
+      type: object
+      required:
+        - friend_id
+      properties:
+        friend_id:
+          type: integer
+          example: 1002
+
+    GenerateInvitationRequest:
+      type: object
+      properties:
+        description:
+          type: string
+          example: "邀请好友加入"
+        max_uses:
+          type: integer
+          default: 1
+
+    GenerateInvitationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            invitation_code:
+              type: string
+              example: "INV-123456"
+            expires_at:
+              type: string
+              format: date-time
+
+    InvitationListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              invitation_code:
+                type: string
+              uses_remaining:
+                type: integer
+              expires_at:
+                type: string
+                format: date-time
+
+    # ID管理相关新增 schema
+    GenerateBatchIDRequest:
+      type: object
+      required:
+        - type
+        - count
+      properties:
+        type:
+          type: string
+          enum: [node, user, zone, route]
+          example: "node"
+        count:
+          type: integer
+          minimum: 1
+          maximum: 100
+          example: 10
+
+    GenerateBatchIDResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            ids:
+              type: array
+              items:
+                type: integer
+            count:
+              type: integer
+
+    ValidateIDRequest:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          example: 1001
+
+    ValidateIDResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            valid:
+              type: boolean
+            type:
+              type: string
+            details:
+              type: object
+
+    ParseIDRequest:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          example: 1001
+
+    ParseIDResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+            type:
+              type: string
+            created_at:
+              type: string
+              format: date-time
+
+    IDFormatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            formats:
+              type: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  pattern:
+                    type: string
+                  description:
+                    type: string
+
+    IDStatisticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            total_generated:
+              type: integer
+            by_type:
+              type: object
+              additionalProperties:
+                type: integer
+
+    # 用户管理相关新增 schema
+    UserListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    UserProfileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            user_id:
+              type: integer
+            name:
+              type: string
+            email:
+              type: string
+            zone_id:
+              type: integer
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "新用户名"
+        email:
+          type: string
+          format: email
+          example: "newemail@example.com"
+
+    UserMyStatisticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            nodes_count:
+              type: integer
+            friends_count:
+              type: integer
+            routes_count:
+              type: integer
+
+    UserResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/User'
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        zone_id:
+          type: integer
+
+    UserStatisticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            nodes_count:
+              type: integer
+            activity_score:
+              type: number
+            last_login:
+              type: string
+              format: date-time
+
+    UserActivityResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              activity_id:
+                type: integer
+              activity_type:
+                type: string
+              description:
+                type: string
+              created_at:
+                type: string
+                format: date-time
+
+    UserPermissionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            permissions:
+              type: array
+              items:
+                type: string
+            roles:
+              type: array
+              items:
+                type: string
+
+    # 路由相关缺失的 schema
+    UpdateRouteConnectionRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [active, inactive]
+        description:
+          type: string
+
+    RouteRequestsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              request_id:
+                type: integer
+              from_node_id:
+                type: integer
+              to_node_id:
+                type: integer
+              status:
+                type: string
+              created_at:
+                type: string
+                format: date-time
+
+    SendRouteRequestRequest:
+      type: object
+      required:
+        - target_node_id
+      properties:
+        target_node_id:
+          type: integer
+          example: 1002
+        message:
+          type: string
+          example: "路由连接请求"
+
+    BulkUpdateRouteStatusRequest:
+      type: object
+      required:
+        - route_ids
+        - status
+      properties:
+        route_ids:
+          type: array
+          items:
+            type: integer
+          example: [1001, 1002, 1003]
+        status:
+          type: string
+          enum: [active, inactive, pending]
+
+    BulkDeleteRouteRequest:
+      type: object
+      required:
+        - route_ids
+      properties:
+        route_ids:
+          type: array
+          items:
+            type: integer
+          example: [1001, 1002, 1003]
+
+    FindOptimalPathRequest:
+      type: object
+      required:
+        - source_node_id
+        - target_node_id
+      properties:
+        source_node_id:
+          type: integer
+          example: 1001
+        target_node_id:
+          type: integer
+          example: 1002
+        algorithm:
+          type: string
+          enum: [dijkstra, floyd, astar]
+          default: dijkstra
+
+    OptimalPathResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            path:
+              type: array
+              items:
+                type: integer
+            total_cost:
+              type: number
+            hop_count:
+              type: integer
+
+    AnalyzeConnectivityRequest:
+      type: object
+      required:
+        - node_id
+      properties:
+        node_id:
+          type: integer
+          example: 1001
+        analysis_type:
+          type: string
+          enum: [full, partial]
+          default: full
+
+    ConnectivityAnalysisResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            connected_nodes:
+              type: array
+              items:
+                type: integer
+            unreachable_nodes:
+              type: array
+              items:
+                type: integer
+            network_segments:
+              type: integer
+
+    AccessRulesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              rule_id:
+                type: integer
+              rule_type:
+                type: string
+              source:
+                type: string
+              target:
+                type: string
+              action:
+                type: string
+                enum: [allow, deny]
+
+    CreateAccessRuleRequest:
+      type: object
+      required:
+        - rule_type
+        - source
+        - target
+        - action
+      properties:
+        rule_type:
+          type: string
+          enum: [ip, port, protocol]
+        source:
+          type: string
+          example: "10.0.0.0/24"
+        target:
+          type: string
+          example: "192.168.1.0/24"
+        action:
+          type: string
+          enum: [allow, deny]
+
+    UpdateAccessRuleRequest:
+      type: object
+      properties:
+        rule_type:
+          type: string
+          enum: [ip, port, protocol]
+        source:
+          type: string
+        target:
+          type: string
+        action:
+          type: string
+          enum: [allow, deny]
+
+    AccessRuleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            rule_id:
+              type: integer
+            rule_type:
+              type: string
+            source:
+              type: string
+            target:
+              type: string
+            action:
+              type: string
+
+    NodeRouteConfigResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            node_id:
+              type: integer
+            config_content:
+              type: string
+            last_updated:
+              type: string
+              format: date-time
+
+    GenerateRouteConfigRequest:
+      type: object
+      properties:
+        format:
+          type: string
+          enum: [gnb, wireguard, openvpn]
+          default: gnb
+        include_routes:
+          type: boolean
+          default: true
+
+    RouteConfigPreviewResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            preview:
+              type: string
+            warnings:
+              type: array
+              items:
+                type: string
+
+    ValidateRouteConfigRequest:
+      type: object
+      required:
+        - config_content
+      properties:
+        config_content:
+          type: string
+        config_format:
+          type: string
+          enum: [gnb, wireguard, openvpn]
+
+    RouteConfigValidationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            valid:
+              type: boolean
+            errors:
+              type: array
+              items:
+                type: string
+            warnings:
+              type: array
+              items:
+                type: string
+
+    ConfigComponentsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            components:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  type:
+                    type: string
+                  config:
+                    type: object
+
+    SimulateRouteConfigRequest:
+      type: object
+      required:
+        - node_ids
+      properties:
+        node_ids:
+          type: array
+          items:
+            type: integer
+          example: [1001, 1002, 1003]
+        scenario:
+          type: string
+          enum: [full_mesh, hub_spoke, ring]
+
+    SimulateRouteConfigResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            simulation_result:
+              type: object
+            generated_configs:
+              type: array
+              items:
+                type: object
+
+    NetworkTopologyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            nodes:
+              type: array
+              items:
+                type: object
+                properties:
+                  node_id:
+                    type: integer
+                  position:
+                    type: object
+            edges:
+              type: array
+              items:
+                type: object
+                properties:
+                  source:
+                    type: integer
+                  target:
+                    type: integer
+                  weight:
+                    type: number
+
+    NodeConnectivityResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            node_id:
+              type: integer
+            connected_nodes:
+              type: array
+              items:
+                type: integer
+            connectivity_score:
+              type: number
+            last_updated:
+              type: string
+              format: date-time
+
+    # 区域管理相关 schema
+    CreateZoneRequest:
+      type: object
+      required:
+        - zone_name
+      properties:
+        zone_name:
+          type: string
+          example: "新区域"
+        description:
+          type: string
+          example: "区域描述"
+
+    ZoneResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/Zone'
+
+    UpdateZoneRequest:
+      type: object
+      properties:
+        zone_name:
+          type: string
+          example: "更新后的区域名"
+        description:
+          type: string
+          example: "更新后的区域描述"
+
+    UpdateZoneStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [active, inactive]
+          example: "active"
+
+    ZoneOverviewResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            total_zones:
+              type: integer
+            active_zones:
+              type: integer
+            total_users:
+              type: integer
+            total_nodes:
+              type: integer
+
+    ZoneStatisticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            zone_id:
+              type: integer
+            users_count:
+              type: integer
+            nodes_count:
+              type: integer
+            routes_count:
+              type: integer
+            traffic_stats:
+              type: object
+
+    # 节点索引服务相关 schema
+    NodeIndexServicesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            node_id:
+              type: integer
+            index_services:
+              type: array
+              items:
+                type: object
+                properties:
+                  service_id:
+                    type: integer
+                  service_name:
+                    type: string
+                  service_url:
+                    type: string
+                  service_port:
+                    type: integer
+                  status:
+                    type: string
+
+tags:
+  - name: Authentication
+    description: 认证相关接口
+  - name: User
+    description: 用户相关接口
+  - name: MyNet
+    description: 系统统计和健康状态
+  - name: Nodes
+    description: 节点管理接口
+  - name: Routes
+    description: 路由管理接口
+  - name: Zones
+    description: 区域管理接口
+  - name: IP Pools
+    description: IP 池管理接口
+  - name: Social
+    description: 社交网络接口
+  - name: ID Management
+    description: ID 管理接口
+  - name: Zone Services
+    description: Zone服务管理接口

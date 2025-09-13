@@ -1,10 +1,10 @@
 import { api } from '../api'
-import type { BaseResponse } from '../../types'
+import type { BaseResponse, RouteDataResponse } from '../../types'
 import type { RouteRequest } from '../../types/api'
 
 export const routesService = {
   // 获取路由数据概览
-  async getOverview(): Promise<any> {
+  async getOverview(): Promise<RouteDataResponse> {
     const response = await api.get('/route/data')
     return response.data.data
   },

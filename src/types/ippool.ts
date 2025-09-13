@@ -1,6 +1,7 @@
 // IP池相关类型定义
 export interface IPPool {
   id: string | number
+  ippool_id?: string | number  // API返回的真实IP池ID
   sequence_number?: number  // API返回的序列号，用于删除操作
   ip_group_sequence_number?: number  // 新API返回的IP组序列号
   group_sequence?: number   // 新API返回的组序列号
@@ -29,6 +30,22 @@ export interface IPPool {
   // 新API字段
   purpose?: string          // 用途
   notes?: string           // 备注
+  // IP统计信息（来自新API）
+  ip_statistics?: {
+    capacity: number        // 总容量
+    consumed: number        // 已消耗数量
+    available: number       // 可用数量
+  }
+  // 分配的IP详情（来自新API）
+  allocated_ips?: Array<{
+    ip_address: string
+    ip_long: number
+    index: number
+    pool_id: number
+    ip_group_sequence_number: number
+    is_consumed: boolean
+    status: 'available' | 'consumed'
+  }>
 }
 
 export interface IPPoolStatistics {

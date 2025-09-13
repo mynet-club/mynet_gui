@@ -57,6 +57,22 @@ export default boot(async ({ router, app }) => {
       const user = JSON.parse(userInfo.toString())
       console.log('🔐 [Boot] Parsed user info:', user)
       
+      // 确保user_id字段正确映射
+      if (user && !user.user_id && user.id) {
+        user.user_id = user.id
+        console.log('🔐 [Boot] Mapped id to user_id:', user.user_id)
+        // 更新LocalStorage
+        LocalStorage.set('user_info', JSON.stringify(user))
+      }
+      
+      // 检查和修复头像URL
+      if (user.avatar && user.avatar.startsWith('blob:')) {
+        console.log('🔐 [Boot] Blob avatar URL detected, replacing with backend URL')
+        user.avatar = 'http://localhost:8000/api/v1/assets/avatar'
+        // 更新LocalStorage
+        LocalStorage.set('user_info', JSON.stringify(user))
+      }
+      
       // 设置认证状态
       authStore.user = user
       authStore.token = token

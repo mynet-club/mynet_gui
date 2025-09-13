@@ -92,6 +92,7 @@ export function useIPPools() {
         // 转换API数据格式到我们的类型
         const poolsData = rawPoolsData.map((pool: any) => ({
           id: pool.id.toString(),
+          ippool_id: pool.ippool_id, // 添加ippool_id字段
           sequence_number: pool.sequence_number, // 保存序列号用于删除
           name: `IP池 ${pool.sequence_number}`, // 生成名称
           network: '', // API中没有network字段，暂时留空
@@ -101,13 +102,16 @@ export function useIPPools() {
           },
           zone_id: pool.zone_id.toString(),
           user_id: pool.user_id?.toString(),
-          total_ips: pool.ip_count,
-          used_ips: pool.is_allocated ? pool.ip_count : 0, // 如果已分配，则全部使用
-          available_ips: pool.is_allocated ? 0 : pool.ip_count, // 如果已分配，则无可用
+          total_ips: pool.ip_statistics?.capacity || pool.ip_count || 0, // 优先使用统计数据
+          used_ips: pool.ip_statistics?.consumed || 0, // 使用统计中的已消耗数量
+          available_ips: pool.ip_statistics?.available || pool.ip_count || 0, // 使用统计中的可用数量
           status: pool.status_text,
           is_allocated: pool.is_allocated,
           created_at: pool.created_at,
-          updated_at: pool.updated_at
+          updated_at: pool.updated_at,
+          // 新增字段：保存分配的IP详情（可选）
+          allocated_ips: pool.allocated_ips || [],
+          ip_statistics: pool.ip_statistics
         }))
         
         pools.value = poolsData
@@ -290,16 +294,16 @@ export function useIPPools() {
         statistics.value = {
           zone_id: apiData.zone_id,
           user_id: apiData.user_id,
-          total_pools: apiData.total_pools || 0,
-          allocated_pools: apiData.allocated_pools || 0,
-          available_pools: apiData.available_pools || 0,
-          total_ips: apiData.total_ips || 0,
-          allocated_ips: apiData.allocated_ips || 0,
-          available_ips: apiData.available_ips || 0,
-          active_ips: apiData.active_ips || 0,
-          free_ips: apiData.free_ips || 0,
-          user_quota: apiData.user_quota || 0,
-          usage_percentage: apiData.usage_percentage || 0
+          total_pools: apiData.pools_allocated || 0,
+          allocated_pools: apiData.pools_allocated || 0,
+          available_pools: apiData.pools_remaining || 0,
+          total_ips: apiData.ips_total_capacity || 0,
+          allocated_ips: apiData.ips_consumed || 0,
+          available_ips: apiData.ips_available || 0,
+          active_ips: apiData.ips_consumed || 0,
+          free_ips: apiData.ips_available || 0,
+          user_quota: apiData.pools_quota || 3,
+          usage_percentage: apiData.pools_usage_percentage || 0
         }
         
         console.log('Statistics fetched from API:', statistics.value)
@@ -324,23 +328,26 @@ export function useIPPools() {
     console.log('calculateStatisticsFromPools called with pools:', poolsToCalculate)
     
     const totalPools = poolsToCalculate.length
-    const allocatedPools = poolsToCalculate.filter(pool => pool.status === 'allocated').length
-    const availablePools = poolsToCalculate.filter(pool => pool.status === 'available').length
-    const totalIPs = poolsToCalculate.reduce((sum, pool) => sum + (pool.total_ips || 0), 0)
+    const allocatedPools = poolsToCalculate.filter(pool => pool.is_allocated).length
+    const availablePools = poolsToCalculate.filter(pool => !pool.is_allocated).length
+    const totalIPs = poolsToCalculate.reduce((sum, pool) => sum + (pool.total_ips || pool.ip_count || 0), 0)
     const allocatedIPs = poolsToCalculate.reduce((sum, pool) => sum + (pool.used_ips || 0), 0)
     const availableIPs = poolsToCalculate.reduce((sum, pool) => sum + (pool.available_ips || 0), 0)
+    
+    const userQuota = 3 // 默认配额为3个IP池
+    const remainingPools = Math.max(0, userQuota - totalPools)
     
     statistics.value = {
       total_pools: totalPools,
       allocated_pools: allocatedPools,
-      available_pools: availablePools,
+      available_pools: remainingPools, // 这里显示剩余可创建的池数量
       total_ips: totalIPs,
       allocated_ips: allocatedIPs,
       available_ips: availableIPs,
       active_ips: allocatedIPs, // 假设 active_ips 等于 allocated_ips
       free_ips: availableIPs,
-      user_quota: 0,
-      usage_percentage: totalIPs > 0 ? Math.round((allocatedIPs / totalIPs) * 100) : 0
+      user_quota: userQuota,
+      usage_percentage: userQuota > 0 ? Math.round((totalPools / userQuota) * 100) : 0
     }
     
     console.log('calculated statistics:', statistics.value)

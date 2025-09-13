@@ -67,7 +67,8 @@ export function setupRouteGuards(router: Router) {
     
     // 处理动态导入失败
     if (error.message?.includes('Loading chunk')) {
-      // 刷新页面重新加载
+      // 只在加载失败时刷新页面，不在认证错误时刷新
+      console.warn('🔧 [Router] Chunk loading failed, will reload page')
       window.location.reload()
     }
   })

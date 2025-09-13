@@ -7,7 +7,8 @@ import type {
   PendingConnection, 
   FriendNode, 
   RouteOverview,
-  RouteConnection
+  RouteConnection,
+  RouteDataResponse
 } from '../types'
 import type { RouteRequest } from '../types/api'
 
@@ -53,38 +54,22 @@ export function useRoutes() {
       
       console.log('路由概览原始数据:', response)
       
-      // 根据实际返回的数据结构设置概览统计
+      // 根据新的数据结构设置概览统计
       overview.value = {
-        active_routes: response.statistics?.active_routes || response.routes?.length || 0,
-        pending_connections: response.statistics?.pending_routes || 
-                           (response.requests?.pending?.length || 0) + (response.requests?.sent?.length || 0),
-        connected_nodes: response.statistics?.total_routes || response.connections?.length || 0,
-        total_bandwidth: response.statistics?.total_bandwidth || '0 MB/s'
+        active_routes: response.statistics?.active_routes || 0,
+        pending_connections: (response.requests?.pending?.length || 0) + (response.requests?.sent?.length || 0),
+        connected_nodes: response.statistics?.total_routes || 0,
+        total_bandwidth: '0 MB/s' // 新API暂时没有带宽数据
       }
       
       // 设置活跃路由数据（已建立的连接）
-      if (response.routes) {
-        activeRoutes.value = response.routes
-      } else if (response.connections) {
-        // 如果 routes 不存在，使用 connections
-        activeRoutes.value = response.connections
-      } else {
-        activeRoutes.value = []
-      }
+      activeRoutes.value = response.routes || []
       
       // 设置待处理连接数据（incoming）
-      if (response.requests?.pending) {
-        pendingConnections.value = response.requests.pending
-      } else {
-        pendingConnections.value = []
-      }
+      pendingConnections.value = response.requests?.pending || []
       
       // 设置发出的连接数据（outgoing）
-      if (response.requests?.sent) {
-        outgoingConnections.value = response.requests.sent
-      } else {
-        outgoingConnections.value = []
-      }
+      outgoingConnections.value = response.requests?.sent || []
       
       console.log('解析后的路由数据:', {
         activeRoutes: activeRoutes.value,
@@ -156,19 +141,19 @@ export function useRoutes() {
     }
   }
 
-  // 获取路由配置
-  const fetchRouteConfig = async () => {
-    try {
-      loading.value = true
-      const response = await routesService.getConfig()
-      routeConfig.value = response.data
-    } catch (error) {
-      console.error('获取路由配置失败:', error)
-      notify.error(t('routes.fetchConfigError'))
-    } finally {
-      loading.value = false
-    }
-  }
+  // 获取路由配置 - 暂时注释掉，因为新API结构中没有这个方法
+  // const fetchRouteConfig = async () => {
+  //   try {
+  //     loading.value = true
+  //     const response = await routesService.getConfig()
+  //     routeConfig.value = response.data
+  //   } catch (error) {
+  //     console.error('获取路由配置失败:', error)
+  //     notify.error(t('routes.fetchConfigError'))
+  //   } finally {
+  //     loading.value = false
+  //   }
+  // }
 
   // 连接到节点
   const connectToNode = async (nodeId: string, message?: string) => {
@@ -196,10 +181,10 @@ export function useRoutes() {
   }
 
   // 批准连接
-  const approveConnection = async (connectionId: string) => {
+  const approveConnection = async (connectionId: string | number) => {
     try {
       loading.value = true
-      const response = await routesService.approveConnection(connectionId)
+      const response = await routesService.approveConnection(String(connectionId))
       if (response.success) {
         notify.success(t('routes.connectionApproved'))
         // 从待处理连接中移除
@@ -219,10 +204,10 @@ export function useRoutes() {
   }
 
   // 拒绝连接
-  const rejectConnection = async (connectionId: string) => {
+  const rejectConnection = async (connectionId: string | number) => {
     try {
       loading.value = true
-      const response = await routesService.rejectConnection(connectionId)
+      const response = await routesService.rejectConnection(String(connectionId))
       if (response.success) {
         notify.success(t('routes.connectionRejected'))
         // 从待处理连接中移除
@@ -248,7 +233,7 @@ export function useRoutes() {
       if (response.success) {
         notify.success(t('routes.routeDisconnected'))
         // 从活跃路由中移除
-        activeRoutes.value = activeRoutes.value.filter(r => r.id !== routeId)
+        activeRoutes.value = activeRoutes.value.filter(r => r.route_id !== routeId)
         // 刷新概览
         await fetchOverview()
       } else {
@@ -262,53 +247,53 @@ export function useRoutes() {
     }
   }
 
-  // 下载路由配置
-  const downloadRouteConfig = async () => {
-    try {
-      loading.value = true
-      const response = await routesService.downloadConfig()
+  // 下载路由配置 - 暂时注释掉，因为新API结构中没有这个方法
+  // const downloadRouteConfig = async () => {
+  //   try {
+  //     loading.value = true
+  //     const response = await routesService.downloadConfig()
       
-      if (response) {
-        // 创建下载链接
-        const blob = new Blob([response], { type: 'text/plain' })
-        const url = window.URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = 'route.conf'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        window.URL.revokeObjectURL(url)
+  //     if (response) {
+  //       // 创建下载链接
+  //       const blob = new Blob([response], { type: 'text/plain' })
+  //       const url = window.URL.createObjectURL(blob)
+  //       const link = document.createElement('a')
+  //       link.href = url
+  //       link.download = 'route.conf'
+  //       document.body.appendChild(link)
+  //       link.click()
+  //       document.body.removeChild(link)
+  //       window.URL.revokeObjectURL(url)
         
-        notify.success(t('routes.configDownloaded'))
-      }
-    } catch (error) {
-      console.error('下载路由配置失败:', error)
-      notify.error(t('routes.configDownloadError'))
-    } finally {
-      loading.value = false
-    }
-  }
+  //       notify.success(t('routes.configDownloaded'))
+  //     }
+  //   } catch (error) {
+  //     console.error('下载路由配置失败:', error)
+  //     notify.error(t('routes.configDownloadError'))
+  //   } finally {
+  //     loading.value = false
+  //   }
+  // }
 
-  // 刷新路由配置
-  const refreshRouteConfig = async () => {
-    try {
-      loading.value = true
-      const response = await routesService.refreshConfig()
-      if (response.success) {
-        notify.success(t('routes.configRefreshed'))
-        // 重新获取配置
-        await fetchRouteConfig()
-      } else {
-        notify.error(response.message || t('routes.configRefreshError'))
-      }
-    } catch (error) {
-      console.error('刷新路由配置失败:', error)
-      notify.error(t('routes.configRefreshError'))
-    } finally {
-      loading.value = false
-    }
-  }
+  // 刷新路由配置 - 暂时注释掉，因为新API结构中没有这个方法
+  // const refreshRouteConfig = async () => {
+  //   try {
+  //     loading.value = true
+  //     const response = await routesService.refreshConfig()
+  //     if (response.success) {
+  //       notify.success(t('routes.configRefreshed'))
+  //       // 重新获取配置
+  //       await fetchRouteConfig()
+  //     } else {
+  //       notify.error(response.message || t('routes.configRefreshError'))
+  //     }
+  //   } catch (error) {
+  //     console.error('刷新路由配置失败:', error)
+  //     notify.error(t('routes.configRefreshError'))
+  //   } finally {
+  //     loading.value = false
+  //   }
+  // }
 
   // 处理连接类型变化
   const handleConnectionTypeChange = (type: 'incoming' | 'outgoing') => {

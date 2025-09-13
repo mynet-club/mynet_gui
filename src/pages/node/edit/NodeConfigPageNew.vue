@@ -74,9 +74,38 @@
                     </q-icon>
                   </div>
                   
+                  <!-- 开关类型 -->
+                  <q-toggle
+                    v-if="param.type === 'switch' && param.options"
+                    v-model="formData[key]"
+                    :true-value="Object.keys(param.options)[0]"
+                    :false-value="Object.keys(param.options)[1]"
+                    :label="param.options[formData[key]] || Object.values(param.options)[0]"
+                    :disable="loading"
+                    color="primary"
+                  />
+                  
+                  <!-- 多按钮类型 -->
+                  <q-btn-group
+                    v-else-if="param.type === 'multi-button' && param.options"
+                    outline
+                  >
+                    <q-btn
+                      v-for="(optionLabel, optionValue) in param.options"
+                      :key="optionValue"
+                      :label="optionLabel"
+                      :color="formData[key] === optionValue ? 'primary' : 'grey-7'"
+                      :outline="formData[key] !== optionValue"
+                      @click="handleMultiButtonClick(key, optionValue)"
+                      :disable="loading"
+                      size="sm"
+                      no-caps
+                    />
+                  </q-btn-group>
+                  
                   <!-- 字符串输入 -->
                   <q-input
-                    v-if="param.type === 'string'"
+                    v-else-if="param.type === 'string'"
                     v-model="formData[key]"
                     :placeholder="param.default?.toString() || ''"
                     outlined
@@ -124,7 +153,7 @@
                         :label="optionLabel"
                         :color="formData[key] === optionValue ? 'primary' : 'grey-7'"
                         :outline="formData[key] !== optionValue"
-                        @click="formData[key] = optionValue"
+                        @click="handleMultiButtonClick(key, optionValue)"
                         :disable="loading"
                         size="sm"
                       />
@@ -288,12 +317,25 @@ const configPreview = computed(() => {
     config.push(`# 当前编辑模式: ${configMode.value === 'base' ? '基本配置' : '专家配置'}`)
     config.push('')
     
-    // 网络配置部分（固定）
+    // 网络配置部分（从表单数据获取）
     config.push('# 网络配置')
-    config.push(`nodeid=${nodeId.value}`)
-    config.push(`ifname=${currentVersionConfig.value.interface_name || 'gnb_tun'}`)
-    config.push(`listen_address=0.0.0.0`)
-    config.push(`listen_port=${currentVersionConfig.value.default_port || 9001}`)
+    config.push(`nodeid ${nodeId.value}`)
+    config.push(`ifname ${formData.value.ifname || 'gnb_tun'}`)
+    
+    // 处理listen参数：根据IPv4/IPv6设置组装地址
+    const listenPort = formData.value.listen || 9001
+    const ipv4Only = formData.value.ipv4_only === 'on'
+    const ipv6Only = formData.value.ipv6_only === 'on'
+    
+    let listenDisplay
+    if (ipv4Only) {
+      listenDisplay = `0.0.0.0:${listenPort}`
+    } else if (ipv6Only) {
+      listenDisplay = `[::]:${listenPort}`
+    } else {
+      listenDisplay = listenPort // 只显示端口号，代表全部监听
+    }
+    config.push(`listen ${listenDisplay}`)
     config.push('')
     
     // 基础配置部分 - 始终显示
@@ -301,12 +343,14 @@ const configPreview = computed(() => {
     if (baseConfig) {
       config.push('# 基础配置')
       Object.entries(baseConfig.parameters).forEach(([key, param]) => {
-        if (!['nodeid', 'ifname', 'listen_address', 'listen_port'].includes(key)) {
+        if (!['nodeid'].includes(key)) { // 只排除nodeid，因为它在网络配置部分已经显示
           const value = formData.value[key] ?? param.default
           if (value !== undefined && value !== null && value !== '') {
             const isCurrentMode = configMode.value === 'base'
             const prefix = isCurrentMode ? '→ ' : '  '
-            config.push(`${prefix}${key}=${value}${isCurrentMode ? ' (当前编辑)' : ''}`)
+            // 转换参数名：下划线换成连字符，等号换成空格
+            const configKey = key.replace(/_/g, '-')
+            config.push(`${prefix}${configKey} ${value}${isCurrentMode ? ' (当前编辑)' : ''}`)
           }
         }
       })
@@ -322,7 +366,9 @@ const configPreview = computed(() => {
         if (value !== undefined && value !== null && value !== '') {
           const isCurrentMode = configMode.value === 'expert'
           const prefix = isCurrentMode ? '→ ' : '  '
-          config.push(`${prefix}${key}=${value}${isCurrentMode ? ' (当前编辑)' : ''}`)
+          // 转换参数名：下划线换成连字符，等号换成空格
+          const configKey = key.replace(/_/g, '-')
+          config.push(`${prefix}${configKey} ${value}${isCurrentMode ? ' (当前编辑)' : ''}`)
         }
       })
     }
@@ -336,7 +382,7 @@ const configPreview = computed(() => {
     
     config.push('[Interface]')
     config.push(`# 网络接口名称: ${currentVersionConfig.value.interface_name || 'WG01'}`)
-    config.push(`Address=${formData.value.listen_address || '10.0.0.1/24'}`)
+    config.push(`Address=${formData.value.listen || '10.0.0.1/24'}`)
     config.push(`ListenPort=${currentVersionConfig.value.default_port || 51820}`)
     config.push('')
     
@@ -345,11 +391,12 @@ const configPreview = computed(() => {
     if (baseConfig) {
       config.push('# 基础配置参数')
       Object.entries(baseConfig.parameters).forEach(([key, param]) => {
-        if (!['ifname', 'listen_address', 'listen_port'].includes(key)) {
+        if (!['nodeid'].includes(key)) { // 只排除nodeid
           const value = formData.value[key] ?? param.default
           if (value !== undefined && value !== null && value !== '') {
             const isCurrentMode = configMode.value === 'base'
             const prefix = isCurrentMode ? '# → ' : '# '
+            // WireGuard保持原格式：key = value
             config.push(`${prefix}${key}=${value}${isCurrentMode ? ' (当前编辑)' : ''}`)
           }
         }
@@ -362,13 +409,12 @@ const configPreview = computed(() => {
     if (expertConfig) {
       config.push('# 专家配置参数')
       Object.entries(expertConfig.parameters).forEach(([key, param]) => {
-        if (!['ifname', 'listen_address', 'listen_port'].includes(key)) {
-          const value = formData.value[key] ?? param.default
-          if (value !== undefined && value !== null && value !== '') {
-            const isCurrentMode = configMode.value === 'expert'
-            const prefix = isCurrentMode ? '# → ' : '# '
-            config.push(`${prefix}${key}=${value}${isCurrentMode ? ' (当前编辑)' : ''}`)
-          }
+        const value = formData.value[key] ?? param.default
+        if (value !== undefined && value !== null && value !== '') {
+          const isCurrentMode = configMode.value === 'expert'
+          const prefix = isCurrentMode ? '# → ' : '# '
+          // WireGuard保持原格式：key = value
+          config.push(`${prefix}${key}=${value}${isCurrentMode ? ' (当前编辑)' : ''}`)
         }
       })
     }
@@ -385,6 +431,20 @@ const configPreview = computed(() => {
 })
 
 // 方法
+const handleMultiButtonClick = (key: string, value: any) => {
+  // 设置当前参数的值
+  formData.value[key] = value
+  
+  // 实现IPv4和IPv6互斥逻辑
+  if (key === 'ipv4_only' && value !== '0' && value !== 0) {
+    // 启用IPv4 only时，禁用IPv6 only
+    formData.value.ipv6_only = '0'
+  } else if (key === 'ipv6_only' && value !== '0' && value !== 0) {
+    // 启用IPv6 only时，禁用IPv4 only
+    formData.value.ipv4_only = '0'
+  }
+}
+
 const getVersionLabel = (version: string) => {
   if (version === 'default') return '默认版本'
   return version
@@ -459,6 +519,10 @@ const initializeFormData = () => {
       data[key] = false
     } else if (param.type === 'select' && param.options) {
       data[key] = Object.keys(param.options)[0]
+    } else if (param.type === 'switch' && param.options) {
+      data[key] = Object.keys(param.options)[1] // 默认关闭状态
+    } else if (param.type === 'multi-button' && param.options) {
+      data[key] = Object.keys(param.options)[0] // 默认第一个选项
     } else {
       data[key] = ''
     }
@@ -504,15 +568,26 @@ const onSubmit = async () => {
   saving.value = true
   
   try {
-    // 构建配置对象
-    const configData: NodeConfigForm = {
+    // 直接提交字段数据，不组织为嵌套结构
+    const submitData: any = {
+      // 基础元数据
       vpn_type: vpnType.value,
       vpn_version: vpnVersion.value,
       config_mode: configMode.value,
-      parameters: { ...formData.value }
+      
+      // 展平的配置字段（直接在顶层）
+      ...formData.value,
+      
+      // 确保必要的网络字段有值
+      nodeid: formData.value.nodeid || parseInt(nodeId.value) || 1000000000000000,
+      ifname: formData.value.ifname || 'gnb_tun',
+      listen: formData.value.listen || 9001
     }
     
-    // 模拟保存API调用
+    console.log('提交的配置数据（分别提交字段）:', submitData)
+    
+    // 调用API保存配置（扁平化字段格式）
+    // 模拟API调用 - 实际项目中应调用 nodeConfigService.updateNodeConfig
     await new Promise(resolve => setTimeout(resolve, 1000))
     
     // 更新原始数据

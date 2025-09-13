@@ -1,314 +1,466 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row q-col-gutter-md">
-      <!-- 用户信息卡片 -->
+  <div class="profile-page q-pa-md">
+    <div class="row q-gutter-md">
+      <!-- 侧边栏用户信息 -->
       <div class="col-12 col-md-4">
-        <q-card>
+        <q-card class="user-card">
           <q-card-section class="text-center">
-            <q-avatar size="100px" class="q-mb-md">
-              <img :src="user?.avatar || 'https://via.placeholder.com/100'" />
-            </q-avatar>
-            <div class="text-h6">{{ user?.name }}</div>
-            <div class="text-caption text-grey-6">{{ user?.email }}</div>
-            <q-chip 
-              :label="currentZone?.name || 'No Zone'"
-              color="primary"
-              class="q-mt-sm"
+            <UserAvatar
+              ref="userAvatarRef"
+              :user-id="user?.user_id || user?.id"
+              size="80px"
+              editable
+              :uploading="loading.avatar"
+              @edit="changeAvatar"
+              class="q-mb-md"
             />
-          </q-card-section>
-          
-          <q-card-section>
-            <div class="text-subtitle2 q-mb-sm">{{ $t('user.profileInfo') }}</div>
-            <q-list>
-              <q-item>
-                <q-item-section>
-                  <q-item-label caption>{{ $t('user.userId') }}</q-item-label>
-                  <q-item-label>{{ user?.user_id }}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>
-                  <q-item-label caption>{{ $t('user.currentZone') }}</q-item-label>
-                  <q-item-label>{{ currentZone?.name }}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>
-                  <q-item-label caption>{{ $t('user.permissions') }}</q-item-label>
-                  <q-item-label>
-                    <q-chip 
-                      v-for="permission in user?.permissions" 
-                      :key="permission"
-                      :label="permission"
-                      size="sm"
-                      class="q-mr-xs q-mb-xs"
-                    />
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
+            <div class="text-h6 q-mb-xs">{{ user?.name || '未知用户' }}</div>
+            <div class="text-caption text-grey-7">{{ user?.email || '' }}</div>
           </q-card-section>
         </q-card>
       </div>
-      
-      <!-- 编辑资料表单 -->
+
+      <!-- 主要内容区域 -->
       <div class="col-12 col-md-8">
         <q-card>
-          <q-card-section>
-            <div class="text-h6">{{ $t('user.editProfile') }}</div>
-          </q-card-section>
-          
-          <q-card-section>
-            <q-form @submit="onSubmit" class="q-gutter-md">
-              <div class="row q-col-gutter-md">
-                <div class="col-12 col-md-6">
-                  <q-input 
-                    v-model="form.name"
-                    :label="$t('user.name')"
-                    outlined
-                    :rules="[val => !!val || $t('user.nameRequired')]"
-                  />
-                </div>
-                <div class="col-12 col-md-6">
-                  <q-input 
-                    v-model="form.email"
-                    :label="$t('user.email')"
-                    type="email"
-                    outlined
-                    :rules="[
-                      val => !!val || $t('user.emailRequired'),
-                      val => validateEmail(val) || $t('user.emailInvalid')
-                    ]"
-                  />
-                </div>
-              </div>
-              
-              <q-input 
-                v-model="form.avatar"
-                :label="$t('user.avatarUrl')"
-                outlined
-                hint="Enter avatar image URL"
-              />
-              
-              <div class="row q-col-gutter-md">
-                <div class="col-12 col-md-6">
-                  <q-btn
-                    type="submit"
-                    color="primary"
-                    :label="$t('user.saveChanges')"
-                    :loading="isLoading"
-                  />
-                </div>
-                <div class="col-12 col-md-6">
-                  <q-btn
-                    :label="$t('user.cancel')"
-                    outline
-                    @click="resetForm"
-                  />
-                </div>
-              </div>
-            </q-form>
-          </q-card-section>
-        </q-card>
-        
-        <!-- 安全设置 -->
-        <q-card class="q-mt-md">
-          <q-card-section>
-            <div class="text-h6">{{ $t('user.securitySettings') }}</div>
-          </q-card-section>
-          
-          <q-card-section>
-            <q-list>
-              <q-item>
-                <q-item-section>
-                  <q-item-label>{{ $t('user.changePassword') }}</q-item-label>
-                  <q-item-label caption>{{ $t('user.changePasswordDesc') }}</q-item-label>
-                </q-item-section>
-                <q-item-section side>
+          <q-tabs
+            v-model="activeTab"
+            dense
+            class="text-grey"
+            active-color="primary"
+            indicator-color="primary"
+            align="left"
+          >
+            <q-tab name="overview" icon="dashboard" :label="$t('user.overview')" />
+            <q-tab name="edit" icon="edit" :label="$t('user.editProfile')" />
+            <q-tab name="security" icon="security" :label="$t('user.security')" />
+            <q-tab name="preferences" icon="settings" :label="$t('user.preferences')" />
+          </q-tabs>
+
+          <q-separator />
+
+          <q-tab-panels v-model="activeTab" animated>
+            <!-- 概览标签页 -->
+            <q-tab-panel name="overview">
+              <div class="text-h6 q-mb-md">{{ $t('user.basicInfo') }}</div>
+              <q-list separator>
+                <q-item>
+                  <q-item-section>
+                    <q-item-label caption>{{ $t('user.userId') }}</q-item-label>
+                    <q-item-label>{{ user?.user_id || user?.id || 'N/A' }}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-btn
+                      icon="content_copy"
+                      flat
+                      round
+                      size="sm"
+                      @click="copyUserId"
+                    >
+                      <q-tooltip>{{ $t('common.copy') }}</q-tooltip>
+                    </q-btn>
+                  </q-item-section>
+                </q-item>
+                <q-item>
+                  <q-item-section>
+                    <q-item-label caption>{{ $t('user.name') }}</q-item-label>
+                    <q-item-label>{{ user?.name || 'N/A' }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item>
+                  <q-item-section>
+                    <q-item-label caption>{{ $t('user.email') }}</q-item-label>
+                    <q-item-label>{{ user?.email || 'N/A' }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item v-if="user?.phone">
+                  <q-item-section>
+                    <q-item-label caption>{{ $t('user.phone') }}</q-item-label>
+                    <q-item-label>{{ user.phone }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item v-if="user?.signature">
+                  <q-item-section>
+                    <q-item-label caption>{{ $t('user.signature') }}</q-item-label>
+                    <q-item-label>{{ user.signature }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-tab-panel>
+
+            <!-- 编辑资料标签页 -->
+            <q-tab-panel name="edit">
+              <div class="text-h6 q-mb-md">{{ $t('user.editProfile') }}</div>
+              <q-form class="q-gutter-md">
+                <q-input
+                  v-model="profileForm.name"
+                  :label="$t('user.name')"
+                  outlined
+                  dense
+                />
+                <q-input
+                  v-model="profileForm.phone"
+                  :label="$t('user.phone')"
+                  outlined
+                  dense
+                />
+                <q-input
+                  v-model="profileForm.signature"
+                  :label="$t('user.signature')"
+                  type="textarea"
+                  outlined
+                  dense
+                  rows="3"
+                  :hint="$t('user.signatureHint')"
+                />
+                <div class="row q-gutter-sm justify-start">
                   <q-btn 
-                    :label="$t('user.change')"
-                    color="primary"
-                    outline
-                    @click="showChangePasswordDialog = true"
+                    :label="$t('user.saveChanges')" 
+                    color="primary" 
+                    @click="updateUserProfile"
+                    :loading="loading.profile"
                   />
-                </q-item-section>
-              </q-item>
+                  <q-btn 
+                    :label="$t('user.cancel')" 
+                    color="grey-7" 
+                    flat 
+                    @click="resetForm"
+                    :disable="loading.profile"
+                  />
+                </div>
+              </q-form>
+            </q-tab-panel>
+
+            <!-- 安全设置标签页 -->
+            <q-tab-panel name="security">
+              <div class="text-h6 q-mb-md">{{ $t('user.security') }}</div>
+              <q-list>
+                <q-item>
+                  <q-item-section>
+                    <q-item-label>{{ $t('user.passwordSecurity') }}</q-item-label>
+                    <q-item-label caption>{{ $t('user.changePasswordDesc') }}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-btn 
+                      :label="$t('user.change')" 
+                      color="primary" 
+                      flat 
+                      @click="changePassword"
+                      :loading="loading.password"
+                    />
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-tab-panel>
+
+            <!-- 偏好设置标签页 -->
+            <q-tab-panel name="preferences">
+              <div class="text-h6 q-mb-md">{{ $t('user.preferences') }}</div>
               
-              <q-item>
-                <q-item-section>
-                  <q-item-label>{{ $t('user.twoFactorAuth') }}</q-item-label>
-                  <q-item-label caption>{{ $t('user.twoFactorAuthDesc') }}</q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <q-toggle v-model="twoFactorEnabled" />
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-card-section>
+              <!-- 主题设置 -->
+              <div class="q-mb-lg">
+                <div class="text-subtitle2 q-mb-sm">{{ $t('user.theme') }}</div>
+                <q-btn-toggle
+                  v-model="preferences.theme"
+                  :options="themeOptions.map(option => ({
+                    label: $t(`settings.themes.${option.value}`),
+                    value: option.value,
+                    icon: option.icon
+                  }))"
+                  color="primary"
+                  toggle-color="primary"
+                  outline
+                  @update:model-value="onThemeChange"
+                />
+              </div>
+
+              <!-- 语言设置 -->
+              <div class="q-mb-lg">
+                <div class="text-subtitle2 q-mb-sm">{{ $t('user.language') }}</div>
+                <q-btn-toggle
+                  v-model="preferences.language"
+                  :options="supportedLanguages.map(lang => ({
+                    label: lang.nativeName,
+                    value: lang.value,
+                    icon: lang.icon
+                  }))"
+                  color="primary"
+                  toggle-color="primary"
+                  outline
+                  @update:model-value="onLanguageChange"
+                />
+              </div>
+
+              <div class="row q-gutter-sm justify-start">
+                <q-btn 
+                  :label="$t('user.saveChanges')" 
+                  color="primary" 
+                  @click="savePreferences"
+                  :loading="loading.preferences"
+                />
+                <q-btn 
+                  :label="$t('user.resetToDefault')" 
+                  color="grey-6" 
+                  outline
+                  @click="resetPreferences"
+                />
+              </div>
+            </q-tab-panel>
+          </q-tab-panels>
         </q-card>
       </div>
     </div>
-    
-    <!-- 修改密码对话框 -->
-    <q-dialog v-model="showChangePasswordDialog">
+
+    <!-- 密码修改对话框 -->
+    <q-dialog v-model="showPasswordDialog" persistent>
       <q-card style="min-width: 400px">
         <q-card-section>
           <div class="text-h6">{{ $t('user.changePassword') }}</div>
+          <div class="text-caption text-grey-7">{{ $t('user.changePasswordDesc') }}</div>
         </q-card-section>
-        
+
         <q-card-section>
-          <q-form @submit="changePassword" class="q-gutter-md">
-            <q-input 
+          <q-form @submit="submitPasswordChange" class="q-gutter-md">
+            <q-input
               v-model="passwordForm.currentPassword"
               :label="$t('user.currentPassword')"
               type="password"
               outlined
+              dense
               :rules="[val => !!val || $t('user.currentPasswordRequired')]"
             />
-            
-            <q-input 
+            <q-input
               v-model="passwordForm.newPassword"
               :label="$t('user.newPassword')"
               type="password"
               outlined
+              dense
               :rules="[
                 val => !!val || $t('user.newPasswordRequired'),
                 val => val.length >= 8 || $t('user.passwordMinLength')
               ]"
             />
-            
-            <q-input 
+            <q-input
               v-model="passwordForm.confirmPassword"
-              :label="$t('user.confirmNewPassword')"
+              :label="$t('user.confirmPassword')"
               type="password"
               outlined
+              dense
               :rules="[
                 val => !!val || $t('user.confirmPasswordRequired'),
                 val => val === passwordForm.newPassword || $t('user.passwordMismatch')
               ]"
             />
-            
-            <div class="row q-col-gutter-md">
-              <div class="col-6">
-                <q-btn
-                  type="submit"
-                  color="primary"
-                  :label="$t('user.save')"
-                  :loading="isChangingPassword"
-                />
-              </div>
-              <div class="col-6">
-                <q-btn
-                  :label="$t('user.cancel')"
-                  outline
-                  v-close-popup
-                />
-              </div>
-            </div>
           </q-form>
         </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn 
+            flat 
+            :label="$t('common.cancel')" 
+            color="grey-7" 
+            @click="closePasswordDialog"
+            :disable="loading.password"
+          />
+          <q-btn 
+            :label="$t('user.change')" 
+            color="primary" 
+            @click="submitPasswordChange"
+            :loading="loading.password"
+          />
+        </q-card-actions>
       </q-card>
     </q-dialog>
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useAuthStore } from '../../stores/auth'
+import { useTheme } from '../../composables/useTheme'
+import { useProfile } from '../../composables/useProfile'
+import { usePasswordManagement } from '../../composables/usePasswordManagement'
+import { useAvatarManagement } from '../../composables/useAvatarManagement'
+import { usePreferencesManagement } from '../../composables/usePreferencesManagement'
+import UserAvatar from '../../components/avatar/UserAvatar.vue'
 
-const $q = useQuasar()
+const { t, locale } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
-
 const user = computed(() => authStore.user)
-const currentZone = computed(() => authStore.currentZone)
 
-const isLoading = ref(false)
-const isChangingPassword = ref(false)
-const showChangePasswordDialog = ref(false)
-const twoFactorEnabled = ref(false)
+// 主题管理
+const { themeMode, setThemeMode, getThemeOptions } = useTheme()
 
-const form = reactive({
-  name: '',
-  email: '',
-  avatar: ''
-})
+// 活动标签页
+const activeTab = ref('overview')
 
-const passwordForm = reactive({
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: ''
-})
+// 监听路由参数变化，设置活动标签页
+watch(() => route.query.tab, (newTab) => {
+  if (newTab && typeof newTab === 'string') {
+    activeTab.value = newTab
+  }
+}, { immediate: true })
 
-const validateEmail = (email: string) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
+// 用户资料管理
+const { 
+  form: profileForm,
+  loading: profileLoading,
+  initializeForm,
+  updateProfile: updateUserProfile
+} = useProfile()
+
+// 密码管理
+const {
+  passwordForm,
+  loading: passwordLoading,
+  showPasswordDialog,
+  resetPasswordForm,
+  validatePasswordForm,
+  changePassword: submitPasswordChange
+} = usePasswordManagement()
+
+// 头像管理
+const { 
+  loading: avatarLoading,
+  changeAvatar: selectAvatarFile
+} = useAvatarManagement()
+
+// 偏好设置管理
+const {
+  preferences,
+  loading: preferencesLoading,
+  options: preferencesOptions,
+  savePreferences,
+  resetPreferences,
+  updateLanguage,
+  updateTheme: updatePreferenceTheme
+} = usePreferencesManagement()
+
+// 头像组件引用
+const userAvatarRef = ref<InstanceType<typeof UserAvatar> | null>(null)
+
+// 统一的加载状态
+const loading = computed(() => ({
+  profile: profileLoading.value.profile,
+  password: passwordLoading.value.password,
+  avatar: avatarLoading.value.avatar,
+  preferences: preferencesLoading.value.preferences || preferencesLoading.value.saving
+}))
+
+// 支持的语言选项
+const supportedLanguages = computed(() => [
+  { label: '中文', value: 'zh-CN', icon: 'translate', nativeName: '中文' },
+  { label: 'English', value: 'en-US', icon: 'translate', nativeName: 'English' }
+])
+
+// 主题选项
+const themeOptions = computed(() => getThemeOptions())
+
+// 切换语言
+const changeLanguage = (newLanguage: string) => {
+  locale.value = newLanguage
+  updateLanguage(newLanguage)
 }
 
-onMounted(() => {
-  if (user.value) {
-    form.name = user.value.name
-    form.email = user.value.email
-    form.avatar = user.value.avatar || ''
-  }
-})
-
-const onSubmit = async () => {
-  isLoading.value = true
-  try {
-    // TODO: 实现更新用户资料逻辑
-    await new Promise(resolve => setTimeout(resolve, 1000)) // 模拟API调用
-    
-    $q.notify({
-      type: 'positive',
-      message: 'Profile updated successfully!',
-      timeout: 3000
-    })
-  } catch (error) {
-    console.error('Update profile failed:', error)
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to update profile. Please try again.',
-      timeout: 3000
-    })
-  } finally {
-    isLoading.value = false
-  }
+// 切换主题
+const changeTheme = (newTheme: string) => {
+  setThemeMode(newTheme as any)
+  updatePreferenceTheme(newTheme)
 }
 
+// 密码修改对话框
+const changePassword = () => {
+  resetPasswordForm()
+  showPasswordDialog.value = true
+}
+
+const closePasswordDialog = () => {
+  showPasswordDialog.value = false
+  resetPasswordForm()
+}
+
+// 头像修改
+const changeAvatar = () => {
+  selectAvatarFile()
+}
+
+// 重置表单
 const resetForm = () => {
-  if (user.value) {
-    form.name = user.value.name
-    form.email = user.value.email
-    form.avatar = user.value.avatar || ''
+  initializeForm()
+}
+
+// 复制用户ID到剪贴板
+const copyUserId = async () => {
+  const userId = user.value?.user_id || user.value?.id
+  if (!userId) return
+  
+  try {
+    await navigator.clipboard.writeText(String(userId))
+    // 使用 Quasar 的 notify 插件
+    const $q = useQuasar()
+    $q.notify({
+      type: 'positive',
+      message: '用户ID已复制到剪贴板'
+    })
+  } catch (error) {
+    console.error('复制失败:', error)
+    const $q = useQuasar()
+    $q.notify({
+      type: 'negative',
+      message: '复制失败'
+    })
   }
 }
 
-const changePassword = async () => {
-  isChangingPassword.value = true
-  try {
-    // TODO: 实现修改密码逻辑
-    await new Promise(resolve => setTimeout(resolve, 1000)) // 模拟API调用
-    
-    showChangePasswordDialog.value = false
-    passwordForm.currentPassword = ''
-    passwordForm.newPassword = ''
-    passwordForm.confirmPassword = ''
-    
-    $q.notify({
-      type: 'positive',
-      message: 'Password changed successfully!',
-      timeout: 3000
-    })
-  } catch (error) {
-    console.error('Change password failed:', error)
-    $q.notify({
-      type: 'negative',
-      message: 'Failed to change password. Please try again.',
-      timeout: 3000
-    })
-  } finally {
-    isChangingPassword.value = false
-  }
+// 主题变化处理
+const onThemeChange = (value: any) => {
+  console.log('主题切换到:', value)
+  changeTheme(value)
 }
-</script> 
+
+// 语言变化处理
+const onLanguageChange = (value: string) => {
+  console.log('语言切换到:', value)
+  changeLanguage(value)
+}
+
+// 初始化数据
+onMounted(() => {
+  console.log('🔧 [Avatar] Profile page mounted, user avatar:', user.value?.avatar)
+  console.log('🔧 [User] Complete user object:', JSON.stringify(user.value, null, 2))
+  console.log('🔧 [User] User ID (id):', user.value?.id)
+  console.log('🔧 [User] User ID (user_id):', user.value?.user_id)
+  console.log('🔧 [User] All user properties:', Object.keys(user.value || {}))
+  
+  // 初始化表单数据
+  initializeForm()
+  
+  // 调试表单数据
+  console.log('🔧 [Profile] Form after initialization:', {
+    name: profileForm.name,
+    phone: profileForm.phone,
+    signature: profileForm.signature
+  })
+})
+</script>
+
+<style scoped>
+.profile-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.user-card {
+  position: sticky;
+  top: 20px;
+}
+
+.q-tab-panel {
+  padding: 24px 16px;
+}
+</style>

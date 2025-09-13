@@ -32,53 +32,62 @@
         </div>
 
         <!-- 空状态 -->
-        <div v-else-if="filteredGroups.length === 0" class="text-center q-py-md">
+        <div v-else-if="filteredPools.length === 0" class="text-center q-py-md">
           <q-icon name="info" size="2em" color="grey-5" />
           <div class="q-mt-sm text-grey-6">
-            {{ ipGroups.length === 0 ? '暂无可用IP地址' : '没有找到匹配的IP地址' }}
+            {{ ipPools.length === 0 ? '暂无可用IP地址' : '没有找到匹配的IP地址' }}
           </div>
           <div class="q-mt-sm text-grey-6 text-caption">
-            {{ ipGroups.length === 0 ? '请先创建IP池或分配IP资源' : '请尝试其他搜索关键词' }}
+            {{ ipPools.length === 0 ? '请先创建IP池或分配IP资源' : '请尝试其他搜索关键词' }}
           </div>
         </div>
 
         <!-- IP组列表 -->
         <div v-else style="max-height: 500px; overflow-y: auto;">
           <div
-            v-for="group in filteredGroups"
-            :key="group.group_id"
+            v-for="pool in filteredPools"
+            :key="pool.seq"
             class="q-mb-lg"
           >
-            <!-- 组标题 -->
+            <!-- 池标题 -->
             <div class="text-subtitle1 text-weight-medium q-mb-sm">
-              {{ group.pool_name }}
+              {{ pool.name }}
               <q-chip
                 size="sm"
                 color="grey-4"
                 text-color="grey-8"
                 class="q-ml-sm"
               >
-                {{ group.available_ips.length }}个IP
+                {{ pool.available }}个可用
+              </q-chip>
+              <q-chip
+                size="sm"
+                color="blue-2"
+                text-color="blue-8"
+                class="q-ml-xs"
+              >
+                容量: {{ pool.capacity }}
               </q-chip>
             </div>
 
             <!-- IP按钮网格 -->
             <div class="ip-grid">
               <q-btn
-                v-for="ip in group.available_ips"
-                :key="ip.ip_address"
-                :color="selectedIP === ip.ip_address ? 'primary' : 'grey-4'"
-                :text-color="selectedIP === ip.ip_address ? 'white' : 'grey-8'"
-                :outline="selectedIP !== ip.ip_address"
-                @click="selectIP(ip)"
+                v-for="ip in pool.availableIPs"
+                :key="ip.addr"
+                :color="selectedIP === ip.addr ? 'primary' : 'grey-4'"
+                :text-color="selectedIP === ip.addr ? 'white' : 'grey-8'"
+                :outline="selectedIP !== ip.addr"
+                @click="selectIP(ip, pool.seq)"
                 class="ip-button"
                 no-caps
               >
-                {{ ip.ip_address }}
+                {{ ip.addr }}
                 <q-tooltip>
-                  IP: {{ ip.ip_address }}<br>
-                  索引: {{ ip.index }}<br>
-                  组序号: {{ ip.ip_group_sequence_number }}
+                  IP: {{ ip.addr }}<br>
+                  索引: {{ ip.idx }}<br>
+                  组序号: {{ pool.seq }}<br>
+                  状态: {{ ip.consumed ? '已使用' : '可用' }}
                 </q-tooltip>
               </q-btn>
             </div>
@@ -87,14 +96,17 @@
 
         <!-- 统计信息 -->
         <div v-if="totalAvailableIPs > 0" class="text-caption text-grey-6 q-mt-md">
-          共 {{ ipGroups.length }} 个IP池组，{{ totalAvailableIPs }} 个可用IP地址
+          共 {{ totalPools }} 个IP池，{{ totalAvailableIPs }} 个可用IP地址
+          <span v-if="statistics" class="q-ml-sm">
+            (总容量: {{ statistics.total_capacity }}，已使用: {{ statistics.total_consumed }})
+          </span>
         </div>
 
         <!-- 选中的IP信息 -->
         <div v-if="selectedIPInfo" class="q-mt-md q-pa-sm bg-blue-1 rounded-borders">
           <div class="text-caption text-grey-7">
-            <strong>已选择:</strong> {{ selectedIPInfo.ip_address }}
-            (组序号: {{ selectedIPInfo.ip_group_sequence_number }})
+            <strong>已选择:</strong> {{ selectedIPInfo.addr }}
+            (组序号: {{ selectedIPGroupSequenceNumber }})
           </div>
         </div>
       </q-card-section>
@@ -115,7 +127,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { nodeService } from '../../services/node/nodeService'
-import type { AvailableIP, IPGroup } from '../../types/node'
+import type { AvailableIP, IPPool, IPStatistics } from '../../types/node'
 
 interface Props {
   modelValue: boolean
@@ -143,35 +155,56 @@ const isOpen = computed({
 })
 
 const loading = ref(false)
-const ipGroups = ref<IPGroup[]>([])
+const ipPools = ref<IPPool[]>([])
+const statistics = ref<IPStatistics | null>(null)
 const selectedIP = ref<string>('')
 const selectedIPGroupSequenceNumber = ref<number>(0)
 const searchText = ref('')
 
+// 扩展的IP池接口（包含处理后的可用IP）
+interface ExtendedIPPool extends IPPool {
+  availableIPs: AvailableIP[]
+}
+
 // 计算属性
 const totalAvailableIPs = computed(() => {
-  return ipGroups.value.reduce((total, group) => total + group.available_ips.length, 0)
+  return ipPools.value.reduce((total, pool) => total + pool.available, 0)
 })
 
-const filteredGroups = computed(() => {
-  if (!searchText.value) return ipGroups.value
+const totalPools = computed(() => {
+  return ipPools.value.length
+})
+
+const filteredPools = computed((): ExtendedIPPool[] => {
+  const pools = ipPools.value.map(pool => ({
+    ...pool,
+    availableIPs: pool.ips.filter(ip => !ip.consumed)
+  }))
+
+  if (!searchText.value) return pools
   
   const searchLower = searchText.value.toLowerCase()
-  return ipGroups.value.map(group => ({
-    ...group,
-    available_ips: group.available_ips.filter(ip => 
-      ip.ip_address.toLowerCase().includes(searchLower) ||
-      group.pool_name.toLowerCase().includes(searchLower)
+  return pools.map(pool => ({
+    ...pool,
+    availableIPs: pool.availableIPs.filter(ip => 
+      ip.addr.toLowerCase().includes(searchLower) ||
+      pool.name.toLowerCase().includes(searchLower)
     )
-  })).filter(group => group.available_ips.length > 0)
+  })).filter(pool => pool.availableIPs.length > 0)
 })
 
 const selectedIPInfo = computed(() => {
   if (!selectedIP.value) return null
   
-  for (const group of ipGroups.value) {
-    const ip = group.available_ips.find(ip => ip.ip_address === selectedIP.value)
-    if (ip) return ip
+  for (const pool of ipPools.value) {
+    const ip = pool.ips.find(ip => ip.addr === selectedIP.value)
+    if (ip) {
+      return {
+        ...ip,
+        addr: ip.addr,
+        idx: ip.idx
+      }
+    }
   }
   return null
 })
@@ -181,18 +214,28 @@ const loadAvailableIPs = async () => {
   loading.value = true
   try {
     const response = await nodeService.getAvailableIPs()
-    ipGroups.value = response.data.groups || []
+    const responseData = response.data
+    
+    // 处理新的API格式
+    ipPools.value = responseData.pools || []
+    statistics.value = responseData.statistics || null
+    
+    console.log('加载可用IP成功:', {
+      pools: ipPools.value.length,
+      statistics: statistics.value
+    })
   } catch (error) {
     console.error('加载可用IP失败:', error)
-    ipGroups.value = []
+    ipPools.value = []
+    statistics.value = null
   } finally {
     loading.value = false
   }
 }
 
-const selectIP = (ip: AvailableIP) => {
-  selectedIP.value = ip.ip_address
-  selectedIPGroupSequenceNumber.value = ip.ip_group_sequence_number
+const selectIP = (ip: AvailableIP, poolSeq: number) => {
+  selectedIP.value = ip.addr
+  selectedIPGroupSequenceNumber.value = poolSeq
 }
 
 const confirmSelection = () => {

@@ -42,6 +42,13 @@ export const useAuthStore = defineStore('auth', () => {
       
       token.value = response.data.auth_token
       user.value = response.data.user
+      
+      // 确保user_id字段正确映射
+      if (user.value && !user.value.user_id && user.value.id) {
+        user.value.user_id = user.value.id
+        console.log('🔧 [AUTH] Mapped id to user_id:', user.value.user_id)
+      }
+      
       tokenExpiry.value = response.data.expires_at
       
       console.log('🔧 [AUTH] Token set:', token.value ? token.value.substring(0, 20) + '...' : null)
@@ -151,8 +158,32 @@ export const useAuthStore = defineStore('auth', () => {
   
   const refreshUserData = async () => {
     try {
+      console.log('🔧 [AUTH] Refreshing user data...')
       const response = await apiService.getCurrentUser()
-      user.value = response.data
+      console.log('🔧 [AUTH] Got user data response:', response.data)
+      const oldAvatar = user.value?.avatar
+      const newUserData = response.data
+      
+      // 确保user_id字段正确映射
+      if (newUserData && !newUserData.user_id && newUserData.id) {
+        newUserData.user_id = newUserData.id
+        console.log('🔧 [AUTH] Mapped id to user_id in refresh:', newUserData.user_id)
+      }
+      
+      // 如果新数据没有avatar字段，但当前用户有avatar，则保持当前avatar
+      if (!newUserData.avatar && oldAvatar) {
+        console.log('🔧 [AUTH] Backend has no avatar field, preserving current avatar')
+        newUserData.avatar = oldAvatar
+      }
+      
+      user.value = newUserData
+      console.log('🔧 [AUTH] Avatar changed from:', oldAvatar, 'to:', user.value?.avatar)
+      
+      // 同时更新LocalStorage
+      if (user.value) {
+        LocalStorage.set('user_info', JSON.stringify(user.value))
+        console.log('🔧 [AUTH] Updated user_info in LocalStorage after refresh')
+      }
     } catch (error) {
       console.error('Refresh user data error:', error)
     }

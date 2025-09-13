@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "quasar dev",
     "build": "quasar build",
+    "build:prod": "quasar build",
     "build:pwa": "quasar build -m pwa",
     "build:electron": "quasar build -m electron",
     "build:capacitor": "quasar build -m capacitor",
@@ -31,6 +32,7 @@
     "vue-router": "^4.2.0"
   },
   "devDependencies": {
+    "@intlify/unplugin-vue-i18n": "^6.0.8",
     "@quasar/app-vite": "^2.2.1",
     "@quasar/cli": "^2.3.0",
     "@types/node": "^20.10.0",

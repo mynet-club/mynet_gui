@@ -122,9 +122,18 @@
         <q-btn-dropdown 
           flat 
           dense
-          :icon="'account_circle'"
-          :label="$q.screen.gt.sm ? (user?.name || 'User') : ''"
+          class="user-menu-btn"
         >
+          <template v-slot:label>
+            <div class="row items-center no-wrap q-gutter-xs">
+              <UserAvatar
+                :user-id="user?.user_id || user?.id"
+                size="32px"
+                class="user-avatar-header"
+              />
+              <span v-if="$q.screen.gt.sm" class="text-white">{{ user?.name || 'User' }}</span>
+            </div>
+          </template>
           <q-list>
             <q-item-label header class="text-weight-bold">
               {{ user?.name || 'User' }}
@@ -138,12 +147,12 @@
                 <q-item-label>{{ $t('common.profile') }}</q-item-label>
               </q-item-section>
             </q-item>
-            <q-item clickable @click="$router.push('/settings')">
+            <q-item clickable @click="goToProfileSettings">
               <q-item-section avatar>
                 <q-icon name="settings" />
               </q-item-section>
               <q-item-section>
-                <q-item-label>{{ $t('common.settings') }}</q-item-label>
+                <q-item-label>个人设置</q-item-label>
               </q-item-section>
             </q-item>
             <q-separator />
@@ -208,11 +217,6 @@
               {{ $t(item.description) }}
             </q-item-label>
           </q-item-section>
-          <q-item-section side v-if="item.badge">
-            <q-badge :color="item.badgeColor || 'primary'">
-              {{ item.badge }}
-            </q-badge>
-          </q-item-section>
         </q-item>
 
         <q-separator class="q-my-md" />
@@ -238,20 +242,6 @@
             <q-item-label caption v-if="item.description">
               {{ $t(item.description) }}
             </q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <div class="row items-center">
-              <q-badge v-if="item.badge" :color="item.badgeColor || 'primary'" class="q-mr-xs">
-                {{ item.badge }}
-              </q-badge>
-              <q-chip 
-                v-if="item.comingSoon"
-                size="sm"
-                color="orange"
-                text-color="white"
-                :label="$t('common.comingSoon')"
-              />
-            </div>
           </q-item-section>
         </q-item>
 
@@ -279,14 +269,6 @@
             <q-item-label caption v-if="item.description">
               {{ $t(item.description) }}
             </q-item-label>
-          </q-item-section>
-          <q-item-section side v-if="item.comingSoon">
-            <q-chip 
-              size="sm"
-              color="orange"
-              text-color="white"
-              :label="$t('common.comingSoon')"
-            />
           </q-item-section>
         </q-item>
       </q-list>
@@ -423,6 +405,7 @@ import { useTheme } from '../composables/useTheme'
 import { useSidebarStats } from '../composables/useSidebarStats'
 import { useI18n } from 'vue-i18n'
 import ZoneSelector from '../components/common/ZoneSelector.vue'
+import UserAvatar from '../components/avatar/UserAvatar.vue'
 import { DEFAULT_GLOBAL_ZONE } from '../config/app'
 
 const $q = useQuasar()
@@ -504,48 +487,35 @@ const mainNavigationItems = computed((): NavigationItem[] => [
     name: 'nodes',
     label: 'navigation.nodes',
     icon: 'dns',
-    path: '/nodes',
-    badge: sidebarStats.value.nodes || 0,
-    badgeColor: 'primary'
-  },
-  {
-    name: 'ippools',
-    label: 'navigation.ippools',
-    icon: 'network_wired',
-    path: '/ippools',
-    badge: sidebarStats.value.ippools || 0,
-    badgeColor: 'secondary',
-    comingSoon: true
+    path: '/nodes'
   }
 ])
 
 // 网络配置导航项
 const networkNavigationItems = computed((): NavigationItem[] => [
   {
+    name: 'ippools',
+    label: 'navigation.ippools',
+    icon: 'dns',
+    path: '/ippools'
+  },
+  {
     name: 'routes',
     label: 'navigation.routes',
     icon: 'alt_route',
-    path: '/routes',
-    badge: sidebarStats.value.routes || 0,
-    badgeColor: 'accent'
+    path: '/routes'
   },
   {
-    name: 'zone-sharing',
-    label: 'navigation.zoneSharing',
-    icon: 'share',
-    path: '/zone-sharing',
-    badge: sidebarStats.value.zones || 0,
-    badgeColor: 'info',
-    comingSoon: false
+    name: 'services',
+    label: 'navigation.services',
+    icon: 'apps',
+    path: '/services'
   },
   {
     name: 'social',
     label: 'navigation.social',
     icon: 'group',
-    path: '/social',
-    badge: sidebarStats.value.connections || 0,
-    badgeColor: 'positive',
-    comingSoon: true
+    path: '/social'
   }
 ])
 
@@ -556,15 +526,13 @@ const systemNavigationItems = computed((): NavigationItem[] => {
       name: 'apitest',
       label: 'navigation.apiTest',
       icon: 'code',
-      path: '/api-test',
-      comingSoon: true
+      path: '/api-test'
     },
     {
       name: 'help',
       label: 'navigation.help',
       icon: 'help',
-      path: '/help',
-      comingSoon: true
+      path: '/help'
     }
   ]
   
@@ -574,8 +542,7 @@ const systemNavigationItems = computed((): NavigationItem[] => {
       name: 'token-debug',
       label: 'Token 调试',
       icon: 'token',
-      path: '/system/token-debug',
-      comingSoon: false
+      path: '/system/token-debug'
     })
   }
   
@@ -636,6 +603,10 @@ const changeTheme = (mode: string) => {
     message: t('settings.themeChanged', { theme: mode }),
     timeout: 2000
   })
+}
+
+const goToProfileSettings = () => {
+  router.push('/profile?tab=preferences')
 }
 
 const logout = async () => {
@@ -722,13 +693,6 @@ const reconnectWebSocket = () => {
 
 // 生命周期
 onMounted(async () => {
-  // 调试输出
-  console.log('MainLayout mounted')
-  console.log('Current zone:', authStore.currentZone)
-  console.log('Available zones:', authStore.availableZones)
-  console.log('User:', user.value)
-  console.log('Is authenticated:', authStore.isAuthenticated)
-  
   // 初始化主题
   initializeTheme()
   
@@ -842,6 +806,15 @@ onMounted(async () => {
     color: white;
   }
   
+  // 侧边栏菜单容器
+  .sidebar-menu {
+    .q-list {
+      .q-item {
+        position: relative;
+      }
+    }
+  }
+  
   .nav-item {
     margin: 4px 8px;
     border-radius: 8px;
@@ -893,6 +866,18 @@ onMounted(async () => {
         }
       }
     }
+  }
+}
+
+// 用户头像样式
+.user-menu-btn {
+  .user-avatar-header {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: border-color 0.3s ease;
+  }
+  
+  &:hover .user-avatar-header {
+    border-color: rgba(255, 255, 255, 0.6);
   }
 }
 

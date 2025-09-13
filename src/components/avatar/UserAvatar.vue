@@ -1,0 +1,125 @@
+<template>
+  <q-avatar 
+    :size="size" 
+    :class="avatarClass"
+    v-bind="$attrs"
+  >
+    <img 
+      :src="currentAvatarUrl" 
+      @error="handleError"
+      :alt="alt"
+    />
+    <!-- 加载状态 -->
+    <q-inner-loading :showing="loading" color="primary" />
+    
+    <!-- 可选的编辑按钮 -->
+    <q-btn
+      v-if="editable"
+      fab
+      mini
+      icon="camera_alt"
+      color="primary"
+      class="absolute-bottom-right"
+      style="transform: translate(25%, 25%)"
+      @click="$emit('edit')"
+      :loading="uploading"
+    >
+      <q-tooltip>更改头像</q-tooltip>
+    </q-btn>
+  </q-avatar>
+</template>
+
+<script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue'
+import { useAvatar } from '../../composables/useAvatar'
+
+interface Props {
+  userId?: string | number
+  size?: string
+  editable?: boolean
+  uploading?: boolean
+  alt?: string
+  class?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  size: '64px',
+  editable: false,
+  uploading: false,
+  alt: 'User Avatar',
+  class: ''
+})
+
+const emit = defineEmits<{
+  edit: []
+  error: [error: Error]
+}>()
+
+const { getAvatarUrl, defaultAvatar, loading } = useAvatar()
+const currentAvatarUrl = ref<string>(defaultAvatar)
+const hasError = ref(false)
+
+const avatarClass = computed(() => {
+  const classes = [props.class]
+  if (hasError.value) {
+    classes.push('avatar-error')
+  }
+  return classes.join(' ')
+})
+
+// 加载头像
+const loadAvatar = async () => {
+  try {
+    hasError.value = false
+    if (props.userId) {
+      currentAvatarUrl.value = await getAvatarUrl(props.userId)
+    } else {
+      currentAvatarUrl.value = defaultAvatar
+    }
+  } catch (error) {
+    console.error('Failed to load avatar:', error)
+    currentAvatarUrl.value = defaultAvatar
+    hasError.value = true
+    emit('error', error as Error)
+  }
+}
+
+// 处理图片加载错误
+const handleError = () => {
+  if (currentAvatarUrl.value !== defaultAvatar) {
+    console.log('Avatar image failed to load, using default')
+    currentAvatarUrl.value = defaultAvatar
+    hasError.value = true
+  }
+}
+
+// 监听userId变化
+watch(() => props.userId, () => {
+  loadAvatar()
+}, { immediate: true })
+
+// 暴露刷新方法
+const refresh = () => {
+  loadAvatar()
+}
+
+// 组件挂载时加载头像
+onMounted(() => {
+  loadAvatar()
+})
+
+defineExpose({
+  refresh,
+  loadAvatar
+})
+</script>
+
+<style scoped>
+.avatar-error {
+  opacity: 0.7;
+}
+
+.q-avatar {
+  position: relative;
+}
+</style>

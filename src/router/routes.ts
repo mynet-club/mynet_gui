@@ -114,10 +114,10 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '区域管理', requiresAuth: true }
       },
       { 
-        path: 'zone-sharing', 
-        name: 'zone-sharing',
+        path: 'services', 
+        name: 'services',
         component: () => import('../pages/zone/ZoneSharingPage.vue'),
-        meta: { title: '区域分享', requiresAuth: true }
+        meta: { title: '服务管理', requiresAuth: true }
       },
       { 
         path: 'social', 
@@ -147,6 +147,9 @@ const routes: RouteRecordRaw[] = [
       { path: 'login', component: () => import('../pages/auth/LoginPage.vue') },
       { path: 'register', component: () => import('../pages/auth/RegisterPage.vue') },
       { path: 'forgot-password', component: () => import('../pages/auth/ForgotPasswordPage.vue') },
+      { path: 'reset-verification', component: () => import('../pages/auth/ResetVerificationPage.vue') },
+      { path: 'reset-password', component: () => import('../pages/auth/NewResetPasswordPage.vue') },
+      { path: 'activate', component: () => import('../pages/auth/AccountActivationPage.vue') },
       { path: 'email-verification', component: () => import('../pages/auth/EmailVerificationPage.vue') }
     ]
   },

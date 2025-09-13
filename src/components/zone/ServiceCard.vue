@@ -34,14 +34,30 @@
       <div class="service-details q-gutter-xs">
         <div class="detail-item">
           <q-icon name="link" size="xs" class="q-mr-xs" />
-          <span class="text-body2">{{ formatServiceUrl() }}</span>
+          <span class="text-body2">{{ formatServiceAddress() }}</span>
         </div>
         
         <div class="detail-item">
           <q-icon name="security" size="xs" class="q-mr-xs" />
           <span class="text-body2">
-            {{ service.service_auth_required ? $t('zoneServices.authRequired') : $t('zoneServices.noAuth') }}
+            {{ getAuthStatusText() }}
           </span>
+        </div>
+
+        <!-- 服务状态 -->
+        <div class="detail-item">
+          <q-icon name="info" size="xs" class="q-mr-xs" />
+          <span class="text-body2">
+            状态: <span :class="getStatusTextClass(service.service_status)">
+              {{ getStatusLabel(service.service_status) }}
+            </span>
+          </span>
+        </div>
+
+        <!-- 关联节点 -->
+        <div v-if="(service as any).associated_node" class="detail-item">
+          <q-icon name="hub" size="xs" class="q-mr-xs" />
+          <span class="text-body2">节点: {{ (service as any).associated_node }}</span>
         </div>
 
         <div v-if="service.creator_name" class="detail-item">
@@ -54,33 +70,14 @@
     <!-- 操作按钮 -->
     <q-card-actions v-if="showActions" align="right" class="q-pa-md">
       <!-- 我的服务：显示管理操作 -->
-      <template v-if="service.is_owner">
+      <template v-if="isMyService">
         <q-btn
           flat
           size="sm"
           color="primary"
           icon="edit"
-          :label="$t('common.edit')"
+          label="编辑"
           @click="$emit('edit', service)"
-        />
-        
-        <q-btn
-          flat
-          size="sm"
-          color="positive"
-          icon="share"
-          :label="$t('zoneServices.share')"
-          @click="$emit('share', service)"
-        />
-
-        <q-btn
-          v-if="service.service_approval_status !== 'approved'"
-          flat
-          size="sm"
-          color="info"
-          icon="public"
-          :label="$t('zoneServices.requestPublic')"
-          @click="$emit('requestApproval', service)"
         />
 
         <q-btn
@@ -88,7 +85,7 @@
           size="sm"
           color="negative"
           icon="delete"
-          :label="$t('common.delete')"
+          label="删除"
           @click="$emit('delete', service)"
         />
       </template>
@@ -100,7 +97,7 @@
           size="sm"
           color="primary"
           icon="launch"
-          :label="$t('zoneServices.connect')"
+          label="连接"
           @click="$emit('connect', service)"
         />
         
@@ -109,7 +106,7 @@
           size="sm"
           color="grey"
           icon="info"
-          :label="$t('common.details')"
+          label="详情"
           @click="$emit('details', service)"
         />
       </template>
@@ -118,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useZoneServices } from '../../composables/useZoneServices'
 import type { ZoneService } from '../../types/zoneService'
@@ -126,19 +123,19 @@ import type { ZoneService } from '../../types/zoneService'
 interface Props {
   service: ZoneService
   showActions?: boolean
+  category?: string // 添加分类属性来判断是否为"我的服务"
 }
 
 interface Emits {
   (e: 'edit', service: ZoneService): void
   (e: 'delete', service: ZoneService): void
-  (e: 'share', service: ZoneService): void
-  (e: 'requestApproval', service: ZoneService): void
   (e: 'connect', service: ZoneService): void
   (e: 'details', service: ZoneService): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  showActions: true
+  showActions: true,
+  category: ''
 })
 
 defineEmits<Emits>()
@@ -149,32 +146,38 @@ const { getServiceTypeConfig } = useZoneServices()
 // 服务类型配置
 const serviceTypeConfig = computed(() => getServiceTypeConfig(props.service.service_type))
 
-// 格式化服务URL
-const formatServiceUrl = () => {
-  const { service_url, service_port, service_protocol } = props.service
+// 判断是否为我的服务
+const isMyService = computed(() => {
+  return props.category === 'my'
+})
+
+// 格式化服务地址
+const formatServiceAddress = () => {
+  const { service_address, service_port, service_protocol } = props.service
   
-  // 如果service_url不存在，返回默认值
-  if (!service_url) {
+  // 如果service_address不存在，返回默认值
+  if (!service_address) {
     return 'N/A'
   }
   
   // 如果URL已经包含协议，直接返回
-  if (service_url.startsWith('http://') || service_url.startsWith('https://')) {
-    return service_url
+  if (service_address.startsWith('http://') || service_address.startsWith('https://')) {
+    return service_address
   }
   
   // 否则构建完整的URL
-  return `${service_protocol}://${service_url}:${service_port}`
+  return `${service_protocol}://${service_address}:${service_port}`
 }
 
 // 获取状态颜色
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'active':
+const getStatusColor = (status: number | string) => {
+  const numStatus = typeof status === 'string' ? parseInt(status) : status
+  switch (numStatus) {
+    case 1:
       return 'positive'
-    case 'inactive':
+    case 0:
       return 'negative'
-    case 'pending':
+    case 2:
       return 'warning'
     default:
       return 'grey'
@@ -182,16 +185,42 @@ const getStatusColor = (status: string) => {
 }
 
 // 获取状态标签
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'active':
-      return t('common.active')
-    case 'inactive':
-      return t('common.inactive')
-    case 'pending':
-      return t('common.pending')
+const getStatusLabel = (status: number | string) => {
+  const numStatus = typeof status === 'string' ? parseInt(status) : status
+  switch (numStatus) {
+    case 1:
+      return '运行中'
+    case 0:
+      return '已停止'
+    case 2:
+      return '等待中'
+    case -1:
+      return '错误'
     default:
-      return status
+      return '未知'
+  }
+}
+
+// 获取认证状态文本
+const getAuthStatusText = () => {
+  const authConfig = (props.service as any).service_config?.auth
+  return authConfig?.required ? '需要认证' : '无需认证'
+}
+
+// 获取状态文字样式类
+const getStatusTextClass = (status: number | string) => {
+  const numStatus = typeof status === 'string' ? parseInt(status) : status
+  switch (numStatus) {
+    case 1:
+      return 'text-positive'
+    case 0:
+      return 'text-negative'
+    case 2:
+      return 'text-warning'
+    case -1:
+      return 'text-negative'
+    default:
+      return 'text-grey'
   }
 }
 </script>

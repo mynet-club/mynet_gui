@@ -1,4 +1,5 @@
 import { api } from '../api'
+import type { IndexServicesResponse } from '../../types'
 
 export interface Zone {
   id: number
@@ -115,5 +116,11 @@ export const zoneService = {
   async getZoneStatistics(zoneId: string): Promise<ZoneStatistics> {
     const response = await api.get(`/zones/${zoneId}/statistics`)
     return response.data.data
+  },
+
+  // 获取索引服务列表
+  async getIndexServices(): Promise<{ data: IndexServicesResponse }> {
+    const response = await api.get('/zones/services/indexeservices')
+    return response.data
   }
 }

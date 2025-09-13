@@ -14,7 +14,7 @@
 
 .auth-card {
   width: 100%;
-  max-width: 480px;
+  max-width: 580px;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   
@@ -139,6 +139,35 @@
     
     .auth-footer {
       border-top-color: var(--q-dark-page);
+    }
+  }
+}
+
+// PC模式下的优化
+@media (min-width: 768px) {
+  .auth-card {
+    max-width: 650px;
+    padding: 2rem;
+    
+    .auth-form {
+      .form-field {
+        margin-bottom: 1.8rem;
+      }
+      
+      .submit-btn {
+        height: 56px;
+        font-size: 1.1rem;
+      }
+    }
+    
+    .auth-header {
+      .auth-title {
+        font-size: 1.75rem;
+      }
+      
+      .auth-subtitle {
+        font-size: 1rem;
+      }
     }
   }
 }

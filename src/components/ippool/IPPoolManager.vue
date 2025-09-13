@@ -1,7 +1,7 @@
 <template>
   <div class="ip-pool-manager">
-    <!-- 工具栏 -->
-    <div class="toolbar q-mb-md">
+    <!-- 工具栏 - 可选显示 -->
+    <div v-if="!hideToolbar" class="toolbar q-mb-md">
       <div class="row q-gutter-md items-center">
         <div class="col-auto">
           <q-btn-group>
@@ -18,19 +18,6 @@
               @click="refreshData"
             />
           </q-btn-group>
-        </div>
-        
-        <div class="col-auto">
-          <q-separator vertical />
-        </div>
-        
-        <div class="col-auto">
-          <q-btn
-            color="info"
-            icon="file_download"
-            :label="$t('ippools.export')"
-            @click="exportData"
-          />
         </div>
         
         <q-space />
@@ -62,7 +49,7 @@
               <q-icon v-if="item.id !== 'usage_rate'" :name="item.icon" size="24px" :color="item.color" />
               <q-circular-progress
                 v-else
-                :value="statistics.usage_percentage || usagePercentage"
+                :value="statistics.usage_percentage || 0"
                 size="24px"
                 :thickness="0.2"
                 color="warning"
@@ -74,31 +61,95 @@
       </template>
     </ResponsiveCardGrid>
 
-    <!-- 卡片视图 -->
-    <div class="card-view">
-      <div class="row q-gutter-md">
-        <div
-          v-for="pool in pools"
-          :key="pool.id"
-          class="col-12 col-sm-6 col-md-4 col-lg-3"
-        >
-          <IPPoolCard
-            :pool="pool"
-            @view="viewPool"
-            @edit="editPool"
-            @manage="managePool"
-            @delete="deletePool"
-          />
-        </div>
-      </div>
-      
-      <!-- 空状态 -->
-      <div v-if="pools.length === 0 && !loading" class="empty-state">
-        <q-icon name="storage" size="64px" color="grey-4" />
-        <div class="text-h6 text-grey-6 q-mt-md">{{ $t('ippools.noPools') }}</div>
-        <div class="text-body2 text-grey-6">{{ $t('ippools.noPoolsHint') }}</div>
-      </div>
-    </div>
+    <!-- IP池列表 -->
+    <ResponsiveCardGrid
+      :items="pools"
+      :loading="loading"
+      :loading-count="8"
+      variant="standard"
+      spacing="normal"
+      :clickable="false"
+      :item-key="(item) => item.sequence_number || item.id"
+      :empty-icon="'storage'"
+      :empty-title="$t('ippools.noPools')"
+      :empty-description="$t('ippools.noPoolsHint')"
+    >
+      <template #default="{ item: pool }">
+        <!-- 卡片标题区域 -->
+        <q-card-section>
+          <div class="row items-center q-mb-md">
+            <div class="col">
+              <div class="text-h6 text-weight-bold pool-title">{{ pool.name || $t('ippools.unnamedPool') }}</div>
+            </div>
+          </div>
+
+          <!-- 基本信息 -->
+          <div class="pool-info q-mb-md">
+            <div class="row q-gutter-md">
+              <div class="col-12">
+                <div class="info-row">
+                  <q-icon name="settings_ethernet" size="sm" color="info" />
+                  <span class="info-label">{{ $t('ippools.ipRange') }}:</span>
+                  <span class="info-value text-mono">{{ pool.ip_range?.start || pool.ip_start }} - {{ pool.ip_range?.end || pool.ip_end }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 使用情况 -->
+          <div class="usage-section q-mb-md">
+            <div class="row items-center q-gutter-md">
+              <div class="col-auto">
+                <q-circular-progress
+                  :value="getUsagePercent(pool)"
+                  size="60px"
+                  :thickness="0.15"
+                  :color="getUsageColor(getUsagePercent(pool))"
+                  track-color="grey-3"
+                  show-value
+                  class="text-weight-bold"
+                />
+              </div>
+              <div class="col">
+                <div class="usage-stats">
+                  <div class="stat-item">
+                    <span class="stat-label">{{ $t('ippools.totalCount') }}:</span>
+                    <span class="stat-value">{{ pool.total_ips || pool.ip_count || 0 }}</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">{{ $t('ippools.usedCount') }}:</span>
+                    <span class="stat-value">{{ pool.used_ips || 0 }}</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">{{ $t('ippools.availableCount') }}:</span>
+                    <span class="stat-value">{{ pool.available_ips || (pool.total_ips || pool.ip_count || 0) - (pool.used_ips || 0) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </q-card-section>          <!-- 底部功能区 -->
+        <q-card-actions class="justify-between items-center">
+          <!-- 左侧：IP池ID显示 -->
+          <div class="text-caption text-grey-6">
+            序列号: {{ pool.sequence_number || pool.id }}
+          </div>
+          
+          <!-- 右侧：功能按钮 -->
+          <div class="row q-gutter-xs">
+            <q-btn
+              icon="delete"
+              size="sm"
+              flat
+              round
+              color="negative"
+              @click="deletePool(pool)"
+              :title="$t('ippools.delete')"
+            />
+          </div>
+        </q-card-actions>
+      </template>
+    </ResponsiveCardGrid>
     
     <!-- IP池创建对话框 -->
     <IPPoolCreateDialog
@@ -115,9 +166,16 @@ import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useIPPools } from '../../composables/useIPPools'
 import ResponsiveCardGrid from '../common/ResponsiveCardGrid.vue'
-import IPPoolCard from './IPPoolCard.vue'
 import IPPoolCreateDialog from './IPPoolCreateDialog.vue'
 import type { IPPool } from '../../types/ippool'
+
+interface Props {
+  hideToolbar?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  hideToolbar: false
+})
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -128,8 +186,7 @@ const {
   loading,
   fetchPools,
   fetchStatistics,
-  deletePool: deletePoolAction,
-  exportPools
+  deletePool: deletePoolAction
 } = useIPPools()
 
 // 本地状态
@@ -141,44 +198,77 @@ const usagePercentage = computed(() => {
   return Math.round((statistics.value.allocated_ips / statistics.value.total_ips) * 100)
 })
 
-// 统计卡片数据
-const statsCards = computed(() => [
-  {
-    id: 'total_pools',
-    title: t('ippools.totalPools'),
-    value: statistics.value.total_pools,
-    icon: 'storage',
-    color: 'primary'
-  },
-  {
-    id: 'total_ips',
-    title: t('ippools.totalIPs'),
-    value: statistics.value.total_ips,
-    icon: 'language',
-    color: 'info'
-  },
-  {
-    id: 'allocated_ips',
-    title: t('ippools.allocatedIPs'),
-    value: statistics.value.allocated_ips,
-    icon: 'assignment',
-    color: 'positive'
-  },
-  {
-    id: 'available_ips',
-    title: t('ippools.availableIPs'),
-    value: statistics.value.free_ips || statistics.value.available_ips || 0,
-    icon: 'check_circle',
-    color: 'positive'
-  },
-  {
-    id: 'usage_rate',
-    title: t('ippools.usageRate'),
-    value: `${(statistics.value.usage_percentage?.toFixed(1) || usagePercentage.value)}%`,
-    icon: 'donut_small',
-    color: 'warning'
+// 统计卡片数据 - 展示4个指标：已创建IP池、可创建IP池、IP总数、已分配IP数
+const statsCards = computed(() => {
+  // 使用API统计数据或从IP池计算的统计数据
+  const userQuota = statistics.value.user_quota || 3
+  const createdCount = statistics.value.total_pools || pools.value.length
+  const availableCount = Math.max(0, userQuota - createdCount)
+  
+  return [
+    {
+      id: 'created_pools',
+      title: t('ippools.createdPools'),
+      value: createdCount,
+      icon: 'storage',
+      color: 'primary'
+    },
+    {
+      id: 'available_pools',
+      title: t('ippools.availablePools'),
+      value: availableCount,
+      icon: 'add_circle',
+      color: 'positive'
+    },
+    {
+      id: 'total_ips',
+      title: t('ippools.totalIPs'),
+      value: statistics.value.total_ips || 0,
+      icon: 'language',
+      color: 'info'
+    },
+    {
+      id: 'usage_rate',
+      title: t('ippools.poolUsageRate'),
+      value: `${Math.round(statistics.value.usage_percentage || 0)}%`,
+      icon: 'pie_chart',
+      color: 'warning'
+    }
+  ]
+})
+
+// IP池卡片相关方法
+const getUsagePercent = (pool: IPPool): number => {
+  const total = pool.total_ips || pool.ip_count || 0
+  if (total === 0) return 0
+  const used = pool.used_ips || 0
+  return Math.round((used / total) * 100)
+}
+
+const getUsageColor = (percent: number): string => {
+  if (percent >= 80) return 'negative'
+  if (percent >= 60) return 'warning'
+  return 'positive'
+}
+
+const getStatusColor = (status: string | number): string => {
+  if (typeof status === 'number') {
+    return status === 1 ? 'warning' : 'positive'
   }
-])
+  switch (status) {
+    case 'available': return 'positive'
+    case 'allocated': return 'warning'
+    case 'full': return 'negative'
+    default: return 'grey'
+  }
+}
+
+const getStatusText = (status: string | number): string => {
+  if (typeof status === 'number') {
+    return status === 1 ? 'Allocated' : 'Available'
+  }
+  return status.charAt(0).toUpperCase() + status.slice(1)
+}
 
 // 方法
 const handlePoolsCreated = (createdPools: IPPool[]) => {
@@ -219,15 +309,12 @@ const refreshData = () => {
   fetchStatistics()
 }
 
-const exportData = () => {
-  exportPools('csv')
-}
-
 // 生命周期
 onMounted(async () => {
   console.log('IPPoolManager mounted, fetching data...')
   await fetchPools()
   console.log('Pools fetched:', pools.value)
+  console.log('Pools count:', pools.value.length)
   
   // 确保先获取IP池数据，然后尝试获取统计信息
   try {
@@ -250,19 +337,65 @@ onMounted(async () => {
     }
   }
   
-  .card-view {
-    min-height: 300px;
-    
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 20px;
-      text-align: center;
+  // IP池卡片样式
+  :deep(.responsive-card-grid) {
+    .standard-card {
+      transition: all 0.3s ease;
+      border-radius: 8px;
       
-      .q-icon {
-        margin-bottom: 16px;
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+  
+  // 卡片标题样式 - 减小字号
+  .pool-title {
+    font-size: 1.125rem !important; // 约为text-h6的0.75倍
+    line-height: 1.4;
+  }
+  
+  .pool-info {
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      
+      .info-label {
+        font-weight: 500;
+        color: var(--q-text-grey-7);
+        min-width: 80px;
+      }
+      
+      .info-value {
+        font-weight: 600;
+        
+        &.text-mono {
+          font-family: 'Courier New', monospace;
+        }
+      }
+    }
+  }
+  
+  .usage-section {
+    .usage-stats {
+      .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+        
+        .stat-label {
+          font-size: 0.875rem;
+          color: var(--q-text-grey-6);
+        }
+        
+        .stat-value {
+          font-weight: 600;
+          font-size: 0.875rem;
+        }
       }
     }
   }

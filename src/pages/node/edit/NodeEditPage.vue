@@ -45,13 +45,15 @@
             class="text-grey"
             active-color="primary"
             indicator-color="primary"
-            align="justify"
+            align="left"
             narrow-indicator
+            dense
+            no-caps
           >
-            <q-tab name="basic" label="基础信息" icon="info" />
-            <q-tab name="network" label="网络配置" icon="settings_ethernet" />
-            <q-tab name="config" label="节点配置" icon="settings" />
-            <q-tab name="keys" label="密钥管理" icon="vpn_key" />
+            <q-tab name="basic" label="基础信息" icon="info" class="tab-item" />
+            <q-tab name="network" label="网络配置" icon="settings_ethernet" class="tab-item" />
+            <q-tab name="config" label="节点配置" icon="settings" class="tab-item" />
+            <q-tab name="keys" label="密钥管理" icon="vpn_key" class="tab-item" />
           </q-tabs>
 
           <q-separator />
@@ -83,8 +85,11 @@
           </q-tab-panels>
         </q-card>
 
-        <!-- 全局操作按钮 -->
-        <div class="row q-gutter-sm q-mt-md">
+        <!-- 全局操作按钮 - 在所有编辑子页面都隐藏，因为各页面有自己的保存按钮 -->
+        <div 
+          class="row q-gutter-sm q-mt-md"
+          v-if="!isEditSubPage"
+        >
           <q-btn
             color="primary"
             @click="saveAll"
@@ -134,8 +139,27 @@ const activeTab = ref('basic')
 // 状态
 const hasChanges = ref(false)
 
+// 判断是否在编辑页面（所有编辑子页面都不显示全局按钮）
+const isEditSubPage = computed(() => {
+  const editPages = ['node-edit-basic', 'node-edit-network', 'node-edit-config', 'node-edit-keys']
+  return editPages.includes(route.name as string)
+})
+
 // 状态相关工具函数
-const getStatusColor = (status: NodeStatus) => {
+const getStatusColor = (status: NodeStatus | number) => {
+  // 处理数字状态码
+  if (typeof status === 'number') {
+    switch (status) {
+      case 2: return 'positive'  // ONLINE
+      case 1: return 'warning'   // ENABLED
+      case 0: return 'negative'  // DISABLED
+      case -1: return 'grey'     // UNCONFIGURED
+      case 99: return 'info'     // MAINTENANCE
+      default: return 'grey'
+    }
+  }
+  
+  // 处理字符串状态
   switch (status) {
     case 'active': return 'positive'
     case 'inactive': return 'negative'
@@ -144,7 +168,20 @@ const getStatusColor = (status: NodeStatus) => {
   }
 }
 
-const getStatusIcon = (status: NodeStatus) => {
+const getStatusIcon = (status: NodeStatus | number) => {
+  // 处理数字状态码
+  if (typeof status === 'number') {
+    switch (status) {
+      case 2: return 'check_circle'      // ONLINE
+      case 1: return 'check_circle_outline' // ENABLED
+      case 0: return 'cancel'            // DISABLED
+      case -1: return 'settings'         // UNCONFIGURED
+      case 99: return 'build'            // MAINTENANCE
+      default: return 'help'
+    }
+  }
+  
+  // 处理字符串状态
   switch (status) {
     case 'active': return 'check_circle'
     case 'inactive': return 'cancel'
@@ -153,7 +190,20 @@ const getStatusIcon = (status: NodeStatus) => {
   }
 }
 
-const getStatusText = (status: NodeStatus) => {
+const getStatusText = (status: NodeStatus | number) => {
+  // 处理数字状态码
+  if (typeof status === 'number') {
+    switch (status) {
+      case 2: return '在线'        // ONLINE
+      case 1: return '已启用'      // ENABLED
+      case 0: return '已禁用'      // DISABLED
+      case -1: return '未配置'     // UNCONFIGURED
+      case 99: return '维护中'     // MAINTENANCE
+      default: return '未知'
+    }
+  }
+  
+  // 处理字符串状态
   switch (status) {
     case 'active': return '在线'
     case 'inactive': return '离线'
@@ -255,7 +305,7 @@ provide('nodeData', {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .q-page {
   min-height: calc(100vh - 150px);
 }
@@ -266,5 +316,17 @@ provide('nodeData', {
 
 .q-tab-panel {
   padding: 0;
+}
+
+.q-tabs {
+  .tab-item {
+    padding: 8px 16px;
+    min-width: auto;
+    flex: 0 0 auto;
+    
+    &.q-tab--active {
+      font-weight: 600;
+    }
+  }
 }
 </style>

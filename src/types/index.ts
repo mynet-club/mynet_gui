@@ -1,6 +1,6 @@
 export interface User {
-  id: number
   user_id: number
+  id: number  // 保留向后兼容性，但主要使用user_id
   zone_id: number
   name: string
   email: string
@@ -18,6 +18,7 @@ export interface User {
   profile_photo_url: string
   permissions?: string[]
   avatar?: string
+  signature?: string  // 用户签名
 }
 
 export interface AuthTokens {
@@ -48,6 +49,37 @@ export interface Zone {
   name?: string
   is_active?: boolean
   description?: string
+}
+
+// 索引服务器相关类型定义
+export interface IndexServiceConnectionInfo {
+  endpoint: string
+  protocol: string
+  max_connections: number
+  current_connections: number
+}
+
+export interface IndexService {
+  service_id: number
+  service_name: string
+  service_address: string
+  service_port: number
+  service_type: string
+  owner_name: string
+  connection_info: IndexServiceConnectionInfo
+}
+
+export interface IndexServiceMeta {
+  zone_id: number
+  total_services: number
+  public_services: number
+  friend_shared_services: number
+  user_id: number
+}
+
+export interface IndexServicesResponse {
+  index_services: IndexService[]
+  meta: IndexServiceMeta
 }
 
 export interface Node {
@@ -183,25 +215,42 @@ export interface SocialStats {
 
 // Routes Module Types
 export interface Route {
-  id: string
-  source_node_id: string
+  route_id: string
+  node_id: string
   target_node_id: string
-  source_node_name: string
-  target_node_name: string
-  source_ip: string
-  target_ip: string
-  source_mask: string
-  target_mask: string
-  friend_id?: string
-  friend_name?: string
-  status: 'active' | 'inactive' | 'connecting' | 'error'
-  connection_type: 'direct' | 'relay'
-  bandwidth_usage: string
-  latency: number
-  packet_loss: number
-  last_active: string
+  target_network: number
+  target_mask: number
+  user_id: string
+  zone_id: string
+  status: number
+  description: string
+  relay_nodes: string
+  relay_mode: string
+  priority: number
   created_at: string
   updated_at: string
+  // 源节点信息
+  source_node_name: string
+  source_node_status: number
+  source_node_type: number
+  source_vpn_type: string
+  source_endpoint: string | null
+  source_node_remarks: string
+  source_user_name: string
+  source_user_email: string
+  source_user_role: string
+  source_profile_photo_url: string
+  // 目标节点信息
+  target_node_name: string
+  target_node_status: number
+  target_node_type: number
+  target_vpn_type: string
+  target_endpoint: string | null
+  target_node_remarks: string
+  target_user_name: string
+  target_user_email: string
+  target_user_role: string
+  target_profile_photo_url: string
 }
 
 export interface RouteOverview {
@@ -212,22 +261,44 @@ export interface RouteOverview {
 }
 
 export interface PendingConnection {
-  id: string
-  requester_id: string
-  target_id: string
-  requester_name: string
-  target_name: string
-  requester_node_id: string
+  id: number
+  source_node_id: string
+  source_user_id: string
   target_node_id: string
-  requester_node_name: string
-  target_node_name: string
-  requester_ip: string
-  target_ip: string
-  status: 'pending' | 'approved' | 'rejected'
-  message?: string
-  connection_type: 'direct' | 'relay'
+  target_user_id: string
+  zone_id: string
+  vpn_type: string
+  status: string
+  target_network: number | null
+  target_mask: number
+  request_message: string
+  response_message: string | null
+  expired_at: string
+  responded_at: string | null
   created_at: string
   updated_at: string
+  // 源节点信息
+  source_node_name: string
+  source_node_status: number
+  source_node_type: number
+  source_vpn_type: string
+  source_endpoint: string | null
+  source_node_remarks: string
+  source_user_name: string
+  source_user_email: string
+  source_user_role: string
+  source_profile_photo_url: string
+  // 目标节点信息
+  target_node_name: string
+  target_node_status: number
+  target_node_type: number
+  target_vpn_type: string
+  target_endpoint: string | null
+  target_node_remarks: string
+  target_user_name: string
+  target_user_email: string
+  target_user_role: string
+  target_profile_photo_url: string
 }
 
 export interface FriendNode {
@@ -283,24 +354,23 @@ export interface RouteConnection {
 }
 
 export interface RouteStats {
+  zone_id: number
   total_routes: number
   active_routes: number
   inactive_routes: number
-  pending_connections: number
-  connected_nodes: number
-  total_bandwidth_in: string
-  total_bandwidth_out: string
-  average_latency: number
-  total_data_transfer: string
+  pending_routes: number
+  rejected_routes: number
 }
 
 export interface RouteDataResponse {
   routes: Route[]
-  pending_connections: PendingConnection[]
-  outgoing_connections: PendingConnection[]
-  friend_nodes: FriendNode[]
-  config: RouteConfig
-  stats: RouteStats
+  statistics: RouteStats
+  requests: {
+    pending: PendingConnection[]
+    sent: PendingConnection[]
+  }
+  zone_id: number
+  timestamp: string
 }
 
 // Zone Module Types

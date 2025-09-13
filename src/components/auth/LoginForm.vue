@@ -7,6 +7,28 @@
     
     <q-card-section>
       <q-form @submit="login" class="auth-form">
+        <!-- 错误提示区域 -->
+        <q-banner 
+          v-if="loginError" 
+          class="text-white bg-negative q-mb-md" 
+          dense
+          inline-actions
+        >
+          <template v-slot:avatar>
+            <q-icon name="warning" />
+          </template>
+          {{ loginError }}
+          <template v-slot:action>
+            <q-btn 
+              flat 
+              dense 
+              icon="close" 
+              @click="clearError"
+              color="white"
+            />
+          </template>
+        </q-banner>
+        
         <q-input 
           v-model="loginForm.email"
           :placeholder="$t('auth.email')"
@@ -64,7 +86,7 @@
 <script setup lang="ts">
 import { useAuth } from '../../composables/useAuth'
 
-const { loginForm, isLoading, login } = useAuth()
+const { loginForm, isLoading, loginError, login, clearError } = useAuth()
 </script>
 
 <style lang="scss" scoped>

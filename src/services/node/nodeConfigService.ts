@@ -7,6 +7,7 @@ import { api } from '../api'
 import type {
   NodeConfig,
   ConfigUpdateRequest,
+  FlatConfigUpdateRequest,
   ConfigPreview,
   ConfigValidationResult,
   VPNConfigTemplate,
@@ -45,7 +46,7 @@ export class NodeConfigService {
    * @param config 配置更新数据
    * @returns 更新后的配置
    */
-  async updateNodeConfig(nodeId: string, config: ConfigUpdateRequest): Promise<ApiResponse<NodeConfig>> {
+  async updateNodeConfig(nodeId: string, config: ConfigUpdateRequest | FlatConfigUpdateRequest): Promise<ApiResponse<NodeConfig>> {
     const response = await api.put(`/nodes/${nodeId}/config`, config)
     return response.data
   }
@@ -198,6 +199,21 @@ export class NodeConfigService {
     return response.data
   }
 
+  /**
+   * 获取渲染后的配置文件内容
+   * @param nodeId 节点ID
+   * @returns 渲染后的配置文件内容（文本格式）
+   */
+  async getRenderedConfig(nodeId: string): Promise<string> {
+    const response = await api.get(`/nodes/${nodeId}/config`, {
+      params: { render_conf: 1 },
+      headers: {
+        'Accept': 'text/plain'
+      }
+    })
+    return response.data
+  }
+
   // --- 本地配置处理和验证 ---
 
   /**
@@ -274,7 +290,7 @@ export class NodeConfigService {
   generateDefaultConfig(vpnType: VPNType, nodeType?: string): Partial<NodeConfig> {
     const baseConfig: Partial<NodeConfig> = {
       vpn_type: vpnType,
-      config_mode: 'basic',
+      config_mode: 'base',
       network: {
         interface_name: vpnType === 'gnb' ? 'gnb0' : 'wg0',
         listen_address: '0.0.0.0',

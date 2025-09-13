@@ -115,15 +115,25 @@ export function useNodes() {
         ...params
       }
 
+      console.log('正在请求节点列表，参数:', queryParams)
       const response = await nodeService.getNodes(queryParams)
+      console.log('节点列表API响应:', response)
       
       // 根据实际API响应结构解析数据
       if (response.data && response.data.nodes) {
         nodes.value = response.data.nodes.data || []
         pagination.rowsNumber = response.data.nodes.total || 0
         pagination.page = response.data.nodes.current_page || 1
+        console.log('解析后的节点数据:', nodes.value)
+      } else if (response.data && Array.isArray(response.data)) {
+        // 如果直接返回数组
+        nodes.value = response.data
+        pagination.rowsNumber = response.data.length
+        pagination.page = 1
+        console.log('直接数组格式的节点数据:', nodes.value)
       } else {
         // 兼容其他可能的响应格式
+        console.log('未知的响应格式，设置为空数组')
         nodes.value = []
         pagination.rowsNumber = 0
         pagination.page = 1
@@ -152,7 +162,10 @@ export function useNodes() {
     creating.value = true
     try {
       const response = await nodeService.createNode(data)
+      console.log('API响应:', response)
       const newNode = response.data
+      console.log('新节点数据:', newNode)
+      console.log('节点ID字段 - id:', newNode.id, 'node_id:', newNode.node_id)
       
       // 将新节点添加到列表开头
       nodes.value.unshift(newNode)

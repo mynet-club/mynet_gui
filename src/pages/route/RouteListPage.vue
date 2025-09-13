@@ -1,21 +1,17 @@
 <template>
-  <q-page class="routes-page">
-    <div class="q-pa-md">
-      <!-- 页面标题 -->
-      <div class="row items-center q-mb-lg">
-        <div class="col">
-          <h4 class="q-my-none">{{ $t('navigation.routes') }}</h4>
-          <p class="text-grey-6 q-mt-xs q-mb-none">
-            {{ $t('routes.subtitle') }}
-          </p>
-        </div>
-        <div class="col-auto">
+  <PageLayout
+    :title="$t('navigation.routes')"
+    :subtitle="$t('routes.subtitle')"
+    icon="route"
+  >
+    <template #actions>
+      <div class="row q-gutter-sm items-center">
+        <q-btn-group>
           <q-btn
             color="positive"
             icon="add"
             :label="$t('routes.actions.createRoute')"
             @click="handleCreateRoute"
-            class="q-mr-md"
           />
           <q-btn
             color="primary"
@@ -24,8 +20,9 @@
             @click="handleRefreshRoutes"
             :loading="loading"
           />
-        </div>
+        </q-btn-group>
       </div>
+    </template>
 
       <!-- 统计卡片 -->
       <ResponsiveCardGrid
@@ -73,11 +70,12 @@
         <q-tab-panels v-model="tab" animated>
           <!-- 活跃路由 -->
           <q-tab-panel name="active">
-            <ActiveRoutesTab
+            <NodeBasedRoutesTab
               :routes="activeRoutes"
               :loading="loading"
               @disconnect="handleDisconnectRoute"
               @view-details="handleViewRouteDetails"
+              @edit-route="handleEditRoute"
             />
           </q-tab-panel>
 
@@ -105,7 +103,6 @@
 
         </q-tab-panels>
       </q-card>
-    </div>
 
     <!-- 路由详情对话框 -->
     <q-dialog v-model="routeDetailsDialog.show" maximized>
@@ -125,7 +122,7 @@
         </q-card-section>
       </q-card>
     </q-dialog>
-  </q-page>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -135,8 +132,9 @@ import { useRouter } from 'vue-router'
 import { useRoutes } from '../../composables/useRoutes'
 import { useSocial } from '../../composables/useSocial'
 import { useNotify } from '../../composables/useNotify'
+import PageLayout from '../../components/layout/PageLayout.vue'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
-import ActiveRoutesTab from '../../components/route/ActiveRoutesTab.vue'
+import NodeBasedRoutesTab from '../../components/route/NodeBasedRoutesTab.vue'
 import PendingConnectionsTab from '../../components/route/PendingConnectionsTab.vue'
 import AllFriendNodesTab from '../../components/route/AllFriendNodesTab.vue'
 import RouteDetailsDialog from '../../components/route/RouteDetailsDialog.vue'
@@ -225,11 +223,16 @@ const handleViewRouteDetails = (route: any) => {
   }
 }
 
-const handleApproveConnection = (connectionId: string) => {
+const handleEditRoute = (route: any) => {
+  // 导航到路由编辑页面
+  router.push(`/routes/edit/${route.route_id}`)
+}
+
+const handleApproveConnection = (connectionId: string | number) => {
   approveConnection(connectionId)
 }
 
-const handleRejectConnection = (connectionId: string) => {
+const handleRejectConnection = (connectionId: string | number) => {
   rejectConnection(connectionId)
 }
 
@@ -286,13 +289,11 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-.routes-page {
-  .stats-card {
-    transition: transform 0.2s ease;
-    
-    &:hover {
-      transform: translateY(-2px);
-    }
+.stats-card {
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
   }
 }
 </style>

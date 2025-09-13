@@ -7,12 +7,50 @@
 export type VPNType = 'gnb' | 'wireguard'
 
 // 配置模式
-export type ConfigMode = 'basic' | 'expert'
+export type ConfigMode = 'base' | 'expert'
 
 // 配置参数类型
-export type ConfigParameterType = 'string' | 'integer' | 'boolean' | 'select' | 'text' | 'ip' | 'port'
+export type ConfigParameterType = 'string' | 'integer' | 'boolean' | 'select' | 'text' | 'ip' | 'port' | 'switch' | 'multi-button'
 
-// 基础节点配置接口
+// 实际API响应的节点配置结构
+export interface NodeConfigApiResponse {
+  node_info: {
+    node_id: number
+    node_name: string
+    vpn_type: VPNType
+    node_type: number
+    endpoint: string
+    node_port: number
+  }
+  network_config: {
+    ifname: string
+    virtual_ip: string
+    ip_group_sequence_number: number
+  }
+  additional_config: {
+    node_remarks: string
+    node_app_version: string
+    node_status: number
+  }
+  custom_config: {
+    network: {
+      mtu: number
+      listen_port: number
+      interface_name: string
+      listen_address: string
+    }
+    config_mode: ConfigMode
+    vpn_version: string
+    basic_config: {
+      [key: string]: any
+    }
+    expert_config?: {
+      [key: string]: any
+    }
+  }
+}
+
+// 基础节点配置接口 (保持向后兼容)
 export interface NodeConfig {
   // 基础配置
   node_id: string                     // 节点ID
@@ -96,7 +134,7 @@ export interface VPNConfigTemplate {
       config_file_extension: string   // 配置文件扩展名
       
       modes: {
-        basic: ConfigModeDefinition   // 基础模式
+        base: ConfigModeDefinition   // 基础模式
         expert: ConfigModeDefinition  // 专家模式
       }
     }
@@ -132,6 +170,33 @@ export interface ConfigUpdateRequest {
   network?: Partial<NodeConfig['network']> // 网络配置
   basic_config?: { [key: string]: any } // 基础配置
   expert_config?: { [key: string]: any } // 专家配置
+}
+
+// 扁平化配置更新请求 - 所有字段直接在顶层
+export interface FlatConfigUpdateRequest {
+  vpn_type: VPNType                   // VPN类型
+  vpn_version: string                 // VPN版本
+  config_mode: ConfigMode             // 配置模式
+  
+  // 所有配置字段直接提交，不嵌套
+  nodeid?: number                     // 节点ID
+  ifname?: string                     // 接口名
+  listen?: number                     // 监听端口号
+  mtu?: number                        // MTU
+  multi_socket?: string               // 多Socket
+  direct_forwarding?: string          // 直接转发
+  unified_forwarding?: string         // 统一转发
+  standard_forwarding?: string        // 标准转发
+  address_secure?: string             // 地址安全
+  ipv4_only?: string                  // 仅IPv4
+  ipv6_only?: string                  // 仅IPv6
+  keepalive?: number                  // 保活时间
+  forward?: string                    // 转发
+  daemon?: string                     // 守护进程
+  zip?: string                        // 压缩
+  zip_level?: number                  // 压缩级别
+  memory?: string                     // 内存设置
+  [key: string]: any                  // 允许其他动态字段
 }
 
 // 配置差异对比

@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <div class="row q-gutter-md">
       <!-- 左侧主要内容 -->
-      <div class="col-12 col-md-8">
+      <div class="col-12 col-lg-8">
         <!-- 页面标题和操作按钮 -->
         <div class="row items-center justify-between q-mb-md">
           <div class="text-h4">
@@ -10,15 +10,49 @@
             节点详情
           </div>
           <div class="row q-gutter-sm">
-            <q-btn
+            <!-- 编辑下拉菜单 -->
+            <q-btn-dropdown
               color="primary"
               outline
-              @click="goToEdit"
+              icon="edit"
+              label="编辑"
               :disable="!node || isLoading"
             >
-              <q-icon name="edit" class="q-mr-xs" />
-              编辑
-            </q-btn>
+              <q-list>
+                <q-item clickable v-close-popup @click="goToEditBasic">
+                  <q-item-section avatar>
+                    <q-icon name="info" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>基本信息</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="goToEditConfig">
+                  <q-item-section avatar>
+                    <q-icon name="settings" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>节点配置</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="goToEditNetwork">
+                  <q-item-section avatar>
+                    <q-icon name="router" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>网络配置</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="goToEditKeys">
+                  <q-item-section avatar>
+                    <q-icon name="vpn_key" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>密钥管理</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
             <q-btn
               color="negative"
               outline
@@ -31,177 +65,417 @@
           </div>
         </div>
 
-        <!-- 节点基本信息 -->
+        <!-- 基本信息 - 紧凑布局 -->
         <q-card class="q-mb-md">
           <q-card-section>
-            <div class="text-h6 q-mb-md">基本信息</div>
+            <div class="row items-center q-mb-md">
+              <q-icon name="info" class="q-mr-sm text-primary" size="sm" />
+              <div class="text-h6">基本信息</div>
+            </div>
             <q-skeleton-loader v-if="isLoading" type="QCard" />
-            <div v-else-if="node" class="q-gutter-md">
-              <div class="row">
-                <div class="col-6">
-                  <q-field label="节点名称" stack-label>
-                    <template v-slot:control>
-                      <div class="self-center full-width no-outline">
-                        {{ node.node_name }}
-                      </div>
-                    </template>
-                  </q-field>
-                </div>
-                <div class="col-6">
-                  <q-field label="节点ID" stack-label>
-                    <template v-slot:control>
-                      <div class="self-center full-width no-outline">
-                        {{ node.node_id }}
-                      </div>
-                    </template>
-                  </q-field>
+            <div v-else-if="node" class="row q-col-gutter-md">
+              <!-- 第一行 -->
+              <div class="col-6 col-sm-6">
+                <div class="text-caption text-grey-6">节点名称</div>
+                <div class="text-body1 text-weight-medium">{{ node.node_name }}</div>
+              </div>
+              <div class="col-6 col-sm-6">
+                <div class="text-caption text-grey-6">节点ID</div>
+                <div class="text-body2">
+                  <q-chip color="blue-grey-2" text-color="dark" square size="sm">
+                    {{ node.node_id }}
+                  </q-chip>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-6">
-                  <q-field label="状态" stack-label>
-                    <template v-slot:control>
-                      <div class="self-center full-width no-outline">
-                        <q-chip
-                          :color="getStatusColor(node.status)"
-                          text-color="white"
-                          :icon="getStatusIcon(node.status)"
-                        >
-                          {{ getStatusText(node.status) }}
-                        </q-chip>
-                      </div>
-                    </template>
-                  </q-field>
-                </div>
-                <div class="col-6">
-                  <q-field label="创建时间" stack-label>
-                    <template v-slot:control>
-                      <div class="self-center full-width no-outline">
-                        {{ formatDate(node.created_at) }}
-                      </div>
-                    </template>
-                  </q-field>
+              
+              <!-- 第二行 -->
+              <div class="col-6 col-sm-6">
+                <div class="text-caption text-grey-6">状态</div>
+                <div class="text-body2">
+                  <q-chip
+                    :color="getStatusColor(node.node_status || node.status)"
+                    text-color="white"
+                    :icon="getStatusIcon(node.node_status || node.status)"
+                    size="sm"
+                  >
+                    {{ getStatusText(node.node_status || node.status) }}
+                  </q-chip>
                 </div>
               </div>
-              <div v-if="node.description">
-                <q-field label="描述" stack-label>
-                  <template v-slot:control>
-                    <div class="self-center full-width no-outline">
-                      {{ node.description }}
-                    </div>
-                  </template>
-                </q-field>
+              <div class="col-6 col-sm-6">
+                <div class="text-caption text-grey-6">最后在线</div>
+                <div class="text-body2">{{ node.last_seen ? formatDate(node.last_seen) : '未知' }}</div>
+              </div>
+              
+              <!-- 第三行 -->
+              <div class="col-6 col-sm-6">
+                <div class="text-caption text-grey-6">创建时间</div>
+                <div class="text-body2">{{ formatDate(node.created_at) }}</div>
+              </div>
+              <div class="col-6 col-sm-6">
+                <div class="text-caption text-grey-6">更新时间</div>
+                <div class="text-body2">{{ formatDate(node.updated_at) }}</div>
+              </div>
+              
+              <!-- 第四行 - 节点类型 -->
+              <div class="col-12" v-if="getNodeTypeNames(node.node_type).length > 0">
+                <div class="text-caption text-grey-6">节点类型</div>
+                <div class="text-body2 q-pt-xs">
+                  <q-chip
+                    v-for="typeName in getNodeTypeNames(node.node_type)"
+                    :key="typeName"
+                    color="blue"
+                    text-color="white"
+                    size="sm"
+                    class="q-mr-xs"
+                  >
+                    {{ typeName }}
+                  </q-chip>
+                </div>
+              </div>
+              
+              <!-- 第五行 - 描述 -->
+              <div class="col-12" v-if="node.description || node.node_remarks">
+                <div class="text-caption text-grey-6">描述</div>
+                <div class="text-body2">{{ node.description || node.node_remarks || '无描述' }}</div>
               </div>
             </div>
           </q-card-section>
         </q-card>
 
-        <!-- 网络信息 -->
+        <!-- 设备信息 - 详细展示 -->
         <q-card class="q-mb-md">
           <q-card-section>
-            <div class="text-h6 q-mb-md">网络信息</div>
-            <q-skeleton-loader v-if="isLoading" type="QCard" />
-            <div v-else-if="node" class="q-gutter-md">
-              <div class="row">
-                <div class="col-6">
-                  <q-field label="内网IP" stack-label>
-                    <template v-slot:control>
-                      <div class="self-center full-width no-outline">
-                        {{ node.ip_address || '未分配' }}
-                      </div>
-                    </template>
-                  </q-field>
+            <div class="row items-center q-mb-md">
+              <q-icon name="computer" class="q-mr-sm text-secondary" size="sm" />
+              <div class="text-h6">设备信息</div>
+            </div>
+            <q-skeleton-loader v-if="isLoading || loadingDeviceInfo" type="QCard" />
+            <div v-else-if="deviceInfo || node" class="column q-gutter-md">
+              
+              <!-- 应用信息 -->
+              <div class="q-pa-sm rounded-borders" style="background-color: rgba(33, 150, 243, 0.1);">
+                <div class="text-subtitle2 text-primary q-mb-sm">
+                  <q-icon name="apps" class="q-mr-xs" />
+                  应用信息
                 </div>
-                <div class="col-6">
-                  <q-field label="公网IP" stack-label>
-                    <template v-slot:control>
-                      <div class="self-center full-width no-outline">
-                        {{ node.public_ip || '未设置' }}
-                      </div>
-                    </template>
-                  </q-field>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-6">
-                  <q-field label="端口" stack-label>
-                    <template v-slot:control>
-                      <div class="self-center full-width no-outline">
-                        {{ node.port || '未设置' }}
-                      </div>
-                    </template>
-                  </q-field>
-                </div>
-                <div class="col-6">
-                  <q-field label="节点类型" stack-label>
-                    <template v-slot:control>
-                      <div class="self-center full-width no-outline">
-                        {{ node.node_type || '未设置' }}
-                      </div>
-                    </template>
-                  </q-field>
+                <div class="row q-col-gutter-md">
+                  <div class="col-6 col-sm-4">
+                    <div class="text-caption text-grey-6">VPN类型</div>
+                    <div class="text-body2">
+                      <q-chip 
+                        :color="getVpnTypeColor(node?.vpn_type)" 
+                        text-color="white"
+                        size="sm"
+                      >
+                        {{ getVpnTypeText(node?.vpn_type) }}
+                      </q-chip>
+                    </div>
+                  </div>
+                  <div class="col-6 col-sm-4">
+                    <div class="text-caption text-grey-6">应用版本</div>
+                    <div class="text-body2">{{ node?.node_app_version || '未知' }}</div>
+                  </div>
+                  <div class="col-6 col-sm-4">
+                    <div class="text-caption text-grey-6">监听端口</div>
+                    <div class="text-body2">{{ node?.node_port || node?.port || '未设置' }}</div>
+                  </div>
                 </div>
               </div>
+
+              <!-- 硬件信息 -->
+              <div v-if="deviceInfo" class="q-pa-sm rounded-borders" style="background-color: rgba(76, 175, 80, 0.1);">
+                <div class="text-subtitle2 text-green q-mb-sm">
+                  <q-icon name="memory" class="q-mr-xs" />
+                  硬件信息
+                </div>
+                <div class="row q-col-gutter-md">
+                  <div class="col-6 col-sm-4">
+                    <div class="text-caption text-grey-6">CPU型号</div>
+                    <div class="text-body2">{{ deviceInfo.cpu_model || '未知' }}</div>
+                  </div>
+                  <div class="col-6 col-sm-4">
+                    <div class="text-caption text-grey-6">CPU架构</div>
+                    <div class="text-body2">{{ deviceInfo.cpu_arch || '未知' }}</div>
+                  </div>
+                  <div class="col-6 col-sm-4">
+                    <div class="text-caption text-grey-6">CPU核心</div>
+                    <div class="text-body2">
+                      {{ deviceInfo.cpu_cores || '未知' }}核
+                      <span v-if="deviceInfo.cpu_threads && deviceInfo.cpu_threads !== deviceInfo.cpu_cores">
+                        / {{ deviceInfo.cpu_threads }}线程
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-6 col-sm-4">
+                    <div class="text-caption text-grey-6">内存总量</div>
+                    <div class="text-body2">{{ formatMemory(deviceInfo.memory_total_mb) }}</div>
+                  </div>
+                  <div class="col-6 col-sm-4">
+                    <div class="text-caption text-grey-6">可用内存</div>
+                    <div class="text-body2">{{ formatMemory(deviceInfo.memory_free_mb) }}</div>
+                  </div>
+                  <div class="col-6 col-sm-4" v-if="deviceInfo.virtualization">
+                    <div class="text-caption text-grey-6">虚拟化</div>
+                    <div class="text-body2">{{ deviceInfo.virtualization }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 系统信息 -->
+              <div v-if="deviceInfo" class="q-pa-sm rounded-borders" style="background-color: rgba(255, 152, 0, 0.1);">
+                <div class="text-subtitle2 text-orange q-mb-sm">
+                  <q-icon name="desktop_windows" class="q-mr-xs" />
+                  系统信息
+                </div>
+                <div class="row q-col-gutter-md">
+                  <div class="col-6 col-sm-4">
+                    <div class="text-caption text-grey-6">操作系统</div>
+                    <div class="text-body2">{{ formatOSInfo(deviceInfo) }}</div>
+                  </div>
+                  <div class="col-6 col-sm-4">
+                    <div class="text-caption text-grey-6">内核版本</div>
+                    <div class="text-body2">{{ deviceInfo.kernel_version || '未知' }}</div>
+                  </div>
+                  <div class="col-6 col-sm-4">
+                    <div class="text-caption text-grey-6">系统架构</div>
+                    <div class="text-body2">{{ deviceInfo.system_arch || '未知' }}</div>
+                  </div>
+                  <div class="col-6 col-sm-4" v-if="deviceInfo.libc_type">
+                    <div class="text-caption text-grey-6">C库</div>
+                    <div class="text-body2">{{ formatLibcInfo(deviceInfo) }}</div>
+                  </div>
+                  <div class="col-6 col-sm-4" v-if="deviceInfo.container_type">
+                    <div class="text-caption text-grey-6">容器类型</div>
+                    <div class="text-body2">{{ deviceInfo.container_type }}</div>
+                  </div>
+                  <div class="col-6 col-sm-4" v-if="deviceInfo.collected_at">
+                    <div class="text-caption text-grey-6">信息采集时间</div>
+                    <div class="text-body2">{{ formatDate(deviceInfo.collected_at) }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 网络设备信息 -->
+              <div v-if="deviceInfo" class="q-pa-sm rounded-borders" style="background-color: rgba(156, 39, 176, 0.1);">
+                <div class="text-subtitle2 text-purple q-mb-sm">
+                  <q-icon name="router" class="q-mr-xs" />
+                  网络设备
+                </div>
+                <div class="row q-col-gutter-md">
+                  <div class="col-6 col-sm-4" v-if="deviceInfo.nic_count">
+                    <div class="text-caption text-grey-6">网卡数量</div>
+                    <div class="text-body2">{{ deviceInfo.nic_count }} 个</div>
+                  </div>
+                  <div class="col-6 col-sm-4" v-if="deviceInfo.firewall_type">
+                    <div class="text-caption text-grey-6">防火墙</div>
+                    <div class="text-body2">
+                      {{ deviceInfo.firewall_type }}
+                      <q-chip 
+                        :color="deviceInfo.firewall_enabled ? 'positive' : 'negative'" 
+                        text-color="white" 
+                        size="xs"
+                        class="q-ml-xs"
+                      >
+                        {{ deviceInfo.firewall_enabled ? '启用' : '禁用' }}
+                      </q-chip>
+                    </div>
+                  </div>
+                  <div class="col-6 col-sm-4">
+                    <div class="text-caption text-grey-6">IP转发</div>
+                    <div class="text-body2">
+                      <q-chip 
+                        :color="deviceInfo.ip_forwarding ? 'positive' : 'negative'" 
+                        text-color="white" 
+                        size="xs"
+                      >
+                        {{ deviceInfo.ip_forwarding ? '启用' : '禁用' }}
+                      </q-chip>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 无设备信息时的占位 -->
+              <div v-if="!deviceInfo" class="text-center q-pa-lg text-grey-6">
+                <q-icon name="device_unknown" size="md" class="q-mb-sm" />
+                <div>暂无设备信息</div>
+                <div class="text-caption">设备信息需要客户端上报</div>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+
+        <!-- 网络信息 + 快速操作 -->
+        <q-card class="q-mb-md">
+          <q-card-section>
+            <div class="row items-center justify-between q-mb-md">
+              <div class="row items-center">
+                <q-icon name="network_check" class="q-mr-sm text-green" size="sm" />
+                <div class="text-h6">网络信息</div>
+              </div>
+              <q-btn
+                color="green"
+                outline
+                size="sm"
+                icon="settings"
+                label="网络配置"
+                @click="goToNetworkConfig"
+                :disable="!node || isLoading"
+              />
+            </div>
+            <q-skeleton-loader v-if="isLoading || loadingNetworkConfig" type="QCard" />
+            <div v-else class="row q-col-gutter-md">
+              <div class="col-6 col-sm-6">
+                <div class="text-caption text-grey-6">虚拟网卡名</div>
+                <div class="text-body2">{{ networkConfig?.ifname || '未设置' }}</div>
+              </div>
+              <div class="col-6 col-sm-6">
+                <div class="text-caption text-grey-6">虚拟IP地址</div>
+                <div class="text-body2">
+                  {{ getVirtualIPWithSequence() }}
+                </div>
+              </div>
+              <div class="col-6 col-sm-6">
+                <div class="text-caption text-grey-6">端点地址</div>
+                <div class="text-body2">{{ getEndpointAddress() }}</div>
+              </div>
+              <div class="col-6 col-sm-6">
+                <div class="text-caption text-grey-6">IP组序号</div>
+                <div class="text-body2">{{ networkConfig?.ip_group_sequence_number || node?.ip_group_sequence_number || '未设置' }}</div>
+              </div>
+              
+              <!-- LAN IPs -->
+              <div v-if="networkConfig?.lan_ips && networkConfig.lan_ips.length > 0" class="col-12">
+                <div class="text-caption text-grey-6">LAN IP地址</div>
+                <div class="text-body2 q-pt-xs">
+                  <q-chip 
+                    v-for="(lanIp, index) in (networkConfig.lan_ips || []).filter((ip: string) => ip.trim())" 
+                    :key="index"
+                    color="blue-2" 
+                    text-color="dark"
+                    size="sm"
+                    class="q-mr-xs q-mb-xs"
+                  >
+                    {{ lanIp }}
+                  </q-chip>
+                </div>
+              </div>
+              
+              <!-- Public IPs -->
+              <div v-if="(networkConfig?.public_ips && networkConfig.public_ips.length > 0) || node?.public_ip" class="col-12">
+                <div class="text-caption text-grey-6">公网IP地址</div>
+                <div class="text-body2 q-pt-xs">
+                  <q-chip 
+                    v-for="(publicIp, index) in getPublicIPs()" 
+                    :key="index"
+                    color="green-2" 
+                    text-color="dark"
+                    size="sm"
+                    :icon="isIPv6(publicIp) ? 'language' : 'public'"
+                    class="q-mr-xs q-mb-xs"
+                  >
+                    {{ publicIp }}
+                    <q-tooltip v-if="isIPv6(publicIp)">IPv6 地址</q-tooltip>
+                  </q-chip>
+                </div>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+
+        <!-- IP分组信息 -->
+        <q-card class="q-mb-md" v-if="indexServices.length > 0">
+          <q-card-section>
+            <div class="row items-center justify-between q-mb-md">
+              <div class="row items-center">
+                <q-icon name="dns" class="q-mr-sm text-secondary" size="sm" />
+                <div class="text-h6">IP分组</div>
+              </div>
+              <q-btn
+                color="secondary"
+                outline
+                size="sm"
+                icon="settings"
+                label="IP管理"
+                @click="goToIPManagement"
+                :disable="!node || isLoading"
+              />
+            </div>
+            <q-skeleton-loader v-if="loadingIndexServices" type="QCard" />
+            <div v-else class="q-gutter-sm">
+              <div 
+                v-for="(service, index) in indexServices" 
+                :key="index"
+                class="row items-center q-py-xs"
+              >
+                <q-icon 
+                  :name="service.is_active ? 'check_circle' : 'radio_button_unchecked'" 
+                  :color="service.is_active ? 'positive' : 'grey'" 
+                  size="sm" 
+                  class="q-mr-sm" 
+                />
+                <div class="col-grow">
+                  <div class="text-body2 text-weight-medium">{{ service.service_name }}</div>
+                  <div class="text-caption text-grey-6">{{ service.endpoint }}</div>
+                </div>
+                <div class="text-right">
+                  <q-chip 
+                    v-if="service.is_default" 
+                    color="orange" 
+                    text-color="white" 
+                    size="xs"
+                  >
+                    默认
+                  </q-chip>
+                  <q-chip 
+                    :color="service.is_active ? 'positive' : 'grey'" 
+                    text-color="white" 
+                    size="xs"
+                    class="q-ml-xs"
+                  >
+                    {{ service.is_active ? '活跃' : '停用' }}
+                  </q-chip>
+                </div>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+
+        <!-- 统计信息占位 -->
+        <q-card class="q-mb-md">
+          <q-card-section>
+            <div class="row items-center q-mb-md">
+              <q-icon name="analytics" class="q-mr-sm text-purple" size="sm" />
+              <div class="text-h6">统计信息</div>
+            </div>
+            <div class="text-center q-pa-lg text-grey-6">
+              <q-icon name="construction" size="md" class="q-mb-sm" />
+              <div>统计功能开发中...</div>
             </div>
           </q-card-section>
         </q-card>
       </div>
 
-      <!-- 右侧统计信息 -->
-      <div class="col-12 col-md-4">
-        <q-card>
+      <!-- 右侧操作面板 -->
+      <div class="col-12 col-lg-4">
+        <!-- 快速操作 -->
+        <q-card class="q-mb-md">
           <q-card-section>
-            <div class="text-h6 q-mb-md">统计信息</div>
-            <q-skeleton-loader v-if="isLoading" type="QCard" />
-            <div v-else-if="node?.stats" class="q-gutter-md">
-              <div>
-                <q-field label="发送字节数" stack-label>
-                  <template v-slot:control>
-                    <div class="self-center full-width no-outline">
-                      {{ formatBytes(node.stats.bytes_sent) }}
-                    </div>
-                  </template>
-                </q-field>
-              </div>
-              <div>
-                <q-field label="接收字节数" stack-label>
-                  <template v-slot:control>
-                    <div class="self-center full-width no-outline">
-                      {{ formatBytes(node.stats.bytes_received) }}
-                    </div>
-                  </template>
-                </q-field>
-              </div>
-              <div>
-                <q-field label="连接数" stack-label>
-                  <template v-slot:control>
-                    <div class="self-center full-width no-outline">
-                      {{ node.stats.connections_count || 0 }}
-                    </div>
-                  </template>
-                </q-field>
-              </div>
-              <div>
-                <q-field label="运行时间" stack-label>
-                  <template v-slot:control>
-                    <div class="self-center full-width no-outline">
-                      {{ formatUptime(node.stats.uptime) }}
-                    </div>
-                  </template>
-                </q-field>
-              </div>
-              <div v-if="node.stats.last_seen">
-                <q-field label="最后在线" stack-label>
-                  <template v-slot:control>
-                    <div class="self-center full-width no-outline">
-                      {{ formatDate(node.stats.last_seen) }}
-                    </div>
-                  </template>
-                </q-field>
-              </div>
+            <div class="row items-center q-mb-md">
+              <q-icon name="flash_on" class="q-mr-sm text-orange" size="sm" />
+              <div class="text-h6">快速操作</div>
             </div>
-            <div v-else class="text-grey-6">
-              暂无统计数据
+            <div class="q-gutter-sm">
+              <q-btn
+                color="primary"
+                outline
+                block
+                icon="refresh"
+                label="刷新数据"
+                @click="refreshData"
+                :loading="isRefreshing"
+              />
             </div>
           </q-card-section>
         </q-card>
@@ -235,7 +509,9 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useNode, useNotify } from '../../composables'
-import { NodeStatus } from '../../types/node'
+import { NodeStatus, VpnType, NODE_STATUS, NODE_TYPE, NODE_TYPE_NAMES, type NodeIndexService, type NodeDeviceInfo } from '../../types/node'
+import { nodeService } from '../../services/node/nodeService'
+import type { NodeNetworkConfig } from '../../types/node'
 
 const route = useRoute()
 const router = useRouter()
@@ -248,36 +524,150 @@ const nodeId = computed(() => route.params.id as string)
 // 使用组合式函数
 const { node, loading: isLoading, loadNode, deleteNode: removeNode } = useNode()
 
-// 状态
+// 新增状态
 const showDeleteDialog = ref(false)
 const isDeleting = ref(false)
+const isRefreshing = ref(false)
+const indexServices = ref<NodeIndexService[]>([])
+const loadingIndexServices = ref(false)
+const networkConfig = ref<NodeNetworkConfig | null>(null)
+const loadingNetworkConfig = ref(false)
+const routeCount = ref(0)
+const loadingRoutes = ref(false)
+const deviceInfo = ref<NodeDeviceInfo | null>(null)
+const loadingDeviceInfo = ref(false)
 
 // 状态相关工具函数
-const getStatusColor = (status: NodeStatus) => {
+const getStatusColor = (status?: NodeStatus | string | number) => {
+  // 处理数字状态码
+  if (typeof status === 'number') {
+    switch (status) {
+      case NODE_STATUS.UNCONFIGURED: return 'warning'
+      case NODE_STATUS.DISABLED: return 'grey'
+      case NODE_STATUS.ENABLED: return 'orange'
+      case NODE_STATUS.ONLINE: return 'positive'
+      case NODE_STATUS.MAINTENANCE: return 'info'
+      default: return 'grey'
+    }
+  }
+  
+  // 处理字符串状态
   switch (status) {
     case 'active': return 'positive'
     case 'inactive': return 'negative'
     case 'pending': return 'warning'
+    case 'maintenance': return 'info'
     default: return 'grey'
   }
 }
 
-const getStatusIcon = (status: NodeStatus) => {
+const getStatusIcon = (status?: NodeStatus | string | number) => {
+  // 处理数字状态码
+  if (typeof status === 'number') {
+    switch (status) {
+      case NODE_STATUS.UNCONFIGURED: return 'settings'
+      case NODE_STATUS.DISABLED: return 'cancel'
+      case NODE_STATUS.ENABLED: return 'check_circle_outline'
+      case NODE_STATUS.ONLINE: return 'check_circle'
+      case NODE_STATUS.MAINTENANCE: return 'build'
+      default: return 'help'
+    }
+  }
+  
+  // 处理字符串状态
   switch (status) {
     case 'active': return 'check_circle'
     case 'inactive': return 'cancel'
     case 'pending': return 'schedule'
+    case 'maintenance': return 'build'
     default: return 'help'
   }
 }
 
-const getStatusText = (status: NodeStatus) => {
+const getStatusText = (status?: NodeStatus | string | number) => {
+  // 处理数字状态码
+  if (typeof status === 'number') {
+    switch (status) {
+      case NODE_STATUS.UNCONFIGURED: return '未完成配置'
+      case NODE_STATUS.DISABLED: return '已禁用'
+      case NODE_STATUS.ENABLED: return '已启用'
+      case NODE_STATUS.ONLINE: return '在线'
+      case NODE_STATUS.MAINTENANCE: return '维护模式'
+      default: return '未知'
+    }
+  }
+  
+  // 处理字符串状态
   switch (status) {
     case 'active': return '在线'
     case 'inactive': return '离线'
     case 'pending': return '待连接'
+    case 'maintenance': return '维护模式'
     default: return '未知'
   }
+}
+
+// VPN类型相关工具函数
+const getVpnTypeColor = (vpnType?: VpnType | string) => {
+  switch (vpnType) {
+    case 'gnb': return 'purple'
+    case 'wireguard': return 'blue'
+    case 'openvpn': return 'green'
+    default: return 'grey'
+  }
+}
+
+const getVpnTypeText = (vpnType?: VpnType | string) => {
+  switch (vpnType) {
+    case 'gnb': return 'GNB'
+    case 'wireguard': return 'WireGuard'
+    case 'openvpn': return 'OpenVPN'
+    default: return '未知'
+  }
+}
+
+// 节点类型相关工具函数
+const getNodeTypeNames = (nodeType?: number | string | string[]): string[] => {
+  if (!nodeType) return []
+  
+  // 如果是字符串数组，直接返回
+  if (Array.isArray(nodeType)) {
+    return nodeType
+  }
+  
+  // 如果是字符串，返回单个元素数组
+  if (typeof nodeType === 'string') {
+    return [nodeType]
+  }
+  
+  // 如果是数字，解析位掩码
+  if (typeof nodeType === 'number') {
+    const typeNames: string[] = []
+    Object.entries(NODE_TYPE).forEach(([key, value]) => {
+      if (nodeType & value) {
+        typeNames.push(NODE_TYPE_NAMES[value as keyof typeof NODE_TYPE_NAMES])
+      }
+    })
+    return typeNames
+  }
+  
+  return []
+}
+
+// 网络相关工具函数
+const getPublicIPs = () => {
+  const ips: string[] = []
+  if (networkConfig.value?.public_ips?.length) {
+    ips.push(...networkConfig.value.public_ips.filter(ip => ip.trim()))
+  }
+  if (node.value?.public_ip && !ips.includes(node.value.public_ip)) {
+    ips.push(node.value.public_ip)
+  }
+  return ips
+}
+
+const isIPv6 = (ip: string) => {
+  return ip.includes(':')
 }
 
 // 格式化工具函数
@@ -311,9 +701,186 @@ const formatUptime = (seconds?: number) => {
   }
 }
 
+// 设备信息格式化函数
+const formatMemory = (mb?: number) => {
+  if (!mb) return '未知'
+  
+  if (mb >= 1024) {
+    return `${(mb / 1024).toFixed(1)} GB`
+  } else {
+    return `${mb} MB`
+  }
+}
+
+const formatOSInfo = (deviceInfo: NodeDeviceInfo) => {
+  const parts: string[] = []
+  
+  if (deviceInfo.os_name) {
+    parts.push(deviceInfo.os_name)
+  }
+  
+  if (deviceInfo.os_version) {
+    parts.push(deviceInfo.os_version)
+  }
+  
+  return parts.length > 0 ? parts.join(' ') : '未知'
+}
+
+const formatLibcInfo = (deviceInfo: NodeDeviceInfo) => {
+  const parts: string[] = []
+  
+  if (deviceInfo.libc_type) {
+    parts.push(deviceInfo.libc_type)
+  }
+  
+  if (deviceInfo.libc_version) {
+    parts.push(deviceInfo.libc_version)
+  }
+  
+  return parts.length > 0 ? parts.join(' ') : '未知'
+}
+
+// 数据加载函数
+const loadIndexServices = async () => {
+  if (!nodeId.value) return
+  
+  try {
+    loadingIndexServices.value = true
+    const response = await nodeService.getNodeIndexServices(nodeId.value)
+    indexServices.value = response.data?.index_services || []
+  } catch (error) {
+    console.error('加载索引服务器失败:', error)
+    indexServices.value = []
+  } finally {
+    loadingIndexServices.value = false
+  }
+}
+
+const loadNetworkConfig = async () => {
+  if (!nodeId.value) return
+  
+  try {
+    loadingNetworkConfig.value = true
+    const response = await nodeService.getNodeNetworkConfig(nodeId.value)
+    networkConfig.value = response.data
+  } catch (error) {
+    console.error('加载网络配置失败:', error)
+    networkConfig.value = null
+  } finally {
+    loadingNetworkConfig.value = false
+  }
+}
+
+const loadDeviceInfo = async () => {
+  if (!nodeId.value) return
+  
+  try {
+    loadingDeviceInfo.value = true
+    const response = await nodeService.getNodeDeviceInfo(nodeId.value)
+    if (response.success && response.data.exists) {
+      deviceInfo.value = response.data.device_info
+    } else {
+      deviceInfo.value = null
+    }
+  } catch (error) {
+    console.error('加载设备信息失败:', error)
+    deviceInfo.value = null
+  } finally {
+    loadingDeviceInfo.value = false
+  }
+}
+
+const loadRouteCount = async () => {
+  if (!nodeId.value) return
+  
+  try {
+    loadingRoutes.value = true
+    // TODO: 这里需要实际的路由数量API
+    // const response = await routeService.getNodeRoutes(nodeId.value)
+    // routeCount.value = response.data?.length || 0
+    routeCount.value = 0 // 临时设置为0
+  } catch (error) {
+    console.error('加载路由数量失败:', error)
+    routeCount.value = 0
+  } finally {
+    loadingRoutes.value = false
+  }
+}
+
 // 操作函数
 const goToEdit = () => {
   router.push(`/nodes/${nodeId.value}/edit`)
+}
+
+// 新增的编辑操作方法
+const goToEditBasic = () => {
+  router.push(`/nodes/${nodeId.value}/edit/basic`)
+}
+
+const goToEditConfig = () => {
+  router.push(`/nodes/${nodeId.value}/edit/config`)
+}
+
+const goToEditNetwork = () => {
+  router.push(`/nodes/${nodeId.value}/edit/network`)
+}
+
+const goToEditKeys = () => {
+  router.push(`/nodes/${nodeId.value}/edit/keys`)
+}
+
+// 网络信息显示方法
+const getVirtualIPWithSequence = () => {
+  const virtualIP = networkConfig.value?.node_ip || node.value?.node_ip || node.value?.ip_address
+  const sequence = networkConfig.value?.ip_group_sequence_number || node.value?.ip_group_sequence_number
+  
+  if (!virtualIP) return '未分配'
+  if (!sequence) return virtualIP
+  
+  return `${virtualIP}@${sequence}`
+}
+
+const getEndpointAddress = () => {
+  // 如果有端点地址，直接返回
+  if (node.value?.endpoint) {
+    return node.value.endpoint
+  }
+  
+  // 如果端点地址为空，显示公网地址
+  const publicIPs = getPublicIPs()
+  if (publicIPs.length > 0) {
+    return publicIPs[0] // 取第一个公网IP
+  }
+  
+  return '未设置'
+}
+
+// 新增的快速操作方法
+const goToNetworkConfig = () => {
+  router.push(`/nodes/${nodeId.value}/network`)
+}
+
+const goToIPManagement = () => {
+  router.push(`/nodes/${nodeId.value}/ips`)
+}
+
+const refreshData = async () => {
+  isRefreshing.value = true
+  try {
+    await Promise.all([
+      loadNode(nodeId.value),
+      loadIndexServices(),
+      loadNetworkConfig(),
+      loadDeviceInfo(),
+      loadRouteCount()
+    ])
+    notifySuccess('数据已刷新')
+  } catch (error) {
+    console.error('刷新数据失败:', error)
+    notifyError('刷新数据失败')
+  } finally {
+    isRefreshing.value = false
+  }
 }
 
 const confirmDelete = () => {
@@ -342,7 +909,13 @@ const deleteNode = async () => {
 // 组件挂载时加载数据
 onMounted(async () => {
   if (nodeId.value) {
-    await loadNode(nodeId.value)
+    await Promise.all([
+      loadNode(nodeId.value),
+      loadIndexServices(),
+      loadNetworkConfig(),
+      loadDeviceInfo(),
+      loadRouteCount()
+    ])
   }
 })
 </script>

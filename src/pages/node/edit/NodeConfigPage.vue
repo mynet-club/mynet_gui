@@ -18,6 +18,7 @@
           :disable="loading"
           toggle-color="primary"
           outline
+          @update:model-value="(newMode) => switchConfigMode(newMode)"
         />
       </div>
     </div>
@@ -54,9 +55,38 @@
                     </q-icon>
                   </div>
                   
+                  <!-- 开关类型 -->
+                  <q-toggle
+                    v-if="param.type === 'switch' && param.options"
+                    v-model="formData[key]"
+                    :true-value="Object.keys(param.options)[0]"
+                    :false-value="Object.keys(param.options)[1]"
+                    :label="param.options[formData[key]] || Object.values(param.options)[0]"
+                    :disable="loading"
+                    color="primary"
+                  />
+                  
+                  <!-- 多按钮类型 -->
+                  <q-btn-group
+                    v-else-if="param.type === 'multi-button' && param.options"
+                    outline
+                  >
+                    <q-btn
+                      v-for="(optionLabel, optionValue) in param.options"
+                      :key="optionValue"
+                      :label="optionLabel"
+                      :color="formData[key] === optionValue ? 'primary' : 'grey-7'"
+                      :outline="formData[key] !== optionValue"
+                      @click="handleMultiButtonClick(key, optionValue as any)"
+                      :disable="loading"
+                      size="sm"
+                      no-caps
+                    />
+                  </q-btn-group>
+                  
                   <!-- 字符串输入 -->
                   <q-input
-                    v-if="param.type === 'string'"
+                    v-else-if="param.type === 'string'"
                     v-model="formData[key]"
                     :placeholder="param.default?.toString() || ''"
                     outlined
@@ -174,7 +204,8 @@
                   color="secondary"
                   outline
                   @click="exportConfig"
-                  :disable="loading"
+                  :disable="loading || exporting"
+                  :loading="exporting"
                   no-caps
                 >
                   <q-icon name="download" class="q-mr-sm" />
@@ -192,7 +223,8 @@
           <q-card>
             <q-card-section>
               <div class="row items-center justify-between q-mb-md">
-                <div class="text-h6">配置预览</div>
+                <div class="text-h6">完整配置预览</div>
+                <div class="text-caption text-grey-6">基本配置 + 专家配置</div>
                 <q-btn
                   color="grey-7"
                   flat
@@ -224,6 +256,8 @@ import { useNotify } from '../../../composables'
 import { vpnConfigData } from '../../../config/vpnConfig'
 import { VPNConfigParameter, NodeConfigForm } from '../../../types/vpnConfig'
 import { VPNConfigService } from '../../../services/vpnConfigService'
+import { nodeConfigService } from '../../../services/node/nodeConfigService'
+import type { ConfigUpdateRequest, NodeConfigApiResponse } from '../../../types/nodeConfig'
 
 const route = useRoute()
 const $q = useQuasar()
@@ -235,17 +269,25 @@ const nodeId = computed(() => route.params.id as string)
 // 加载状态
 const loading = ref(false)
 const saving = ref(false)
+const exporting = ref(false)
 
 // 基础配置
 const vpnType = ref<'gnb' | 'wireguard'>('gnb')
 const configMode = ref<'base' | 'expert'>('base')
 
-// 表单数据
+// 完整的表单数据结构（包含所有参数的完整结构）
 const formData = ref<Record<string, any>>({})
 const originalFormData = ref<Record<string, any>>({})
 
+// API参数架构缓存（用于安全的数据覆盖）
+const apiSchema = ref<Record<string, any>>({})
+
+// 编辑状态
+const hasUserEdited = ref(false)
+
 // 网络配置相关字段（在网络配置页面处理，本页面不显示）
-const networkFields = ['nodeid', 'ifname', 'listen_address', 'listen_port']
+// 注意：现在只排除nodeid，其他字段都移动到节点配置页面
+const networkFields = ['nodeid']
 
 // 计算属性
 const currentVpnConfig = computed(() => {
@@ -281,47 +323,56 @@ const modeOptions = computed(() => [
 ])
 
 const hasChanges = computed(() => {
-  return JSON.stringify(formData.value) !== JSON.stringify(originalFormData.value)
+  // 简化的变更检测：只检查表单数据是否有变化或用户是否进行过编辑
+  return hasUserEdited.value || JSON.stringify(formData.value) !== JSON.stringify(originalFormData.value)
 })
 
-// 配置预览
+// 完整配置预览（包含基本配置和专家配置）
 const configPreview = computed(() => {
-  if (!currentModeConfig.value || !formData.value) return '# 请填写配置参数'
+  const versionConfig = currentVersionConfig.value
+  if (!versionConfig || !formData.value) return '# 请填写配置参数'
   
   const lines: string[] = []
   
   if (vpnType.value === 'gnb') {
     // GNB 配置格式 (key=value)
-    lines.push('# GNB 节点配置文件')
+    lines.push('# GNB 节点配置文件 (完整配置)')
     lines.push(`# 生成时间: ${new Date().toLocaleString()}`)
     lines.push('')
     
-    Object.entries(formData.value).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        const param = currentModeConfig.value?.parameters[key]
-        if (param) {
-          lines.push(`# ${param.description || param.name}`)
-          lines.push(`${key}=${value}`)
-          lines.push('')
-        }
-      }
-    })
+    // 基本配置部分
+    lines.push('# ==================== 基本配置 ====================')
+    const baseConfig = versionConfig.modes.base
+    if (baseConfig) {
+      renderConfigSection(lines, baseConfig.parameters, '基本配置')
+    }
+    
+    lines.push('')
+    lines.push('# ==================== 专家配置 ====================')
+    const expertConfig = versionConfig.modes.expert
+    if (expertConfig) {
+      renderConfigSection(lines, expertConfig.parameters, '专家配置')
+    }
+    
   } else if (vpnType.value === 'wireguard') {
     // WireGuard 配置格式 (INI格式)
-    lines.push('# WireGuard 节点配置文件')
+    lines.push('# WireGuard 节点配置文件 (完整配置)')
     lines.push(`# 生成时间: ${new Date().toLocaleString()}`)
     lines.push('')
     lines.push('[Interface]')
     
-    Object.entries(formData.value).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        const param = currentModeConfig.value?.parameters[key]
-        if (param) {
-          lines.push(`# ${param.description || param.name}`)
-          lines.push(`${key}=${value}`)
-        }
-      }
-    })
+    // 基本配置部分
+    lines.push('# ==================== 基本配置 ====================')
+    const baseConfig = versionConfig.modes.base
+    if (baseConfig) {
+      renderConfigSection(lines, baseConfig.parameters, '基本配置', true)
+    }
+    
+    lines.push('# ==================== 专家配置 ====================')
+    const expertConfig = versionConfig.modes.expert
+    if (expertConfig) {
+      renderConfigSection(lines, expertConfig.parameters, '专家配置', true)
+    }
     
     lines.push('')
     lines.push('[Peer]')
@@ -334,7 +385,103 @@ const configPreview = computed(() => {
   return lines.join('\n') || '# 暂无配置内容'
 })
 
+// 渲染配置段的辅助函数
+const renderConfigSection = (lines: string[], parameters: Record<string, VPNConfigParameter>, sectionName: string, isWireGuard = false) => {
+  let hasContent = false
+  
+  Object.entries(parameters).forEach(([key, param]) => {
+    // 跳过网络字段（这些在网络配置页面管理）
+    if (networkFields.includes(key)) return
+    
+    const value = formData.value[key]
+    if (value !== undefined && value !== null && value !== '') {
+      hasContent = true
+      lines.push(`# ${param.description || param.name}`)
+      
+      // 转换参数名：下划线换成连字符
+      const configKey = key.replace(/_/g, '-')
+      
+      // 特殊处理listen参数：根据IPv4/IPv6设置组装完整地址
+      let displayValue = value
+      if (key === 'listen') {
+        const ipv4Only = formData.value.ipv4_only === 'on'
+        const ipv6Only = formData.value.ipv6_only === 'on'
+        
+        if (ipv4Only) {
+          displayValue = `0.0.0.0:${value}`
+        } else if (ipv6Only) {
+          displayValue = `[::]:${value}`
+        } else {
+          displayValue = value // 只显示端口号，代表全部监听
+        }
+      }
+      
+      if (isWireGuard) {
+        lines.push(`${configKey} = ${displayValue}`)
+      } else {
+        // GNB格式：使用空格而不是等号
+        lines.push(`${configKey} ${displayValue}`)
+      }
+      lines.push('')
+    } else if (param.required || param.default !== undefined) {
+      // 显示必填项或有默认值的项，即使当前值为空
+      hasContent = true
+      const rawValue = value || param.default || ''
+      lines.push(`# ${param.description || param.name} ${param.required ? '(必填)' : '(可选)'}`)
+      
+      // 转换参数名：下划线换成连字符
+      const configKey = key.replace(/_/g, '-')
+      
+      // 特殊处理listen参数：根据IPv4/IPv6设置组装完整地址
+      let displayValue = rawValue
+      if (key === 'listen') {
+        const ipv4Only = formData.value.ipv4_only === 'on'
+        const ipv6Only = formData.value.ipv6_only === 'on'
+        
+        if (ipv4Only) {
+          displayValue = `0.0.0.0:${rawValue}`
+        } else if (ipv6Only) {
+          displayValue = `[::]:${rawValue}`
+        } else {
+          displayValue = rawValue // 只显示端口号，代表全部监听
+        }
+      }
+      
+      if (isWireGuard) {
+        lines.push(`${configKey} = ${displayValue}`)
+      } else {
+        // GNB格式：使用空格而不是等号
+        lines.push(`${configKey} ${displayValue}`)
+      }
+      lines.push('')
+    }
+  })
+  
+  if (!hasContent) {
+    lines.push(`# ${sectionName}暂无配置内容`)
+    lines.push('')
+  }
+}
+
 // 方法
+const handleMultiButtonClick = (key: string, value: any) => {
+  // 设置当前参数的值
+  formData.value[key] = value
+  
+  // 实现IPv4和IPv6互斥逻辑
+  if (key === 'ipv4_only') {
+    if (value === 'on') {
+      // 启用IPv4 only时，明确禁用IPv6 only
+      formData.value.ipv6_only = 'off'
+    }
+  } else if (key === 'ipv6_only') {
+    if (value === 'on') {
+      // 启用IPv6 only时，明确禁用IPv4 only
+      formData.value.ipv4_only = 'off'
+    }
+  }
+}
+
 const getValidationRules = (param: VPNConfigParameter) => {
   const rules: any[] = []
   
@@ -382,32 +529,138 @@ const getSelectOptions = (options: Record<string, string>) => {
   }))
 }
 
+// 初始化完整的表单数据结构（包含所有模式的所有参数）
 const initializeFormData = () => {
-  if (!currentModeConfig.value) return
+  console.log('初始化完整表单数据结构')
   
-  const data: Record<string, any> = {}
+  const fullData: Record<string, any> = {}
   
-  Object.entries(currentModeConfig.value.parameters).forEach(([key, param]) => {
-    // 设置默认值
-    if (param.default !== undefined) {
-      data[key] = param.default
-    } else if (param.type === 'integer') {
-      data[key] = 0
-    } else if (param.type === 'boolean') {
-      data[key] = false
-    } else if (param.type === 'select' && param.options) {
-      data[key] = Object.keys(param.options)[0]
-    } else {
-      data[key] = ''
+  // 获取当前VPN类型的完整版本配置
+  const versionConfig = currentVersionConfig.value
+  if (!versionConfig) {
+    console.warn('未找到版本配置')
+    return
+  }
+  
+  // 遍历所有模式（base和expert），收集所有参数
+  Object.entries(versionConfig.modes).forEach(([modeName, modeConfig]) => {
+    Object.entries(modeConfig.parameters).forEach(([key, param]) => {
+      // 如果参数还不存在，则添加默认值
+      if (!(key in fullData)) {
+        if (param.default !== undefined) {
+          fullData[key] = param.default
+        } else if (param.type === 'integer') {
+          fullData[key] = 0
+        } else if (param.type === 'boolean') {
+          fullData[key] = false
+        } else if (param.type === 'select' && param.options) {
+          fullData[key] = Object.keys(param.options)[0]
+        } else if (param.type === 'switch' && param.options) {
+          fullData[key] = Object.keys(param.options)[1] // 默认关闭状态
+        } else if (param.type === 'multi-button' && param.options) {
+          fullData[key] = Object.keys(param.options)[0] // 默认第一个选项
+        } else {
+          fullData[key] = ''
+        }
+      }
+    })
+  })
+  
+  // 添加网络字段的默认值（虽然不显示，但提交时需要）
+  networkFields.forEach(field => {
+    if (!(field in fullData)) {
+      fullData[field] = getNetworkFieldDefault(field)
     }
   })
   
-  formData.value = { ...data }
-  originalFormData.value = { ...data }
+  // 更新表单数据
+  formData.value = { ...fullData }
+  originalFormData.value = { ...fullData }
+  
+  // 确保IPv4/IPv6字段有明确的默认值，给用户安全感
+  if (!formData.value.ipv4_only || formData.value.ipv4_only === '') {
+    formData.value.ipv4_only = 'off' // 明确设为禁用
+  }
+  if (!formData.value.ipv6_only || formData.value.ipv6_only === '') {
+    formData.value.ipv6_only = 'off' // 明确设为禁用
+  }
+  
+  // 重置编辑状态
+  hasUserEdited.value = false
+  
+  console.log('完整表单数据初始化完成:', fullData)
 }
 
+// 获取网络字段的默认值
+const getNetworkFieldDefault = (field: string): any => {
+  switch (field) {
+    case 'nodeid':
+      return nodeId.value || ''
+    case 'ifname':
+      return 'tun0'
+    case 'listen':
+      return 9001
+    default:
+      return ''
+  }
+}
+
+// 安全地用服务器数据覆盖对应参数（只覆盖API架构中存在的参数）
+const safeOverrideWithServerData = (serverData: Record<string, any>) => {
+  console.log('安全覆盖服务器数据:', serverData)
+  
+  const versionConfig = currentVersionConfig.value
+  if (!versionConfig) {
+    console.warn('无版本配置，跳过服务器数据覆盖')
+    return
+  }
+  
+  // 收集所有有效的参数键和配置（来自所有模式）
+  const validParams = new Map<string, any>()
+  Object.values(versionConfig.modes).forEach(modeConfig => {
+    Object.entries(modeConfig.parameters).forEach(([key, param]) => {
+      validParams.set(key, param)
+    })
+  })
+  
+  // 只覆盖有效的参数，并进行类型转换
+  Object.entries(serverData).forEach(([key, value]) => {
+    const param = validParams.get(key)
+    if (param && value !== undefined && value !== null) {
+      let convertedValue = value
+      
+      // 对multi-button类型进行验证
+      if (param.type === 'multi-button' && param.options) {
+        const validOptions = Object.keys(param.options)
+        if (validOptions.includes(String(value))) {
+          convertedValue = String(value)  // 确保是字符串
+          console.log(`验证multi-button参数 ${key}: ${value} -> ${convertedValue}`)
+        } else {
+          console.warn(`multi-button参数 ${key} 的值 ${value} 不在有效选项中:`, validOptions)
+          convertedValue = param.default || validOptions[0] // 使用默认值或第一个选项
+        }
+      }
+      
+      formData.value[key] = convertedValue
+      console.log(`覆盖参数 ${key}:`, value, '->', convertedValue)
+    } else {
+      console.log(`跳过无效参数 ${key}:`, value)
+    }
+  })
+}
+
+// 简化的模式切换（不需要保存和加载数据，因为使用统一的数据结构）
+const switchConfigMode = (newMode: 'base' | 'expert') => {
+  console.log(`切换配置模式: ${configMode.value} -> ${newMode}`)
+  configMode.value = newMode
+  // 不需要额外的数据操作，因为使用统一的formData
+}
+
+// 简化的重置函数
 const resetForm = () => {
+  // 重置为原始数据
   formData.value = { ...originalFormData.value }
+  hasUserEdited.value = false
   notifySuccess('表单已重置')
 }
 
@@ -421,16 +674,27 @@ const copyConfig = async () => {
   }
 }
 
-const exportConfig = () => {
-  const content = configPreview.value
-  const blob = new Blob([content], { type: 'text/plain' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `node-${nodeId.value}-${vpnType.value}-config${currentVersionConfig.value?.config_file_extension || '.conf'}`
-  a.click()
-  URL.revokeObjectURL(url)
-  notifySuccess('配置文件已导出')
+const exportConfig = async () => {
+  exporting.value = true
+  try {
+    // 从 API 获取渲染后的配置内容
+    const renderedContent = await nodeConfigService.getRenderedConfig(nodeId.value)
+    
+    // 创建并下载文件
+    const blob = new Blob([renderedContent], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `node-${nodeId.value}-${vpnType.value}-config${currentVersionConfig.value?.config_file_extension || '.conf'}`
+    a.click()
+    URL.revokeObjectURL(url)
+    notifySuccess('配置文件已导出')
+  } catch (error) {
+    console.error('导出配置失败:', error)
+    notifyError('导出配置失败，请稍后重试')
+  } finally {
+    exporting.value = false
+  }
 }
 
 const onSubmit = async () => {
@@ -442,50 +706,72 @@ const onSubmit = async () => {
   saving.value = true
   
   try {
-    // 构建配置对象
-    const configData: NodeConfigForm = {
+    // 直接提交字段数据，不组织为嵌套结构
+    const submitData: any = {
+      // 基础元数据
       vpn_type: vpnType.value,
-      vpn_version: 'merged', // 表示使用合并版本
+      vpn_version: 'merged',
       config_mode: configMode.value,
-      parameters: { ...formData.value }
+      
+      // 展平的配置字段（直接在顶层）
+      ...formData.value,
+      
+      // 确保必要的网络字段有值
+      nodeid: formData.value.nodeid || parseInt(nodeId.value) || 1000000000000000,
+      ifname: formData.value.ifname || 'gnb_tun',
+      listen: formData.value.listen || 9001
     }
     
-    // 验证配置
-    const validation = VPNConfigService.validateConfig(
-      vpnType.value,
-      'default', // 验证时使用默认版本的规则
-      configMode.value,
-      formData.value
-    )
+    console.log('提交的配置数据（分别提交字段）:', submitData)
     
-    if (!validation.valid) {
-      notifyError(`配置验证失败: ${validation.errors.join(', ')}`)
-      return
-    }
+    // 调用API保存配置（扁平化字段格式）
+    await nodeConfigService.updateNodeConfig(nodeId.value, submitData)
     
-    // 模拟保存API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // 更新原始数据
+    // 更新原始数据并重置编辑状态
     originalFormData.value = { ...formData.value }
+    hasUserEdited.value = false
     
     notifySuccess('节点配置保存成功')
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('保存节点配置失败:', error)
-    notifyError('保存失败，请重试')
+    const errorMsg = error?.response?.data?.message || error?.message || '保存失败，请重试'
+    notifyError(`保存失败: ${errorMsg}`)
   } finally {
     saving.value = false
   }
 }
 
-// 监听配置变化，重新初始化表单
+// 监听表单数据变化，设置编辑状态
 watch(
-  [vpnType, configMode],
+  formData,
   () => {
-    initializeFormData()
+    // 用户有任何编辑行为时，设置编辑状态
+    if (!hasUserEdited.value) {
+      hasUserEdited.value = true
+    }
   },
-  { immediate: true }
+  { deep: true }
+)
+
+// 监听配置变化
+watch(
+  [vpnType],
+  () => {
+    // VPN类型变化时重新初始化所有数据
+    initializeFormData()
+  }
+)
+
+// 监听配置模式变化
+watch(
+  configMode,
+  (newMode, oldMode) => {
+    if (oldMode && newMode !== oldMode) {
+      // 使用新的模式切换逻辑
+      switchConfigMode(newMode)
+    }
+  }
 )
 
 // 组件挂载时初始化
@@ -498,24 +784,98 @@ onMounted(async () => {
       const detectedVpnType = VPNConfigService.detectVpnType(nodeId.value)
       vpnType.value = detectedVpnType
       
-      // 模拟加载节点配置
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      // 这里可以从API获取节点的具体配置
-      // const nodeConfig = await loadNodeConfig(nodeId.value)
-      // vpnVersion.value = nodeConfig.vpn_version || 'default'
-      // configMode.value = nodeConfig.config_mode || 'base'
-      // if (nodeConfig.parameters) {
-      //   formData.value = { ...nodeConfig.parameters }
-      //   originalFormData.value = { ...nodeConfig.parameters }
-      // }
+      // 尝试从API获取节点的具体配置
+      try {
+        console.log('尝试加载节点配置:', nodeId.value)
+        const configResponse = await nodeConfigService.getNodeConfig(nodeId.value)
+        
+        console.log('API返回的完整响应:', configResponse)
+        
+        // 检查新的扁平化数据格式
+        if (configResponse.success && configResponse.data) {
+          console.log('检测到新的扁平化数据格式:', configResponse.data)
+          
+          // 先初始化完整的默认数据结构
+          initializeFormData()
+          
+          // 直接使用返回的数据覆盖表单
+          safeOverrideWithServerData(configResponse.data)
+          
+          // 保存为原始数据
+          originalFormData.value = { ...formData.value }
+          
+          console.log('节点配置加载成功（新格式）:', {
+            vpnType: vpnType.value,
+            configMode: configMode.value,
+            formData: formData.value,
+            特别关注multi_socket: formData.value.multi_socket
+          })
+        } else {
+          // 尝试旧的数据格式
+          console.log('尝试旧的数据格式...')
+          const responseData = configResponse.data as unknown as NodeConfigApiResponse
+          
+          console.log('API返回的配置数据（旧格式）:', responseData)
+          
+          // 从API响应中提取配置信息
+          const customConfig = responseData.custom_config
+          const nodeInfo = responseData.node_info
+          
+          if (customConfig && customConfig.basic_config) {
+            // 过滤出非网络配置字段
+            const filteredParams = Object.fromEntries(
+              Object.entries(customConfig.basic_config).filter(([key]) => !networkFields.includes(key))
+            )
+            
+            // 更新VPN类型和配置模式
+            if (nodeInfo?.vpn_type) {
+              vpnType.value = nodeInfo.vpn_type as 'gnb' | 'wireguard'
+            }
+            if (customConfig.config_mode) {
+              configMode.value = customConfig.config_mode as 'base' | 'expert'
+            }
+            
+            // 先初始化完整的默认数据结构
+            initializeFormData()
+            
+            // 安全地用服务器数据覆盖对应参数
+            safeOverrideWithServerData(filteredParams)
+            
+            // 如果有expert_config，也进行安全覆盖
+            if (customConfig.expert_config) {
+              const expertParams = Object.fromEntries(
+                Object.entries(customConfig.expert_config).filter(([key]) => !networkFields.includes(key))
+              )
+              safeOverrideWithServerData(expertParams)
+            }
+            
+            // 保存为原始数据
+            originalFormData.value = { ...formData.value }
+            
+            console.log('节点配置加载成功（旧格式）:', {
+              vpnType: vpnType.value,
+              configMode: configMode.value,
+              formData: formData.value
+            })
+          } else {
+            console.log('custom_config 或 basic_config 不存在，使用默认值')
+            // 如果没有配置数据，使用默认值
+            initializeFormData()
+          }
+        }
+      } catch (configError: any) {
+        console.log('节点配置不存在或加载失败，使用默认值:', configError?.response?.status)
+        // 如果是404错误或其他错误，使用默认值初始化
+        initializeFormData()
+      }
+    } else {
+      initializeFormData()
     }
     
-    initializeFormData()
-    
-  } catch (error) {
+  } catch (error: any) {
     console.error('加载节点配置失败:', error)
     notifyError('加载配置失败')
+    initializeFormData() // 出错时使用默认值
   } finally {
     loading.value = false
   }

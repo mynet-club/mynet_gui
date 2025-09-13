@@ -1,204 +1,206 @@
 <template>
-  <q-page class="social-page">
-    <div class="q-pa-md">
-      <!-- 页面标题 -->
-      <div class="row items-center q-mb-lg">
-        <div class="col">
-          <h4 class="q-my-none">{{ $t('navigation.social') }}</h4>
-          <p class="text-grey-6 q-mt-xs q-mb-none">
-            {{ $t('social.subtitle') }}
-          </p>
-        </div>
-      </div>
+  <PageLayout
+    :title="$t('navigation.social')"
+    :subtitle="$t('social.subtitle')"
+    icon="people"
+  >
+    <template #actions>
+      <q-btn
+        color="primary"
+        icon="search"
+        :label="$t('social.search.title')"
+        @click="handleSearchUser"
+      />
+    </template>
 
-      <!-- 统计卡片 -->
-      <ResponsiveCardGrid
-        :items="statsCards"
-        :loading="loading"
-        :loading-count="4"
-        variant="compact"
-        spacing="normal"
-        :clickable="false"
-        class="q-mb-lg"
-      >
-        <template #default="{ item }">
-          <q-card-section>
-            <div class="row items-center">
-              <div class="col">
-                <div class="text-h6">{{ item.value }}</div>
-                <div class="text-body2 text-grey-6">{{ item.title }}</div>
-              </div>
-              <div>
-                <q-icon :name="item.icon" size="2rem" :color="item.color" />
-              </div>
+    <!-- 统计卡片 -->
+    <ResponsiveCardGrid
+      :items="statsCards"
+      :loading="loading"
+      :loading-count="4"
+      variant="compact"
+      spacing="normal"
+      :clickable="false"
+      class="q-mb-lg"
+    >
+      <template #default="{ item }">
+        <q-card-section>
+          <div class="row items-center">
+            <div class="col">
+              <div class="text-h6">{{ item.value }}</div>
+              <div class="text-body2 text-grey-6">{{ item.title }}</div>
             </div>
-          </q-card-section>
-        </template>
-      </ResponsiveCardGrid>
-
-      <!-- 标签页 -->
-      <q-card>
-        <q-tabs
-          v-model="tab"
-          dense
-          class="text-grey"
-          active-color="primary"
-          indicator-color="primary"
-          align="justify"
-          narrow-indicator
-        >
-          <q-tab name="friends" :label="$t('social.friends.title')" />
-          <q-tab name="requests" :label="$t('social.friendRequests.title')" />
-          <q-tab name="search" :label="$t('social.search.title')" />
-          <q-tab name="invitations" :label="$t('social.invitations.title')" />
-        </q-tabs>
-
-        <q-separator />
-
-        <q-tab-panels v-model="tab" animated>
-          <!-- 好友列表 -->
-          <q-tab-panel name="friends">
-            <FriendsTab
-              :friends="friends"
-              :loading="loading"
-              :search="friendsSearch"
-              @search="handleFriendsSearch"
-              @remove="handleRemoveFriend"
-              @view-nodes="handleViewNodes"
-            />
-          </q-tab-panel>
-
-          <!-- 好友请求 -->
-          <q-tab-panel name="requests">
-            <FriendRequestsTab
-              :requests="friendRequests"
-              :loading="loading"
-              @accept="handleAcceptRequest"
-              @reject="handleRejectRequest"
-              @cancel="handleCancelRequest"
-              @type-change="handleRequestTypeChange"
-            />
-          </q-tab-panel>
-
-          <!-- 搜索用户 -->
-          <q-tab-panel name="search">
-            <SearchTab
-              :search-results="searchResults"
-              :loading="searchLoading"
-              @search="handleUserSearch"
-              @send-request="handleSendRequest"
-            />
-          </q-tab-panel>
-
-          <!-- 邀请码管理 -->
-          <q-tab-panel name="invitations">
-            <InvitationsTab
-              :invitations="invitations"
-              :loading="loading"
-              @create="handleCreateInvitation"
-              @copy="handleCopyInvitation"
-            />
-          </q-tab-panel>
-        </q-tab-panels>
-      </q-card>
-    </div>
-
-    <!-- 确认删除对话框 -->
-    <q-dialog v-model="removeDialog.show" persistent>
-      <q-card>
-        <q-card-section>
-          <div class="text-h6">{{ $t('social.dialogs.removeFriend.title') }}</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          {{ $t('social.dialogs.removeFriend.message', { name: removeDialog.friendName }) }}
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat :label="$t('social.dialogs.removeFriend.cancel')" color="primary" v-close-popup />
-          <q-btn 
-            flat 
-            :label="$t('social.dialogs.removeFriend.confirm')" 
-            color="negative" 
-            @click="confirmRemoveFriend"
-            :loading="loading"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- 发送好友请求对话框 -->
-    <q-dialog v-model="requestDialog.show" persistent>
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">{{ $t('social.dialogs.sendRequest.title') }}</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <div class="q-mb-md">
-            {{ $t('social.dialogs.sendRequest.message', { name: requestDialog.userName }) }}
+            <div>
+              <q-icon :name="item.icon" size="2rem" :color="item.color" />
+            </div>
           </div>
-          <q-input
-            v-model="requestDialog.message"
-            :label="$t('social.dialogs.sendRequest.messagePlaceholder')"
-            type="textarea"
-            rows="3"
-            outlined
+        </q-card-section>
+      </template>
+    </ResponsiveCardGrid>
+
+    <!-- 标签页 -->
+    <q-card>
+      <q-tabs
+        v-model="tab"
+        dense
+        class="text-grey"
+        active-color="primary"
+        indicator-color="primary"
+        align="justify"
+        narrow-indicator
+      >
+        <q-tab name="friends" :label="$t('social.friends.title')" />
+        <q-tab name="requests" :label="$t('social.friendRequests.title')" />
+        <q-tab name="invitations" :label="$t('social.invitations.title')" />
+      </q-tabs>
+
+      <q-separator />
+
+      <q-tab-panels v-model="tab" animated>
+        <!-- 好友列表 -->
+        <q-tab-panel name="friends">
+          <FriendsTab
+            :friends="friends"
+            :loading="loading"
+            :search="friendsSearch"
+            @search="handleFriendsSearch"
+            @remove="handleRemoveFriend"
+            @view-nodes="handleViewNodes"
           />
+        </q-tab-panel>
+
+        <!-- 好友请求 -->
+        <q-tab-panel name="requests">
+          <FriendRequestsTab
+            :requests="friendRequests"
+            :loading="loading"
+            @accept="handleAcceptRequest"
+            @reject="handleRejectRequest"
+            @cancel="handleCancelRequest"
+            @type-change="handleRequestTypeChange"
+          />
+        </q-tab-panel>
+
+        <!-- 邀请 -->
+        <q-tab-panel name="invitations">
+          <InvitationsTab
+            :invitations="invitations"
+            :loading="loading"
+            @create="handleCreateInvitation"
+            @copy="handleCopyInvitation"
+            @delete="handleDeleteInvitation"
+          />
+        </q-tab-panel>
+      </q-tab-panels>
+    </q-card>
+
+    <!-- 搜索用户对话框 -->
+    <q-dialog v-model="searchDialog.show" persistent>
+      <q-card style="min-width: 400px">
+        <q-card-section>
+          <div class="text-h6">{{ $t('social.search.title') }}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input
+            v-model="searchDialog.query"
+            :label="$t('social.search.placeholder')"
+            dense
+            outlined
+            @keyup.enter="performSearch"
+          >
+            <template v-slot:append>
+              <q-icon 
+                name="search" 
+                @click="performSearch"
+                class="cursor-pointer"
+              />
+            </template>
+          </q-input>
+          
+          <!-- 搜索结果 -->
+          <div v-if="searchResults.length > 0" class="q-mt-md">
+            <q-separator class="q-mb-md" />
+            <div class="text-subtitle2 q-mb-sm">{{ $t('social.search.title') }}</div>
+            <q-list>
+              <q-item 
+                v-for="user in searchResults" 
+                :key="user.user_id || user.id"
+                class="q-pa-sm"
+              >
+                <q-item-section avatar>
+                  <q-avatar color="primary" text-color="white">
+                    {{ user.name?.charAt(0)?.toUpperCase() }}
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ user.name }}</q-item-label>
+                  <q-item-label caption>ID: {{ user.user_id || user.id }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-btn
+                    color="primary"
+                    size="sm"
+                    :label="$t('social.dialogs.sendRequest.send')"
+                    @click="handleSendRequest(user.user_id || user.id, user.name)"
+                  />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
+
+          <div v-else-if="searchPerformed && searchResults.length === 0" class="q-mt-md text-center text-grey-6">
+            {{ $t('social.search.noResults') }}
+          </div>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat :label="$t('social.dialogs.sendRequest.cancel')" color="primary" v-close-popup />
-          <q-btn 
-            flat 
-            :label="$t('social.dialogs.sendRequest.send')" 
-            color="primary" 
-            @click="confirmSendRequest"
-            :loading="loading"
-          />
+          <q-btn flat :label="$t('common.cancel')" @click="closeSearchDialog" />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
     <!-- 创建邀请码对话框 -->
-    <q-dialog v-model="invitationDialog.show" persistent>
-      <q-card style="min-width: 350px">
+    <q-dialog v-model="invitationDialog.show">
+      <q-card style="min-width: 400px">
         <q-card-section>
           <div class="text-h6">{{ $t('social.dialogs.createInvitation.title') }}</div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
+        <q-card-section>
           <q-input
             v-model.number="invitationDialog.expiresIn"
-            :label="$t('social.dialogs.createInvitation.expiresIn')"
             type="number"
-            min="1"
-            max="30"
+            :label="$t('social.dialogs.createInvitation.expiresIn')"
             outlined
+            min="1"
+            max="365"
+            suffix="天"
           />
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat :label="$t('social.dialogs.createInvitation.cancel')" color="primary" v-close-popup />
-          <q-btn 
-            flat 
-            :label="$t('social.dialogs.createInvitation.create')" 
-            color="primary" 
+          <q-btn flat :label="$t('social.dialogs.createInvitation.cancel')" v-close-popup />
+          <q-btn
+            color="primary"
+            :label="$t('social.dialogs.createInvitation.create')"
             @click="confirmCreateInvitation"
             :loading="loading"
           />
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </q-page>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { useSocial } from '../../composables/useSocial'
 import { useNotify } from '../../composables/useNotify'
+import PageLayout from '../../components/layout/PageLayout.vue'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import FriendsTab from '../../components/social/FriendsTab.vue'
 import FriendRequestsTab from '../../components/social/FriendRequestsTab.vue'
@@ -208,6 +210,7 @@ import InvitationsTab from '../../components/social/InvitationsTab.vue'
 const { t } = useI18n()
 const router = useRouter()
 const notify = useNotify()
+const $q = useQuasar()
 const {
   loading,
   overview,
@@ -225,6 +228,7 @@ const {
   cancelFriendRequest,
   removeFriend,
   createInvitation,
+  deleteInvitation,
   getFriendNodes,
   handleRequestTypeChange,
   init
@@ -232,6 +236,13 @@ const {
 
 // 响应式状态
 const tab = ref('friends')
+
+// 搜索相关状态
+const searchDialog = ref({
+  show: false,
+  query: ''
+})
+const searchPerformed = ref(false)
 const friendsSearch = ref('')
 
 // 统计卡片数据
@@ -365,6 +376,51 @@ const handleCopyInvitation = (code: string) => {
   navigator.clipboard.writeText(code).then(() => {
     notify.success(t('social.invitationCopied'))
   })
+}
+
+const handleDeleteInvitation = async (invitation: any) => {
+  $q.dialog({
+    title: t('common.delete'),
+    message: t('social.confirmDeleteInvitation', { code: invitation.invitation_code }),
+    cancel: true,
+    persistent: true
+  }).onOk(async () => {
+    await deleteInvitation(invitation)
+  })
+}
+
+const handleSearchUser = () => {
+  searchDialog.value.show = true
+  searchDialog.value.query = ''
+  searchResults.value = []
+  searchPerformed.value = false
+}
+
+const performSearch = async () => {
+  if (!searchDialog.value.query.trim()) return
+  
+  try {
+    await searchUsers(searchDialog.value.query)
+    searchPerformed.value = true
+  } catch (error) {
+    console.error('搜索用户失败:', error)
+    notify.error(t('social.searchError'))
+  }
+}
+
+const closeSearchDialog = () => {
+  searchDialog.value.show = false
+  searchDialog.value.query = ''
+  searchResults.value = []
+  searchPerformed.value = false
+}
+
+const handleAcceptInvitation = (invitationId: string | number) => {
+  console.log('接受邀请:', invitationId)
+}
+
+const handleRejectInvitation = (invitationId: string | number) => {
+  console.log('拒绝邀请:', invitationId)
 }
 
 // 初始化

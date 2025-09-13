@@ -40,18 +40,11 @@ export const vpnConfigData: VPNConfigData = {
                 validation: '^[a-zA-Z0-9_]{1,15}$',
                 description: 'GNB虚拟网卡接口名称'
               },
-              listen_address: {
-                name: '监听地址',
-                type: 'string',
-                default: '0.0.0.0',
-                required: true,
-                description: '节点监听的IP地址'
-              },
-              listen_port: {
+              listen: {
                 name: '监听端口',
                 type: 'integer',
                 default: 9001,
-                min: 1,
+                min: 1024,
                 max: 65535,
                 required: true,
                 description: '节点监听的UDP端口号'
@@ -59,50 +52,20 @@ export const vpnConfigData: VPNConfigData = {
               mtu: {
                 name: 'MTU (最大传输单元)',
                 type: 'integer',
-                default: 1400,
-                min: 576,
+                default: 1450,
+                min: 1280,
                 max: 9000,
-                description: '网络最大传输单元，建议值：1400'
+                description: '网络最大传输单元（IPv6最小1280；典型1280~1450，推荐1450）'
               },
               multi_socket: {
                 name: '多路复用',
-                type: 'select',
-                default: 'on',
-                options: {
-                  'on': '启用',
-                  'off': '禁用'
-                },
-                description: '启用多路复用功能提高连接稳定性'
-              },
-              ipv4_only: {
-                name: '仅IPv4',
-                type: 'select',
+                type: 'multi-button',
                 default: 'off',
                 options: {
-                  'on': '启用',
-                  'off': '禁用'
+                  'off': '禁用',
+                  'on': '启用'
                 },
-                description: '仅使用IPv4协议'
-              },
-              ipv6_only: {
-                name: '仅IPv6',
-                type: 'select',
-                default: 'off',
-                options: {
-                  'on': '启用',
-                  'off': '禁用'
-                },
-                description: '仅使用IPv6协议'
-              },
-              daemon: {
-                name: '守护进程',
-                type: 'select',
-                default: 'on',
-                options: {
-                  'on': '启用',
-                  'off': '禁用'
-                },
-                description: '以守护进程方式运行'
+                description: '多套接字打洞（NAT 环境下更好）'
               }
             }
           },
@@ -110,111 +73,68 @@ export const vpnConfigData: VPNConfigData = {
             name: '专家配置',
             description: '可选的高级参数配置，可不写入配置文件',
             parameters: {
-              listen6: {
-                name: 'IPv6地址前缀',
-                type: 'string',
-                default: '::',
-                description: 'IPv6网络地址前缀，用于配置IPv6网络范围'
-              },
-              ctl_block: {
-                name: '控制阻塞',
-                type: 'select',
-                default: 'off',
-                options: {
-                  'on': '启用',
-                  'off': '禁用'
-                },
-                description: '控制包阻塞机制'
-              },
               direct_forwarding: {
                 name: '直接转发',
-                type: 'select',
-                default: 'off',
+                type: 'multi-button',
+                default: 'on',
                 options: {
-                  'on': '启用',
-                  'off': '禁用'
+                  'off': '禁用',
+                  'on': '启用'
                 },
                 description: '启用直接转发模式'
               },
               unified_forwarding: {
                 name: '统一转发',
-                type: 'select',
-                default: 'super',
+                type: 'multi-button',
+                default: 'auto',
                 options: {
+                  'off': '关闭',
+                  'auto': '自动',
+                  'force': '强制',
                   'super': 'Super模式',
-                  'on': '启用',
-                  'off': '禁用'
+                  'hyper': 'Hyper模式'
                 },
                 description: '统一转发模式配置'
               },
-              address_secure: {
-                name: '地址安全',
-                type: 'select',
+              standard_forwarding: {
+                name: '标准中继转发',
+                type: 'multi-button',
                 default: 'on',
                 options: {
-                  'on': '启用',
-                  'off': '禁用'
+                  'off': '禁用',
+                  'on': '启用'
+                },
+                description: '启用标准中继转发'
+              },
+              address_secure: {
+                name: '地址安全',
+                type: 'multi-button',
+                default: 'on',
+                options: {
+                  'off': '禁用',
+                  'on': '启用'
                 },
                 description: '启用地址安全验证机制'
               },
-              quiet: {
-                name: '静默模式',
-                type: 'select',
+              ipv4_only: {
+                name: '仅IPv4',
+                type: 'multi-button',
                 default: 'off',
                 options: {
-                  'on': '启用',
-                  'off': '禁用'
+                  'off': '禁用',
+                  'on': '启用'
                 },
-                description: '启用静默模式，减少日志输出'
+                description: '仅使用 IPv4 套接字（与 ipv6_only 互斥）'
               },
-              set_tun: {
-                name: '设置TUN接口',
-                type: 'select',
-                default: 'on',
+              ipv6_only: {
+                name: '仅IPv6',
+                type: 'multi-button',
+                default: 'off',
                 options: {
-                  'on': '启用',
-                  'off': '禁用'
+                  'off': '禁用',
+                  'on': '启用'
                 },
-                description: '自动设置TUN网络接口'
-              },
-              node_worker: {
-                name: '节点工作线程数',
-                type: 'integer',
-                default: 4,
-                min: 1,
-                max: 32,
-                description: '节点处理工作线程数量'
-              },
-              index_worker: {
-                name: '索引工作线程数',
-                type: 'integer',
-                default: 0,
-                min: 0,
-                max: 16,
-                description: '索引处理工作线程数量'
-              },
-              index_service_worker: {
-                name: '索引服务工作线程数',
-                type: 'integer',
-                default: 0,
-                min: 0,
-                max: 16,
-                description: '索引服务工作线程数量'
-              },
-              node_detect_worker: {
-                name: '节点检测工作线程数',
-                type: 'integer',
-                default: 4,
-                min: 0,
-                max: 16,
-                description: '节点检测工作线程数量，0表示关闭'
-              },
-              port_detect_range: {
-                name: '端口检测范围',
-                type: 'string',
-                default: '10000-60000',
-                validation: '^\\d+-\\d+$',
-                description: '端口检测范围，格式：起始端口-结束端口'
+                description: '仅使用 IPv6 套接字（与 ipv4_only 互斥）'
               },
               keepalive: {
                 name: '保活间隔(秒)',
@@ -226,43 +146,59 @@ export const vpnConfigData: VPNConfigData = {
               },
               forward: {
                 name: '转发功能',
-                type: 'select',
+                type: 'multi-button',
                 default: 'on',
                 options: {
-                  'on': '启用',
-                  'off': '禁用'
+                  'off': '禁用',
+                  'on': '启用'
                 },
                 description: '启用数据包转发功能'
               },
-              pid_file: {
-                name: 'PID文件路径',
-                type: 'string',
-                default: '/var/run/gnb.pid',
-                description: '进程ID文件存储路径'
+              daemon: {
+                name: '守护进程',
+                type: 'multi-button',
+                default: 'on',
+                options: {
+                  'off': '禁用',
+                  'on': '启用'
+                },
+                description: '以守护进程方式运行'
               },
-              node_cache_file: {
-                name: '节点缓存文件',
-                type: 'string',
-                default: '/var/lib/gnb/node_cache',
-                description: '节点缓存数据文件路径'
+              zip: {
+                name: '压缩',
+                type: 'multi-button',
+                default: 'auto',
+                options: {
+                  'auto': 'auto',
+                  'force': 'force'
+                },
+                description: '压缩策略'
               },
-              log_file_path: {
-                name: '日志文件路径',
-                type: 'string',
-                default: '/var/log/gnb/gnb.log',
-                description: 'GNB日志文件存储路径'
+              zip_level: {
+                name: '压缩等级',
+                type: 'integer',
+                default: -1,
+                min: -1,
+                max: 9,
+                description: '-1(默认) ~ 9（9压缩比高但更耗CPU）'
               },
-              log_udp4: {
-                name: 'UDP4日志地址',
-                type: 'string',
-                default: '',
-                description: 'UDP4日志服务器地址，格式：IP:端口'
+              memory: {
+                name: '内存刻度',
+                type: 'multi-button',
+                default: 'tiny',
+                options: {
+                  'tiny': 'tiny',
+                  'small': 'small',
+                  'large': 'large',
+                  'huge': 'huge'
+                },
+                description: '内存与缓存规模（tiny/small/large/huge）'
               },
               es_argv: {
                 name: 'ES参数',
                 type: 'string',
                 default: '--upnp',
-                description: 'ES(Enhanced Security)高级参数，如--upnp启用UPnP'
+                description: '传给 gnb_es 的单个参数（如 --upnp）'
               }
             }
           }

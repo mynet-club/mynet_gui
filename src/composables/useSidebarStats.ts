@@ -27,17 +27,21 @@ export function useSidebarStats() {
     isLoading.value = true
     try {
       // 这里应该调用真实的API获取统计数据
-      // 现在使用模拟数据
+      // 现在使用模拟数据，但添加防抖机制
       
       // 模拟API延迟
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      // 生成相对稳定的模拟数据，避免过于频繁的变化
+      const baseTime = Math.floor(Date.now() / 30000) // 30秒为一个周期
+      const seedValue = baseTime % 100
       
       stats.value = {
-        nodes: Math.floor(Math.random() * 50) + 10,
-        ippools: Math.floor(Math.random() * 20) + 5,
-        routes: Math.floor(Math.random() * 100) + 20,
-        connections: Math.floor(Math.random() * 200) + 50,
-        zones: Math.floor(Math.random() * 10) + 3
+        nodes: Math.floor((seedValue * 0.5) % 50) + 10,
+        ippools: Math.floor((seedValue * 0.2) % 20) + 5,
+        routes: Math.floor((seedValue * 1.0) % 100) + 20,
+        connections: Math.floor((seedValue * 2.0) % 200) + 50,
+        zones: Math.floor((seedValue * 0.1) % 10) + 3
       }
       
       console.log('📊 [SidebarStats] Updated stats:', stats.value)
@@ -61,8 +65,8 @@ export function useSidebarStats() {
   const init = async () => {
     await fetchStats()
     
-    // 每30秒更新一次统计数据
-    setInterval(fetchStats, 30000)
+    // 增加更新间隔到60秒，减少频繁更新
+    setInterval(fetchStats, 60000)
   }
 
   return {

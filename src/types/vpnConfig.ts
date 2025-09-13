@@ -5,7 +5,7 @@
 
 export interface VPNConfigParameter {
   name: string
-  type: 'string' | 'integer' | 'select' | 'text' | 'boolean'
+  type: 'string' | 'integer' | 'select' | 'text' | 'boolean' | 'switch' | 'multi-button'
   default?: any
   min?: number
   max?: number

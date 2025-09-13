@@ -13,7 +13,11 @@ import type {
   NodeStatus,
   NodeNetworkConfig,
   UpdateNodeNetworkConfigRequest,
-  AvailableIPsResponse
+  AvailableIPsResponse,
+  NodeIndexServicesResponse,
+  NodeStatusInfo,
+  NodeDeviceInfo,
+  NodeDeviceInfoResponse
 } from '../../types/node'
 import type { 
   ApiResponse, 
@@ -90,6 +94,49 @@ export class NodeService {
   }
 
   /**
+   * 更新节点状态（数字状态码）
+   * @param nodeId 节点ID (node_id)
+   * @param statusCode 新状态码
+   * @returns 更新结果
+   */
+  async updateNodeStatusCode(nodeId: string, statusCode: number): Promise<ApiResponse<void>> {
+    const response = await api.patch(`/nodes/${nodeId}/status`, { status: statusCode })
+    return response.data
+  }
+
+  /**
+   * 获取节点设备信息
+   * @param nodeId 节点ID
+   * @returns 设备信息
+   */
+  async getNodeDeviceInfo(nodeId: string): Promise<NodeDeviceInfoResponse> {
+    const response = await api.get(`/nodes/${nodeId}/deviceinfo`)
+    return response.data
+  }
+
+  /**
+   * 更新节点设备信息
+   * @param nodeId 节点ID
+   * @param deviceInfo 设备信息
+   * @returns 更新结果
+   */
+  async updateNodeDeviceInfo(nodeId: string, deviceInfo: NodeDeviceInfo): Promise<ApiResponse<void>> {
+    const response = await api.put(`/nodes/${nodeId}/deviceinfo`, deviceInfo)
+    return response.data
+  }
+
+  /**
+   * 局部更新节点设备信息
+   * @param nodeId 节点ID
+   * @param deviceInfo 设备信息（部分字段）
+   * @returns 更新结果
+   */
+  async patchNodeDeviceInfo(nodeId: string, deviceInfo: Partial<NodeDeviceInfo>): Promise<ApiResponse<void>> {
+    const response = await api.patch(`/nodes/${nodeId}/deviceinfo`, deviceInfo)
+    return response.data
+  }
+
+  /**
    * 搜索节点
    * @param query 搜索关键词
    * @param params 额外查询参数
@@ -122,6 +169,16 @@ export class NodeService {
   }
 
   /**
+   * 获取节点的索引服务列表
+   * @param nodeId 节点ID (node_id)
+   * @returns 节点索引服务列表
+   */
+  async getNodeIndexServices(nodeId: string): Promise<NodeIndexServicesResponse> {
+    const response = await api.get(`/nodes/${nodeId}/index-services`)
+    return response.data
+  }
+
+  /**
    * 更新节点网络配置
    * @param nodeId 节点ID (node_id)
    * @param config 网络配置数据
@@ -139,6 +196,16 @@ export class NodeService {
    */
   async getNodeNetworkConfig(nodeId: string): Promise<ApiResponse<NodeNetworkConfig>> {
     const response = await api.get(`/nodes/${nodeId}/network-config`)
+    return response.data
+  }
+
+  /**
+   * 获取节点状态信息
+   * @param nodeId 节点ID (node_id)
+   * @returns 节点状态详细信息
+   */
+  async getNodeStatusInfo(nodeId: string): Promise<ApiResponse<NodeStatusInfo>> {
+    const response = await api.get(`/nodes/${nodeId}/status-info`)
     return response.data
   }
 

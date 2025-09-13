@@ -6,26 +6,45 @@ export type ServiceProtocol = 'http' | 'https' | 'tcp' | 'udp'
 export type AuthType = 'bearer' | 'basic' | 'none'
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
 
+export interface ServiceAuthConfig {
+  type: AuthType
+  required: boolean
+  username?: string
+  password?: string
+  token?: string
+}
+
+export interface ServiceConfig {
+  auth: ServiceAuthConfig
+}
+
 export interface ZoneService {
-  service_id: number
+  id: number
+  service_id: string
+  zone_id: string
+  user_id: string
+  node_id?: string
   service_name: string
-  service_type: ServiceType
-  service_status: ServiceStatus
   service_description?: string
-  service_url: string
+  service_type: ServiceType
+  service_address: string
   service_port: number
   service_protocol: ServiceProtocol
-  service_auth_required: boolean
-  service_auth_type: AuthType
-  service_auth_token?: string
-  service_created_by: number
-  service_zone_id: number
-  service_shared_with: number[]
-  service_approved_by?: number
-  service_approval_status: ApprovalStatus
-  service_approval_reason?: string
-  service_created_at: string
-  service_updated_at: string
+  service_is_ipv6: boolean
+  service_is_public: boolean
+  service_priority: number
+  service_max_connections: number
+  service_current_connections: number
+  service_config: ServiceConfig
+  service_remarks?: string
+  service_last_checked_at?: string
+  service_status: number
+  service_status_message?: string
+  created_at: string
+  updated_at: string
+  deleted_at?: string
+  approvals: any[]
+  shares: any[]
   // 扩展字段
   creator_name?: string
   is_owner?: boolean
@@ -36,7 +55,7 @@ export interface CreateZoneServiceRequest {
   service_name: string
   service_type: ServiceType
   service_description?: string
-  service_url: string
+  service_address: string
   service_port: number
   service_protocol: ServiceProtocol
   service_auth_required: boolean
@@ -47,7 +66,7 @@ export interface CreateZoneServiceRequest {
 export interface UpdateZoneServiceRequest {
   service_name?: string
   service_description?: string
-  service_url?: string
+  service_address?: string
   service_port?: number
   service_protocol?: ServiceProtocol
   service_auth_required?: boolean

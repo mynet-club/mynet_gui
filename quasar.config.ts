@@ -12,9 +12,9 @@ export default defineConfig((/* ctx */) => {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
+      'i18n',  // 确保i18n最先初始化
       'init',
       'pinia',
-      'i18n', 
       'notify',
       'axios',
       'theme',
@@ -47,6 +47,16 @@ export default defineConfig((/* ctx */) => {
 
       vueRouterMode: 'history', // available values: 'hash', 'history'
       
+      // 确保生产环境变量正确加载
+      env: {
+        VITE_API_BASE_URL: process.env.VITE_API_BASE_URL,
+        VITE_WS_URL: process.env.VITE_WS_URL,
+        VITE_PUSHER_APP_KEY: process.env.VITE_PUSHER_APP_KEY,
+        VITE_REVERB_HOST: process.env.VITE_REVERB_HOST,
+        VITE_REVERB_PORT: process.env.VITE_REVERB_PORT,
+        VITE_REVERB_SCHEME: process.env.VITE_REVERB_SCHEME
+      },
+      
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
       // publicPath: '/',
@@ -61,14 +71,8 @@ export default defineConfig((/* ctx */) => {
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
 
-      // vitePlugins: [
-      //   ['vite-plugin-checker', {
-      //     vueTsc: true,
-      //     eslint: {
-      //       lintCommand: 'eslint --ext .js,.ts,.vue ./src'
-      //     }
-      //   }, { server: false }]
-      // ]
+      // 移除Vue i18n编译插件，使用纯运行时模式
+      // vitePlugins: []
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver

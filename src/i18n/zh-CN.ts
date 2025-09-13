@@ -15,6 +15,7 @@ export default {
     delete: '删除',
     edit: '编辑',
     add: '添加',
+    update: '更新',
     search: '搜索',
     loading: '加载中...',
     error: '错误',
@@ -34,7 +35,10 @@ export default {
     apply: '应用',
     reset: '重置',
     back: '返回',
-    previous: '上一步'
+    previous: '上一步',
+    copy: '复制',
+    copiedToClipboard: '已复制到剪贴板',
+    copyFailed: '复制失败'
   },
   settings: {
     language: '语言设置',
@@ -56,8 +60,11 @@ export default {
     registerSubtitle: '请填写以下信息创建账户',
     forgotPasswordTitle: '忘记密码',
     forgotPasswordSubtitle: '请输入您的邮箱地址',
+    resetPasswordTitle: '重置密码',
+    resetPasswordSubtitle: '请设置您的新密码',
     emailVerificationTitle: '邮箱验证',
     emailVerificationSubtitle: '请输入验证码',
+    resetVerificationSubtitle: '我们已发送6位验证码到 {email}',
     email: '邮箱',
     password: '密码',
     confirmPassword: '确认密码',
@@ -67,39 +74,121 @@ export default {
     loginButton: '登录',
     registerButton: '注册',
     sendResetLink: '发送重置链接',
+    resetPasswordButton: '重置密码',
     verifyEmail: '验证邮箱',
     resendCode: '重新发送验证码',
+    resendCodeCountdown: '重新发送 ({seconds}s)',
     verificationCode: '验证码',
     agreeTerms: '我同意服务条款',
     noAccount: '还没有账户？',
     alreadyHaveAccount: '已有账户？',
     rememberPassword: '记起密码了？',
     backToLogin: '返回登录',
+    backToForgotPassword: '返回忘记密码',
     loginLink: '登录',
     registerLink: '注册',
     continueToLogin: '继续登录',
+    didntReceiveCode: '没有收到验证码？',
     emailRequired: '请输入邮箱',
     passwordRequired: '请输入密码',
     confirmPasswordRequired: '请确认密码',
     nameRequired: '请输入姓名',
     emailInvalid: '请输入有效的邮箱地址',
     passwordMinLength: '密码至少8位',
+    passwordTooShort: '密码至少需要8位字符',
     passwordMismatch: '两次密码不一致',
     verificationCodeRequired: '请输入验证码',
+    verificationCodeInvalid: '验证码格式不正确',
     loginFailed: '登录失败，请检查凭据',
     registrationSuccessful: '注册成功！请检查邮箱验证',
     passwordResetSent: '密码重置链接已发送到您的邮箱！',
+    passwordResetSuccess: '密码重置成功！即将跳转到登录页面...',
+    passwordResetFailed: '密码重置失败',
     emailVerified: '邮箱验证成功！',
     verificationCodeSent: '验证码已发送！',
+    verificationFailed: '验证失败',
+    resendCodeFailed: '重发验证码失败',
+    sendResetCodeFailed: '发送重置码失败',
     resendCooldown: '{seconds}秒后可重新发送',
     verificationSuccess: '验证成功',
     verificationSuccessSubtitle: '您的邮箱已验证，现在可以登录了',
     namePlaceholder: '请输入您的姓名',
     emailPlaceholder: '请输入您的邮箱',
     passwordPlaceholder: '请输入您的密码',
+    newPasswordPlaceholder: '请输入新密码',
     confirmPasswordPlaceholder: '请再次输入您的密码',
+    verificationCodePlaceholder: '请输入6位验证码',
     invitationPlaceholder: '请输入邀请码（可选）',
-    invitationRequired: '请输入邀请码'
+    invitationRequired: '请输入邀请码',
+    
+    // 账号激活相关
+    accountActivation: '账号激活',
+    activationInstruction: '请选择激活方式',
+    useCode: '使用验证码',
+    checkEmail: '查看邮件',
+    activationCode: '激活码',
+    activate: '激活',
+    activating: '正在激活...',
+    activationSuccess: '激活成功',
+    activationFailed: '激活失败',
+    accountActivated: '您的账号已成功激活！',
+    alreadyActivated: '账号已激活',
+    accountAlreadyActive: '您的账号已经是激活状态',
+    invalidActivationLink: '激活链接无效或已过期',
+    activationError: '激活过程中出现错误',
+    checkEmailInstruction: '我们已向您的邮箱发送激活链接',
+    checkEmailForReset: '请查看邮箱中的密码重置链接',
+    enterActivationCode: '输入激活码',
+    enterCodeInstruction: '请输入您收到的6位激活码',
+    codeRequired: '请输入验证码',
+    codeLength: '验证码必须是6位',
+    codeResent: '验证码已重新发送',
+    emailResent: '邮件已重新发送',
+    resendFailed: '重新发送失败',
+    goToLogin: '前往登录',
+    backToRegister: '返回注册',
+    missingParameters: '缺少必要参数',
+    registrationComplete: '注册完成！请登录您的账户',
+    
+    // 密码重置相关
+    resetPassword: '重置密码',
+    resetPasswordInstruction: '请设置您的新密码',
+    verifyToken: '验证令牌',
+    validatingToken: '正在验证令牌...',
+    tokenValid: '令牌验证成功',
+    tokenInvalid: '令牌无效或已过期',
+    tokenValidationFailed: '令牌验证失败',
+    newPassword: '新密码',
+    passwordStrength: '密码强度',
+    selectMethod: '选择方式',
+    resetMethodInstruction: '请选择重置密码的方式',
+    resetCode: '重置码',
+    verify: '验证',
+    enterEmail: '输入邮箱',
+    sendResetCode: '发送重置码',
+    requestNewReset: '请求新的重置链接',
+    resetLinkSent: '重置链接已发送',
+    resetCodeSent: '重置码已发送',
+    requestFailed: '请求失败',
+    invalidCode: '验证码无效',
+    resetFailed: '重置失败',
+    sendFailed: '发送失败',
+    send: '发送',
+    
+    // 密码强度等级
+    strength: {
+      weak: '弱',
+      fair: '一般',
+      good: '良好',
+      strong: '强'
+    },
+    
+    // 新增字段
+    confirmNewPassword: '确认新密码',
+    passwordWeak: '弱',
+    passwordFair: '一般', 
+    passwordGood: '良好',
+    passwordStrong: '强'
   },
   dashboard: {
     title: '仪表板',
@@ -140,6 +229,8 @@ export default {
     ippools: 'IP池管理',
     zones: '区域管理',
     zoneSharing: '区域分享',
+    zoneServices: '区域服务',
+    services: '服务管理',
     social: '社交网络',
     apiTest: 'API测试',
     help: '帮助文档'
@@ -172,7 +263,8 @@ export default {
       active: '活跃',
       inactive: '非活跃',
       connecting: '连接中',
-      error: '错误'
+      error: '错误',
+      unknown: '未知'
     },
     
     // 连接类型
@@ -207,9 +299,27 @@ export default {
       packetLoss: '丢包率',
       connectionType: '连接类型',
       lastActive: '最后活跃',
+      lastUpdate: '最后更新',
       unknownUser: '未知用户',
       viewDetails: '查看详情',
-      disconnect: '断开连接'
+      editRoute: '编辑路由',
+      disconnect: '断开连接',
+      relayMode: '中继模式',
+      priority: '优先级',
+      vpnType: 'VPN类型',
+      targetUser: '目标用户',
+      sourceNode: '源节点',
+      targetNode: '目标节点',
+      unknownType: '未知类型',
+      unknownMode: '未知模式'
+    },
+
+    // 中继模式
+    relayModes: {
+      direct: '直连',
+      relay: '中继',
+      p2p: '点对点',
+      hybrid: '混合模式'
     },
     
     // 待处理连接
@@ -219,6 +329,7 @@ export default {
       noIncomingConnections: '暂无接收的连接请求',
       noOutgoingConnections: '暂无发送的连接请求',
       connectionType: '连接类型',
+      vpnType: 'VPN类型',
       requestedAt: '请求时间',
       approve: '批准',
       reject: '拒绝'
@@ -266,6 +377,62 @@ export default {
       connectionError: '连接失败',
       defaultMessage: '我希望通过我的节点 {myNodeName} 连接到您的节点 {friendNodeName}，用于网络通信。谢谢！',
       goToSocial: '前往社交网络'
+    },
+
+    // 基于节点的路由管理
+    nodeBased: {
+      selectNode: '选择我的节点',
+      selectNodeDescription: '点击您的节点卡片查看该节点的路由信息',
+      viewRoutes: '查看路由',
+      backToNodes: '返回节点列表',
+      noNodes: '暂无节点',
+      noNodesDescription: '您还没有创建任何节点，请先创建节点',
+      noDescription: '暂无描述',
+      nodeId: '节点ID',
+      totalRoutes: '路由总数',
+      totalNodes: '节点总数',
+      routeCount: '路由数',
+      nodeType: '节点类型',
+      vpnType: 'VPN类型',
+      status: '状态',
+      unknown: '未知',
+      routesList: '路由列表',
+      nodesList: '节点列表',
+      noRoutesForNode: '该节点暂无路由',
+      noNodesForNode: '该节点暂无节点',
+      statusLabels: {
+        active: '活跃',
+        inactive: '非活跃',
+        pending: '待配置',
+        unknown: '未知'
+      }
+    },
+
+    // 节点路由显示
+    nodeRoutes: {
+      nodeId: '节点ID',
+      totalRoutes: '路由总数',
+      noDescription: '暂无描述',
+      searchPlaceholder: '搜索路由信息...',
+      refresh: '刷新',
+      noRoutes: '该节点暂无路由',
+      noSearchResults: '未找到匹配的路由',
+      tryDifferentSearch: '请尝试其他搜索条件',
+      noRoutesForNode: '该节点还没有建立任何路由连接',
+      vpnType: 'VPN类型',
+      relayMode: '中继模式',
+      priority: '优先级',
+      remoteUser: '远程用户',
+      lastUpdate: '最后更新',
+      viewDetails: '查看详情',
+      editRoute: '编辑路由',
+      disconnect: '断开连接',
+      unknownType: '未知类型',
+      unknownMode: '未知模式',
+      direction: {
+        outgoing: '出站路由',
+        incoming: '入站路由'
+      }
     },
     
     // 配置管理
@@ -655,7 +822,8 @@ export default {
       expiresAt: '过期时间',
       usedAt: '使用时间',
       usedBy: '使用者',
-      createdAt: '创建时间', 
+      createdAt: '创建时间',
+      usageCount: '使用次数',
       copyInviteLink: '复制邀请码链接',
       active: '有效',
       used: '已使用',
@@ -690,7 +858,9 @@ export default {
     friendRequestRejected: '好友请求已拒绝',
     friendRemoved: '好友 "{name}" 已删除',
     invitationCreated: '邀请码已生成',
+    invitationDeleted: '邀请码已删除',
     invitationCopied: '邀请码已复制到剪贴板',
+    confirmDeleteInvitation: '确定要删除邀请码 "{code}" 吗？',
     // 错误消息
     fetchOverviewError: '获取社交概览失败',
     fetchFriendsError: '获取好友列表失败',
@@ -702,6 +872,7 @@ export default {
     friendRemoveError: '删除好友失败',
     fetchInvitationsError: '获取邀请码列表失败',
     invitationCreateError: '创建邀请码失败',
+    invitationDeleteError: '删除邀请码失败',
     
     // 新增的错误和成功消息
     noFriendNodes: '该好友暂无节点',
@@ -722,15 +893,20 @@ export default {
     noPoolsFound: '未找到IP池',
     // 统计卡片
     totalPools: '总IP池数',
-    availablePools: '可用IP池',
+    createdPools: '已创建IP池',
+    availablePools: '可创建IP池',
     allocatedPools: '已分配IP池',
     totalIPs: '总IP地址数',
     availableIPs: '可用IP地址',
     allocatedIPs: '已分配IP地址',
+    allocatedToNodes: '已使用分配IP数',
+    poolUsageRate: 'IP池使用率',
     usageRate: '使用率',
     // 表格字段
     poolName: '池名称',
+    poolId: 'IP池ID',
     network: '网络段',
+    ipGroupSequence: 'IP分组序号',
     ipRange: 'IP范围',
     totalCount: '总数',
     totalIPPoolsCount: '共 {count} 个IP池',
@@ -739,6 +915,9 @@ export default {
     status: '状态',
     createdAt: '创建时间',
     actions: '操作',
+    unnamedPool: '未命名IP池',
+    noPools: '暂无IP池',
+    noPoolsHint: '点击创建按钮添加新的IP池',
     // 状态
     statusAvailable: '可用',
     statusAllocated: '已分配',
@@ -781,6 +960,8 @@ export default {
     releaseIPDialog: '释放IP地址',
     poolDetailsDialog: 'IP池详情',
     // 确认消息
+    deleteConfirmTitle: '删除确认',
+    deleteConfirmMessage: '确定要删除IP池 "{name}" 吗？此操作不可撤销。',
     deletePoolConfirm: '确定要删除IP池 "{name}" 吗？此操作不可撤销。',
     releaseIPConfirm: '确定要释放IP地址 "{ip}" 吗？',
     // 验证消息
@@ -862,7 +1043,6 @@ export default {
     ipContainsPlaceholder: '输入IP地址片段...',
     quickSearch: '快速搜索...',
     viewOptions: '显示选项',
-    unnamedPool: '未命名池',
     manage: '管理',
     usageAll: '全部',
     usageLow: '低使用率 (0-30%)',
@@ -873,8 +1053,6 @@ export default {
     // 视图模式
     cardView: '卡片视图',
     tableView: '表格视图',
-    noPools: '暂无IP池',
-    noPoolsHint: '点击"创建IP池"按钮开始创建第一个IP池',
     updatedAt: '更新时间'
   },
   apiTest: {
@@ -949,8 +1127,9 @@ export default {
       serviceType: '服务类型',
       serviceTypeRequired: '请选择服务类型',
       serviceDescription: '服务描述',
-      serviceUrl: '服务地址',
-      serviceUrlRequired: '请输入服务地址',
+      serviceAddress: '服务地址',
+      serviceAddressRequired: '请输入服务地址',
+      associatedNode: '关联节点',
       servicePort: '端口',
       servicePortRequired: '请输入端口',
       servicePortInvalid: '端口范围应为1-65535',
@@ -959,10 +1138,25 @@ export default {
       authRequired: '需要认证',
       authType: '认证类型',
       authToken: '认证令牌',
+      authUsername: '用户名',
+      authPassword: '密码',
+      shareSettings: '分享设置',
+      shareMode: '分享模式',
       authTypes: {
         none: '无认证',
         bearer: 'Bearer Token',
         basic: 'Basic Auth'
+      },
+      protocols: {
+        http: 'HTTP',
+        https: 'HTTPS',
+        tcp: 'TCP',
+        udp: 'UDP'
+      },
+      shareModes: {
+        private: '私有',
+        friends: '好友可见',
+        public: '公开'
       }
     },
     
@@ -993,5 +1187,124 @@ export default {
       shareFailed: '分享服务失败',
       approvalFailed: '申请公开失败'
     }
+  },
+  
+  user: {
+    overview: '概览',
+    editProfile: '编辑资料',
+    security: '安全设置',
+    preferences: '偏好设置',
+    activity: '活动记录',
+    
+    // 基本信息
+    basicInfo: '基本信息',
+    userId: '用户ID',
+    name: '姓名',
+    email: '邮箱',
+    phone: '电话',
+    bio: '个人简介',
+    role: '角色',
+    joinDate: '加入时间',
+    
+    // 统计信息
+    statistics: '统计信息',
+    totalNodes: '节点总数',
+    totalRoutes: '路由总数',
+    totalFriends: '好友总数',
+    totalLogins: '登录次数',
+    
+    // 权限
+    permissions: '权限',
+    noPermissions: '暂无特殊权限',
+    
+    // 表单相关
+    nameRequired: '请输入姓名',
+    emailRequired: '请输入邮箱',
+    emailInvalid: '邮箱格式不正确',
+    signature: '个性签名',
+    signatureHint: '简单的个性签名或座右铭',
+    nameTooLong: '姓名长度不能超过100个字符',
+    phoneTooLong: '手机号长度不能超过20个字符',
+    bioHint: '简单介绍一下自己',
+    saveChanges: '保存更改',
+    cancel: '取消',
+    
+    // 头像
+    changeAvatar: '更换头像',
+    avatarUrl: '头像链接',
+    avatarUrlHint: '输入头像图片的URL地址',
+    uploadAvatar: '上传头像文件',
+    avatarUpdated: '头像更新成功',
+    avatarUpdateFailed: '头像更新失败',
+    avatarSizeLimit: '头像文件大小不能超过1MB',
+    avatarTypeLimit: '请选择图片文件（支持jpeg、png、jpg、gif格式）',
+    
+    // 密码安全
+    passwordSecurity: '密码安全',
+    changePassword: '修改密码',
+    changePasswordDesc: '定期更换密码以保护账户安全',
+    change: '修改',
+    currentPassword: '当前密码',
+    newPassword: '新密码',
+    confirmPassword: '确认密码',
+    currentPasswordRequired: '请输入当前密码',
+    newPasswordRequired: '请输入新密码',
+    passwordMinLength: '密码长度至少8位',
+    confirmPasswordRequired: '请确认新密码',
+    passwordMismatch: '两次输入的密码不一致',
+    lastPasswordChange: '上次修改密码',
+    never: '从未',
+    passwordChanged: '密码修改成功',
+    passwordChangeFailed: '密码修改失败',
+    
+    // 两步验证
+    twoFactorAuth: '两步验证',
+    enable2FA: '启用两步验证',
+    twoFactorAuthDesc: '为账户添加额外的安全保护',
+    backupCodes: '备用代码',
+    backupCodesDesc: '生成备用验证码以备不时之需',
+    generateCodes: '生成代码',
+    '2faEnabled': '两步验证已启用',
+    '2faDisabled': '两步验证已禁用',
+    '2faUpdateFailed': '两步验证设置失败',
+    
+    // 会话管理
+    activeSessions: '活跃会话',
+    currentSession: '当前会话',
+    activeSession: '活跃会话',
+    revokeSession: '撤销会话',
+    sessionRevoked: '会话已撤销',
+    sessionRevokeFailed: '撤销会话失败',
+    
+    // 外观设置
+    appearance: '外观设置',
+    theme: '主题',
+    themeDesc: '选择你喜欢的界面主题',
+    themeAuto: '跟随系统',
+    themeLight: '浅色主题',
+    themeDark: '深色主题',
+    language: '语言',
+    languageDesc: '选择界面显示语言',
+    
+    // 通知设置
+    notifications: '通知设置',
+    emailNotifications: '邮件通知',
+    emailNotificationsDesc: '接收重要事件的邮件通知',
+    pushNotifications: '推送通知',
+    pushNotificationsDesc: '接收浏览器推送通知',
+    systemAlerts: '系统警报',
+    systemAlertsDesc: '接收系统状态和安全警报',
+    
+    // 活动记录
+    recentActivity: '最近活动',
+    noActivity: '暂无活动记录',
+    
+    // 消息提示
+    profileUpdated: '资料更新成功',
+    profileUpdateFailed: '资料更新失败',
+    preferencesUpdated: '偏好设置已更新',
+    preferencesUpdateFailed: '偏好设置更新失败',
+    preferencesReset: '偏好设置已重置为默认值',
+    resetToDefault: '重置为默认'
   }
 }

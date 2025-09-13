@@ -6,8 +6,8 @@
       <!-- 节点名称 -->
       <q-input
         v-model="form.node_name"
-        label="节点名称"
         outlined
+        placeholder="节点名称"
         :rules="[
           val => !!val || '节点名称不能为空',
           val => val.length <= 50 || '节点名称长度不能超过50个字符'
@@ -18,10 +18,10 @@
       <!-- 节点描述 -->
       <q-input
         v-model="form.description"
-        label="节点描述"
         type="textarea"
         rows="4"
         outlined
+        placeholder="节点描述"
         :rules="[
           val => !val || val.length <= 500 || '描述长度不能超过500个字符'
         ]"
@@ -31,16 +31,18 @@
       <!-- VPN类型 -->
       <div class="q-mb-md">
         <div class="text-subtitle2 q-mb-sm">VPN类型</div>
-        <div class="row q-gutter-sm">
+        <div class="vpn-type-buttons">
           <q-btn
             v-for="type in vpnTypeOptions"
             :key="type.value"
-            :color="form.vpn_type === type.value ? 'primary' : 'grey-4'"
-            :text-color="form.vpn_type === type.value ? 'white' : 'grey-8'"
+            :color="form.vpn_type === type.value ? 'primary' : 'grey-5'"
+            :text-color="form.vpn_type === type.value ? 'white' : 'dark'"
+            :unelevated="form.vpn_type === type.value"
             :outline="form.vpn_type !== type.value"
             @click="handleVpnTypeChange(type.value)"
             :disable="loading"
-            class="q-px-md"
+            size="sm"
+            class="vpn-type-btn"
           >
             <q-icon :name="type.icon" class="q-mr-xs" />
             {{ type.label }}
@@ -48,41 +50,29 @@
         </div>
       </div>
 
-      <!-- 监听端口 -->
-      <q-input
-        v-model.number="form.node_port"
-        label="监听端口"
-        type="number"
-        outlined
-        :rules="[
-          val => !!val || '监听端口不能为空',
-          val => val >= 1 && val <= 65535 || '端口范围必须在1-65535之间'
-        ]"
-        :disable="loading"
-      />
-
       <!-- 软件版本 -->
       <q-input
         v-model="form.node_app_version"
-        label="软件版本"
         outlined
-        placeholder="例如: v1.0.0"
+        placeholder="软件版本 (例如: v1.0.0)"
         :disable="loading"
       />
 
       <!-- 节点类型 -->
       <div class="q-mb-md">
         <div class="text-subtitle2 q-mb-sm">节点类型 (可多选)</div>
-        <div class="row q-gutter-sm">
+        <div class="node-type-buttons">
           <q-btn
             v-for="type in nodeTypeOptions"
             :key="type.value"
-            :color="hasNodeType(type.value) ? 'secondary' : 'grey-4'"
-            :text-color="hasNodeType(type.value) ? 'white' : 'grey-8'"
+            :color="hasNodeType(type.value) ? 'primary' : 'grey-5'"
+            :text-color="hasNodeType(type.value) ? 'white' : 'dark'"
+            :unelevated="hasNodeType(type.value)"
             :outline="!hasNodeType(type.value)"
             @click="toggleNodeType(type.value)"
             :disable="loading"
-            class="q-px-md"
+            size="sm"
+            class="node-type-btn"
           >
             <q-icon :name="type.icon" class="q-mr-xs" />
             {{ type.label }}
@@ -101,7 +91,7 @@
           :true-value="'active'"
           :false-value="'inactive'"
           :label="`当前状态: ${form.node_status_active === 'active' ? '激活' : '停用'}`"
-          color="positive"
+          color="primary"
           :disable="loading"
         />
       </div>
@@ -129,29 +119,6 @@
         </q-btn>
       </div>
     </q-form>
-
-    <!-- 端口切换确认对话框 -->
-    <q-dialog v-model="showPortChangeDialog" persistent>
-      <q-card>
-        <q-card-section class="row items-center">
-          <q-avatar icon="info" color="warning" text-color="white" />
-          <span class="q-ml-sm">
-            切换VPN类型会影响端口设置
-          </span>
-        </q-card-section>
-        <q-card-section>
-          <div>当前端口为 {{ form.node_port }}，是否切换到推荐端口 {{ pendingVpnType ? vpnDefaultPorts[pendingVpnType] : '' }} ？</div>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="保持当前端口" @click="cancelPortChange" />
-          <q-btn
-            color="primary"
-            label="使用推荐端口"
-            @click="confirmPortChange"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </div>
 </template>
 
@@ -179,7 +146,6 @@ const form = ref({
   node_name: '',
   description: '',
   vpn_type: '' as VpnType | '',
-  node_port: 51820,
   node_app_version: '',
   node_type: 0, // 使用数字表示位运算的节点类型
   node_status_active: 'active' as 'active' | 'inactive'
@@ -190,7 +156,6 @@ const originalData = ref({
   node_name: '',
   description: '',
   vpn_type: '' as VpnType | '',
-  node_port: 51820,
   node_app_version: '',
   node_type: 0, // 使用数字表示位运算的节点类型
   node_status_active: 'active' as 'active' | 'inactive'
@@ -227,17 +192,6 @@ const tagOptions = ref([
   'client'
 ])
 
-// VPN类型对应的默认端口
-const vpnDefaultPorts: Record<VpnType, number> = {
-  gnb: 9001,
-  wireguard: 51820,
-  openvpn: 1194
-}
-
-// 端口变更提醒
-const showPortChangeDialog = ref(false)
-const pendingVpnType = ref<VpnType | ''>('')
-
 // 计算属性
 const hasChanges = computed(() => {
   return JSON.stringify(form.value) !== JSON.stringify(originalData.value)
@@ -264,7 +218,6 @@ const initializeForm = () => {
       node_name: node.value.node_name || '',
       description: node.value.description || '',
       vpn_type: (node.value.vpn_type || '') as VpnType | '',
-      node_port: node.value.node_port || 51820,
       node_app_version: node.value.node_app_version || '',
       node_type: typeof node.value.node_type === 'number' ? node.value.node_type : 0,
       node_status_active: nodeStatus
@@ -318,7 +271,6 @@ const onSubmit = async () => {
       node_name: form.value.node_name,
       ...(form.value.description && { description: form.value.description }),
       ...(form.value.vpn_type && { vpn_type: form.value.vpn_type }),
-      ...(form.value.node_port && { node_port: form.value.node_port }),
       ...(form.value.node_app_version && { node_app_version: form.value.node_app_version }),
       ...(form.value.node_type > 0 && { node_type: form.value.node_type }),
       ...(form.value.node_status_active && { node_status: form.value.node_status_active })
@@ -337,43 +289,9 @@ const onSubmit = async () => {
 
 // VPN类型切换处理
 const handleVpnTypeChange = (newType: VpnType) => {
-  const currentPort = form.value.node_port
-  const recommendedPort = vpnDefaultPorts[newType]
-  
-  // 如果当前端口为空或为默认值，直接设置推荐端口
-  if (!currentPort || currentPort === 51820 || 
-      Object.values(vpnDefaultPorts).includes(currentPort)) {
-    form.value.vpn_type = newType
-    form.value.node_port = recommendedPort
-    notifySuccess(`已切换到 ${newType.toUpperCase()}，端口已设置为推荐值 ${recommendedPort}`)
-  } else {
-    // 如果用户手动设置了端口，提醒是否要切换
-    pendingVpnType.value = newType
-    showPortChangeDialog.value = true
-  }
-}
-
-// 确认端口变更
-const confirmPortChange = () => {
-  if (pendingVpnType.value) {
-    const newType = pendingVpnType.value
-    const recommendedPort = vpnDefaultPorts[newType]
-    form.value.vpn_type = newType
-    form.value.node_port = recommendedPort
-    notifySuccess(`已切换到 ${newType.toUpperCase()}，端口已更新为推荐值 ${recommendedPort}`)
-  }
-  showPortChangeDialog.value = false
-  pendingVpnType.value = ''
-}
-
-// 取消端口变更
-const cancelPortChange = () => {
-  if (pendingVpnType.value) {
-    form.value.vpn_type = pendingVpnType.value
-    notifySuccess(`已切换到 ${pendingVpnType.value.toUpperCase()}，保持当前端口 ${form.value.node_port}`)
-  }
-  showPortChangeDialog.value = false
-  pendingVpnType.value = ''
+  // 直接切换VPN类型，端口配置交给节点配置页面处理
+  form.value.vpn_type = newType
+  notifySuccess(`已切换到 ${newType.toUpperCase()}，请到节点配置页面设置相关端口`)
 }
 
 // 监听节点数据变化
@@ -403,7 +321,7 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .basic-info-page {
   max-width: 600px;
   margin: 0 auto;

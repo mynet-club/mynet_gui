@@ -2,6 +2,7 @@
 @import '../styles/auth.scss';
 @import '../styles/dashboard.scss';
 @import '../styles/card-layout.scss';
+@import '../styles/edit-forms.scss';
 
 /* 全局样式 */
 body {
