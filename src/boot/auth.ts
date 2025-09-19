@@ -195,7 +195,7 @@ export default boot(async ({ router, app }) => {
     })
     
     // 防止无限重定向：如果已经在正确的页面，直接放行
-    if ((isAuthenticated && (to.path === '/app/dashboard' || to.path === '/dashboard')) || 
+    if ((isAuthenticated && to.path === '/app/dashboard') || 
         (!isAuthenticated && to.path === '/auth/login')) {
       debug.log('🔐 [Router] Already at correct destination, allowing navigation')
       next()
@@ -213,7 +213,7 @@ export default boot(async ({ router, app }) => {
       debug.log('🔐 [Router] Redirecting to login - not authenticated')
       // 未登录且不是认证页面，重定向到登录页
       next('/auth/login')
-    } else if (isAuthenticated && isAuthRoute && to.path !== '/app/dashboard' && to.path !== '/dashboard') {
+    } else if (isAuthenticated && isAuthRoute && to.path !== '/app/dashboard') {
       debug.log('🔐 [Router] Redirecting to dashboard - already authenticated')
       // 已登录用户访问认证页面，重定向到仪表板
       next('/app/dashboard')

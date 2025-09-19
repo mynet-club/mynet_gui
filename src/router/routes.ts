@@ -6,6 +6,21 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('../pages/IndexPage.vue')
   },
+  
+  // 重定向旧的路径到新的 /app 结构
+  {
+    path: '/dashboard',
+    redirect: '/app/dashboard'
+  },
+  {
+    path: '/nodes',
+    redirect: '/app/nodes'
+  },
+  {
+    path: '/routes',
+    redirect: '/app/routes'
+  },
+  
   {
     path: '/app',
     component: () => import('../layouts/MainLayout.vue'),
