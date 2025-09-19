@@ -156,7 +156,7 @@ export function useAuth() {
       // 确保认证状态已经更新
       if (authStore.isAuthenticated) {
         debug.log('🔧 [useAuth] Navigating to dashboard...')
-        await router.push('/dashboard')
+        await router.push('/app/dashboard')
         debug.log('🔧 [useAuth] Navigation to dashboard completed')
       } else {
         debug.error('🔧 [useAuth] Login succeeded but not authenticated')
