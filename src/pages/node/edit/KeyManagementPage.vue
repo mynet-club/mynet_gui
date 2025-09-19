@@ -12,7 +12,16 @@
             <q-skeleton-loader v-if="loading" type="QCard" />
             <div v-else>
               <q-list separator>
-                <q-item
+              }).onCancel(() => {
+              // 下载私钥
+              const filename = `node_${nodeId.value}_private_key.txt`
+              const blob = new Blob([result.private_key], { type: 'text/plain' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = filename
+              a.click()
+              URL.revokeObjectURL(url)    <q-item
                   v-for="key in keys"
                   :key="key.id"
                   clickable
@@ -531,8 +540,8 @@ const createKey = async () => {
     }
     isUpdateMode.value = false
     
-    // 刷新密钥列表
-    await refreshKeys()
+    // 注意：generateKeyPair 函数内部已经调用了 loadKeys() 来刷新密钥列表
+    // 不需要在这里再次调用 refreshKeys() 避免重复请求
     
   } catch (error: any) {
     const actionText = isUpdateMode.value ? '更新' : '创建'
@@ -577,7 +586,7 @@ const deleteKey = async () => {
 const downloadPublicKey = () => {
   if (!selectedKey.value) return
   
-  const filename = `${selectedKey.value.id}_public.key`
+  const filename = `${selectedKey.value.id}_public.txt`
   const blob = new Blob([selectedKey.value.public_key], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -590,7 +599,7 @@ const downloadPublicKey = () => {
 const downloadPrivateKey = () => {
   if (!selectedKey.value?.private_key) return
   
-  const filename = `${selectedKey.value.id}_private.key`
+  const filename = `${selectedKey.value.id}_private.txt`
   const blob = new Blob([selectedKey.value.private_key], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
