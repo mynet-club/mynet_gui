@@ -1452,7 +1452,8 @@ export default {
       basicConfig: 'Basic Configuration',
       basicConfigDesc: 'Required basic parameter configuration',
       wireGuardBasicDesc: 'Required WireGuard basic parameters',
-      listenPort: 'Listen Port'
+      listenPort: 'Listen Port',
+      gnbVirtualNetwork: 'GNB Virtual Network'
     },
     detail: {
       deleteNodeFailed: 'Failed to delete node, please try again'

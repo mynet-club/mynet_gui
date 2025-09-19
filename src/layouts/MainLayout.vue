@@ -20,11 +20,8 @@
 
         <!-- 语言切换 -->
         <q-btn-dropdown 
+          flat
           dense
-          :icon="'language'"
-          :label="$q.screen.gt.sm ? getCurrentLanguageLabel() : ''"
-          class="q-mr-sm"
-        >
           :icon="'language'"
           :label="$q.screen.gt.sm ? getCurrentLanguageLabel() : ''"
           class="q-mr-sm"
@@ -142,7 +139,7 @@
               {{ user?.name || 'User' }}
             </q-item-label>
             <q-separator />
-            <q-item clickable @click="$router.push('/app/profile')">>
+            <q-item clickable @click="$router.push('/app/profile')">
               <q-item-section avatar>
                 <q-icon name="person" />
               </q-item-section>

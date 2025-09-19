@@ -870,7 +870,7 @@ const getEndpointAddress = () => {
 
 // 新增的快速操作方法
 const goToNetworkConfig = () => {
-  router.push(`/app/nodes/${nodeId.value}/network`)
+  router.push(`/app/nodes/${nodeId.value}/edit/network`)
 }
 
 const goToIPManagement = () => {
