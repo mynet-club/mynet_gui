@@ -212,7 +212,7 @@ const getStatusColor = (status: string) => {
 }
 
 const goBack = () => {
-  router.push('/routes')
+  router.push('/app/routes')
 }
 
 const goToNextStep = () => {
@@ -224,7 +224,7 @@ const goToNextStep = () => {
   // 将选中的好友存储到会话存储中
   sessionStorage.setItem('route-create-friend', JSON.stringify(selectedFriend.value))
   
-  router.push('/routes/create/prev_2')
+  router.push('/app/routes/create/prev_2')
 }
 
 // 初始化

@@ -226,7 +226,7 @@ const handleViewRouteDetails = (route: any) => {
 
 const handleEditRoute = (route: any) => {
   // 导航到路由编辑页面
-  router.push(`/routes/edit/${route.route_id}`)
+  router.push(`/app/routes/edit/${route.route_id}`)
 }
 
 const handleApproveConnection = (connectionId: string | number) => {
@@ -238,7 +238,7 @@ const handleRejectConnection = (connectionId: string | number) => {
 }
 
 const handleViewFriend = (friendId: string | number) => {
-  router.push(`/social?friend=${friendId}`)
+  router.push(`/app/social?friend=${friendId}`)
 }
 
 // 好友节点相关方法

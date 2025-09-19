@@ -415,11 +415,11 @@ const goToCreate = () => {
 }
 
 const goToDetail = (nodeId: string | number) => {
-  router.push(`/nodes/${nodeId}`)
+  router.push(`/app/nodes/${nodeId}`)
 }
 
 const goToEdit = (nodeId: string | number) => {
-  router.push(`/nodes/${nodeId}/edit`)
+  router.push(`/app/nodes/${nodeId}/edit`)
 }
 
 const refreshNodes = async () => {

@@ -238,11 +238,11 @@ const getStatusColor = (status: string) => {
 }
 
 const changeFriend = () => {
-  router.push('/routes/create/prev_1')
+  router.push('/app/routes/create/prev_1')
 }
 
 const goBack = () => {
-  router.push('/routes/create/prev_1')
+  router.push('/app/routes/create/prev_1')
 }
 
 const goToNextStep = () => {
@@ -254,7 +254,7 @@ const goToNextStep = () => {
   // 将选中的节点存储到会话存储中
   sessionStorage.setItem('route-create-friend-node', JSON.stringify(selectedNode.value))
   
-  router.push('/routes/create/prev_3')
+  router.push('/app/routes/create/prev_3')
 }
 
 // 获取好友节点列表
@@ -284,7 +284,7 @@ onMounted(async () => {
   const savedFriend = sessionStorage.getItem('route-create-friend')
   if (!savedFriend) {
     notify.error(t('routes.create.step2.noFriendSelected'))
-    router.push('/routes/create/prev_1')
+    router.push('/app/routes/create/prev_1')
     return
   }
   
@@ -292,7 +292,7 @@ onMounted(async () => {
     selectedFriend.value = JSON.parse(savedFriend)
   } catch (error) {
     debug.error('解析已保存的好友数据失败:', error)
-    router.push('/routes/create/prev_1')
+    router.push('/app/routes/create/prev_1')
     return
   }
   

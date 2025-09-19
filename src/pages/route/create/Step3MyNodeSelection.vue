@@ -407,7 +407,7 @@ const getNodeStatusText = (node: any) => {
 }
 
 const goBack = () => {
-  router.push('/routes/create/prev_2')
+  router.push('/app/routes/create/prev_2')
 }
 
 const goToNextStep = () => {
@@ -424,7 +424,7 @@ const goToNextStep = () => {
   // 将选中的我的节点存储到会话存储中
   sessionStorage.setItem('route-create-my-node', JSON.stringify(selectedMyNode.value))
   
-  router.push('/routes/create/prev_4')
+  router.push('/app/routes/create/prev_4')
 }
 
 // 获取我的节点列表
@@ -615,7 +615,7 @@ onMounted(async () => {
   const savedFriend = sessionStorage.getItem('route-create-friend')
   if (!savedFriend) {
     notify.error(t('routes.create.step3.noFriendSelected'))
-    router.push('/routes/create/prev_1')
+    router.push('/app/routes/create/prev_1')
     return
   }
   
@@ -623,7 +623,7 @@ onMounted(async () => {
   const savedFriendNode = sessionStorage.getItem('route-create-friend-node')
   if (!savedFriendNode) {
     notify.error(t('routes.create.step3.noFriendNodeSelected'))
-    router.push('/routes/create/prev_2')
+    router.push('/app/routes/create/prev_2')
     return
   }
   
@@ -632,7 +632,7 @@ onMounted(async () => {
     selectedFriendNode.value = JSON.parse(savedFriendNode)
   } catch (error) {
     debug.error('解析已保存的数据失败:', error)
-    router.push('/routes/create/prev_1')
+    router.push('/app/routes/create/prev_1')
     return
   }
   

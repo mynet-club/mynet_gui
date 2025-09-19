@@ -223,10 +223,10 @@ const goBack = () => {
       cancel: true,
       persistent: true
     }).onOk(() => {
-      router.push(`/nodes/${nodeId.value}`)
+      router.push(`/app/nodes/${nodeId.value}`)
     })
   } else {
-    router.push(`/nodes/${nodeId.value}`)
+    router.push(`/app/nodes/${nodeId.value}`)
   }
 }
 

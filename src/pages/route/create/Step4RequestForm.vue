@@ -218,7 +218,7 @@ const requestForm = reactive({
 
 // 方法
 const goBack = () => {
-  router.push('/routes/create/prev_3')
+  router.push('/app/routes/create/prev_3')
 }
 
 const submitRequest = async () => {
@@ -260,12 +260,12 @@ const submitRequest = async () => {
 
 const goToRoutes = () => {
   showSuccessDialog.value = false
-  router.push('/routes')
+  router.push('/app/routes')
 }
 
 const createAnother = () => {
   showSuccessDialog.value = false
-  router.push('/routes/create/prev_1')
+  router.push('/app/routes/create/prev_1')
 }
 
 // 初始化
@@ -277,7 +277,7 @@ onMounted(() => {
   
   if (!savedFriend || !savedFriendNode || !savedMyNode) {
     notify.error(t('routes.create.step4.incompleteSelection'))
-    router.push('/routes/create/prev_1')
+    router.push('/app/routes/create/prev_1')
     return
   }
   
@@ -287,7 +287,7 @@ onMounted(() => {
     selectedMyNode.value = JSON.parse(savedMyNode)
   } catch (error) {
     debug.error('解析已保存的数据失败:', error)
-    router.push('/routes/create/prev_1')
+    router.push('/app/routes/create/prev_1')
     return
   }
 

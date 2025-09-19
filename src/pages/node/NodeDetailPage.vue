@@ -822,24 +822,24 @@ const loadRouteCount = async () => {
 
 // 操作函数
 const goToEdit = () => {
-  router.push(`/nodes/${nodeId.value}/edit`)
+  router.push(`/app/nodes/${nodeId.value}/edit`)
 }
 
 // 新增的编辑操作方法
 const goToEditBasic = () => {
-  router.push(`/nodes/${nodeId.value}/edit/basic`)
+  router.push(`/app/nodes/${nodeId.value}/edit/basic`)
 }
 
 const goToEditConfig = () => {
-  router.push(`/nodes/${nodeId.value}/edit/config`)
+  router.push(`/app/nodes/${nodeId.value}/edit/config`)
 }
 
 const goToEditNetwork = () => {
-  router.push(`/nodes/${nodeId.value}/edit/network`)
+  router.push(`/app/nodes/${nodeId.value}/edit/network`)
 }
 
 const goToEditKeys = () => {
-  router.push(`/nodes/${nodeId.value}/edit/keys`)
+  router.push(`/app/nodes/${nodeId.value}/edit/keys`)
 }
 
 // 网络信息显示方法
@@ -870,11 +870,11 @@ const getEndpointAddress = () => {
 
 // 新增的快速操作方法
 const goToNetworkConfig = () => {
-  router.push(`/nodes/${nodeId.value}/network`)
+  router.push(`/app/nodes/${nodeId.value}/network`)
 }
 
 const goToIPManagement = () => {
-  router.push(`/nodes/${nodeId.value}/ips`)
+  router.push(`/app/nodes/${nodeId.value}/ips`)
 }
 
 const refreshData = async () => {
