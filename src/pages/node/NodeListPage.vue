@@ -411,7 +411,7 @@ const loadAllNodesDeviceInfo = async () => {
 
 // 操作方法
 const goToCreate = () => {
-  router.push('/nodes/create')
+  router.push('/app/nodes/create')
 }
 
 const goToDetail = (nodeId: string | number) => {

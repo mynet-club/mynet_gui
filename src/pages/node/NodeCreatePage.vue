@@ -200,7 +200,7 @@ const onSubmit = async () => {
         router.push(`/nodes/${nodeId}`)
       } else {
         debug.warn('节点创建成功但无法获取节点ID，跳转到节点列表')
-        router.push('/nodes')
+        router.push('/app/nodes')
       }
     }
     
@@ -214,7 +214,7 @@ const onSubmit = async () => {
 
 // 取消操作
 const onCancel = () => {
-  router.push('/nodes')
+  router.push('/app/nodes')
 }
 
 // 组件挂载时加载数据

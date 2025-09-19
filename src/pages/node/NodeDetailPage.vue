@@ -66,7 +66,7 @@
           outline
           icon="arrow_back"
           :label="$t('common.back')"
-          @click="$router.push('/nodes')"
+          @click="$router.push('/app/nodes')"
         />
       </div>
     </template>
@@ -908,7 +908,7 @@ const deleteNode = async () => {
     const success = await removeNode()
     if (success) {
       notifySuccess(t('nodes.deleteSuccess'))
-      router.push('/nodes')
+      router.push('/app/nodes')
     }
   } catch (error) {
     debug.error('删除节点失败:', error)

@@ -20,6 +20,50 @@ const routes: RouteRecordRaw[] = [
     path: '/routes',
     redirect: '/app/routes'
   },
+  {
+    path: '/ippools',
+    redirect: '/app/ippools'
+  },
+  {
+    path: '/zones',
+    redirect: '/app/zones'
+  },
+  {
+    path: '/services',
+    redirect: '/app/services'
+  },
+  {
+    path: '/social',
+    redirect: '/app/social'
+  },
+  {
+    path: '/help',
+    redirect: '/app/help'
+  },
+  {
+    path: '/profile',
+    redirect: '/app/profile'
+  },
+  {
+    path: '/api-test',
+    redirect: '/app/api-test'
+  },
+  {
+    path: '/routes/create/prev_1',
+    redirect: '/app/routes/create/prev_1'
+  },
+  {
+    path: '/routes/create/prev_2',
+    redirect: '/app/routes/create/prev_2'
+  },
+  {
+    path: '/routes/create/prev_3',
+    redirect: '/app/routes/create/prev_3'
+  },
+  {
+    path: '/routes/create/prev_4',
+    redirect: '/app/routes/create/prev_4'
+  },
   
   {
     path: '/app',

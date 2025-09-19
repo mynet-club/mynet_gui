@@ -269,7 +269,7 @@ const handleRefreshRoutes = () => {
 
 // 创建路由
 const handleCreateRoute = () => {
-  router.push('/routes/create/prev_1')
+  router.push('/app/routes/create/prev_1')
 }
 
 // 初始化

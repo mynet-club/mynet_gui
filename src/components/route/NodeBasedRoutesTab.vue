@@ -24,7 +24,7 @@
               color="primary" 
               label="节点管理" 
               icon="settings"
-              @click="$router.push('/nodes')"
+              @click="$router.push('/app/nodes')"
               class="q-mx-xs"
             />
             页面启用节点后才能创建路由。
@@ -58,7 +58,7 @@
                 color="primary" 
                 label="启用" 
                 icon="settings"
-                @click="$router.push('/nodes')"
+                @click="$router.push('/app/nodes')"
                 size="sm"
                 class="q-mx-xs"
               />

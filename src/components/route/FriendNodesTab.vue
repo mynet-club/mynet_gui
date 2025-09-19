@@ -441,7 +441,7 @@ const getStatusColor = (status: string) => {
 
 // 跳转到社交页面
 const goToSocial = () => {
-  router.push('/social')
+  router.push('/app/social')
 }
 
 // 格式化日期

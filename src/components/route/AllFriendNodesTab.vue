@@ -100,7 +100,7 @@
         <q-btn
           color="primary"
           :label="$t('routes.friendNodes.goToSocial')"
-          @click="$router.push('/social')"
+          @click="$router.push('/app/social')"
         />
       </template>
     </ResponsiveCardGrid>

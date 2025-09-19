@@ -20,8 +20,19 @@
 
         <!-- 语言切换 -->
         <q-btn-dropdown 
-          flat 
-          dense
+     const mainNavigationItems = computed((): NavigationItem[] => [
+  {
+    name: 'dashboard',
+    label: 'navigation.dashboard',
+    icon: 'dashboard',
+    path: '/app/dashboard'
+  },
+  {
+    name: 'nodes',
+    label: 'navigation.nodes',
+    icon: 'dns',
+    path: '/app/nodes'
+  },        dense
           :icon="'language'"
           :label="$q.screen.gt.sm ? getCurrentLanguageLabel() : ''"
           class="q-mr-sm"
@@ -139,7 +150,7 @@
               {{ user?.name || 'User' }}
             </q-item-label>
             <q-separator />
-            <q-item clickable @click="$router.push('/profile')">
+            <q-item clickable @click="$router.push('/app/profile')">>
               <q-item-section avatar>
                 <q-icon name="person" />
               </q-item-section>
@@ -498,25 +509,25 @@ const networkNavigationItems = computed((): NavigationItem[] => [
     name: 'ippools',
     label: 'navigation.ippools',
     icon: 'dns',
-    path: '/ippools'
+    path: '/app/ippools'
   },
   {
     name: 'routes',
     label: 'navigation.routes',
     icon: 'alt_route',
-    path: '/routes'
+    path: '/app/routes'
   },
   {
     name: 'services',
     label: 'navigation.services',
     icon: 'apps',
-    path: '/services'
+    path: '/app/services'
   },
   {
     name: 'social',
     label: 'navigation.social',
     icon: 'group',
-    path: '/social'
+    path: '/app/social'
   }
 ])
 
@@ -527,13 +538,13 @@ const systemNavigationItems = computed((): NavigationItem[] => {
       name: 'apitest',
       label: 'navigation.apiTest',
       icon: 'code',
-      path: '/api-test'
+      path: '/app/api-test'
     },
     {
       name: 'help',
       label: 'navigation.help',
       icon: 'help',
-      path: '/help'
+      path: '/app/help'
     }
   ]
   
@@ -543,7 +554,7 @@ const systemNavigationItems = computed((): NavigationItem[] => {
       name: 'token-debug',
       label: 'Token Debug',
       icon: 'token',
-      path: '/system/token-debug'
+      path: '/app/system/token-debug'
     })
   }
   
@@ -603,7 +614,7 @@ const changeTheme = (mode: string) => {
 }
 
 const goToProfileSettings = () => {
-  router.push('/profile?tab=preferences')
+  router.push('/app/profile?tab=preferences')
 }
 
 const logout = async () => {
