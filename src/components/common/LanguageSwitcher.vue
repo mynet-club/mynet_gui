@@ -32,6 +32,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { setLocale, getLocale, getSupportedLocales } from '../../boot/i18n'
@@ -64,7 +65,7 @@ const switchLanguage = (localeCode: 'zh-CN' | 'en-US') => {
       timeout: 2000
     })
   } catch (error) {
-    console.error('Language switch failed:', error)
+    debug.error('Language switch failed:', error)
     
     // 显示错误提示
     $q.notify({

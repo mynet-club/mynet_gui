@@ -1,4 +1,5 @@
 import { ref, reactive } from 'vue'
+import debug from "src/utils/debug"
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { apiService } from '../services/api'
@@ -91,7 +92,7 @@ export function usePasswordManagement() {
         throw new Error(response.data.message || 'Password change failed')
       }
     } catch (error: any) {
-      console.error('密码修改失败:', error)
+      debug.error('密码修改失败:', error)
       
       let errorMessage = t('user.passwordChangeFailed')
       if (error.response?.data?.message) {

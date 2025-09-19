@@ -62,7 +62,7 @@
             >
               <div class="text-caption text-orange-8 q-mb-xs">
                 <q-icon name="info" class="q-mr-xs" />
-                下一步建议:
+                {{ $t('nodes.nextStepSuggestion') }}:
               </div>
               <div class="text-body2">
                 <ul class="q-ma-none q-pl-md">
@@ -78,7 +78,7 @@
             </div>
             <div v-else-if="loadingStatusInfo[node.node_id]" class="text-center q-pa-sm">
               <q-spinner color="primary" size="sm" />
-              <span class="q-ml-sm text-caption">获取配置建议...</span>
+              <span class="q-ml-sm text-caption">{{ $t('nodes.gettingConfigSuggestions') }}</span>
             </div>
           </div>
           
@@ -116,7 +116,7 @@
           </div>
           
           <div class="text-caption text-grey-6">
-            创建于 {{ formatDate(node.created_at) }}
+            {{ $t('nodes.createdAt') }} {{ formatDate(node.created_at) }}
           </div>
         </q-card-section>
         
@@ -127,7 +127,7 @@
             icon="visibility"
             @click.stop="goToDetail(node.node_id)"
           >
-            查看
+            {{ $t('nodes.view') }}
           </q-btn>
           
           <q-btn
@@ -136,7 +136,7 @@
             icon="edit"
             @click.stop="goToEdit(node.node_id)"
           >
-            编辑
+            {{ $t('common.edit') }}
           </q-btn>
           
           <q-space />
@@ -158,7 +158,7 @@
                 <q-item-section avatar>
                   <q-icon name="power_settings_new" color="positive" />
                 </q-item-section>
-                <q-item-section>启用</q-item-section>
+                <q-item-section>{{ $t('nodes.enable') }}</q-item-section>
               </q-item>
               <q-item 
                 clickable 
@@ -168,7 +168,7 @@
                 <q-item-section avatar>
                   <q-icon name="power_off" color="negative" />
                 </q-item-section>
-                <q-item-section>禁用</q-item-section>
+                <q-item-section>{{ $t('nodes.disable') }}</q-item-section>
               </q-item>
             </q-list>
           </q-btn-dropdown>
@@ -179,7 +179,7 @@
             icon="delete"
             @click.stop="confirmDelete(node)"
           >
-            删除
+            {{ $t('common.delete') }}
           </q-btn>
         </q-card-actions>
       </template>
@@ -191,7 +191,7 @@
           class="q-mt-md"
         >
           <q-icon name="add" class="q-mr-sm" />
-          创建第一个节点
+          {{ $t('nodes.createFirstNode') }}
         </q-btn>
       </template>
     </ResponsiveCardGrid>
@@ -202,14 +202,14 @@
         <q-card-section class="row items-center">
           <q-avatar icon="warning" color="negative" text-color="white" />
           <span class="q-ml-sm">
-            确定要删除节点 "{{ nodeToDelete?.node_name }}" 吗？
+            {{ $t('nodes.deleteConfirm', { name: nodeToDelete?.node_name }) }}
           </span>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="取消" v-close-popup />
+          <q-btn flat :label="$t('nodes.deleteCancel')" v-close-popup />
           <q-btn
             flat
-            label="删除"
+            :label="$t('nodes.deleteConfirmAction')"
             color="negative"
             @click="deleteNode"
             :loading="deleting"
@@ -222,8 +222,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import PageLayout from '../../components/layout/PageLayout.vue'
 import { useNodes, useNotify } from '../../composables'
@@ -233,6 +235,7 @@ import { NodeStatusManager, normalizeNodeStatus } from '../../utils/nodeStatus'
 
 const router = useRouter()
 const $q = useQuasar()
+const { t } = useI18n()
 const { success: notifySuccess, error: notifyError } = useNotify()
 
 // 使用组合式函数
@@ -342,7 +345,7 @@ const loadNodeStatusInfo = async (nodeId: string | number) => {
     const response = await nodeService.getNodeStatusInfo(String(nodeId))
     nodeStatusInfo.value[nodeId] = response.data
   } catch (error) {
-    console.error(`获取节点 ${nodeId} 状态信息失败:`, error)
+    debug.error(`获取节点 ${nodeId} 状态信息失败:`, error)
   } finally {
     loadingStatusInfo.value[nodeId] = false
   }
@@ -361,7 +364,7 @@ const loadNodeDeviceInfo = async (nodeId: string | number) => {
       nodeDeviceInfo.value[nodeId] = response.data.device_info
     }
   } catch (error) {
-    console.error(`获取节点 ${nodeId} 设备信息失败:`, error)
+    debug.error(`获取节点 ${nodeId} 设备信息失败:`, error)
   } finally {
     loadingDeviceInfo.value[nodeId] = false
   }
@@ -440,7 +443,7 @@ const deleteNode = async () => {
     deleting.value = true
     await removeNode(String(nodeToDelete.value.node_id))
     
-    notifySuccess('节点删除成功')
+    notifySuccess(t('nodes.deleteSuccess'))
     showDeleteDialog.value = false
     nodeToDelete.value = null
     
@@ -448,8 +451,8 @@ const deleteNode = async () => {
     await refreshNodes()
     
   } catch (error) {
-    console.error('删除节点失败:', error)
-    notifyError('删除节点失败，请重试')
+    debug.error('删除节点失败:', error)
+    notifyError(t('nodes.deleteFailed'))
   } finally {
     deleting.value = false
   }
@@ -469,11 +472,11 @@ const changeNodeStatus = async (node: Node, newStatus: number) => {
     await refreshNodes()
     
     const statusText = NodeStatusManager.getStatusText(newStatus)
-    notifySuccess(`节点状态已更新为: ${statusText}`)
+    notifySuccess(t('nodes.status.updateSuccess', { status: statusText }))
     
   } catch (error) {
-    console.error('更新节点状态失败:', error)
-    notifyError('更新节点状态失败，请重试')
+    debug.error('更新节点状态失败:', error)
+    notifyError(t('nodes.status.updateFailed'))
   } finally {
     statusChanging.value[nodeId] = false
   }

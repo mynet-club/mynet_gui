@@ -397,6 +397,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive } from 'vue'
+import debug from "src/utils/debug"
 import { useRouter } from 'vue-router'
 import { useQuasar, date, LocalStorage } from 'quasar'
 import { useAuthStore } from '../stores/auth'
@@ -584,7 +585,7 @@ const changeLanguage = async (newLocale: string) => {
       timeout: 2000
     })
   } catch (error) {
-    console.error('Failed to change language:', error)
+    debug.error('Failed to change language:', error)
     $q.notify({
       type: 'negative',
       message: t('settings.languageChangeFailed')
@@ -615,7 +616,7 @@ const logout = async () => {
     })
     router.push('/login')
   } catch (error) {
-    console.error('Logout failed:', error)
+    debug.error('Logout failed:', error)
     router.push('/login')
   }
 }
@@ -684,7 +685,7 @@ const wsConnectionStats = reactive({
 
 // 移除 reconnectWebSocket 的引用
 const reconnectWebSocket = () => {
-  console.warn('Reconnect WebSocket is not implemented yet.')
+  debug.warn('Reconnect WebSocket is not implemented yet.')
 }
 
 // 生命周期
@@ -701,44 +702,44 @@ onMounted(async () => {
   
   // 如果已认证但没有区域数据，尝试加载区域数据
   if (authStore.isAuthenticated && authStore.availableZones.length === 0) {
-    console.log('🔧 [MainLayout] Loading zones data...')
+    debug.log('🔧 [MainLayout] Loading zones data...')
     try {
       await authStore.loadUserZones()
-      console.log('🔧 [MainLayout] Zones loaded:', authStore.availableZones.length, 'zones')
-      console.log('🔧 [MainLayout] Available zones:', authStore.availableZones.map(z => z.zone_name))
+      debug.log('🔧 [MainLayout] Zones loaded:', authStore.availableZones.length, 'zones')
+      debug.log('🔧 [MainLayout] Available zones:', authStore.availableZones.map(z => z.zone_name))
       
       // 注意：区域恢复逻辑已经在 boot/auth.ts 中处理
       // 这里只是一个备用恢复机制，防止 boot 文件执行失败
       if (!authStore.currentZone) {
-        console.log('🔧 [MainLayout] No current zone, attempting fallback recovery...')
+        debug.log('🔧 [MainLayout] No current zone, attempting fallback recovery...')
         const savedZone = LocalStorage.getItem('current_zone') as string | null
         if (savedZone) {
           try {
             const zone = JSON.parse(savedZone)
-            console.log('🔧 [MainLayout] Fallback: Parsed saved zone:', zone.zone_name)
+            debug.log('🔧 [MainLayout] Fallback: Parsed saved zone:', zone.zone_name)
             const validZone = authStore.availableZones.find((z: any) => z.zone_id === zone.zone_id)
             if (validZone) {
               authStore.currentZone = validZone
-              console.log('🔧 [MainLayout] Fallback: Restored saved zone:', validZone.zone_name)
+              debug.log('🔧 [MainLayout] Fallback: Restored saved zone:', validZone.zone_name)
             } else {
-              console.log('🔧 [MainLayout] Fallback: Saved zone not in available zones')
+              debug.log('🔧 [MainLayout] Fallback: Saved zone not in available zones')
               // 如果保存的区域不在可用列表中，使用用户默认区域
               if (authStore.user?.zone_id) {
                 const defaultZone = authStore.availableZones.find((z: any) => z.zone_id === authStore.user?.zone_id)
                 if (defaultZone) {
                   authStore.currentZone = defaultZone
-                  console.log('🔧 [MainLayout] Fallback: Using default zone:', defaultZone.zone_name)
+                  debug.log('🔧 [MainLayout] Fallback: Using default zone:', defaultZone.zone_name)
                 }
               }
             }
           } catch (error) {
-            console.warn('🔧 [MainLayout] Fallback: Failed to parse saved zone:', error)
+            debug.warn('🔧 [MainLayout] Fallback: Failed to parse saved zone:', error)
             // 解析失败时使用用户默认区域
             if (authStore.user?.zone_id) {
               const defaultZone = authStore.availableZones.find((z: any) => z.zone_id === authStore.user?.zone_id)
               if (defaultZone) {
                 authStore.currentZone = defaultZone
-                console.log('🔧 [MainLayout] Fallback: Using default zone after parse error:', defaultZone.zone_name)
+                debug.log('🔧 [MainLayout] Fallback: Using default zone after parse error:', defaultZone.zone_name)
               }
             }
           }
@@ -748,21 +749,21 @@ onMounted(async () => {
             const zone = authStore.availableZones.find((z: any) => z.zone_id === authStore.user?.zone_id)
             if (zone) {
               authStore.currentZone = zone
-              console.log('🔧 [MainLayout] Fallback: Using default zone:', zone.zone_name)
+              debug.log('🔧 [MainLayout] Fallback: Using default zone:', zone.zone_name)
             }
           }
         }
       } else {
-        console.log('🔧 [MainLayout] Current zone already set:', authStore.currentZone.zone_name)
+        debug.log('🔧 [MainLayout] Current zone already set:', authStore.currentZone.zone_name)
       }
     } catch (error) {
-      console.error('🔧 [MainLayout] Failed to load zones:', error)
+      debug.error('🔧 [MainLayout] Failed to load zones:', error)
     }
   }
   
   // 如果区域数据仍然为空且用户已认证，使用默认的Global zone
   if (authStore.isAuthenticated && authStore.availableZones.length === 0) {
-    console.log('🔧 [MainLayout] No zones loaded, using default Global zone')
+    debug.log('🔧 [MainLayout] No zones loaded, using default Global zone')
     authStore.availableZones = [DEFAULT_GLOBAL_ZONE]
     if (!authStore.currentZone) {
       authStore.currentZone = DEFAULT_GLOBAL_ZONE

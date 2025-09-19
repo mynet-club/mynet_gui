@@ -5,7 +5,8 @@
       <div class="row items-center q-mb-lg">
         <div class="col">
           <h4 class="q-my-none">{{ $t('routes.create.step3.title') }}</h4>
-          <p class="text-grey-6 q-mt-xs q-mb-none">
+                      <!-- 根据节点状态显示正确的错误信息 -->
+                      {{ getNodeStatusText(node) + ' - ' + $t('routes.create.step3.nodeNotAvailable') }}     <p class="text-grey-6 q-mt-xs q-mb-none">
             {{ $t('routes.create.step3.subtitle') }}
           </p>
         </div>
@@ -179,11 +180,11 @@
                     <div class="col-6">
                       <div class="text-caption text-grey-6">{{ $t('routes.create.step3.nodeStatus') }}</div>
                       <q-chip 
-                        :color="(node.status === 'active' || node.status === 'online') ? 'positive' : 'grey'" 
+                        :color="getNodeStatusColor(node)" 
                         text-color="white" 
                         size="sm"
                       >
-                        {{ node.status === 'active' ? 'online' : node.status }}
+                        {{ getNodeStatusText(node) }}
                       </q-chip>
                     </div>
                     <div class="col-6">
@@ -247,7 +248,11 @@
                       <template v-slot:avatar>
                         <q-icon name="warning" />
                       </template>
-                      {{ $t('routes.create.step3.connectionsFull') }}
+                      <!-- 根据节点状态显示正确的错误信息 -->
+                      <span v-if="node.status === -1">{{ $t('routes.create.step3.nodeUnconfigured') }}</span>
+                      <span v-else-if="node.status === 0">{{ $t('routes.create.step3.nodeDisabled') }}</span>
+                      <span v-else-if="node.status === 99">{{ $t('routes.create.step3.nodeMaintenance') }}</span>
+                      <span v-else>{{ $t('routes.create.step3.nodeNotAvailable') }}</span>
                     </q-banner>
                   </div>
 
@@ -286,11 +291,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useNodes } from '../../../composables/useNodes'
 import { useRoutes } from '../../../composables/useRoutes'
 import { useNotify } from '../../../composables/useNotify'
+import { NODE_STATUS } from '../../../types/node'
+import { NodeStatusManager } from '../../../utils/nodeStatus'
 import type { Friend } from '../../../types'
 
 const { t } = useI18n()
@@ -334,7 +342,12 @@ const filteredNodes = computed(() => {
 
   // 状态筛选
   if (statusFilter.value === 'online') {
-    nodes = nodes.filter(node => node.status === 'active' || node.status === 'online')
+    nodes = nodes.filter(node => {
+      const status = node.normalized_status ?? NodeStatusManager.normalizeStatus(node.node_status, node.status)
+      return typeof status === 'number' 
+        ? (status === NODE_STATUS.ENABLED || status === NODE_STATUS.ONLINE)
+        : NodeStatusManager.isOnline(status)
+    })
   } else if (statusFilter.value === 'available') {
     nodes = nodes.filter(node => node.can_connect && node.connection_status === 'none')
   } else if (statusFilter.value === 'connected') {
@@ -372,13 +385,25 @@ const selectMyNode = (node: any) => {
 }
 
 const getNodeStatusColor = (node: any) => {
+  if (!node) return 'grey'
+  
   if (node.connection_status === 'connected') return 'positive'
   if (node.connection_status === 'pending_sent') return 'orange'
   if (node.connection_status === 'pending_received') return 'blue'
   if (node.connection_status === 'rejected') return 'negative'
   if (!node.can_connect) return 'grey'
-  if (node.status === 'active' || node.status === 'online') return 'positive'
-  return 'grey'
+  
+  // 使用统一状态管理器获取颜色
+  const status = node.normalized_status ?? NodeStatusManager.normalizeStatus(node.node_status, node.status)
+  return NodeStatusManager.getStatusColor(status)
+}
+
+const getNodeStatusText = (node: any) => {
+  if (!node) return NodeStatusManager.getStatusText(NODE_STATUS.UNCONFIGURED)
+  
+  // 使用统一状态管理器获取状态文本
+  const status = node.normalized_status ?? NodeStatusManager.normalizeStatus(node.node_status, node.status)
+  return NodeStatusManager.getStatusText(status)
 }
 
 const goBack = () => {
@@ -419,16 +444,24 @@ const fetchMyNodes = async () => {
       const connectionStatus = checkConnectionStatusLocal(node.id, selectedFriendNode.value?.id)
       
       // 详细的连接能力判断
-      // 节点不需要 max_connections 概念，只要是活跃状态就可以连接
+      // 使用统一的状态管理器来处理状态判断
       const hasAvailableConnections = true
-      const isOnline = node.status === 'active' || node.status === 'online' // 支持 active 和 online 状态
+      const normalizedStatus = NodeStatusManager.normalizeStatus(node.node_status, node.status)
+      
+      // 只有启用(1)或在线(2)状态的节点可以用于路由连接
+      const isOnline = typeof normalizedStatus === 'number' 
+        ? (normalizedStatus === NODE_STATUS.ENABLED || normalizedStatus === NODE_STATUS.ONLINE)
+        : NodeStatusManager.isOnline(normalizedStatus)
+      
       const canConnectByStatus = connectionStatus.can_connect
       
-      console.log(`节点 ${node.name} (${node.id}):`, {
+      debug.log(`节点 ${node.name} (${node.id}):`, {
         node_data: node,
         current_connections: node.current_connections || 'N/A',
         hasAvailableConnections,
-        status: node.status,
+        raw_status: node.status,
+        raw_node_status: node.node_status,
+        normalizedStatus,
         isOnline,
         connectionStatus: connectionStatus.status,
         canConnectByStatus,
@@ -439,6 +472,8 @@ const fetchMyNodes = async () => {
         ...node,
         // 添加默认值以兼容模板显示
         current_connections: node.current_connections || 0,
+        // 使用统一状态管理器标准化状态
+        normalized_status: normalizedStatus,
         can_connect: hasAvailableConnections && isOnline && canConnectByStatus,
         connection_status: connectionStatus.status,
         connection_message: connectionStatus.message,
@@ -446,7 +481,7 @@ const fetchMyNodes = async () => {
       }
     })
   } catch (error) {
-    console.error('获取我的节点失败:', error)
+    debug.error('获取我的节点失败:', error)
     notify.error(t('routes.create.step3.fetchNodesError'))
   } finally {
     loading.value = false
@@ -478,7 +513,7 @@ const fetchRouteData = async () => {
     
     routeRequests.value = allRequests
     
-    console.log('路由数据详情:', {
+    debug.log('路由数据详情:', {
       activeRoutes: routeConnections.value,
       pendingRequests: routeRequests.value,
       incomingConnections: incomingConnections.value,
@@ -487,15 +522,15 @@ const fetchRouteData = async () => {
       pendingRequestsCount: routeRequests.value.length
     })
   } catch (error) {
-    console.error('获取路由数据失败:', error)
+    debug.error('获取路由数据失败:', error)
   }
 }
 
 // 本地检查节点连接状态
 const checkConnectionStatusLocal = (myNodeId: string | number, friendNodeId: string | number) => {
-  console.log(`检查连接状态: 我的节点=${myNodeId}, 好友节点=${friendNodeId}`)
-  console.log('当前连接数据:', routeConnections.value)
-  console.log('当前请求数据:', routeRequests.value)
+  debug.log(`检查连接状态: 我的节点=${myNodeId}, 好友节点=${friendNodeId}`)
+  debug.log('当前连接数据:', routeConnections.value)
+  debug.log('当前请求数据:', routeRequests.value)
   
   if (!friendNodeId) {
     return {
@@ -520,7 +555,7 @@ const checkConnectionStatusLocal = (myNodeId: string | number, friendNodeId: str
   })
   
   if (existingConnection) {
-    console.log('找到现有连接:', existingConnection)
+    debug.log('找到现有连接:', existingConnection)
     return {
       status: 'connected',
       message: t('routes.create.step3.connectionStatus.connected'),
@@ -539,7 +574,7 @@ const checkConnectionStatusLocal = (myNodeId: string | number, friendNodeId: str
   })
 
   if (pendingRequest) {
-    console.log('找到待处理请求:', pendingRequest)
+    debug.log('找到待处理请求:', pendingRequest)
     const requestSourceId = String(pendingRequest.source_node_id || pendingRequest.source_id || pendingRequest.from_node_id || pendingRequest.sender_node_id)
     
     if (requestSourceId === myNodeIdStr) {
@@ -564,7 +599,7 @@ const checkConnectionStatusLocal = (myNodeId: string | number, friendNodeId: str
   // 检查是否有被拒绝的记录（如果后端提供此数据）
   // TODO: 需要后端提供被拒绝的请求历史
 
-  console.log('没有找到连接或请求冲突，可以连接')
+  debug.log('没有找到连接或请求冲突，可以连接')
   // 无连接关系
   return {
     status: 'none',
@@ -596,7 +631,7 @@ onMounted(async () => {
     selectedFriend.value = JSON.parse(savedFriend)
     selectedFriendNode.value = JSON.parse(savedFriendNode)
   } catch (error) {
-    console.error('解析已保存的数据失败:', error)
+    debug.error('解析已保存的数据失败:', error)
     router.push('/routes/create/prev_1')
     return
   }
@@ -607,7 +642,7 @@ onMounted(async () => {
     try {
       selectedMyNode.value = JSON.parse(savedMyNode)
     } catch (error) {
-      console.error('解析已保存的节点数据失败:', error)
+      debug.error('解析已保存的节点数据失败:', error)
     }
   }
   

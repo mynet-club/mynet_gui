@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import debug from "src/utils/debug"
 import { apiService } from '../services/api'
 
 export interface SidebarStats {
@@ -44,9 +45,9 @@ export function useSidebarStats() {
         zones: Math.floor((seedValue * 0.1) % 10) + 3
       }
       
-      console.log('📊 [SidebarStats] Updated stats:', stats.value)
+      debug.log('📊 [SidebarStats] Updated stats:', stats.value)
     } catch (error) {
-      console.error('Failed to fetch sidebar stats:', error)
+      debug.error('Failed to fetch sidebar stats:', error)
     } finally {
       isLoading.value = false
     }

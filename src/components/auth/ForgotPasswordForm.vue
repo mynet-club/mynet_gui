@@ -46,6 +46,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import debug from "src/utils/debug"
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -69,7 +70,7 @@ const handleForgotPassword = async () => {
       query: { email: forgotPasswordForm.email }
     })
   } catch (error) {
-    console.error('Forgot password failed:', error)
+    debug.error('Forgot password failed:', error)
     $q.notify({
       type: 'negative',
       message: t('auth.sendResetCodeFailed'),

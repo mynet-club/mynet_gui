@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import debug from "src/utils/debug"
 import type { KeyType, LocalKeyPair, KeyValidationResult } from '../types/nodeKeys'
 import { 
   generateEd25519KeyPair, 
@@ -94,7 +95,7 @@ export function useKeyGeneration() {
       
       return keyPair
     } catch (err) {
-      console.error('生成密钥对失败:', err)
+      debug.error('生成密钥对失败:', err)
       error.value = err instanceof Error ? err.message : '生成密钥对失败'
       notifyError(error.value)
       return null
@@ -160,7 +161,7 @@ export function useKeyGeneration() {
       downloadKeyToFile(generatedKeyPair.value.public_key, filename, 'public')
       notifySuccess('公钥下载成功')
     } catch (err) {
-      console.error('下载公钥失败:', err)
+      debug.error('下载公钥失败:', err)
       notifyError('下载公钥失败')
     }
   }
@@ -179,7 +180,7 @@ export function useKeyGeneration() {
       downloadKeyToFile(generatedKeyPair.value.private_key, filename, 'private')
       notifySuccess('私钥下载成功')
     } catch (err) {
-      console.error('下载私钥失败:', err)
+      debug.error('下载私钥失败:', err)
       notifyError('下载私钥失败')
     }
   }
@@ -207,7 +208,7 @@ export function useKeyGeneration() {
         return false
       }
     } catch (err) {
-      console.error('上传公钥失败:', err)
+      debug.error('上传公钥失败:', err)
       error.value = err instanceof Error ? err.message : '上传公钥失败'
       notifyError(error.value)
       return false

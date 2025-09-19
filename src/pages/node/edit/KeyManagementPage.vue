@@ -1,13 +1,13 @@
 <template>
   <div class="key-management-page q-pa-md">
-    <div class="text-h6 q-mb-md">密钥管理</div>
+    <div class="text-h6 q-mb-md">{{ $t('nodes.edit.keys.title') }}</div>
     
     <div class="row q-gutter-md">
       <!-- 左侧：密钥列表 -->
       <div class="col-12 col-md-6">
         <q-card>
           <q-card-section>
-            <div class="text-h6 q-mb-md">密钥列表</div>
+            <div class="text-h6 q-mb-md">{{ $t('nodes.edit.keys.keyList') }}</div>
             
             <q-skeleton-loader v-if="loading" type="QCard" />
             <div v-else>
@@ -47,7 +47,7 @@
               </q-list>
               
               <div v-if="keys.length === 0" class="text-center text-grey-6 q-pa-md">
-                暂无密钥
+                {{ $t('nodes.edit.keys.noKeys') }}
               </div>
             </div>
           </q-card-section>
@@ -55,11 +55,11 @@
           <q-card-actions>
             <q-btn
               color="primary"
-              @click="showCreateDialog = true"
+              @click="handleAddOrUpdateKey"
               :disable="loading"
             >
-              <q-icon name="add" class="q-mr-sm" />
-              添加密钥
+              <q-icon :name="hasKeys ? 'update' : 'add'" class="q-mr-sm" />
+              {{ hasKeys ? '更新密钥' : $t('nodes.edit.keys.addKey') }}
             </q-btn>
             
             <q-btn
@@ -69,7 +69,7 @@
               :disable="loading"
             >
               <q-icon name="refresh" class="q-mr-sm" />
-              刷新
+              {{ $t('common.refresh') }}
             </q-btn>
           </q-card-actions>
         </q-card>
@@ -79,11 +79,11 @@
       <div class="col-12 col-md-6">
         <q-card>
           <q-card-section>
-            <div class="text-h6 q-mb-md">密钥详情</div>
+            <div class="text-h6 q-mb-md">{{ $t('nodes.edit.keys.keyDetails') }}</div>
             
             <div v-if="selectedKey" class="q-gutter-md">
               <!-- 基本信息 -->
-              <q-field label="密钥ID" stack-label>
+              <q-field :label="$t('nodes.edit.keys.keyId')" stack-label>
                 <template v-slot:control>
                   <div class="self-center full-width no-outline">
                     {{ selectedKey.id }}
@@ -91,7 +91,7 @@
                 </template>
               </q-field>
               
-              <q-field label="密钥类型" stack-label>
+              <q-field :label="$t('nodes.edit.keys.keyType')" stack-label>
                 <template v-slot:control>
                   <div class="self-center full-width no-outline">
                     {{ selectedKey.key_type }}
@@ -99,7 +99,7 @@
                 </template>
               </q-field>
               
-              <q-field label="指纹" stack-label>
+              <q-field :label="$t('nodes.edit.keys.fingerprint')" stack-label>
                 <template v-slot:control>
                   <div class="self-center full-width no-outline text-mono">
                     {{ selectedKey.fingerprint }}
@@ -108,7 +108,7 @@
               </q-field>
               
               <!-- 公钥 -->
-              <q-field label="公钥" stack-label>
+              <q-field :label="$t('nodes.edit.keys.publicKey')" stack-label>
                 <template v-slot:control>
                   <div class="self-center full-width no-outline">
                     <q-input
@@ -126,7 +126,7 @@
               <!-- 私钥（仅首次显示） -->
               <q-field 
                 v-if="selectedKey.private_key"
-                label="私钥 (仅此一次显示)"
+                :label="$t('nodes.edit.keys.privateKeyOnetime')"
                 stack-label
               >
                 <template v-slot:control>
@@ -135,7 +135,7 @@
                       <template v-slot:avatar>
                         <q-icon name="warning" />
                       </template>
-                      私钥仅显示一次，请立即保存！
+                      {{ $t('nodes.edit.keys.privateKeyWarning') }}
                     </q-banner>
                     <q-input
                       v-model="selectedKey.private_key"
@@ -177,7 +177,7 @@
             </div>
             
             <div v-else class="text-center text-grey-6 q-pa-md">
-              请选择一个密钥查看详情
+              {{ $t('node.keyManagement.selectKeyToViewDetails') }}
             </div>
           </q-card-section>
           
@@ -210,9 +210,14 @@
     <q-dialog v-model="showCreateDialog" persistent>
       <q-card style="min-width: 400px">
         <q-card-section>
-          <div class="text-h6">生成密钥</div>
+          <div class="text-h6">
+            {{ isUpdateMode ? '更新密钥' : $t('node.keyManagement.generateKey') }}
+          </div>
           <div class="text-caption text-grey-6 q-mt-sm">
-            为节点 {{ nodeId }} 生成密钥
+            {{ isUpdateMode 
+                ? `为节点 ${nodeId} 更新密钥（将替换现有密钥）`
+                : $t('node.keyManagement.generateKeyForNode', { nodeId }) 
+            }}
           </div>
         </q-card-section>
 
@@ -221,7 +226,7 @@
             <q-select
               v-model="newKey.generation_method"
               :options="generationMethodOptions"
-              label="生成方式"
+              :label="$t('node.keyManagement.generationMethod')"
               emit-value
               map-options
             />
@@ -229,20 +234,20 @@
             <q-input
               v-if="newKey.generation_method === 'upload'"
               v-model="newKey.public_key"
-              label="公钥内容"
+              :label="$t('node.keyManagement.publicKeyContent')"
               type="textarea"
               rows="4"
               required
-              :rules="[val => !!val || '公钥内容不能为空']"
+              :rules="[val => !!val || $t('node.keyManagement.publicKeyRequired')]"
             />
           </q-form>
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="取消" @click="showCreateDialog = false" />
+          <q-btn flat :label="$t('common.cancel')" @click="showCreateDialog = false" />
           <q-btn
             color="primary"
-            :label="newKey.generation_method === 'server' ? '生成' : '创建'"
+            :label="getCreateButtonText()"
             @click="createKey"
             :loading="creating"
             :disable="!isCreateFormValid"
@@ -259,13 +264,61 @@
           <span class="q-ml-sm">确定要删除密钥 "{{ selectedKey?.id }}" 吗？</span>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="取消" v-close-popup />
+          <q-btn flat :label="$t('common.cancel')" v-close-popup />
           <q-btn
             flat
-            label="删除"
+            :label="$t('common.delete')"
             color="negative"
             @click="deleteKey"
             :loading="deleting"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- 风险警告对话框 -->
+    <q-dialog v-model="showRiskWarningDialog" persistent>
+      <q-card style="min-width: 500px">
+        <q-card-section>
+          <div class="row items-center q-mb-md">
+            <q-avatar icon="warning" color="negative" text-color="white" />
+            <div class="text-h6 q-ml-sm">密钥更新风险警告</div>
+          </div>
+          
+          <div class="text-body1 q-mb-md">
+            <p class="text-negative q-mb-sm">
+              <strong>⚠️ 重要提醒：更新密钥会带来以下风险</strong>
+            </p>
+            <ul class="q-pl-md">
+              <li>现有的所有SSH连接将会断开</li>
+              <li>之前配置的公钥访问将失效</li>
+              <li>需要重新配置所有依赖此密钥的服务</li>
+              <li>如果没有备用访问方式，可能导致节点无法访问</li>
+            </ul>
+          </div>
+          
+          <div class="bg-red-1 q-pa-md rounded-borders">
+            <div class="text-negative text-weight-bold q-mb-sm">
+              确认前请确保：
+            </div>
+            <ul class="q-pl-md text-negative">
+              <li>您有其他方式访问此节点（如控制台访问）</li>
+              <li>已备份重要数据</li>
+              <li>了解如何重新配置相关服务</li>
+            </ul>
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn 
+            flat 
+            label="取消" 
+            @click="showRiskWarningDialog = false" 
+          />
+          <q-btn
+            color="negative"
+            label="我了解风险，继续更新"
+            @click="proceedWithKeyUpdate"
           />
         </q-card-actions>
       </q-card>
@@ -277,11 +330,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import { useNodeKeys, useNotify } from '../../../composables'
 import { NodeKey, KeyType } from '../../../types/nodeKeys'
+import debug from '../../../utils/debug'
 
 const route = useRoute()
 const $q = useQuasar()
+const { t } = useI18n()
 const { success: notifySuccess, error: notifyError } = useNotify()
 
 // 获取节点ID
@@ -300,8 +356,10 @@ const {
 const selectedKey = ref<NodeKey | null>(null)
 const showCreateDialog = ref(false)
 const showDeleteDialog = ref(false)
+const showRiskWarningDialog = ref(false)
 const creating = ref(false)
 const deleting = ref(false)
+const isUpdateMode = ref(false)
 
 // 新建密钥表单
 const newKey = ref({
@@ -311,11 +369,13 @@ const newKey = ref({
 
 // 选项数据
 const generationMethodOptions = ref([
-  { label: '服务端生成', value: 'server' },
-  { label: '上传公钥', value: 'upload' }
+  { label: t('node.keyManagement.serverGenerated'), value: 'server' },
+  { label: t('node.keyManagement.uploadPublicKey'), value: 'upload' }
 ])
 
 // 计算属性
+const hasKeys = computed(() => keys.value && keys.value.length > 0)
+
 const isCreateFormValid = computed(() => {
   return newKey.value.generation_method &&
          (newKey.value.generation_method !== 'upload' || newKey.value.public_key)
@@ -352,6 +412,14 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString('zh-CN')
 }
 
+const getCreateButtonText = () => {
+  if (isUpdateMode.value) {
+    return newKey.value.generation_method === 'server' ? '更新密钥' : '更新密钥'
+  } else {
+    return newKey.value.generation_method === 'server' ? t('node.keyManagement.generate') : t('node.keyManagement.create')
+  }
+}
+
 // 操作方法
 const selectKey = (key: NodeKey) => {
   selectedKey.value = key
@@ -359,6 +427,24 @@ const selectKey = (key: NodeKey) => {
 
 const refreshKeys = async () => {
   await loadKeys(nodeId.value)
+}
+
+const handleAddOrUpdateKey = () => {
+  if (hasKeys.value) {
+    // 如果已有密钥，显示风险警告
+    isUpdateMode.value = true
+    showRiskWarningDialog.value = true
+  } else {
+    // 如果没有密钥，直接显示创建对话框
+    isUpdateMode.value = false
+    showCreateDialog.value = true
+  }
+}
+
+const proceedWithKeyUpdate = () => {
+  // 用户确认风险后，显示创建/更新对话框
+  showRiskWarningDialog.value = false
+  showCreateDialog.value = true
 }
 
 const createKey = async () => {
@@ -369,11 +455,16 @@ const createKey = async () => {
     
     // 根据生成方式调用不同的API
     if (newKey.value.generation_method === 'server') {
-      // 服务端生成密钥 - 不需要传递额外参数，使用默认的ed25519类型
-      const result = await generateKeyPair({})
+      // 服务端生成密钥 - 如果是更新模式，传递 force_regenerate 参数
+      const params: any = {}
+      if (isUpdateMode.value) {
+        params.force_regenerate = true
+      }
+      
+      const result = await generateKeyPair(params)
       
       if (result) {
-        notifySuccess('密钥对生成成功')
+        notifySuccess(isUpdateMode.value ? '密钥更新成功' : '密钥对生成成功')
         // 如果有私钥，显示私钥保存提示
         if (result.private_key) {
           let downloadClicked = false
@@ -381,7 +472,7 @@ const createKey = async () => {
           const showSaveDialog = () => {
             $q.dialog({
               title: '私钥保存提醒',
-              message: `密钥对生成成功！私钥仅显示一次，请立即保存。\n\n公钥: ${result.public_key.substring(0, 32)}...\n私钥: ${result.private_key.substring(0, 32)}...${downloadClicked ? '\n\n✓ 私钥已下载' : '\n\n⚠️ 请先下载私钥'}`,
+              message: `密钥${isUpdateMode.value ? '更新' : '生成'}成功！私钥仅显示一次，请立即保存。\n\n公钥: ${result.public_key.substring(0, 32)}...\n私钥: ${result.private_key.substring(0, 32)}...${downloadClicked ? '\n\n✓ 私钥已下载' : '\n\n⚠️ 请先下载私钥'}`,
               persistent: true,
               ok: {
                 label: '我已保存',
@@ -420,8 +511,8 @@ const createKey = async () => {
         }
       }
     } else if (newKey.value.generation_method === 'upload') {
-      // 上传公钥
-      // TODO: 实现上传公钥功能
+      // 上传公钥 - 如果是更新模式，也传递 force_regenerate 参数
+      // TODO: 实现上传公钥功能，需要传递 force_regenerate 参数
       notifyError('上传公钥功能暂未实现')
       return
     } else {
@@ -433,18 +524,19 @@ const createKey = async () => {
     
     showCreateDialog.value = false
     
-    // 重置表单
+    // 重置表单和状态
     newKey.value = {
       generation_method: 'server',
       public_key: ''
     }
+    isUpdateMode.value = false
     
     // 刷新密钥列表
     await refreshKeys()
     
   } catch (error: any) {
-    console.error('创建密钥失败:', error)
-    const errorMsg = error?.response?.data?.message || error?.message || '创建密钥失败，请重试'
+    const actionText = isUpdateMode.value ? '更新' : '创建'
+    const errorMsg = error?.response?.data?.message || error?.message || `${actionText}密钥失败，请重试`
     notifyError(errorMsg)
   } finally {
     creating.value = false
@@ -474,7 +566,7 @@ const deleteKey = async () => {
     await refreshKeys()
     
   } catch (error: any) {
-    console.error('删除密钥失败:', error)
+    debug.error('删除密钥失败:', error)
     const errorMsg = error?.response?.data?.message || error?.message || '删除密钥失败，请重试'
     notifyError(errorMsg)
   } finally {

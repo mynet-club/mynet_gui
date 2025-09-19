@@ -85,6 +85,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useIPPools } from '../../composables/useIPPools'
 import { api } from '../../services/api'
@@ -144,7 +145,7 @@ const fetchZones = async () => {
       }))
     }
   } catch (error) {
-    console.error('Failed to fetch zones:', error)
+    debug.error('Failed to fetch zones:', error)
   } finally {
     zonesLoading.value = false
   }
@@ -184,7 +185,7 @@ const onSubmit = async () => {
     }
     emit('saved')
   } catch (error) {
-    console.error('Failed to save pool:', error)
+    debug.error('Failed to save pool:', error)
   } finally {
     loading.value = false
   }

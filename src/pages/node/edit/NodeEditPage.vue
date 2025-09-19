@@ -1,24 +1,22 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row justify-center">
-      <div class="col-12 col-lg-10">
-        <!-- 页面标题 -->
-        <div class="row items-center justify-between q-mb-md">
-          <div class="text-h4">
-            <q-icon name="edit" class="q-mr-sm" />
-            编辑节点
-          </div>
-          <q-btn
-            color="grey-7"
-            outline
-            @click="goBack"
-            :disable="saving"
-          >
-            <q-icon name="arrow_back" class="q-mr-sm" />
-            返回
-          </q-btn>
-        </div>
+  <PageLayout
+    :title="$t('nodes.edit.title')"
+    :subtitle="node?.node_name || $t('common.loading')"
+    icon="edit"
+  >
+    <template #actions>
+      <q-btn
+        color="grey-7"
+        outline
+        @click="goBack"
+        :disable="saving"
+        icon="arrow_back"
+        :label="$t('common.back')"
+      />
+    </template>
 
+    <div class="row justify-center">
+      <div class="col-12">
         <!-- 节点基本信息 -->
         <q-card class="q-mb-md" v-if="node">
           <q-card-section class="row items-center">
@@ -50,10 +48,10 @@
             dense
             no-caps
           >
-            <q-tab name="basic" label="基础信息" icon="info" class="tab-item" />
-            <q-tab name="network" label="网络配置" icon="settings_ethernet" class="tab-item" />
-            <q-tab name="config" label="节点配置" icon="settings" class="tab-item" />
-            <q-tab name="keys" label="密钥管理" icon="vpn_key" class="tab-item" />
+            <q-tab name="basic" :label="$t('nodes.edit.tabs.basic')" icon="info" class="tab-item" />
+            <q-tab name="network" :label="$t('nodes.edit.tabs.network')" icon="settings_ethernet" class="tab-item" />
+            <q-tab name="config" :label="$t('nodes.edit.tabs.config')" icon="settings" class="tab-item" />
+            <q-tab name="keys" :label="$t('nodes.edit.tabs.keys')" icon="vpn_key" class="tab-item" />
           </q-tabs>
 
           <q-separator />
@@ -97,7 +95,7 @@
             :disable="!hasChanges"
           >
             <q-icon name="save" class="q-mr-sm" />
-            保存所有更改
+            {{ $t('nodes.edit.saveAllChanges') }}
           </q-btn>
           
           <q-btn
@@ -107,21 +105,25 @@
             :disable="saving || !hasChanges"
           >
             <q-icon name="refresh" class="q-mr-sm" />
-            重置更改
+            {{ $t('nodes.edit.resetChanges') }}
           </q-btn>
         </div>
       </div>
     </div>
-  </q-page>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, provide } from 'vue'
+import debug from "src/utils/debug"
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import { useNode, useNotify } from '../../../composables'
 import { NodeStatus } from '../../../types/node'
+import PageLayout from '../../../components/layout/PageLayout.vue'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const $q = useQuasar()
@@ -194,21 +196,21 @@ const getStatusText = (status: NodeStatus | number) => {
   // 处理数字状态码
   if (typeof status === 'number') {
     switch (status) {
-      case 2: return '在线'        // ONLINE
-      case 1: return '已启用'      // ENABLED
-      case 0: return '已禁用'      // DISABLED
-      case -1: return '未配置'     // UNCONFIGURED
-      case 99: return '维护中'     // MAINTENANCE
-      default: return '未知'
+      case 2: return t('nodes.status.online')        // ONLINE
+      case 1: return t('nodes.status.enabled')      // ENABLED
+      case 0: return t('nodes.status.disabled')      // DISABLED
+      case -1: return t('nodes.status.unconfigured')     // UNCONFIGURED
+      case 99: return t('nodes.status.maintenance')     // MAINTENANCE
+      default: return t('common.unknown')
     }
   }
   
   // 处理字符串状态
   switch (status) {
-    case 'active': return '在线'
-    case 'inactive': return '离线'
-    case 'pending': return '待连接'
-    default: return '未知'
+    case 'active': return t('nodes.status.online')
+    case 'inactive': return t('nodes.status.offline')
+    case 'pending': return t('nodes.status.pending')
+    default: return t('common.unknown')
   }
 }
 
@@ -216,8 +218,8 @@ const getStatusText = (status: NodeStatus | number) => {
 const goBack = () => {
   if (hasChanges.value) {
     $q.dialog({
-      title: '确认离开',
-      message: '您有未保存的更改，确定要离开吗？',
+      title: t('nodes.edit.confirmLeave'),
+      message: t('nodes.edit.unsavedChangesMessage'),
       cancel: true,
       persistent: true
     }).onOk(() => {
@@ -232,24 +234,24 @@ const saveAll = async () => {
   try {
     // 这里应该触发所有子组件的保存操作
     // 可以通过事件总线或provide/inject实现
-    notifySuccess('所有更改已保存')
+    notifySuccess(t('nodes.edit.allChangesSaved'))
     hasChanges.value = false
   } catch (error) {
-    console.error('保存失败:', error)
-    notifyError('保存失败，请重试')
+    debug.error('保存失败:', error)
+    notifyError(t('nodes.edit.saveFailed'))
   }
 }
 
 const resetAll = () => {
   $q.dialog({
-    title: '确认重置',
-    message: '确定要重置所有更改吗？',
+    title: t('nodes.edit.confirmReset'),
+    message: t('nodes.edit.resetChangesMessage'),
     cancel: true,
     persistent: true
   }).onOk(() => {
     // 这里应该触发所有子组件的重置操作
     hasChanges.value = false
-    notifySuccess('已重置所有更改')
+    notifySuccess(t('common.allChangesReset'))
   })
 }
 

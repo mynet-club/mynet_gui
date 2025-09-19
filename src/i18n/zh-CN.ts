@@ -1,7 +1,7 @@
 export default {
   app: {
     name: 'MyNet',
-    tagline: '高级网络管理系统'
+    tagline: '基于社交的组网管理系统'
   },
   common: {
     login: '登录',
@@ -55,7 +55,17 @@ export default {
     seconds: '秒',
     minutes: '分钟',
     hours: '小时',
-    days: '天'
+    days: '天',
+    confirm: '确认',
+    required: '必填',
+    optional: '可选',
+    formReset: '表单已重置',
+    allChangesReset: '已重置所有更改',
+    noChangesToSave: '没有需要保存的更改'
+  },
+  welcome: {
+    title: '欢迎使用 MyNet',
+    subtitle: '基于社交的组网管理系统'
   },
   settings: {
     language: '语言设置',
@@ -71,6 +81,8 @@ export default {
     }
   },
   auth: {
+    login: '登录',
+    register: '注册',
     loginTitle: '欢迎回来',
     loginSubtitle: '请登录您的账户',
     registerTitle: '创建账户',
@@ -97,6 +109,9 @@ export default {
     resendCodeCountdown: '重新发送 ({seconds}s)',
     verificationCode: '验证码',
     agreeTerms: '我同意服务条款',
+    ageVerification: '我确认已满14岁并有权访问网络服务',
+    minorProtectionTitle: '未成年人保护',
+    minorProtectionMessage: '本平台仅允许14岁及以上用户访问。根据相关法律法规，我们需要确认您的年龄资格。如果您未满14岁，请在监护人陪同下使用网络服务。',
     noAccount: '还没有账户？',
     alreadyHaveAccount: '已有账户？',
     rememberPassword: '记起密码了？',
@@ -135,7 +150,7 @@ export default {
     newPasswordPlaceholder: '请输入新密码',
     confirmPasswordPlaceholder: '请再次输入您的密码',
     verificationCodePlaceholder: '请输入6位验证码',
-    invitationPlaceholder: '请输入邀请码（可选）',
+    invitationPlaceholder: '请输入邀请码（必需）',
     invitationRequired: '请输入邀请码',
     
     // 账号激活相关
@@ -239,6 +254,7 @@ export default {
   },
   nodes: {
     title: '节点管理',
+    subtitle: '管理和监控网络节点',
     name: '节点名称',
     type: '节点类型',
     ipAddress: 'IP地址',
@@ -266,6 +282,190 @@ export default {
     loadDeviceInfoFailed: '加载设备信息失败',
     loadRoutesCountFailed: '加载路由数量失败',
     
+    // 列表页面
+    createNode: '创建节点',
+    noData: '暂无节点',
+    noDataDescription: '还没有创建任何节点',
+    createFirstNode: '创建第一个节点',
+    view: '查看',
+    enable: '启用',
+    disable: '禁用',
+    createdAt: '创建于',
+    gettingConfigSuggestions: '获取配置建议...',
+    nextStepSuggestion: '下一步建议',
+    
+    // 删除确认对话框
+    deleteConfirmTitle: '确认删除',
+    deleteCancel: '取消',
+    deleteConfirmAction: '删除',
+    
+    // 节点操作
+    operations: {
+      start: '启动',
+      stop: '停止',
+      restart: '重启',
+      pause: '暂停',
+      resume: '恢复',
+      backup: '备份',
+      restore: '恢复',
+      upgrade: '升级',
+      downgrade: '降级',
+      migrate: '迁移',
+      clone: '克隆',
+      sync: '同步',
+      test: '测试',
+      monitor: '监控',
+      diagnose: '诊断',
+      optimize: '优化',
+      
+      // 操作确认
+      confirmStart: '确定要启动节点 "{name}" 吗？',
+      confirmStop: '确定要停止节点 "{name}" 吗？',
+      confirmRestart: '确定要重启节点 "{name}" 吗？',
+      confirmPause: '确定要暂停节点 "{name}" 吗？',
+      confirmUpgrade: '确定要升级节点 "{name}" 吗？',
+      confirmMigrate: '确定要迁移节点 "{name}" 吗？',
+      
+      // 操作结果
+      startSuccess: '节点启动成功',
+      stopSuccess: '节点停止成功',
+      restartSuccess: '节点重启成功',
+      pauseSuccess: '节点暂停成功',
+      resumeSuccess: '节点恢复成功',
+      backupSuccess: '节点备份成功',
+      restoreSuccess: '节点恢复成功',
+      upgradeSuccess: '节点升级成功',
+      migrateSuccess: '节点迁移成功',
+      syncSuccess: '节点同步成功',
+      testSuccess: '节点测试成功',
+      
+      // 操作失败
+      startFailed: '节点启动失败',
+      stopFailed: '节点停止失败',
+      restartFailed: '节点重启失败',
+      pauseFailed: '节点暂停失败',
+      resumeFailed: '节点恢复失败',
+      backupFailed: '节点备份失败',
+      restoreFailed: '节点恢复失败',
+      upgradeFailed: '节点升级失败',
+      migrateFailed: '节点迁移失败',
+      syncFailed: '节点同步失败',
+      testFailed: '节点测试失败',
+      
+      // 批量操作
+      batchOperations: '批量操作',
+      selectNodes: '选择节点',
+      selectAll: '全选',
+      unselectAll: '取消全选',
+      selectedCount: '已选择 {count} 个节点',
+      batchStart: '批量启动',
+      batchStop: '批量停止',
+      batchRestart: '批量重启',
+      batchDelete: '批量删除',
+      batchUpdate: '批量更新',
+      confirmBatchOperation: '确定要对所选的 {count} 个节点执行 {operation} 操作吗？',
+      batchOperationSuccess: '批量操作完成，成功 {success} 个，失败 {failed} 个',
+      batchOperationFailed: '批量操作失败',
+      
+      // 操作进度
+      operationInProgress: '操作进行中...',
+      operationCompleted: '操作已完成',
+      operationCanceled: '操作已取消',
+      operationTimeout: '操作超时',
+      cancelOperation: '取消操作',
+      operationProgress: '操作进度: {percent}%'
+    },
+    
+    // 节点监控
+    monitoring: {
+      title: '节点监控',
+      realTimeStats: '实时统计',
+      performanceMetrics: '性能指标',
+      connectionStatus: '连接状态',
+      networkTraffic: '网络流量',
+      resourceUsage: '资源使用',
+      healthCheck: '健康检查',
+      alertsWarnings: '警报和警告',
+      
+      // 性能指标
+      cpuUsage: 'CPU使用率',
+      memoryUsage: '内存使用率',
+      diskUsage: '磁盘使用率',
+      networkIn: '网络接收',
+      networkOut: '网络发送',
+      uptime: '运行时间',
+      latency: '延迟',
+      throughput: '吞吐量',
+      errorRate: '错误率',
+      connectionCount: '连接数',
+      
+      // 健康状态
+      healthy: '健康',
+      warning: '警告',
+      critical: '严重',
+      unknown: '未知',
+      degraded: '降级',
+      
+      // 警报类型
+      alerts: {
+        highCPU: 'CPU使用率过高',
+        highMemory: '内存使用率过高',
+        highDisk: '磁盘使用率过高',
+        networkTimeout: '网络连接超时',
+        connectionLost: '连接丢失',
+        configError: '配置错误',
+        securityAlert: '安全警报',
+        performanceDrop: '性能下降'
+      },
+      
+      // 时间范围
+      timeRange: {
+        last1Hour: '最近1小时',
+        last6Hours: '最近6小时',
+        last24Hours: '最近24小时',
+        last7Days: '最近7天',
+        last30Days: '最近30天',
+        custom: '自定义'
+      }
+    },
+    
+    // 节点日志
+    logs: {
+      title: '节点日志',
+      viewLogs: '查看日志',
+      downloadLogs: '下载日志',
+      clearLogs: '清空日志',
+      refreshLogs: '刷新日志',
+      searchLogs: '搜索日志',
+      filterLogs: '过滤日志',
+      logLevel: '日志级别',
+      logTime: '日志时间',
+      logMessage: '日志消息',
+      logSource: '日志来源',
+      
+      // 日志级别过滤
+      showAll: '显示全部',
+      showErrors: '仅显示错误',
+      showWarnings: '显示警告及以上',
+      showInfo: '显示信息及以上',
+      showDebug: '显示调试及以上',
+      
+      // 日志操作
+      logsCleared: '日志已清空',
+      logsClearFailed: '清空日志失败',
+      logsDownloaded: '日志已下载',
+      logsDownloadFailed: '下载日志失败',
+      noLogsFound: '未找到日志',
+      logsTooLarge: '日志文件过大，建议下载查看',
+      
+      // 实时日志
+      realTimeMode: '实时模式',
+      pauseRealTime: '暂停实时',
+      resumeRealTime: '恢复实时',
+      autoScroll: '自动滚动',
+      followTail: '跟踪尾部'
+    },
+    
     // 节点状态
     status: {
       unconfigured: '未完成配置',
@@ -276,7 +476,9 @@ export default {
       maintenance: '维护模式',
       active: '在线',
       inactive: '离线',
-      pending: '待连接'
+      pending: '待连接',
+      updateSuccess: '节点状态已更新为: {status}',
+      updateFailed: '更新节点状态失败，请重试'
     },
     
     // 节点信息字段
@@ -363,7 +565,292 @@ export default {
       noDeviceInfo: '暂无设备信息',
       deviceInfoNote: '设备信息需要客户端上报',
       statisticsInDevelopment: '统计功能开发中...',
-      defaultGroup: '默认'
+      defaultGroup: '默认',
+      ipv6Address: 'IPv6 地址'
+    },
+    
+    // 编辑页面
+    edit: {
+      title: '编辑节点',
+      saveAllChanges: '保存所有更改',
+      resetChanges: '重置更改',
+      confirmLeave: '确认离开',
+      unsavedChangesMessage: '您有未保存的更改，确定要离开吗？',
+      allChangesSaved: '所有更改已保存',
+      saveFailed: '保存失败，请重试',
+      confirmReset: '确认重置',
+      resetChangesMessage: '确定要重置所有更改吗？',
+      
+      // 标签页
+      tabs: {
+        basic: '基础信息',
+        network: '网络配置',
+        config: '节点配置',
+        keys: '密钥管理'
+      },
+      
+      // 基础信息页面
+      basic: {
+        nameRequired: '节点名称不能为空',
+        nameMaxLength: '节点名称长度不能超过50个字符',
+        descriptionMaxLength: '描述长度不能超过500个字符',
+        versionPlaceholder: '软件版本 (例如: v1.0.0)',
+        nodeTypeMultiSelect: '节点类型 (可多选)',
+        currentSelection: '当前选择值',
+        currentStatus: '当前状态: {status}',
+        saveBasicInfo: '保存基础信息',
+        noSelection: '未选择',
+        loadTypesDefinitionFailed: '加载节点类型定义失败',
+        formReset: '表单已重置',
+        basicInfoSaved: '基础信息保存成功',
+        saveFailed: '保存失败，请重试',
+        vpnTypeSwitched: '已切换到 {type}，请到节点配置页面设置相关端口',
+        
+        // 节点类型
+        nodeTypes: {
+          edge: '边缘节点',
+          relay: '中继节点',
+          gateway: '网关节点',
+          master: '主节点',
+          backup: '备用节点',
+          monitor: '监控节点',
+          proxy: '代理节点',
+          special: '特殊节点'
+        }
+      },
+      
+      // 网络配置页面
+      network: {
+        loadingConfig: '正在加载网络配置...',
+        basicConfig: '基础配置',
+        nodeVirtualIP: '节点虚拟IP',
+        selectIP: '选择IP',
+        selectIPFromPool: '从IP池中选择一个可用的IP地址作为节点的虚拟IP',
+        ipGroupSequence: '组序号',
+        virtualInterface: '虚拟网卡名称',
+        interfacePlaceholder: '默认为 gnb0',
+        lanIPs: 'LAN IP地址',
+        lanIPsDescription: '局域网IP地址，格式：192.168.1.1',
+        lanIPsHint: '配置节点在局域网中的IP地址，用于局域网内的直接连接',
+        addLanIP: '添加LAN IP',
+        publicIPs: '公网IP地址',
+        publicIPsDescription: '公网IP地址，格式：1.2.3.4',
+        publicIPsHint: '配置节点的公网IP地址，用于跨网络连接',
+        addPublicIP: '添加公网IP',
+        indexServers: '索引服务器',
+        indexServersDescription: '索引服务器地址，格式：IP:端口',
+        indexServersHint: '索引服务器用于节点发现和路由，可配置多个提高可用性',
+        addIndexServer: '添加索引服务器',
+        manualConfig: '手动配置',
+        autoDetect: '自动检测',
+        detectIPs: '检测IP',
+        addIP: '添加IP',
+        removeIP: '移除IP',
+        networkConfigSaved: '网络配置保存成功',
+        networkConfigSaveFailed: '网络配置保存失败',
+        ipDetectionFailed: 'IP检测失败',
+        invalidIPFormat: 'IP地址格式不正确',
+        duplicateIP: 'IP地址重复',
+        saveNetworkConfig: '保存网络配置',
+        resetNetwork: '重置网络配置',
+        confirmResetNetwork: '确定要重置网络配置吗？',
+        
+        // 连接测试
+        testConnection: {
+          selectVirtualIpFirst: '请先选择节点虚拟IP',
+          testing: '正在测试连接...',
+          resultTitle: '连接测试结果',
+          successMessage: '网络配置测试通过！',
+          virtualIpLabel: '节点虚拟IP',
+          failureMessage: '连接测试失败，请检查网络配置'
+        },
+        
+        // 保存相关
+        save: {
+          noChanges: '没有任何变化，无需保存',
+          noChangesDetected: '没有检测到变化，无需保存',
+          success: '网络配置保存成功，更新了 {count} 个字段',
+          errorLog: '保存网络配置失败:',
+          defaultError: '保存失败，请重试',
+          errorPrefix: '保存失败'
+        },
+        
+        // 验证相关
+        validation: {
+          formErrors: '请检查并修正表单错误',
+          virtualIpRequired: '请选择节点虚拟IP'
+        }
+      },
+      
+      // 节点配置页面
+      config: {
+        title: '节点配置',
+        loadingConfig: '正在加载节点配置...',
+        portConfig: '端口配置',
+        listenPort: '监听端口',
+        discoveryPort: '发现端口',
+        webUIPort: 'Web UI端口',
+        sslConfig: 'SSL配置',
+        enableSSL: '启用SSL',
+        certPath: '证书路径',
+        keyPath: '私钥路径',
+        advancedConfig: '高级配置',
+        logLevel: '日志级别',
+        maxConnections: '最大连接数',
+        connectionTimeout: '连接超时',
+        heartbeatInterval: '心跳间隔',
+        configGenerated: '配置已生成',
+        configGenerateFailed: '配置生成失败',
+        configExported: '配置已导出',
+        configExportFailed: '配置导出失败',
+        configImported: '配置已导入',
+        configImportFailed: '配置导入失败',
+        invalidConfigFile: '配置文件格式不正确',
+        portInUse: '端口已被占用',
+        portOutOfRange: '端口号必须在1-65535之间',
+        generateConfig: '生成配置',
+        exportConfig: '导出配置',
+        importConfig: '导入配置',
+        previewConfig: '预览配置',
+        saveNodeConfig: '保存节点配置',
+        resetConfig: '重置配置',
+        confirmResetConfig: '确定要重置节点配置吗？',
+        saveConfig: '保存配置',
+        basicConfig: '基本配置',
+        expertConfig: '专家配置',
+        copyConfig: '复制配置',
+        
+        // VPN类型和版本
+        gnbVirtualNetwork: 'GNB虚拟网络',
+        wireGuard: 'WireGuard',
+        openVPN: 'OpenVPN',
+        defaultVersion: '默认版本 (Latest)',
+        
+        // VPN配置参数翻译
+        nodeId: '节点ID',
+        networkInterface: '网络接口名称',
+        listenPortConfig: '监听端口',
+        mtu: 'MTU (最大传输单元)',
+        multiSocket: '多路复用',
+        directForwarding: '直接转发',
+        unifiedForwarding: '统一转发',
+        standardForwarding: '标准中继转发',
+        addressSecure: '地址安全',
+        ipv4Only: '仅IPv4',
+        ipv6Only: '仅IPv6',
+        keepalive: '保活间隔(秒)',
+        forward: '转发功能',
+        daemon: '守护进程',
+        compression: '压缩',
+        compressionLevel: '压缩等级',
+        memory: '内存刻度',
+        esArgs: 'ES参数',
+        
+        // WireGuard参数
+        interfaceAddress: '接口地址',
+        multiConnection: '多连接支持',
+        daemonMode: '守护进程模式',
+        dnsServers: 'DNS服务器',
+        persistentKeepalive: '持续保活(秒)',
+        allowedIPs: '允许的IP',
+        endpoint: '端点地址',
+        fwmark: 'FwMark防火墙标记',
+        routeTable: '路由表',
+        saveConfigFile: '保存配置',
+        preUpScript: '启动前脚本',
+        postUpScript: '启动后脚本',
+        preDownScript: '停止前脚本',
+        postDownScript: '停止后脚本',
+        presharedKey: '预共享密钥',
+        roaming: '漫游支持',
+        handshakeTimeout: '握手超时(秒)',
+        fullConfigPreview: '基本配置 + 专家配置',
+        pleaseConfigureParams: '# 请填写配置参数',
+        gnbConfigFile: '# GNB 节点配置文件 (完整配置)',
+        wireguardConfigFile: '# WireGuard 节点配置文件 (完整配置)',
+        generateTime: '# 生成时间',
+        peerConfigNote: '# Peer配置需要根据具体需求设置',
+        peerPublicKey: '# PublicKey = <对端公钥>',
+        peerEndpoint: '# Endpoint = <对端地址:端口>',
+        peerAllowedIPs: '# AllowedIPs = <允许的IP范围>',
+        noConfigContent: '# 暂无配置内容',
+        saveSuccess: '节点配置保存成功',
+        saveFailedLog: '保存节点配置失败:',
+        saveFailedRetry: '保存失败，请重试',
+        saveFailedPrefix: '保存失败',
+        
+        // 日志级别
+        logLevels: {
+          trace: '追踪',
+          debug: '调试',
+          info: '信息',
+          warn: '警告',
+          error: '错误',
+          fatal: '致命'
+        }
+      },
+      
+      // 密钥管理页面
+      keys: {
+        title: '密钥管理',
+        keyList: '密钥列表',
+        keyDetails: '密钥详情',
+        noKeys: '暂无密钥',
+        addKey: '添加密钥',
+        keyId: '密钥ID',
+        keyType: '密钥类型',
+        fingerprint: '指纹',
+        privateKeyOnetime: '私钥 (仅此一次显示)',
+        privateKeyWarning: '私钥仅显示一次，请立即保存！',
+        loadingKeys: '正在加载密钥信息...',
+        publicKey: '公钥',
+        privateKey: '私钥',
+        keyPair: '密钥对',
+        generateKeyPair: '生成密钥对',
+        importKey: '导入密钥',
+        exportKey: '导出密钥',
+        copyPublicKey: '复制公钥',
+        copyPrivateKey: '复制私钥',
+        showPrivateKey: '显示私钥',
+        hidePrivateKey: '隐藏私钥',
+        keyFormat: '密钥格式',
+        keyLength: '密钥长度',
+        keyAlgorithm: '密钥算法',
+        keyGenerated: '密钥已生成',
+        keyGenerateFailed: '密钥生成失败',
+        keyImported: '密钥已导入',
+        keyImportFailed: '密钥导入失败',
+        keyExported: '密钥已导出',
+        keyExportFailed: '密钥导出失败',
+        publicKeyCopied: '公钥已复制到剪贴板',
+        privateKeyCopied: '私钥已复制到剪贴板',
+        keyCopyFailed: '密钥复制失败',
+        invalidKeyFormat: '密钥格式不正确',
+        keyTooShort: '密钥长度不足',
+        keyTooLong: '密钥长度过长',
+        confirmGenerateKey: '生成新密钥将覆盖现有密钥，确定要继续吗？',
+        confirmDeleteKey: '确定要删除密钥吗？此操作不可恢复',
+        keyFileSelect: '选择密钥文件',
+        dragDropKey: '拖拽密钥文件到此处或点击选择',
+        saveKeyConfig: '保存密钥配置',
+        resetKeys: '重置密钥',
+        
+        // 密钥格式
+        formats: {
+          pem: 'PEM格式',
+          der: 'DER格式',
+          p12: 'PKCS#12格式',
+          jks: 'Java KeyStore格式'
+        },
+        
+        // 密钥算法
+        algorithms: {
+          rsa: 'RSA',
+          ecdsa: 'ECDSA',
+          ed25519: 'Ed25519',
+          secp256k1: 'secp256k1'
+        }
+      }
     }
   },
   navigation: {
@@ -740,7 +1227,10 @@ export default {
           rejected: '申请被拒绝',
           none: '无连接',
           unknown: '状态未知'
-        }
+        },
+        
+        // 节点不可用原因
+        nodeNotAvailable: '节点暂时不可用'
       },
       
       // 第四步 - 提交申请
@@ -1221,6 +1711,112 @@ export default {
       offline: '离线',
       connecting: '连接中',
       error: '错误'
+    },
+    ip: {
+      searchPlaceholder: '搜索IP地址或IP池组名称...',
+      loadingMessage: '正在加载可用IP...',
+      noIPAddress: '暂无可用IP地址',
+      noMatchingIP: '没有找到匹配的IP地址',
+      createIPPoolHint: '请先创建IP池或分配IP资源',
+      tryOtherKeywords: '请尝试其他搜索关键词',
+      status: '状态',
+      used: '已使用',
+      available: '可用'
+    },
+    indexServer: {
+      searchPlaceholder: '搜索服务器名称或地址...',
+      loadingMessage: '正在加载索引服务器...',
+      noServers: '暂无可用索引服务器',
+      noMatchingServers: '没有找到匹配的服务器',
+      contactAdminHint: '请联系管理员配置索引服务器',
+      tryOtherKeywords: '请尝试其他搜索关键词',
+      serverAlreadyExists: '所选服务器已存在，未添加任何新服务器',
+      serversAdded: '已添加 {count} 个索引服务器'
+    },
+    network: {
+      invalidIPFormat: 'IP地址格式不正确',
+      invalidIPv4Format: 'IPv4地址格式不正确',
+      invalidIPPortFormat: 'IP:端口格式不正确，例如: 192.168.1.1:8080',
+      loadConfigFailed: '加载网络配置失败，使用默认值',
+      ipSelected: '已选择IP: {ip} (组序号: {ipGroupSequenceNumber})'
+    },
+    config: {
+      validation: {
+        required: '此项为必填项',
+        invalidNumber: '请输入有效的数字',
+        minValue: '最小值为 {min}',
+        maxValue: '最大值为 {max}',
+        invalidFormat: '输入格式不正确'
+      },
+      configCopied: '配置已复制到剪贴板',
+      copyFailed: '复制失败，请手动选择复制',
+      configExported: '配置文件已导出',
+      exportFailed: '导出配置失败，请稍后重试',
+      loadConfigFailed: '加载配置失败',
+      required: '(必填)',
+      optional: '(可选)',
+      basicConfig: '基本配置',
+      basicConfigDesc: '必需的基础参数配置',
+      wireGuardBasicDesc: '必需的WireGuard基础参数',
+      listenPort: '监听端口',
+      
+      // VPN配置参数翻译
+      nodeId: '节点ID',
+      networkInterface: '网络接口名称',
+      listenPortConfig: '监听端口',
+      mtu: 'MTU (最大传输单元)',
+      multiSocket: '多路复用',
+      directForwarding: '直接转发',
+      unifiedForwarding: '统一转发',
+      standardForwarding: '标准中继转发',
+      addressSecure: '地址安全',
+      ipv4Only: '仅IPv4',
+      ipv6Only: '仅IPv6',
+      keepalive: '保活间隔(秒)',
+      forward: '转发功能',
+      daemon: '守护进程',
+      compression: '压缩',
+      compressionLevel: '压缩等级',
+      memory: '内存刻度',
+      esArgs: 'ES参数',
+      gnbVirtualNetwork: 'GNB虚拟网络',
+      wireGuard: 'WireGuard',
+      openVPN: 'OpenVPN',
+      defaultVersion: '默认版本 (Latest)',
+      
+      // WireGuard参数
+      interfaceAddress: '接口地址',
+      multiConnection: '多连接支持',
+      daemonMode: '守护进程模式',
+      dnsServers: 'DNS服务器',
+      persistentKeepalive: '持续保活(秒)',
+      allowedIPs: '允许的IP',
+      endpoint: '端点地址',
+      fwmark: 'FwMark防火墙标记',
+      routeTable: '路由表',
+      saveConfigFile: '保存配置',
+      preUpScript: '启动前脚本',
+      postUpScript: '启动后脚本',
+      preDownScript: '关闭前脚本',
+      postDownScript: '关闭后脚本',
+      presharedKey: '预共享密钥',
+      roaming: '漫游支持',
+      handshakeTimeout: '握手超时(秒)'
+    },
+    detail: {
+      deleteNodeFailed: '删除节点失败，请重试'
+    },
+    keyManagement: {
+      generateKey: '生成密钥',
+      generateKeyForNode: '为节点 {nodeId} 生成密钥',
+      generationMethod: '生成方式',
+      publicKeyContent: '公钥内容',
+      publicKeyRequired: '公钥内容不能为空',
+      generate: '生成',
+      create: '创建',
+      serverGenerated: '服务端生成',
+      uploadPublicKey: '上传公钥',
+      selectKeyToViewDetails: '请选择一个密钥查看详情'
     }
   },
   zoneServices: {
@@ -1245,6 +1841,31 @@ export default {
     connect: '连接',
     authRequired: '需要认证',
     noAuth: '无需认证',
+    
+    // ServiceCard 相关翻译
+    serviceCard: {
+      statusLabel: '状态',
+      nodeLabel: '节点',
+      edit: '编辑',
+      delete: '删除',
+      connect: '连接',
+      details: '详情',
+      
+      // 状态标签
+      status: {
+        running: '运行中',
+        stopped: '已停止',
+        waiting: '等待中',
+        error: '错误',
+        unknown: '未知'
+      },
+      
+      // 认证状态
+      auth: {
+        required: '需要认证',
+        notRequired: '无需认证'
+      }
+    },
     
     categories: {
       public: '公共服务',

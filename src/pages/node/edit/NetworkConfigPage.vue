@@ -1,31 +1,31 @@
 <template>
   <div class="network-config-page q-pa-md">
-    <div class="text-h6 q-mb-md">网络配置</div>
+    <div class="text-h6 q-mb-md">{{ $t('nodes.edit.tabs.network') }}</div>
     
     <!-- 加载状态 -->
     <div v-if="loadingNetworkConfig" class="text-center q-py-lg">
       <q-spinner color="primary" size="2em" />
-      <div class="q-mt-sm text-grey-6">正在加载网络配置...</div>
+      <div class="q-mt-sm text-grey-6">{{ $t('nodes.edit.network.loadingConfig') }}</div>
     </div>
     
     <q-form v-else @submit.prevent="onSubmit" class="q-gutter-md" ref="formRef">
       <!-- 基础网络配置 -->
       <q-card flat bordered class="q-mb-md">
         <q-card-section>
-          <div class="text-subtitle1 q-mb-md">基础配置</div>
+          <div class="text-subtitle1 q-mb-md">{{ $t('nodes.edit.network.basicConfig') }}</div>
           
           <!-- 节点虚拟IP -->
           <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-sm">节点虚拟IP</div>
+            <div class="text-subtitle2 q-mb-sm">{{ $t('nodes.edit.network.nodeVirtualIP') }}</div>
             <div class="row q-gutter-sm">
               <div class="col">
                 <q-input
                   v-model="form.node_ip"
                   outlined
                   readonly
-                  placeholder="虚拟IP地址 - 点击右侧按钮选择IP"
+                  :placeholder="$t('nodes.edit.network.selectIPFromPool')"
                   :rules="[
-                    val => !!val || '请选择节点虚拟IP'
+                    val => !!val || $t('nodes.edit.network.nodeVirtualIP') + $t('common.required')
                   ]"
                   :disable="loading"
                 />
@@ -39,14 +39,14 @@
                   :disable="loading"
                   class="q-mt-sm"
                 >
-                  选择IP
+                  {{ $t('nodes.edit.network.selectIP') }}
                 </q-btn>
               </div>
             </div>
             <div class="text-caption text-grey-6 q-mt-sm">
-              从你的IP池中选择一个可用的IP地址作为节点的虚拟IP
+              {{ $t('nodes.edit.network.selectIPFromPool') }}
               <span v-if="form.ip_group_sequence_number" class="q-ml-sm">
-                (组序号: {{ form.ip_group_sequence_number }})
+                ({{ $t('nodes.edit.network.ipGroupSequence') }}: {{ form.ip_group_sequence_number }})
               </span>
             </div>
             
@@ -61,8 +61,8 @@
           <!-- 索引服务器 -->
           <div class="q-mb-md">
             <div class="text-subtitle2 q-mb-sm">
-              索引服务器 
-              <span class="text-caption text-grey-6">(选填)</span>
+              {{ $t('nodes.edit.network.indexServers') }}
+              <span class="text-caption text-grey-6">({{ $t('common.optional') }})</span>
             </div>
             <div class="q-gutter-sm">
               <div
@@ -75,7 +75,7 @@
                     v-model="form.index_servers[index]"
                     outlined
                     dense
-                    placeholder="索引服务器 (例如: 192.168.1.1:8080)"
+                    :placeholder="$t('nodes.edit.network.indexServersDescription')"
                     :rules="[validateIPPort]"
                     :disable="loading"
                     @focus="!isProcessingSelection && (showIndexServerSelector = true)"
@@ -97,14 +97,14 @@
                 color="primary"
                 outline
                 icon="add"
-                label="添加索引服务器"
+                :label="$t('nodes.edit.network.addIndexServer')"
                 @click="addIndexServer"
                 :disable="loading"
                 class="q-mt-sm"
               />
             </div>
             <div class="text-caption text-grey-6 q-mt-sm">
-              配置节点的索引服务器，点击输入框可从列表中选择
+              {{ $t('nodes.edit.network.indexServersHint') }}
             </div>
           </div>
         </q-card-section>
@@ -113,13 +113,13 @@
       <!-- 扩展配置 -->
       <q-card flat bordered class="q-mb-md">
         <q-card-section>
-          <div class="text-subtitle1 q-mb-md">扩展配置</div>
+          <div class="text-subtitle1 q-mb-md">{{ $t('nodes.edit.network.advancedConfig') }}</div>
           
           <!-- 局域网IP -->
           <div class="q-mb-md">
             <div class="text-subtitle2 q-mb-sm">
-              局域网IP 
-              <span class="text-caption text-grey-6">(选填)</span>
+              {{ $t('nodes.edit.network.lanIPs') }}
+              <span class="text-caption text-grey-6">({{ $t('common.optional') }})</span>
             </div>
             <div class="q-gutter-sm">
               <div
@@ -132,7 +132,7 @@
                     v-model="form.lan_ips[index]"
                     outlined
                     dense
-                    placeholder="局域网IP (例如: 192.168.1.100)"
+                    :placeholder="$t('nodes.edit.network.lanIPsDescription')"
                     :rules="[validateIPv4Address]"
                     :disable="loading"
                   />
@@ -153,22 +153,22 @@
                 color="primary"
                 outline
                 icon="add"
-                label="添加局域网IP"
+                :label="$t('nodes.edit.network.addLanIP')"
                 @click="addLanIP"
                 :disable="loading"
                 class="q-mt-sm"
               />
             </div>
             <div class="text-caption text-grey-6 q-mt-sm">
-              配置节点的局域网IP地址，仅支持IPv4
+              {{ $t('nodes.edit.network.lanIPsHint') }}
             </div>
           </div>
 
           <!-- 公网IP -->
           <div class="q-mb-md">
             <div class="text-subtitle2 q-mb-sm">
-              公网IP 
-              <span class="text-caption text-grey-6">(选填)</span>
+              {{ $t('nodes.edit.network.publicIPs') }}
+              <span class="text-caption text-grey-6">({{ $t('common.optional') }})</span>
             </div>
             <div class="q-gutter-sm">
               <div
@@ -181,7 +181,7 @@
                     v-model="form.public_ips[index]"
                     outlined
                     dense
-                    placeholder="公网IP (例如: 1.2.3.4 或 2001:db8::1)"
+                    :placeholder="$t('nodes.edit.network.publicIPsDescription')"
                     :rules="[validateIPAddress]"
                     :disable="loading"
                   />
@@ -202,14 +202,14 @@
                 color="primary"
                 outline
                 icon="add"
-                label="添加公网IP"
+                :label="$t('nodes.edit.network.addPublicIP')"
                 @click="addPublicIP"
                 :disable="loading"
                 class="q-mt-sm"
               />
             </div>
             <div class="text-caption text-grey-6 q-mt-sm">
-              如果本节点有公网IP，请填写，支持IPv4和IPv6，这会大大提升建立连接的速度
+              {{ $t('nodes.edit.network.publicIPsHint') }}
             </div>
           </div>
         </q-card-section>
@@ -224,7 +224,7 @@
           :disable="!hasChanges || loading || loadingNetworkConfig"
         >
           <q-icon name="save" class="q-mr-sm" />
-          保存网络配置
+          {{ $t('nodes.edit.network.saveNetworkConfig') }}
         </q-btn>
         
         <q-btn
@@ -234,7 +234,7 @@
           :disable="saving || !hasChanges || loading || loadingNetworkConfig"
         >
           <q-icon name="refresh" class="q-mr-sm" />
-          重置
+          {{ $t('common.reset') }}
         </q-btn>
         
         <q-btn
@@ -244,7 +244,7 @@
           :disable="saving || loading || loadingNetworkConfig || !form.node_ip"
         >
           <q-icon name="network_check" class="q-mr-sm" />
-          测试连接
+          {{ $t('nodes.edit.network.testConnection') }}
         </q-btn>
       </div>
     </q-form>
@@ -268,7 +268,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, inject } from 'vue'
+import { useI18n } from 'vue-i18n'
+import debug from "src/utils/debug"
+import { computed, watch, ref, onMounted, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useNode, useNotify } from '../../../composables'
@@ -279,6 +281,7 @@ import IndexServerSelectorDialog from '../../../components/node/IndexServerSelec
 
 const route = useRoute()
 const $q = useQuasar()
+const { t } = useI18n()
 const { success: notifySuccess, error: notifyError } = useNotify()
 
 // 获取节点ID
@@ -371,7 +374,7 @@ const validateIPAddress = (ip: string): string | boolean => {
   if (!ip || !ip.trim()) return true // 空值允许
   const trimmedIP = ip.trim()
   if (!isValidIPAddress(trimmedIP)) {
-    return 'IP地址格式不正确'
+    return t('node.network.invalidIPFormat')
   }
   return true
 }
@@ -381,7 +384,7 @@ const validateIPv4Address = (ip: string): string | boolean => {
   if (!ip || !ip.trim()) return true // 空值允许
   const trimmedIP = ip.trim()
   if (!isValidIPv4Address(trimmedIP)) {
-    return 'IPv4地址格式不正确'
+    return t('node.network.invalidIPv4Format')
   }
   return true
 }
@@ -391,7 +394,7 @@ const validateIPPort = (ipPort: string): string | boolean => {
   if (!ipPort || !ipPort.trim()) return true // 空值允许
   const trimmedIPPort = ipPort.trim()
   if (!isValidIPPort(trimmedIPPort)) {
-    return 'IP:端口格式不正确，例如: 192.168.1.1:8080'
+    return t('node.network.invalidIPPortFormat')
   }
   return true
 }
@@ -437,18 +440,18 @@ const loadNetworkConfig = async () => {
     form.value = JSON.parse(JSON.stringify(data))
     originalData.value = JSON.parse(JSON.stringify(data))
     
-    console.log('网络配置数据加载成功:', data)
-    console.log('节点索引服务器:', nodeIndexServices)
+    debug.log('网络配置数据加载成功:', data)
+    debug.log('节点索引服务器:', nodeIndexServices)
   } catch (error: any) {
-    console.error('加载网络配置数据失败:', error)
+    debug.error('加载网络配置数据失败:', error)
     
     // 如果是404错误，说明网络配置不存在，使用默认值
     if (error?.response?.status === 404) {
-      console.log('网络配置不存在，使用默认值初始化')
+      debug.log('网络配置不存在，使用默认值初始化')
       await initializeForm()
     } else {
       // 其他错误，显示错误信息但仍使用默认值
-      notifyError('加载网络配置失败，使用默认值')
+      notifyError(t('node.network.loadConfigFailed'))
       await initializeForm()
     }
   } finally {
@@ -473,7 +476,7 @@ const initializeForm = async () => {
         }
       }
     } catch (error) {
-      console.log('获取节点索引服务器失败，使用默认值:', error)
+      debug.log('获取节点索引服务器失败，使用默认值:', error)
     }
     
     const data = {
@@ -493,7 +496,7 @@ const resetForm = () => {
   form.value = JSON.parse(JSON.stringify(originalData.value))
   // 重置选择的索引服务器列表
   selectedIndexServers.value = []
-  notifySuccess('表单已重置')
+  notifySuccess(t('common.formReset'))
 }
 
 // 索引服务器管理
@@ -542,7 +545,7 @@ const removePublicIP = (index: number) => {
 const onIPSelected = (ip: string, ipGroupSequenceNumber: number) => {
   form.value.node_ip = ip
   form.value.ip_group_sequence_number = ipGroupSequenceNumber
-  notifySuccess(`已选择IP: ${ip} (组序号: ${ipGroupSequenceNumber})`)
+  notifySuccess(t('node.network.ipSelected', { ip, ipGroupSequenceNumber }))
 }
 
 // 索引服务器选择处理
@@ -555,7 +558,7 @@ const onIndexServersSelected = (servers: string[]) => {
   const newServers = servers.filter(server => !existingServers.includes(server))
   
   if (newServers.length === 0) {
-    notifyError('所选服务器已存在，未添加任何新服务器')
+    notifyError(t('node.indexServer.serverAlreadyExists'))
     setTimeout(() => {
       isProcessingSelection.value = false
     }, 300)
@@ -585,7 +588,7 @@ const onIndexServersSelected = (servers: string[]) => {
     form.value.index_servers.push('')
   }
   
-  notifySuccess(`已添加 ${newServers.length} 个索引服务器`)
+  notifySuccess(t('node.indexServer.serversAdded', { count: newServers.length }))
   
   // 延迟重置处理状态，避免立即触发focus
   setTimeout(() => {
@@ -606,13 +609,13 @@ const onIndexDialogClose = (value: boolean) => {
 
 const testConnection = async () => {
   if (!form.value.node_ip) {
-    notifyError('请先选择节点虚拟IP')
+    notifyError(t('nodes.edit.network.testConnection.selectVirtualIpFirst'))
     return
   }
 
   try {
     $q.loading.show({
-      message: '正在测试连接...'
+      message: t('nodes.edit.network.testConnection.testing')
     })
     
     // 模拟连接测试
@@ -621,23 +624,23 @@ const testConnection = async () => {
     $q.loading.hide()
     
     $q.dialog({
-      title: '连接测试结果',
-      message: `网络配置测试通过！\n节点虚拟IP: ${form.value.node_ip}`,
+      title: t('nodes.edit.network.testConnection.resultTitle'),
+      message: `${t('nodes.edit.network.testConnection.successMessage')}\n${t('nodes.edit.network.testConnection.virtualIpLabel')}: ${form.value.node_ip}`,
       ok: true
     })
   } catch (error) {
     $q.loading.hide()
-    notifyError('连接测试失败，请检查网络配置')
+    notifyError(t('nodes.edit.network.testConnection.failureMessage'))
   }
 }
 
 const onSubmit = async () => {
-  console.log('onSubmit 函数被调用')
+  debug.log('onSubmit 函数被调用')
   
   try {
     // 检查是否有变化
     if (!hasChanges.value) {
-      notifySuccess('没有任何变化，无需保存')
+      notifySuccess(t('nodes.edit.network.save.noChanges'))
       return
     }
     
@@ -645,14 +648,14 @@ const onSubmit = async () => {
     if (formRef.value) {
       const isValid = await formRef.value.validate()
       if (!isValid) {
-        notifyError('请检查并修正表单错误')
+        notifyError(t('nodes.edit.network.validation.formErrors'))
         return
       }
     }
     
     // 验证必填字段
     if (!form.value.node_ip?.trim()) {
-      notifyError('请选择节点虚拟IP')
+      notifyError(t('nodes.edit.network.validation.virtualIpRequired'))
       return
     }
     
@@ -689,12 +692,12 @@ const onSubmit = async () => {
     
     // 如果没有任何字段需要更新
     if (Object.keys(updateData).length === 0) {
-      notifySuccess('没有检测到变化，无需保存')
+      notifySuccess(t('nodes.edit.network.save.noChangesDetected'))
       return
     }
 
-    console.log('提交网络配置数据到API端点 PUT /nodes/' + String(node.value.node_id) + '/network-config:', updateData)
-    console.log('变化的字段:', Object.keys(updateData))
+    debug.log('提交网络配置数据到API端点 PUT /nodes/' + String(node.value.node_id) + '/network-config:', updateData)
+    debug.log('变化的字段:', Object.keys(updateData))
 
     if (node.value) {
       saving.value = true
@@ -703,7 +706,7 @@ const onSubmit = async () => {
       // 更新原始数据为当前表单数据
       originalData.value = JSON.parse(JSON.stringify(form.value))
       
-      notifySuccess(`网络配置保存成功，更新了 ${Object.keys(updateData).length} 个字段`)
+      notifySuccess(t('nodes.edit.network.save.success', { count: Object.keys(updateData).length }))
       
       // 重新加载节点数据
       if (loadNode) {
@@ -711,9 +714,9 @@ const onSubmit = async () => {
       }
     }
   } catch (error: any) {
-    console.error('保存网络配置失败:', error)
-    const errorMsg = error?.response?.data?.message || error?.message || '保存失败，请重试'
-    notifyError(`保存失败: ${errorMsg}`)
+    debug.error(t('nodes.edit.network.save.errorLog'), error)
+    const errorMsg = error?.response?.data?.message || error?.message || t('nodes.edit.network.save.defaultError')
+    notifyError(`${t('nodes.edit.network.save.errorPrefix')}: ${errorMsg}`)
   } finally {
     saving.value = false
   }

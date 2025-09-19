@@ -1,4 +1,5 @@
 import { boot } from 'quasar/wrappers'
+import debug from "src/utils/debug"
 import { Notify } from 'quasar'
 
 export default boot(({ app }) => {
@@ -55,5 +56,5 @@ export default boot(({ app }) => {
   app.config.globalProperties.$showWarning = showWarning
   app.config.globalProperties.$showInfo = showInfo
   
-  console.log('🔔 [Boot] Notification system initialized')
+  debug.log('🔔 [Boot] Notification system initialized')
 }) 

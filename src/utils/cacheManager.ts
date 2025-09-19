@@ -1,3 +1,4 @@
+import debug from "src/utils/debug"
 /**
  * 统一缓存管理器
  * 支持内存缓存、LocalStorage、SessionStorage
@@ -175,7 +176,7 @@ export class CacheManager {
     try {
       storage.setItem(`cache_${key}`, JSON.stringify(item))
     } catch (error) {
-      console.warn('设置存储缓存失败:', error)
+      debug.warn('设置存储缓存失败:', error)
     }
   }
 
@@ -184,7 +185,7 @@ export class CacheManager {
       const data = storage.getItem(`cache_${key}`)
       return data ? JSON.parse(data) : null
     } catch (error) {
-      console.warn('获取存储缓存失败:', error)
+      debug.warn('获取存储缓存失败:', error)
       return null
     }
   }

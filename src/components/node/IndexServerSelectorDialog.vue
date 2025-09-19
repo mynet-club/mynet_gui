@@ -15,7 +15,7 @@
         <!-- 搜索框 -->
         <q-input
           v-model="searchText"
-          placeholder="搜索服务器名称或地址..."
+          :placeholder="$t('node.indexServer.searchPlaceholder')"
           outlined
           dense
           class="q-mb-md"
@@ -28,17 +28,17 @@
         <!-- 加载状态 -->
         <div v-if="loading" class="text-center q-py-md">
           <q-spinner color="primary" size="2em" />
-          <div class="q-mt-sm text-grey-6">正在加载索引服务器...</div>
+          <div class="q-mt-sm text-grey-6">{{ $t('node.indexServer.loadingMessage') }}</div>
         </div>
 
         <!-- 空状态 -->
         <div v-else-if="filteredServices.length === 0" class="text-center q-py-md">
           <q-icon name="info" size="2em" color="grey-5" />
           <div class="q-mt-sm text-grey-6">
-            {{ indexServices.length === 0 ? '暂无可用索引服务器' : '没有找到匹配的服务器' }}
+            {{ indexServices.length === 0 ? $t('node.indexServer.noServers') : $t('node.indexServer.noMatchingServers') }}
           </div>
           <div class="q-mt-sm text-grey-6 text-caption">
-            {{ indexServices.length === 0 ? '请联系管理员配置索引服务器' : '请尝试其他搜索关键词' }}
+            {{ indexServices.length === 0 ? $t('node.indexServer.contactAdminHint') : $t('node.indexServer.tryOtherKeywords') }}
           </div>
         </div>
 
@@ -170,6 +170,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import debug from "src/utils/debug"
 import { zoneService } from '../../services/zone/zoneService'
 import type { IndexService, IndexServiceMeta } from '../../types'
 
@@ -225,12 +226,12 @@ const loadIndexServices = async () => {
     indexServices.value = responseData.index_services || []
     meta.value = responseData.meta || null
     
-    console.log('加载索引服务器成功:', {
+    debug.log('加载索引服务器成功:', {
       services: indexServices.value.length,
       meta: meta.value
     })
   } catch (error) {
-    console.error('加载索引服务器失败:', error)
+    debug.error('加载索引服务器失败:', error)
     indexServices.value = []
     meta.value = null
   } finally {

@@ -15,7 +15,7 @@
         <!-- 搜索框 -->
         <q-input
           v-model="searchText"
-          placeholder="搜索IP地址或IP池组名称..."
+          :placeholder="$t('node.ip.searchPlaceholder')"
           outlined
           dense
           class="q-mb-md"
@@ -28,17 +28,17 @@
         <!-- 加载状态 -->
         <div v-if="loading" class="text-center q-py-md">
           <q-spinner color="primary" size="2em" />
-          <div class="q-mt-sm text-grey-6">正在加载可用IP...</div>
+          <div class="q-mt-sm text-grey-6">{{ $t('node.ip.loadingMessage') }}</div>
         </div>
 
         <!-- 空状态 -->
         <div v-else-if="filteredPools.length === 0" class="text-center q-py-md">
           <q-icon name="info" size="2em" color="grey-5" />
           <div class="q-mt-sm text-grey-6">
-            {{ ipPools.length === 0 ? '暂无可用IP地址' : '没有找到匹配的IP地址' }}
+            {{ ipPools.length === 0 ? $t('node.ip.noIPAddress') : $t('node.ip.noMatchingIP') }}
           </div>
           <div class="q-mt-sm text-grey-6 text-caption">
-            {{ ipPools.length === 0 ? '请先创建IP池或分配IP资源' : '请尝试其他搜索关键词' }}
+            {{ ipPools.length === 0 ? $t('node.ip.createIPPoolHint') : $t('node.ip.tryOtherKeywords') }}
           </div>
         </div>
 
@@ -87,7 +87,7 @@
                   IP: {{ ip.addr }}<br>
                   索引: {{ ip.idx }}<br>
                   组序号: {{ pool.seq }}<br>
-                  状态: {{ ip.consumed ? '已使用' : '可用' }}
+                  {{ $t('node.ip.status') }}: {{ ip.consumed ? $t('node.ip.used') : $t('node.ip.available') }}
                 </q-tooltip>
               </q-btn>
             </div>
@@ -112,10 +112,10 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn flat label="取消" v-close-popup />
+        <q-btn flat :label="$t('common.cancel')" v-close-popup />
         <q-btn
           color="primary"
-          label="确认选择"
+          :label="$t('common.confirm')"
           :disable="!selectedIP"
           @click="confirmSelection"
         />
@@ -126,6 +126,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import debug from "src/utils/debug"
 import { nodeService } from '../../services/node/nodeService'
 import type { AvailableIP, IPPool, IPStatistics } from '../../types/node'
 
@@ -220,12 +221,12 @@ const loadAvailableIPs = async () => {
     ipPools.value = responseData.pools || []
     statistics.value = responseData.statistics || null
     
-    console.log('加载可用IP成功:', {
+    debug.log('加载可用IP成功:', {
       pools: ipPools.value.length,
       statistics: statistics.value
     })
   } catch (error) {
-    console.error('加载可用IP失败:', error)
+    debug.error('加载可用IP失败:', error)
     ipPools.value = []
     statistics.value = null
   } finally {

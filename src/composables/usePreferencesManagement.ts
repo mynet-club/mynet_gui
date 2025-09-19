@@ -1,4 +1,5 @@
 import { ref, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useQuasar, LocalStorage } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
@@ -82,9 +83,9 @@ export function usePreferencesManagement() {
         }
       }
       
-      console.log('🔧 [Preferences] Loaded preferences:', preferences.value)
+      debug.log('🔧 [Preferences] Loaded preferences:', preferences.value)
     } catch (error) {
-      console.error('加载偏好设置失败:', error)
+      debug.error('加载偏好设置失败:', error)
       // 使用默认设置，不显示错误
     } finally {
       loading.value.preferences = false
@@ -99,7 +100,7 @@ export function usePreferencesManagement() {
       // 保存到 LocalStorage
       LocalStorage.set('user_preferences', preferences.value)
       
-      console.log('🔧 [Preferences] Saved preferences:', preferences.value)
+      debug.log('🔧 [Preferences] Saved preferences:', preferences.value)
       
       $q.notify({
         type: 'positive',
@@ -107,7 +108,7 @@ export function usePreferencesManagement() {
       })
       return true
     } catch (error: any) {
-      console.error('保存偏好设置失败:', error)
+      debug.error('保存偏好设置失败:', error)
       
       $q.notify({
         type: 'negative',

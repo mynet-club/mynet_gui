@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import debug from "src/utils/debug"
 import { socialService } from '../services/social/socialService'
 import { useNotify } from './useNotify'
 import { useI18n } from 'vue-i18n'
@@ -81,7 +82,7 @@ export function useSocial() {
               ).length // 可用节点数
             }
           } catch (error) {
-            console.error(`获取好友 ${friend.id} 的节点失败:`, error)
+            debug.error(`获取好友 ${friend.id} 的节点失败:`, error)
             return {
               ...friend,
               friendship_date: friend.created_at,
@@ -100,7 +101,7 @@ export function useSocial() {
       if (response.pending_requests) {
         friendRequests.value = response.pending_requests.map(request => {
           if (!request.status) {
-            console.error(`好友请求状态缺失:`, request);
+            debug.error(`好友请求状态缺失:`, request);
             notify.error(t('social.friendRequests.statusError'));
           }
           return {
@@ -114,7 +115,7 @@ export function useSocial() {
       if (response.outgoing_requests) {
         sentRequests.value = response.outgoing_requests.map(request => {
           if (!request.status) {
-            console.error(`发送的好友请求状态缺失:`, request);
+            debug.error(`发送的好友请求状态缺失:`, request);
             notify.error(t('social.friendRequests.statusError'));
           }
           return {
@@ -129,7 +130,7 @@ export function useSocial() {
         invitations.value = response.invitations
       }
     } catch (error) {
-      console.error('获取社交概览失败:', error)
+      debug.error('获取社交概览失败:', error)
       notify.error(t('social.fetchOverviewError'))
     } finally {
       loading.value = false
@@ -155,7 +156,7 @@ export function useSocial() {
         await fetchOverview()
       }
     } catch (error) {
-      console.error('获取好友列表失败:', error)
+      debug.error('获取好友列表失败:', error)
       notify.error(t('social.fetchFriendsError'))
     } finally {
       loading.value = false
@@ -174,7 +175,7 @@ export function useSocial() {
       const response = await socialService.searchUsers(query)
       searchResults.value = response
     } catch (error) {
-      console.error('搜索用户失败:', error)
+      debug.error('搜索用户失败:', error)
       notify.error(t('social.searchUsersError'))
     } finally {
       searchLoading.value = false
@@ -195,7 +196,7 @@ export function useSocial() {
       // 数据已经通过 fetchOverview 设置，currentRequests 计算属性会自动返回正确的数据
       
     } catch (error) {
-      console.error('获取好友请求失败:', error)
+      debug.error('获取好友请求失败:', error)
       notify.error(t('social.fetchRequestsError'))
     } finally {
       loading.value = false
@@ -224,7 +225,7 @@ export function useSocial() {
         notify.error(response.message || t('social.friendRequestError'))
       }
     } catch (error) {
-      console.error('发送好友请求失败:', error)
+      debug.error('发送好友请求失败:', error)
       notify.error(t('social.friendRequestError'))
     } finally {
       loading.value = false
@@ -246,7 +247,7 @@ export function useSocial() {
         notify.error(response.message || t('social.friendRequestAcceptError'))
       }
     } catch (error) {
-      console.error('接受好友请求失败:', error)
+      debug.error('接受好友请求失败:', error)
       notify.error(t('social.friendRequestAcceptError'))
     } finally {
       loading.value = false
@@ -268,7 +269,7 @@ export function useSocial() {
         notify.error(response.message || t('social.friendRequestRejectError'))
       }
     } catch (error) {
-      console.error('拒绝好友请求失败:', error)
+      debug.error('拒绝好友请求失败:', error)
       notify.error(t('social.friendRequestRejectError'))
     } finally {
       loading.value = false
@@ -290,7 +291,7 @@ export function useSocial() {
         notify.error(response.message || t('social.friendRemoveError'))
       }
     } catch (error) {
-      console.error('删除好友失败:', error)
+      debug.error('删除好友失败:', error)
       notify.error(t('social.friendRemoveError'))
     } finally {
       loading.value = false
@@ -310,7 +311,7 @@ export function useSocial() {
       // 数据已经通过 fetchOverview 设置，无需额外处理
       
     } catch (error) {
-      console.error('获取邀请码列表失败:', error)
+      debug.error('获取邀请码列表失败:', error)
       notify.error(t('social.fetchInvitationsError'))
     } finally {
       loading.value = false
@@ -327,7 +328,7 @@ export function useSocial() {
         invitations.value.unshift(response)
       }
     } catch (error) {
-      console.error('创建邀请码失败:', error)
+      debug.error('创建邀请码失败:', error)
       notify.error(t('social.invitationCreateError'))
     } finally {
       loading.value = false
@@ -350,7 +351,7 @@ export function useSocial() {
       }
       return false
     } catch (error) {
-      console.error('删除邀请码失败:', error)
+      debug.error('删除邀请码失败:', error)
       notify.error(t('social.invitationDeleteError'))
       return false
     } finally {
@@ -364,7 +365,7 @@ export function useSocial() {
       const response = await socialService.getFriendNodes(friendId)
       return response
     } catch (error) {
-      console.error('获取好友节点失败:', error)
+      debug.error('获取好友节点失败:', error)
       notify.error(t('social.fetchFriendNodesError'))
       return []
     }
@@ -376,7 +377,7 @@ export function useSocial() {
       const response = await socialService.getAllFriendNodes()
       return response
     } catch (error) {
-      console.error('获取所有好友节点失败:', error)
+      debug.error('获取所有好友节点失败:', error)
       notify.error(t('social.fetchAllFriendNodesError'))
       return null
     }
@@ -433,7 +434,7 @@ export function useSocial() {
         notify.error(response.message || t('social.friendRequestCancelError'))
       }
     } catch (error) {
-      console.error('取消好友请求失败:', error)
+      debug.error('取消好友请求失败:', error)
       notify.error(t('social.friendRequestCancelError'))
     } finally {
       loading.value = false

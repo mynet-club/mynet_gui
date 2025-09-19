@@ -173,6 +173,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useRoutes } from '../../composables/useRoutes'
 import type { Route } from '../../types'
@@ -250,7 +251,7 @@ onMounted(async () => {
   try {
     connectionStats.value = await getConnectionStats(props.route.id)
   } catch (error) {
-    console.error('Failed to load connection stats:', error)
+    debug.error('Failed to load connection stats:', error)
   }
 })
 </script>

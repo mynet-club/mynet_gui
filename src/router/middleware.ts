@@ -3,6 +3,7 @@
  */
 
 import { Router } from 'vue-router'
+import debug from "src/utils/debug"
 import { useAuth } from '../composables/useAuth'
 
 /**
@@ -63,12 +64,12 @@ export function setupRouteGuards(router: Router) {
 
   // 路由错误处理
   router.onError((error) => {
-    console.error('路由错误:', error)
+    debug.error('路由错误:', error)
     
     // 处理动态导入失败
     if (error.message?.includes('Loading chunk')) {
       // 只在加载失败时刷新页面，不在认证错误时刷新
-      console.warn('🔧 [Router] Chunk loading failed, will reload page')
+      debug.warn('🔧 [Router] Chunk loading failed, will reload page')
       window.location.reload()
     }
   })
@@ -97,7 +98,7 @@ async function hasNodeEditPermission(nodeId: string): Promise<boolean> {
     // 暂时返回true，实际应用中需要实现具体逻辑
     return true
   } catch (error) {
-    console.error('检查节点编辑权限失败:', error)
+    debug.error('检查节点编辑权限失败:', error)
     return false
   }
 }
@@ -270,7 +271,7 @@ export class PageProgressBar {
    */
   set(progress: number) {
     // 可以在这里更新进度条的进度
-    console.log(`页面加载进度: ${progress}%`)
+    debug.log(`页面加载进度: ${progress}%`)
   }
 }
 

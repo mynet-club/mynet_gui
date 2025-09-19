@@ -60,6 +60,12 @@
         />
         
         <q-checkbox 
+          v-model="registerForm.ageVerified"
+          :label="$t('auth.ageVerification')"
+          color="primary"
+        />
+        
+        <q-checkbox 
           v-model="registerForm.agreeTerms"
           :label="$t('auth.agreeTerms')"
         />
@@ -70,7 +76,7 @@
           :label="$t('auth.registerButton')"
           class="submit-btn"
           :loading="isLoading"
-          :disable="!registerForm.agreeTerms"
+          :disable="!registerForm.agreeTerms || !registerForm.ageVerified"
         />
       </q-form>
     </q-card-section>
@@ -92,6 +98,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -122,7 +129,7 @@ const handleRegister = async () => {
       }
     })
   } catch (error) {
-    console.error('Registration failed:', error)
+    debug.error('Registration failed:', error)
   }
 }
 

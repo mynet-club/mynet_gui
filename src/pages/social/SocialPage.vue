@@ -175,7 +175,7 @@
             outlined
             min="1"
             max="365"
-            suffix="天"
+            :suffix="$t('common.days')"
           />
         </q-card-section>
 
@@ -195,6 +195,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -328,7 +329,7 @@ const handleViewNodes = async (friendId: string) => {
       notify.info(t('social.noFriendNodes'))
     }
   } catch (error) {
-    console.error('Failed to get friend nodes:', error)
+    debug.error('Failed to get friend nodes:', error)
     notify.error(t('social.fetchFriendNodesError'))
   }
 }
@@ -403,7 +404,7 @@ const performSearch = async () => {
     await searchUsers(searchDialog.value.query)
     searchPerformed.value = true
   } catch (error) {
-    console.error('搜索用户失败:', error)
+    debug.error('搜索用户失败:', error)
     notify.error(t('social.searchError'))
   }
 }
@@ -416,11 +417,11 @@ const closeSearchDialog = () => {
 }
 
 const handleAcceptInvitation = (invitationId: string | number) => {
-  console.log('接受邀请:', invitationId)
+  debug.log('接受邀请:', invitationId)
 }
 
 const handleRejectInvitation = (invitationId: string | number) => {
-  console.log('拒绝邀请:', invitationId)
+  debug.log('拒绝邀请:', invitationId)
 }
 
 // 初始化

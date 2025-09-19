@@ -1,4 +1,5 @@
 import { boot } from 'quasar/wrappers'
+import debug from "src/utils/debug"
 import { Dark, LocalStorage } from 'quasar'
 
 export default boot(({ app }) => {
@@ -39,5 +40,5 @@ export default boot(({ app }) => {
   app.config.globalProperties.$setDarkMode = setDarkMode
   app.config.globalProperties.$getDarkMode = getDarkMode
   
-  console.log('🎨 [Boot] Theme system initialized, dark mode:', Dark.isActive)
+  debug.log('🎨 [Boot] Theme system initialized, dark mode:', Dark.isActive)
 }) 

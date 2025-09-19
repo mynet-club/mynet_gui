@@ -119,6 +119,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useIPPools } from '../../composables/useIPPools'
 import type { IPPool } from '../../types/ippool'
@@ -166,7 +167,7 @@ const currentPoolsCount = computed(() => {
   const propsCount = props.existingPools.length
   const result = statsCount || propsCount
   
-  console.log('currentPoolsCount computed:', {
+  debug.log('currentPoolsCount computed:', {
     statsCount,
     propsCount,
     result,
@@ -180,7 +181,7 @@ const remainingPools = computed(() => {
   const userQuota = statistics.value?.user_quota || MAX_POOLS_PER_ZONE
   const result = Math.max(0, userQuota - currentPoolsCount.value)
   
-  console.log('remainingPools computed:', {
+  debug.log('remainingPools computed:', {
     userQuota,
     currentCount: currentPoolsCount.value,
     result
@@ -349,7 +350,7 @@ const handleCreate = async () => {
     isOpen.value = false
     resetForm()
   } catch (error) {
-    console.error('创建IP池失败:', error)
+    debug.error('创建IP池失败:', error)
     // 即使创建失败，也不关闭对话框，让用户看到错误信息
   }
 }
@@ -384,11 +385,11 @@ watch(isOpen, async (open) => {
     // 获取最新的统计数据
     try {
       await fetchStatistics()
-      console.log('Create dialog - Statistics loaded:', statistics.value)
-      console.log('Create dialog - Current pools count:', currentPoolsCount.value)
-      console.log('Create dialog - Remaining pools:', remainingPools.value)
+      debug.log('Create dialog - Statistics loaded:', statistics.value)
+      debug.log('Create dialog - Current pools count:', currentPoolsCount.value)
+      debug.log('Create dialog - Remaining pools:', remainingPools.value)
     } catch (error) {
-      console.warn('Failed to fetch statistics in create dialog:', error)
+      debug.warn('Failed to fetch statistics in create dialog:', error)
     }
     
     if (remainingPools.value === 1) {

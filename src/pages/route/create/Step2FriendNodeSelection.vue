@@ -197,6 +197,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useSocial } from '../../../composables/useSocial'
@@ -270,7 +271,7 @@ const fetchFriendNodes = async () => {
       can_connect: node.current_connections < node.max_connections && node.status === 'online'
     }))
   } catch (error) {
-    console.error('获取好友节点失败:', error)
+    debug.error('获取好友节点失败:', error)
     notify.error(t('routes.create.step2.fetchNodesError'))
   } finally {
     loading.value = false
@@ -290,7 +291,7 @@ onMounted(async () => {
   try {
     selectedFriend.value = JSON.parse(savedFriend)
   } catch (error) {
-    console.error('解析已保存的好友数据失败:', error)
+    debug.error('解析已保存的好友数据失败:', error)
     router.push('/routes/create/prev_1')
     return
   }
@@ -301,7 +302,7 @@ onMounted(async () => {
     try {
       selectedNode.value = JSON.parse(savedNode)
     } catch (error) {
-      console.error('解析已保存的节点数据失败:', error)
+      debug.error('解析已保存的节点数据失败:', error)
     }
   }
   

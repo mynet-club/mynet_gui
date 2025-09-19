@@ -1,5 +1,5 @@
 <template>
-  <q-page class="auth-layout">
+  <div class="auth-page">
     <div class="auth-container">
       <q-card class="auth-card q-pa-lg">
         <q-card-section class="text-center">
@@ -72,11 +72,12 @@
         </q-card-section>
       </q-card>
     </div>
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import debug from "src/utils/debug"
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -134,7 +135,7 @@ const handleVerification = async () => {
   try {
     const response = await apiService.validateResetToken({
       email: email.value,
-      token: verificationCode.value
+      code: verificationCode.value
     })
     
     if (response.data.success) {
@@ -143,14 +144,14 @@ const handleVerification = async () => {
         path: '/auth/reset-password',
         query: { 
           email: email.value,
-          token: verificationCode.value
+          code: verificationCode.value
         }
       })
     } else {
       throw new Error(response.data.message || t('auth.verificationCodeInvalid'))
     }
   } catch (error: any) {
-    console.error('Verification failed:', error)
+    debug.error('Verification failed:', error)
     $q.notify({
       type: 'negative',
       message: error.response?.data?.message || error.message || t('auth.verificationFailed'),
@@ -181,7 +182,7 @@ const handleResendCode = async () => {
       throw new Error(response.data.message || t('auth.resendCodeFailed'))
     }
   } catch (error: any) {
-    console.error('Resend code failed:', error)
+    debug.error('Resend code failed:', error)
     $q.notify({
       type: 'negative',
       message: error.response?.data?.message || error.message || t('auth.resendCodeFailed'),

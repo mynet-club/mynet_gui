@@ -1,4 +1,5 @@
 import { ref, reactive } from 'vue'
+import debug from "src/utils/debug"
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -28,6 +29,7 @@ export function useAuth() {
     password: '',
     confirmPassword: '',
     agreeTerms: false,
+    ageVerified: false,
     invitation: '' // 添加邀请码字段
   })
 
@@ -142,7 +144,7 @@ export function useAuth() {
         password: loginForm.password 
       })
       
-      console.log('🔧 [useAuth] Login successful, checking auth state:', {
+      debug.log('🔧 [useAuth] Login successful, checking auth state:', {
         isAuthenticated: authStore.isAuthenticated,
         hasUser: !!authStore.user,
         hasToken: !!authStore.token,
@@ -153,14 +155,14 @@ export function useAuth() {
       
       // 确保认证状态已经更新
       if (authStore.isAuthenticated) {
-        console.log('🔧 [useAuth] Navigating to dashboard...')
+        debug.log('🔧 [useAuth] Navigating to dashboard...')
         await router.push('/dashboard')
-        console.log('🔧 [useAuth] Navigation to dashboard completed')
+        debug.log('🔧 [useAuth] Navigation to dashboard completed')
       } else {
-        console.error('🔧 [useAuth] Login succeeded but not authenticated')
+        debug.error('🔧 [useAuth] Login succeeded but not authenticated')
       }
     } catch (error: any) {
-      console.error('Login failed:', error)
+      debug.error('Login failed:', error)
       
       // 根据不同的错误类型显示不同的错误信息
       let errorMessage = 'Login failed. Please try again.'
@@ -248,7 +250,7 @@ export function useAuth() {
       
       // 不再自动跳转，而是由调用组件处理后续逻辑
     } catch (error: any) {
-      console.error('Registration failed:', error);
+      debug.error('Registration failed:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Registration failed. Please try again.';
       $q.notify({
         type: 'negative',
@@ -277,7 +279,7 @@ export function useAuth() {
         throw new Error(response.data.message || '发送重置邮件失败')
       }
     } catch (error: any) {
-      console.error('Forgot password failed:', error)
+      debug.error('Forgot password failed:', error)
       throw error
     } finally {
       isLoading.value = false
@@ -310,7 +312,7 @@ export function useAuth() {
         throw new Error(response.data.message || '邮箱验证失败')
       }
     } catch (error: any) {
-      console.error('Email verification failed:', error)
+      debug.error('Email verification failed:', error)
       $q.notify({
         type: 'negative',
         message: error.message || '邮箱验证失败，请检查验证码',
@@ -348,7 +350,7 @@ export function useAuth() {
         throw new Error(response.data.message || '重新发送验证码失败')
       }
     } catch (error: any) {
-      console.error('Resend verification code failed:', error)
+      debug.error('Resend verification code failed:', error)
       $q.notify({
         type: 'negative',
         message: error.message || '重新发送验证码失败，请稍后再试',
@@ -381,7 +383,7 @@ export function useAuth() {
         throw new Error(response.data.message || '密码重置失败')
       }
     } catch (error: any) {
-      console.error('Reset password failed:', error)
+      debug.error('Reset password failed:', error)
       $q.notify({
         type: 'negative',
         message: error.message || '密码重置失败，请稍后再试',

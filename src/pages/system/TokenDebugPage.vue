@@ -112,6 +112,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import debug from "src/utils/debug"
 import { tokenManager } from '../../utils/tokenManager'
 import { testTokenRefresh, testAutoRefresh, getTokenInfo } from '../../utils/tokenRefreshTest'
 import { useNotify } from '../../composables/useNotify'
@@ -245,12 +246,12 @@ const handleDisconnected = (data: any) => {
 }
 
 // 监听控制台输出
-const originalConsoleLog = console.log
-const originalConsoleError = console.error
-const originalConsoleWarn = console.warn
+const originalConsoleLog = debug.log
+const originalConsoleError = debug.error
+const originalConsoleWarn = debug.warn
 
 const setupConsoleInterception = () => {
-  console.log = (...args) => {
+  debug.log = (...args) => {
     originalConsoleLog(...args)
     const message = args.join(' ')
     if (message.includes('[TokenManager]')) {
@@ -258,7 +259,7 @@ const setupConsoleInterception = () => {
     }
   }
   
-  console.error = (...args) => {
+  debug.error = (...args) => {
     originalConsoleError(...args)
     const message = args.join(' ')
     if (message.includes('[TokenManager]')) {
@@ -266,7 +267,7 @@ const setupConsoleInterception = () => {
     }
   }
   
-  console.warn = (...args) => {
+  debug.warn = (...args) => {
     originalConsoleWarn(...args)
     const message = args.join(' ')
     if (message.includes('[TokenManager]')) {
@@ -276,9 +277,9 @@ const setupConsoleInterception = () => {
 }
 
 const restoreConsole = () => {
-  console.log = originalConsoleLog
-  console.error = originalConsoleError
-  console.warn = originalConsoleWarn
+  debug.log = originalConsoleLog
+  debug.error = originalConsoleError
+  debug.warn = originalConsoleWarn
 }
 
 onMounted(() => {

@@ -162,6 +162,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useIPPools } from '../../composables/useIPPools'
@@ -272,22 +273,22 @@ const getStatusText = (status: string | number): string => {
 
 // 方法
 const handlePoolsCreated = (createdPools: IPPool[]) => {
-  console.log('IP pools created:', createdPools)
+  debug.log('IP pools created:', createdPools)
   refreshData()
 }
 
 const viewPool = (pool: IPPool) => {
-  console.log('View pool:', pool)
+  debug.log('View pool:', pool)
   // TODO: 实现查看池详情
 }
 
 const editPool = (pool: IPPool) => {
-  console.log('Edit pool:', pool)
+  debug.log('Edit pool:', pool)
   // TODO: 实现编辑池
 }
 
 const managePool = (pool: IPPool) => {
-  console.log('Manage pool:', pool)
+  debug.log('Manage pool:', pool)
   // TODO: 实现管理池
 }
 
@@ -311,18 +312,18 @@ const refreshData = () => {
 
 // 生命周期
 onMounted(async () => {
-  console.log('IPPoolManager mounted, fetching data...')
+  debug.log('IPPoolManager mounted, fetching data...')
   await fetchPools()
-  console.log('Pools fetched:', pools.value)
-  console.log('Pools count:', pools.value.length)
+  debug.log('Pools fetched:', pools.value)
+  debug.log('Pools count:', pools.value.length)
   
   // 确保先获取IP池数据，然后尝试获取统计信息
   try {
     await fetchStatistics()
-    console.log('Statistics fetched:', statistics.value)
+    debug.log('Statistics fetched:', statistics.value)
   } catch (error) {
     // 如果统计API失败，statisticsFromPools 已经在 fetchPools 中被调用
-    console.log('Using calculated statistics from pools data:', statistics.value)
+    debug.log('Using calculated statistics from pools data:', statistics.value)
   }
 })
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <q-page class="page-layout q-pa-md">
+  <div class="page-layout q-pa-md">
     <!-- 页面标题区域 -->
     <div class="page-header q-mb-lg">
       <div class="row items-start">
@@ -26,7 +26,7 @@
     <div class="page-content">
       <slot />
     </div>
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">

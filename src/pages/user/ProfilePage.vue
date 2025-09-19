@@ -276,6 +276,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -408,7 +409,7 @@ const copyUserId = async () => {
       message: t('common.copiedToClipboard')
     })
   } catch (error) {
-    console.error('复制失败:', error)
+    debug.error('复制失败:', error)
     const $q = useQuasar()
     $q.notify({
       type: 'negative',
@@ -419,29 +420,29 @@ const copyUserId = async () => {
 
 // 主题变化处理
 const onThemeChange = (value: any) => {
-  console.log('主题切换到:', value)
+  debug.log('主题切换到:', value)
   changeTheme(value)
 }
 
 // 语言变化处理
 const onLanguageChange = (value: string) => {
-  console.log('语言切换到:', value)
+  debug.log('语言切换到:', value)
   changeLanguage(value)
 }
 
 // 初始化数据
 onMounted(() => {
-  console.log('🔧 [Avatar] Profile page mounted, user avatar:', user.value?.avatar)
-  console.log('🔧 [User] Complete user object:', JSON.stringify(user.value, null, 2))
-  console.log('🔧 [User] User ID (id):', user.value?.id)
-  console.log('🔧 [User] User ID (user_id):', user.value?.user_id)
-  console.log('🔧 [User] All user properties:', Object.keys(user.value || {}))
+  debug.log('🔧 [Avatar] Profile page mounted, user avatar:', user.value?.avatar)
+  debug.log('🔧 [User] Complete user object:', JSON.stringify(user.value, null, 2))
+  debug.log('🔧 [User] User ID (id):', user.value?.id)
+  debug.log('🔧 [User] User ID (user_id):', user.value?.user_id)
+  debug.log('🔧 [User] All user properties:', Object.keys(user.value || {}))
   
   // 初始化表单数据
   initializeForm()
   
   // 调试表单数据
-  console.log('🔧 [Profile] Form after initialization:', {
+  debug.log('🔧 [Profile] Form after initialization:', {
     name: profileForm.name,
     phone: profileForm.phone,
     signature: profileForm.signature

@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import debug from "src/utils/debug"
 import { routesService } from '../services/route/routesService'
 import { useNotify } from './useNotify'
 import { useI18n } from 'vue-i18n'
@@ -52,7 +53,7 @@ export function useRoutes() {
       loading.value = true
       const response = await routesService.getOverview()
       
-      console.log('路由概览原始数据:', response)
+      debug.log('路由概览原始数据:', response)
       
       // 根据新的数据结构设置概览统计
       overview.value = {
@@ -71,7 +72,7 @@ export function useRoutes() {
       // 设置发出的连接数据（outgoing）
       outgoingConnections.value = response.requests?.sent || []
       
-      console.log('解析后的路由数据:', {
+      debug.log('解析后的路由数据:', {
         activeRoutes: activeRoutes.value,
         pendingConnections: pendingConnections.value,
         outgoingConnections: outgoingConnections.value,
@@ -79,7 +80,7 @@ export function useRoutes() {
       })
       
     } catch (error) {
-      console.error('获取路由概览失败:', error)
+      debug.error('获取路由概览失败:', error)
       notify.error(t('routes.fetchOverviewError'))
     } finally {
       loading.value = false
@@ -97,7 +98,7 @@ export function useRoutes() {
       }
       
     } catch (error) {
-      console.error('获取活跃路由失败:', error)
+      debug.error('获取活跃路由失败:', error)
       notify.error(t('routes.fetchActiveRoutesError'))
     } finally {
       loading.value = false
@@ -116,7 +117,7 @@ export function useRoutes() {
       }
       
     } catch (error) {
-      console.error('获取待处理连接失败:', error)
+      debug.error('获取待处理连接失败:', error)
       notify.error(t('routes.fetchPendingConnectionsError'))
     } finally {
       loading.value = false
@@ -134,7 +135,7 @@ export function useRoutes() {
       }
       
     } catch (error) {
-      console.error('获取好友节点失败:', error)
+      debug.error('获取好友节点失败:', error)
       notify.error(t('routes.fetchFriendNodesError'))
     } finally {
       loading.value = false
@@ -148,7 +149,7 @@ export function useRoutes() {
   //     const response = await routesService.getConfig()
   //     routeConfig.value = response.data
   //   } catch (error) {
-  //     console.error('获取路由配置失败:', error)
+  //     debug.error('获取路由配置失败:', error)
   //     notify.error(t('routes.fetchConfigError'))
   //   } finally {
   //     loading.value = false
@@ -173,7 +174,7 @@ export function useRoutes() {
         notify.error(response.message || t('routes.connectionRequestError'))
       }
     } catch (error) {
-      console.error('连接节点失败:', error)
+      debug.error('连接节点失败:', error)
       notify.error(t('routes.connectionRequestError'))
     } finally {
       loading.value = false
@@ -196,7 +197,7 @@ export function useRoutes() {
         notify.error(response.message || t('routes.connectionApproveError'))
       }
     } catch (error) {
-      console.error('批准连接失败:', error)
+      debug.error('批准连接失败:', error)
       notify.error(t('routes.connectionApproveError'))
     } finally {
       loading.value = false
@@ -218,7 +219,7 @@ export function useRoutes() {
         notify.error(response.message || t('routes.connectionRejectError'))
       }
     } catch (error) {
-      console.error('拒绝连接失败:', error)
+      debug.error('拒绝连接失败:', error)
       notify.error(t('routes.connectionRejectError'))
     } finally {
       loading.value = false
@@ -240,7 +241,7 @@ export function useRoutes() {
         notify.error(response.message || t('routes.routeDisconnectError'))
       }
     } catch (error) {
-      console.error('断开路由失败:', error)
+      debug.error('断开路由失败:', error)
       notify.error(t('routes.routeDisconnectError'))
     } finally {
       loading.value = false
@@ -268,7 +269,7 @@ export function useRoutes() {
   //       notify.success(t('routes.configDownloaded'))
   //     }
   //   } catch (error) {
-  //     console.error('下载路由配置失败:', error)
+  //     debug.error('下载路由配置失败:', error)
   //     notify.error(t('routes.configDownloadError'))
   //   } finally {
   //     loading.value = false
@@ -288,7 +289,7 @@ export function useRoutes() {
   //       notify.error(response.message || t('routes.configRefreshError'))
   //     }
   //   } catch (error) {
-  //     console.error('刷新路由配置失败:', error)
+  //     debug.error('刷新路由配置失败:', error)
   //     notify.error(t('routes.configRefreshError'))
   //   } finally {
   //     loading.value = false
@@ -307,7 +308,7 @@ export function useRoutes() {
       const response = await routesService.getRouteDetails(routeId)
       return response
     } catch (error) {
-      console.error('获取路由详情失败:', error)
+      debug.error('获取路由详情失败:', error)
       notify.error(t('routes.fetchRouteDetailsError'))
       return null
     }
@@ -319,7 +320,7 @@ export function useRoutes() {
       const response = await routesService.getConnectionStats(routeId)
       return response
     } catch (error) {
-      console.error('获取连接统计失败:', error)
+      debug.error('获取连接统计失败:', error)
       return null
     }
   }
@@ -341,7 +342,7 @@ export function useRoutes() {
         throw new Error(response.message || t('routes.create.submitError'))
       }
     } catch (error) {
-      console.error('创建路由请求失败:', error)
+      debug.error('创建路由请求失败:', error)
       throw error
     } finally {
       loading.value = false

@@ -4,6 +4,7 @@
  */
 
 import { api } from '../api'
+import debug from "src/utils/debug"
 import type {
   NodeKey,
   NodeKeyApiResponse,
@@ -375,7 +376,7 @@ export class NodeKeysService {
         return successful
       }
     } catch (error) {
-      console.error('复制到剪贴板失败:', error)
+      debug.error('复制到剪贴板失败:', error)
       return false
     }
   }

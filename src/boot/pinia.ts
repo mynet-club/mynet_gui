@@ -1,9 +1,10 @@
 import { boot } from 'quasar/wrappers'
+import debug from "src/utils/debug"
 import { createPinia } from 'pinia'
 
 export default boot(({ app }) => {
   const pinia = createPinia()
   app.use(pinia)
   
-  console.log('🍍 [Boot] Pinia initialized successfully')
+  debug.log('🍍 [Boot] Pinia initialized successfully')
 })

@@ -303,6 +303,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useNodes } from '../../composables/useNodes'
 import { api } from '../../services/api'
@@ -417,11 +418,11 @@ const handleNodeSelect = async (node: Node, index: number) => {
 const fetchNodeRoutes = async (nodeId: string | number) => {
   try {
     routesLoading.value = true
-    console.log('获取节点路由:', nodeId)
+    debug.log('获取节点路由:', nodeId)
     
     // 调用 /route/node/{nodeId} API
     const response = await api.get(`/route/node/${nodeId}`)
-    console.log('节点路由数据:', response.data)
+    debug.log('节点路由数据:', response.data)
     
     // 假设返回的数据结构是节点列表，已按user_email分组
     if (response.data && response.data.data) {
@@ -433,7 +434,7 @@ const fetchNodeRoutes = async (nodeId: string | number) => {
     }
     
   } catch (error) {
-    console.error('获取节点路由失败:', error)
+    debug.error('获取节点路由失败:', error)
     nodeRoutesList.value = []
     // 这里可以使用 notify 显示错误
   } finally {

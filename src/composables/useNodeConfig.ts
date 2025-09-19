@@ -1,4 +1,5 @@
 import { ref, computed, watch } from 'vue'
+import debug from "src/utils/debug"
 import type { 
   NodeConfig, 
   VPNConfigTemplate, 
@@ -83,7 +84,7 @@ export function useNodeConfig(nodeId?: string) {
       // 自动验证配置
       await validateConfig()
     } catch (err) {
-      console.error('加载配置失败:', err)
+      debug.error('加载配置失败:', err)
       error.value = '加载配置失败'
       notifyError('加载配置失败')
     } finally {
@@ -117,7 +118,7 @@ export function useNodeConfig(nodeId?: string) {
       notifySuccess('配置保存成功')
       return true
     } catch (err) {
-      console.error('保存配置失败:', err)
+      debug.error('保存配置失败:', err)
       error.value = '保存配置失败'
       notifyError('保存配置失败')
       return false
@@ -149,7 +150,7 @@ export function useNodeConfig(nodeId?: string) {
       validationResult.value = result.data
       return result.data
     } catch (err) {
-      console.error('验证配置失败:', err)
+      debug.error('验证配置失败:', err)
       const result: ConfigValidationResult = {
         valid: false,
         errors: ['验证失败'],
@@ -172,7 +173,7 @@ export function useNodeConfig(nodeId?: string) {
       const result = await nodeConfigService.getVPNConfigTemplates()
       templates.value = result.data
     } catch (err) {
-      console.error('加载模板失败:', err)
+      debug.error('加载模板失败:', err)
       notifyError('加载模板失败')
     }
   }
@@ -198,7 +199,7 @@ export function useNodeConfig(nodeId?: string) {
       
       return true
     } catch (err) {
-      console.error('应用模板失败:', err)
+      debug.error('应用模板失败:', err)
       error.value = '应用模板失败'
       notifyError('应用模板失败')
       return false
@@ -241,7 +242,7 @@ export function useNodeConfig(nodeId?: string) {
       
       return true
     } catch (err) {
-      console.error('重置配置失败:', err)
+      debug.error('重置配置失败:', err)
       error.value = '重置配置失败'
       notifyError('重置配置失败')
       return false
@@ -332,7 +333,7 @@ export function useNodeConfig(nodeId?: string) {
       URL.revokeObjectURL(url)
       notifySuccess('配置导出成功')
     } catch (err) {
-      console.error('导出配置失败:', err)
+      debug.error('导出配置失败:', err)
       notifyError('导出配置失败')
     }
   }
@@ -364,7 +365,7 @@ export function useNodeConfig(nodeId?: string) {
       
       return true
     } catch (err) {
-      console.error('导入配置失败:', err)
+      debug.error('导入配置失败:', err)
       error.value = '导入配置失败'
       notifyError('导入配置失败')
       return false

@@ -1,4 +1,5 @@
 import { reactive, ref, computed } from 'vue'
+import debug from "src/utils/debug"
 import { api } from '../services/api'
 import { useNotify } from './useNotify'
 import { useI18n } from 'vue-i18n'
@@ -82,7 +83,7 @@ export function useIPPools() {
       const params = zoneId ? { zone_id: zoneId } : {}
       const response = await api.get('/ippools', { params })
       
-      console.log('fetchPools API response:', response.data)
+      debug.log('fetchPools API response:', response.data)
       
       // 处理API响应格式
       if (response.data.success) {
@@ -115,19 +116,19 @@ export function useIPPools() {
         }))
         
         pools.value = poolsData
-        console.log('pools.value updated:', pools.value)
+        debug.log('pools.value updated:', pools.value)
         
         // 获取数据后自动计算统计信息
         calculateStatisticsFromPools()
       } else {
-        console.warn('fetchPools API failed:', response.data.message)
+        debug.warn('fetchPools API failed:', response.data.message)
         pools.value = []
         notifyError(response.data.message || t('ippools.fetchError'))
       }
       
       return response.data
     } catch (error) {
-      console.error('fetchPools error:', error)
+      debug.error('fetchPools error:', error)
       pools.value = []
       notifyError(t('ippools.fetchError'))
       throw error
@@ -306,7 +307,7 @@ export function useIPPools() {
           usage_percentage: apiData.pools_usage_percentage || 0
         }
         
-        console.log('Statistics fetched from API:', statistics.value)
+        debug.log('Statistics fetched from API:', statistics.value)
         return response.data.data
       } else {
         // 如果统计API失败，从IP池数据中计算统计信息
@@ -314,7 +315,7 @@ export function useIPPools() {
         return { statistics: statistics.value }
       }
     } catch (error) {
-      console.error('Failed to fetch statistics:', error)
+      debug.error('Failed to fetch statistics:', error)
       // 如果统计API失败，从IP池数据中计算统计信息
       calculateStatisticsFromPools()
       return { statistics: statistics.value }
@@ -325,7 +326,7 @@ export function useIPPools() {
   const calculateStatisticsFromPools = () => {
     const poolsToCalculate = pools.value || []
     
-    console.log('calculateStatisticsFromPools called with pools:', poolsToCalculate)
+    debug.log('calculateStatisticsFromPools called with pools:', poolsToCalculate)
     
     const totalPools = poolsToCalculate.length
     const allocatedPools = poolsToCalculate.filter(pool => pool.is_allocated).length
@@ -350,7 +351,7 @@ export function useIPPools() {
       usage_percentage: userQuota > 0 ? Math.round((totalPools / userQuota) * 100) : 0
     }
     
-    console.log('calculated statistics:', statistics.value)
+    debug.log('calculated statistics:', statistics.value)
   }
 
   const fetchUserResources = async (userId: string) => {
@@ -560,12 +561,12 @@ export function useIPPools() {
             const prevPool = allPools[i-1]
             const currentPool = allPools[i]
             if (prevPool && currentPool && !checkIPRangeContinuity(prevPool, currentPool)) {
-              console.log(`连续性检查失败: ${prevPool.ip_range.end} 与 ${currentPool.ip_range.start} 不连续`)
+              debug.log(`连续性检查失败: ${prevPool.ip_range.end} 与 ${currentPool.ip_range.start} 不连续`)
               return false
             }
           }
           
-          console.log('连续性检查通过:', allPools.map(p => `${p.ip_range.start}-${p.ip_range.end}`).join(' -> '))
+          debug.log('连续性检查通过:', allPools.map(p => `${p.ip_range.start}-${p.ip_range.end}`).join(' -> '))
           return true
         }
 
@@ -580,15 +581,15 @@ export function useIPPools() {
           const poolInfo = createdPools.map(p => `序列号 ${p.sequence_number} (${p.ip_range.start}-${p.ip_range.end})`).join(', ')
           if (!isContinuous) {
             // 创建成功但不连续，给出警告而不是错误
-            console.warn('IP池创建成功，但未能实现连续分配:', poolInfo)
+            debug.warn('IP池创建成功，但未能实现连续分配:', poolInfo)
             notifySuccess(`${t('ippools.createSuccess')} - ${t('ippools.continuityWarning')}`)
           } else {
-            console.log('IP池创建成功，实现连续分配:', poolInfo)
+            debug.log('IP池创建成功，实现连续分配:', poolInfo)
             notifySuccess(t('ippools.createSuccess'))
           }
         } else {
           const poolInfo = createdPools.map(p => `序列号 ${p.sequence_number} (${p.ip_range.start}-${p.ip_range.end})`).join(', ')
-          console.log('IP池创建成功:', poolInfo)
+          debug.log('IP池创建成功:', poolInfo)
           notifySuccess(t('ippools.createSuccess'))
         }
         
@@ -598,7 +599,7 @@ export function useIPPools() {
         throw new Error(response.data.message)
       }
     } catch (error) {
-      console.error('IP池创建失败:', error)
+      debug.error('IP池创建失败:', error)
       notifyError(t('ippools.createError'))
       throw error
     } finally {

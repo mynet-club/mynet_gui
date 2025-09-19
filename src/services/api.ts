@@ -1,8 +1,14 @@
 import axios from 'axios'
+import debug from "src/utils/debug"
 import { LocalStorage } from 'quasar'
 import { tokenManager } from '../utils/tokenManager'
 import { mockDashboardData, mockDelay } from './mockData'
 import type { Zone } from '../types'
+
+// 获取当前语言
+const getCurrentLanguage = () => {
+  return LocalStorage.getItem('app-locale') || 'en-US'
+}
 
 // 配置 API 基础URL
 const getApiBaseUrl = () => {
@@ -54,10 +60,10 @@ api.interceptors.request.use(
         const user = JSON.parse(userInfo.toString())
         if (user.zone_id) {
           config.headers['X-Zone-ID'] = user.zone_id
-          console.log('🔧 [API] Injected X-Zone-ID header:', user.zone_id)
+          debug.log('🔧 [API] Injected X-Zone-ID header:', user.zone_id)
         }
       } catch (error) {
-        console.warn('🔧 [API] Failed to parse user info for zone_id:', error)
+        debug.warn('🔧 [API] Failed to parse user info for zone_id:', error)
       }
     }
     
@@ -81,7 +87,7 @@ api.interceptors.response.use(
     const shouldExclude = excludePaths.some(path => originalRequest.url?.includes(path))
 
     if (error.response?.status === 401 && !originalRequest._retry && !shouldExclude) {
-      console.log('🔧 [API] 401 error received, checking token refresh status:', {
+      debug.log('🔧 [API] 401 error received, checking token refresh status:', {
         isRefreshing,
         hasRefreshToken: !!tokenManager.getRefreshToken(),
         isTokenExpired: tokenManager.isTokenExpired(),
@@ -102,7 +108,7 @@ api.interceptors.response.use(
                 originalRequest.headers['X-Zone-ID'] = user.zone_id
               }
             } catch (error) {
-              console.warn('🔧 [API] Failed to parse user info for zone_id during token refresh:', error)
+              debug.warn('🔧 [API] Failed to parse user info for zone_id during token refresh:', error)
             }
           }
           return api(originalRequest)
@@ -127,12 +133,12 @@ api.interceptors.response.use(
               originalRequest.headers['X-Zone-ID'] = user.zone_id
             }
           } catch (error) {
-            console.warn('🔧 [API] Failed to parse user info for zone_id during token refresh:', error)
+            debug.warn('🔧 [API] Failed to parse user info for zone_id during token refresh:', error)
           }
         }
         return api(originalRequest)
       } catch (refreshError) {
-        console.error('🔧 [API] Token refresh failed, clearing tokens:', refreshError)
+        debug.error('🔧 [API] Token refresh failed, clearing tokens:', refreshError)
         processQueue(refreshError, null)
         tokenManager.clearTokens()
         // 移除自动跳转，让组件或页面处理登录失败
@@ -179,7 +185,7 @@ export const apiService = {
       
       const response = await api.post('/auth/login', loginData);
 
-      console.log('🔧 [API] Raw login response:', response.data);
+      debug.log('🔧 [API] Raw login response:', response.data);
 
       if (response.data.success) {
         const tokenData = {
@@ -206,7 +212,7 @@ export const apiService = {
         throw error;
       }
     } catch (error: any) {
-      console.error('🔧 [API] Login error:', error);
+      debug.error('🔧 [API] Login error:', error);
       // 如果是axios错误或已经包含响应数据的错误，直接抛出
       if (error.response) {
         throw error;
@@ -237,7 +243,8 @@ export const apiService = {
       device_name: data.device_name || 'Web Browser',
       activation_url: data.activation_url || `${window.location.origin}/auth/activate`
     };
-    return await api.post('/auth/register', registerData);
+    const lang = getCurrentLanguage();
+    return await api.post(`/auth/register?lang=${lang}`, registerData);
   },
 
   // 密码重置相关
@@ -246,19 +253,21 @@ export const apiService = {
       ...data,
       redirect_url: data.redirect_url || `${window.location.origin}/auth/reset-password`
     };
-    return await api.post('/auth/forgot-password', requestData);
+    const lang = getCurrentLanguage();
+    return await api.post(`/auth/forgot-password?lang=${lang}`, requestData);
   },
 
   async resetPassword(data: {
     email: string;
-    token: string;
+    token?: string;
+    code?: string;
     password: string;
     password_confirmation: string;
   }) {
     return await api.post('/auth/reset-password', data);
   },
 
-  async validateResetToken(data: { email: string; token: string }) {
+  async validateResetToken(data: { email: string; token?: string; code?: string }) {
     return await api.post('/auth/validate-reset-token', data);
   },
 
@@ -276,8 +285,14 @@ export const apiService = {
   },
 
   // 账号激活相关
-  async activateAccount(data: { email: string; token: string }) {
-    return await api.post('/auth/activate-account', data);
+  async activateAccount(data: { 
+    email?: string; 
+    user_id?: string; 
+    token?: string; 
+    code?: string; 
+  }) {
+    const lang = getCurrentLanguage();
+    return await api.post(`/auth/activate-account?lang=${lang}`, data);
   },
 
   async resendActivationEmail(data: { email: string; activation_url?: string }) {
@@ -285,7 +300,8 @@ export const apiService = {
       ...data,
       activation_url: data.activation_url || `${window.location.origin}/auth/activate`
     };
-    return await api.post('/auth/resend-activation-email', requestData);
+    const lang = getCurrentLanguage();
+    return await api.post(`/auth/resend-activation-email?lang=${lang}`, requestData);
   },
 
   async checkActivationStatus(email: string) {
@@ -336,7 +352,7 @@ export const apiService = {
 
       return { success: true };
     } catch (error) {
-      console.error('🔧 [API] Token refresh error:', error);
+      debug.error('🔧 [API] Token refresh error:', error);
       throw new Error('Token refresh failed');
     }
   },
@@ -421,7 +437,7 @@ export const apiService = {
           user.zone_id = zoneId
           LocalStorage.set('user_info', JSON.stringify(user))
         } catch (error) {
-          console.error('Failed to update zone_id in user info:', error)
+          debug.error('Failed to update zone_id in user info:', error)
         }
       }
       

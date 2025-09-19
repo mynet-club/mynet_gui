@@ -1,35 +1,39 @@
 import { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
+  // IndexPage 作为独立路由，不使用 MainLayout
   {
     path: '/',
+    component: () => import('../pages/IndexPage.vue')
+  },
+  {
+    path: '/dashboard',
     component: () => import('../layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('../pages/IndexPage.vue') },
-      { path: 'dashboard', component: () => import('../pages/dashboard/DashboardPage.vue') },
+      { path: '', component: () => import('../pages/dashboard/DashboardPage.vue') },
       
       // 节点管理模块路由
       { 
-        path: 'nodes', 
+        path: '/nodes', 
         name: 'nodes',
         component: () => import('../pages/node/NodeListPage.vue'),
         meta: { title: '节点管理', requiresAuth: true }
       },
       { 
-        path: 'nodes/create', 
+        path: '/nodes/create', 
         name: 'node-create',
         component: () => import('../pages/node/NodeCreatePage.vue'),
         meta: { title: '创建节点', requiresAuth: true }
       },
       { 
-        path: 'nodes/:id', 
+        path: '/nodes/:id', 
         name: 'node-detail',
         component: () => import('../pages/node/NodeDetailPage.vue'),
         meta: { title: '节点详情', requiresAuth: true },
         props: true
       },
       { 
-        path: 'nodes/:id/edit', 
+        path: '/nodes/:id/edit', 
         component: () => import('../pages/node/edit/NodeEditPage.vue'),
         meta: { title: '编辑节点', requiresAuth: true },
         props: true,
@@ -72,72 +76,77 @@ const routes: RouteRecordRaw[] = [
       
       // 其他网络模块路由
       { 
-        path: 'routes', 
+        path: '/routes', 
         name: 'routes',
         component: () => import('../pages/route/RouteListPage.vue'),
         meta: { title: '路由管理', requiresAuth: true }
       },
       {
-        path: 'routes/create/prev_1',
+        path: '/routes/create/prev_1',
         name: 'route-create-step1',
         component: () => import('../pages/route/create/Step1FriendSelection.vue'),
         meta: { title: '创建路由 - 选择好友', requiresAuth: true }
       },
       {
-        path: 'routes/create/prev_2',
+        path: '/routes/create/prev_2',
         name: 'route-create-step2',
         component: () => import('../pages/route/create/Step2FriendNodeSelection.vue'),
         meta: { title: '创建路由 - 选择好友节点', requiresAuth: true }
       },
       {
-        path: 'routes/create/prev_3',
+        path: '/routes/create/prev_3',
         name: 'route-create-step3',
         component: () => import('../pages/route/create/Step3MyNodeSelection.vue'),
         meta: { title: '创建路由 - 选择我的节点', requiresAuth: true }
       },
       {
-        path: 'routes/create/prev_4',
+        path: '/routes/create/prev_4',
         name: 'route-create-step4',
         component: () => import('../pages/route/create/Step4RequestForm.vue'),
         meta: { title: '创建路由 - 提交申请', requiresAuth: true }
       },
       { 
-        path: 'ippools', 
+        path: '/ippools', 
         name: 'ippools',
         component: () => import('../pages/ippool/IpPoolListPage.vue'),
         meta: { title: 'IP池管理', requiresAuth: true }
       },
       { 
-        path: 'zones', 
+        path: '/zones', 
         name: 'zones',
         component: () => import('../pages/zone/ZoneListPage.vue'),
         meta: { title: '区域管理', requiresAuth: true }
       },
       { 
-        path: 'services', 
+        path: '/services', 
         name: 'services',
         component: () => import('../pages/zone/ZoneSharingPage.vue'),
         meta: { title: '服务管理', requiresAuth: true }
       },
       { 
-        path: 'social', 
+        path: '/social', 
         name: 'social',
         component: () => import('../pages/social/SocialPage.vue'),
         meta: { title: '社交网络', requiresAuth: true }
       },
       
       // 系统模块路由
-      { path: 'api-test', component: () => import('../pages/system/ApiTestPage.vue') },
-      { path: 'help', component: () => import('../pages/system/HelpPage.vue') },
+      { path: '/api-test', component: () => import('../pages/system/ApiTestPage.vue') },
       { 
-        path: 'system/token-debug', 
+        path: '/help', 
+        name: 'help',
+        component: () => import('../pages/help/HelpPageSimple.vue'),
+        meta: { title: '帮助文档' }
+      },
+      { 
+        path: '/system/token-debug', 
         name: 'token-debug',
         component: () => import('../pages/system/TokenDebugPage.vue'),
         meta: { title: 'Token 调试', requiresAuth: true }
       },
       
       // 用户模块路由
-      { path: 'profile', component: () => import('../pages/user/ProfilePage.vue') }
+      { path: '/profile', component: () => import('../pages/user/ProfilePage.vue') }
     ],
   },
   {
@@ -152,23 +161,6 @@ const routes: RouteRecordRaw[] = [
       { path: 'activate', component: () => import('../pages/auth/AccountActivationPage.vue') },
       { path: 'email-verification', component: () => import('../pages/auth/EmailVerificationPage.vue') }
     ]
-  },
-  // 重定向旧路径到新路径
-  {
-    path: '/login',
-    redirect: '/auth/login'
-  },
-  {
-    path: '/register',
-    redirect: '/auth/register'
-  },
-  {
-    path: '/forgot-password',
-    redirect: '/auth/forgot-password'
-  },
-  {
-    path: '/email-verification',
-    redirect: '/auth/email-verification'
   },
   {
     path: '/:catchAll(.*)*',

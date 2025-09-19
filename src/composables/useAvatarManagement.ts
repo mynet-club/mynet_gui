@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import debug from "src/utils/debug"
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { apiService } from '../services/api'
@@ -62,7 +63,7 @@ export function useAvatarManagement() {
       const response = await apiService.uploadAvatar(file)
       
       if (response.data.success) {
-        console.log('🔧 [Avatar] Upload response:', response.data)
+        debug.log('🔧 [Avatar] Upload response:', response.data)
         
         $q.notify({
           type: 'positive',
@@ -74,7 +75,7 @@ export function useAvatarManagement() {
         throw new Error(response.data.message || 'Upload failed')
       }
     } catch (error: any) {
-      console.error('头像上传失败:', error)
+      debug.error('头像上传失败:', error)
       
       let errorMessage = t('user.avatarUpdateFailed')
       

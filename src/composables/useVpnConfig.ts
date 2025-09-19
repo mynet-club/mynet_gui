@@ -3,6 +3,7 @@
  */
 
 import { ref, computed, reactive } from 'vue'
+import debug from "src/utils/debug"
 import { VPNConfigService } from '../services/vpnConfigService'
 import { NodeConfigForm } from '../types/vpnConfig'
 
@@ -38,7 +39,7 @@ export function useVpnConfig() {
       return defaultConfig
       
     } catch (error) {
-      console.error('加载节点配置失败:', error)
+      debug.error('加载节点配置失败:', error)
       return null
     } finally {
       loading.value = false
@@ -70,7 +71,7 @@ export function useVpnConfig() {
       return true
       
     } catch (error) {
-      console.error('保存节点配置失败:', error)
+      debug.error('保存节点配置失败:', error)
       throw error
     } finally {
       saving.value = false

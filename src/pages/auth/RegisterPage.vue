@@ -1,7 +1,7 @@
 <template>
-  <q-page class="auth-layout">
+  <div class="auth-page">
     <RegisterForm />
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">

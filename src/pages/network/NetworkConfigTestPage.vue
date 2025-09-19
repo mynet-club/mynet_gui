@@ -56,6 +56,7 @@
 
 <script setup lang="ts">
 import { ref, provide } from 'vue'
+import debug from "src/utils/debug"
 import { useRoute } from 'vue-router'
 import NetworkConfigPage from './node-edit/NetworkConfigPage.vue'
 import type { Node } from '../../types/node'
@@ -142,13 +143,13 @@ const mockNodeData = {
   loading: ref(false),
   saving: ref(false),
   loadNode: async (nodeId: string) => {
-    console.log('模拟加载节点:', nodeId)
+    debug.log('模拟加载节点:', nodeId)
     // 模拟API调用延迟
     await new Promise(resolve => setTimeout(resolve, 500))
     return currentNode.value
   },
   updateNode: async (nodeId: string, data: any) => {
-    console.log('模拟更新节点:', nodeId, data)
+    debug.log('模拟更新节点:', nodeId, data)
     // 模拟API调用延迟
     await new Promise(resolve => setTimeout(resolve, 1000))
     return currentNode.value

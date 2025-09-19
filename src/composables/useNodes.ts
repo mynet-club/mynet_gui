@@ -4,6 +4,7 @@
  */
 
 import { ref, computed, reactive, readonly } from 'vue'
+import debug from "src/utils/debug"
 import { nodeService } from '../services/node/nodeService'
 // import { useNotify } from './useNotify'
 import type { 
@@ -16,10 +17,10 @@ import type { PaginatedApiResponse } from '../types/api'
 
 // 临时的通知函数，后续可以替换为实际的 useNotify
 const useNotify = () => ({
-  success: (message: string) => console.log('SUCCESS:', message),
-  error: (message: string) => console.error('ERROR:', message),
-  warning: (message: string) => console.warn('WARNING:', message),
-  info: (message: string) => console.info('INFO:', message)
+  success: (message: string) => debug.log('SUCCESS:', message),
+  error: (message: string) => debug.error('ERROR:', message),
+  warning: (message: string) => debug.warn('WARNING:', message),
+  info: (message: string) => debug.info('INFO:', message)
 })
 
 export function useNodes() {
@@ -115,32 +116,32 @@ export function useNodes() {
         ...params
       }
 
-      console.log('正在请求节点列表，参数:', queryParams)
+      debug.log('正在请求节点列表，参数:', queryParams)
       const response = await nodeService.getNodes(queryParams)
-      console.log('节点列表API响应:', response)
+      debug.log('节点列表API响应:', response)
       
       // 根据实际API响应结构解析数据
       if (response.data && response.data.nodes) {
         nodes.value = response.data.nodes.data || []
         pagination.rowsNumber = response.data.nodes.total || 0
         pagination.page = response.data.nodes.current_page || 1
-        console.log('解析后的节点数据:', nodes.value)
+        debug.log('解析后的节点数据:', nodes.value)
       } else if (response.data && Array.isArray(response.data)) {
         // 如果直接返回数组
         nodes.value = response.data
         pagination.rowsNumber = response.data.length
         pagination.page = 1
-        console.log('直接数组格式的节点数据:', nodes.value)
+        debug.log('直接数组格式的节点数据:', nodes.value)
       } else {
         // 兼容其他可能的响应格式
-        console.log('未知的响应格式，设置为空数组')
+        debug.log('未知的响应格式，设置为空数组')
         nodes.value = []
         pagination.rowsNumber = 0
         pagination.page = 1
       }
       
     } catch (error) {
-      console.error('加载节点列表失败:', error)
+      debug.error('加载节点列表失败:', error)
       notifyError('加载节点列表失败')
       nodes.value = []
     } finally {
@@ -162,10 +163,10 @@ export function useNodes() {
     creating.value = true
     try {
       const response = await nodeService.createNode(data)
-      console.log('API响应:', response)
+      debug.log('API响应:', response)
       const newNode = response.data
-      console.log('新节点数据:', newNode)
-      console.log('节点ID字段 - id:', newNode.id, 'node_id:', newNode.node_id)
+      debug.log('新节点数据:', newNode)
+      debug.log('节点ID字段 - id:', newNode.id, 'node_id:', newNode.node_id)
       
       // 将新节点添加到列表开头
       nodes.value.unshift(newNode)
@@ -174,7 +175,7 @@ export function useNodes() {
       notifySuccess('节点创建成功')
       return newNode
     } catch (error) {
-      console.error('创建节点失败:', error)
+      debug.error('创建节点失败:', error)
       notifyError('创建节点失败')
       return null
     } finally {
@@ -200,7 +201,7 @@ export function useNodes() {
       notifySuccess('节点删除成功')
       return true
     } catch (error) {
-      console.error('删除节点失败:', error)
+      debug.error('删除节点失败:', error)
       notifyError('删除节点失败')
       return false
     } finally {
@@ -225,7 +226,7 @@ export function useNodes() {
       notifySuccess(`节点状态已更新为${nodeService.formatNodeStatus(status)}`)
       return true
     } catch (error) {
-      console.error('更新节点状态失败:', error)
+      debug.error('更新节点状态失败:', error)
       notifyError('更新节点状态失败')
       return false
     }
@@ -357,7 +358,7 @@ export function useNodes() {
       
       return true
     } catch (error) {
-      console.error('批量删除节点失败:', error)
+      debug.error('批量删除节点失败:', error)
       notifyError('批量删除节点失败')
       return false
     }
@@ -416,7 +417,7 @@ export function useNodes() {
       
       notifySuccess('节点列表导出成功')
     } catch (error) {
-      console.error('导出节点列表失败:', error)
+      debug.error('导出节点列表失败:', error)
       notifyError('导出节点列表失败')
     }
   }

@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import debug from "src/utils/debug"
 import type { 
   NodeKey, 
   NodeKeyApiResponse,
@@ -82,7 +83,7 @@ export function useNodeKeys(nodeId?: string) {
         keys.value = []
       }
     } catch (err) {
-      console.error('加载密钥列表失败:', err)
+      debug.error('加载密钥列表失败:', err)
       error.value = '加载密钥列表失败'
       notifyError('加载密钥列表失败')
       // 发生错误时设置为空数组
@@ -125,7 +126,7 @@ export function useNodeKeys(nodeId?: string) {
       
       return keyPair
     } catch (err) {
-      console.error('生成密钥对失败:', err)
+      debug.error('生成密钥对失败:', err)
       error.value = '生成密钥对失败'
       notifyError('生成密钥对失败')
       return null
@@ -155,7 +156,7 @@ export function useNodeKeys(nodeId?: string) {
       
       return true
     } catch (err) {
-      console.error('上传密钥失败:', err)
+      debug.error('上传密钥失败:', err)
       error.value = '上传密钥失败'
       notifyError('上传密钥失败')
       return false
@@ -185,7 +186,7 @@ export function useNodeKeys(nodeId?: string) {
       
       return true
     } catch (err) {
-      console.error('撤销密钥失败:', err)
+      debug.error('撤销密钥失败:', err)
       error.value = '撤销密钥失败'
       notifyError('撤销密钥失败')
       return false
@@ -213,7 +214,7 @@ export function useNodeKeys(nodeId?: string) {
       
       return true
     } catch (err) {
-      console.error('删除密钥失败:', err)
+      debug.error('删除密钥失败:', err)
       error.value = '删除密钥失败'
       notifyError('删除密钥失败')
       return false
@@ -234,7 +235,7 @@ export function useNodeKeys(nodeId?: string) {
       URL.revokeObjectURL(url)
       notifySuccess('公钥下载成功')
     } catch (err) {
-      console.error('下载公钥失败:', err)
+      debug.error('下载公钥失败:', err)
       notifyError('下载公钥失败')
     }
   }
@@ -258,7 +259,7 @@ export function useNodeKeys(nodeId?: string) {
       URL.revokeObjectURL(url)
       notifySuccess('私钥下载成功')
     } catch (err) {
-      console.error('下载私钥失败:', err)
+      debug.error('下载私钥失败:', err)
       notifyError('下载私钥失败')
     }
   }
@@ -271,7 +272,7 @@ export function useNodeKeys(nodeId?: string) {
       await navigator.clipboard.writeText(key.public_key)
       notifySuccess('公钥已复制到剪贴板')
     } catch (err) {
-      console.error('复制公钥失败:', err)
+      debug.error('复制公钥失败:', err)
       notifyError('复制公钥失败')
     }
   }
@@ -289,7 +290,7 @@ export function useNodeKeys(nodeId?: string) {
       await navigator.clipboard.writeText(generatedKeyPair.value.private_key)
       notifySuccess('私钥已复制到剪贴板')
     } catch (err) {
-      console.error('复制私钥失败:', err)
+      debug.error('复制私钥失败:', err)
       notifyError('复制私钥失败')
     }
   }

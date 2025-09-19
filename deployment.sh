@@ -17,6 +17,9 @@ NGINX_PATH="/usr/sbin/nginx"
 WEB_USER="www"
 WS_URL="wss://my.mynet.club/wss"
 
+# 部署选项
+DEPLOY_HELP=false  # 默认不发布帮助文档
+
 # 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -27,6 +30,27 @@ NC='\033[0m' # No Color
 # =============================================================================
 # 辅助函数
 # =============================================================================
+
+# 询问是否发布帮助文档
+ask_deploy_help() {
+    print_info "是否发布帮助文档到生产环境？"
+    echo -e "${YELLOW}  y/Y${NC} - 发布帮助文档 (使用 build:help)"
+    echo -e "${YELLOW}  n/N${NC} - 不发布帮助文档 (使用 build，默认)"
+    echo -e "${YELLOW}  其他${NC} - 不发布帮助文档 (默认)"
+    echo ""
+    read -p "请选择 [y/N]: " choice
+    
+    case "$choice" in
+        y|Y|yes|Yes|YES)
+            DEPLOY_HELP=true
+            print_success "选择发布帮助文档"
+            ;;
+        *)
+            DEPLOY_HELP=false
+            print_info "选择不发布帮助文档（默认）"
+            ;;
+    esac
+}
 
 # 打印带颜色的消息
 print_info() {
@@ -210,6 +234,18 @@ EOF
 build_project() {
     print_info "开始构建项目..."
     
+    # 验证debug模式已关闭
+    print_info "验证生产环境debug配置..."
+    if [ -f "./verify-debug-disabled.sh" ]; then
+        if ! ./verify-debug-disabled.sh; then
+            print_error "Debug验证失败，请检查生产环境配置"
+            exit 1
+        fi
+        print_success "Debug配置验证通过"
+    else
+        print_warning "Debug验证脚本不存在，跳过验证"
+    fi
+    
     # 清理之前的构建
     if [ -d "$BUILD_DIR" ]; then
         rm -rf "$BUILD_DIR"
@@ -239,14 +275,20 @@ build_project() {
     print_info "VITE_API_BASE_URL=$VITE_API_BASE_URL"
     print_info "VITE_WS_URL=$VITE_WS_URL"
     
-    # 执行生产环境构建 - Quasar 默认就是生产模式
+    # 执行生产环境构建 - 根据用户选择决定是否包含帮助文档
     print_info "执行 Quasar 构建..."
-    print_info "构建命令: NODE_ENV=production npm run build"
+    if [ "$DEPLOY_HELP" = true ]; then
+        print_info "构建命令: NODE_ENV=production npm run build:help (包含帮助文档)"
+        BUILD_CMD="build:help"
+    else
+        print_info "构建命令: NODE_ENV=production npm run build (不包含帮助文档)"
+        BUILD_CMD="build"
+    fi
     
     # 设置环境变量确保使用生产模式
     export NODE_ENV=production
     
-    if ! npm run build; then
+    if ! npm run "$BUILD_CMD"; then
         print_error "构建失败"
         # 恢复备份的文件
         if [ -f ".env.local.backup.deploy" ]; then
@@ -489,6 +531,9 @@ main() {
     
     # 更新配置
     update_config
+    
+    # 询问是否发布帮助文档
+    ask_deploy_help
     
     # 构建项目
     build_project

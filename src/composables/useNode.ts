@@ -1,4 +1,5 @@
 import { ref, computed, reactive, watch } from 'vue'
+import debug from "src/utils/debug"
 import type { Node, CreateNodeRequest, UpdateNodeRequest } from '../types/node'
 import { nodeService } from '../services/node/nodeService'
 import { useNotify } from './useNotify'
@@ -74,7 +75,7 @@ export function useNode(nodeId?: string) {
       node.value = result.data
       error.value = null
     } catch (err) {
-      console.error('加载节点失败:', err)
+      debug.error('加载节点失败:', err)
       error.value = '加载节点失败'
       node.value = null
     } finally {
@@ -95,7 +96,7 @@ export function useNode(nodeId?: string) {
       notifySuccess('节点创建成功')
       return result.data
     } catch (err) {
-      console.error('创建节点失败:', err)
+      debug.error('创建节点失败:', err)
       error.value = '创建节点失败'
       notifyError('创建节点失败')
       return null
@@ -122,7 +123,7 @@ export function useNode(nodeId?: string) {
       notifySuccess('节点更新成功')
       return true
     } catch (err) {
-      console.error('更新节点失败:', err)
+      debug.error('更新节点失败:', err)
       error.value = '更新节点失败'
       notifyError('更新节点失败')
       return false
@@ -149,7 +150,7 @@ export function useNode(nodeId?: string) {
       node.value = null
       return true
     } catch (err) {
-      console.error('删除节点失败:', err)
+      debug.error('删除节点失败:', err)
       error.value = '删除节点失败'
       notifyError('删除节点失败')
       return false
@@ -176,7 +177,7 @@ export function useNode(nodeId?: string) {
       notifySuccess('节点启动成功')
       return true
     } catch (err) {
-      console.error('启动节点失败:', err)
+      debug.error('启动节点失败:', err)
       error.value = '启动节点失败'
       notifyError('启动节点失败')
       return false
@@ -203,7 +204,7 @@ export function useNode(nodeId?: string) {
       notifySuccess('节点停止成功')
       return true
     } catch (err) {
-      console.error('停止节点失败:', err)
+      debug.error('停止节点失败:', err)
       error.value = '停止节点失败'
       notifyError('停止节点失败')
       return false
@@ -235,7 +236,7 @@ export function useNode(nodeId?: string) {
       await loadNode()
       return true
     } catch (err) {
-      console.error('重启节点失败:', err)
+      debug.error('重启节点失败:', err)
       error.value = '重启节点失败'
       notifyError('重启节点失败')
       return false
@@ -264,7 +265,7 @@ export function useNode(nodeId?: string) {
       await loadNode()
       return true
     } catch (err) {
-      console.error('重置节点失败:', err)
+      debug.error('重置节点失败:', err)
       error.value = '重置节点失败'
       notifyError('重置节点失败')
       return false
@@ -290,7 +291,7 @@ export function useNode(nodeId?: string) {
       }
       return true
     } catch (err) {
-      console.error('刷新统计信息失败:', err)
+      debug.error('刷新统计信息失败:', err)
       return false
     }
   }

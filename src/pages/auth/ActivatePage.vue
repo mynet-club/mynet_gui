@@ -1,5 +1,5 @@
 <template>
-  <q-page class="auth-layout">
+  <div class="auth-page">
     <div class="auth-container">
       <q-card class="auth-card q-pa-lg">
         <q-card-section class="text-center">
@@ -102,11 +102,12 @@
         </q-card-section>
       </q-card>
     </div>
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import debug from "src/utils/debug"
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -162,7 +163,7 @@ const autoActivate = async () => {
       throw new Error(response.data.message || t('auth.activationFailed'))
     }
   } catch (error: any) {
-    console.error('Auto activation failed:', error)
+    debug.error('Auto activation failed:', error)
     
     if (error.response?.status === 409) {
       // 账号已经激活
@@ -203,7 +204,7 @@ const manualActivate = async () => {
       throw new Error(response.data.message || t('auth.activationFailed'))
     }
   } catch (error: any) {
-    console.error('Manual activation failed:', error)
+    debug.error('Manual activation failed:', error)
     
     $q.notify({
       type: 'negative',

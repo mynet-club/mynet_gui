@@ -4991,8 +4991,14 @@ components:
       properties:
         status:
           type: integer
+          description: 节点状态值，对应 node_status
           enum: [0, 1, 2]
-          example: 1
+          example: 2
+        force:
+          type: boolean
+          description: 可选：是否强制更新，忽略状态转换验证
+          default: false
+          example: false
 
     NodeConfigStatusResponse:
       type: object

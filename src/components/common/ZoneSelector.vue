@@ -51,6 +51,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import debug from "src/utils/debug"
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../stores/auth'
@@ -66,18 +67,18 @@ const availableZones = computed(() => authStore.availableZones)
 
 // Zone切换方法
 const switchZone = async (zoneId: number) => {
-  console.log('🔧 [ZoneSelector] Switching to zone:', zoneId)
-  console.log('🔧 [ZoneSelector] Current zone before switch:', currentZone.value?.zone_name)
+  debug.log('🔧 [ZoneSelector] Switching to zone:', zoneId)
+  debug.log('🔧 [ZoneSelector] Current zone before switch:', currentZone.value?.zone_name)
   
   try {
     // 先找到要切换到的zone
     const targetZone = availableZones.value.find(z => z.zone_id === zoneId)
     const targetZoneName = targetZone?.zone_name || targetZone?.name || 'Unknown Zone'
-    console.log('🔧 [ZoneSelector] Target zone:', targetZoneName)
+    debug.log('🔧 [ZoneSelector] Target zone:', targetZoneName)
     
     await authStore.switchZone(zoneId)
     
-    console.log('🔧 [ZoneSelector] Current zone after switch:', currentZone.value?.zone_name)
+    debug.log('🔧 [ZoneSelector] Current zone after switch:', currentZone.value?.zone_name)
     
     $q.notify({
       type: 'positive',
@@ -85,7 +86,7 @@ const switchZone = async (zoneId: number) => {
       timeout: 3000
     })
   } catch (error) {
-    console.error('🔧 [ZoneSelector] Failed to switch zone:', error)
+    debug.error('🔧 [ZoneSelector] Failed to switch zone:', error)
     $q.notify({
       type: 'negative',
       message: t('zones.switchFailed')

@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import debug from "src/utils/debug"
 import { apiService } from '../services/api'
 
 // 头像缓存
@@ -22,7 +23,7 @@ export function useAvatar() {
     // 检查缓存
     if (useCache && avatarCache.has(cacheKey)) {
       const cachedUrl = avatarCache.get(cacheKey)!
-      console.log('🔧 [Avatar] Using cached avatar for:', cacheKey, cachedUrl.substring(0, 50) + '...')
+      debug.log('🔧 [Avatar] Using cached avatar for:', cacheKey, cachedUrl.substring(0, 50) + '...')
       return cachedUrl
     }
 
@@ -30,7 +31,7 @@ export function useAvatar() {
     error.value = null
 
     try {
-      console.log('🔧 [Avatar] Loading avatar for:', cacheKey)
+      debug.log('🔧 [Avatar] Loading avatar for:', cacheKey)
       const response = await apiService.getAvatar(userId ? String(userId) : undefined)
       
       if (response.data && response.data.size > 0) {
@@ -39,15 +40,15 @@ export function useAvatar() {
         
         // 缓存URL
         avatarCache.set(cacheKey, url)
-        console.log('🔧 [Avatar] Avatar loaded and cached for:', cacheKey, url.substring(0, 50) + '...')
+        debug.log('🔧 [Avatar] Avatar loaded and cached for:', cacheKey, url.substring(0, 50) + '...')
         
         return url
       } else {
-        console.warn('🔧 [Avatar] Empty avatar response for:', cacheKey)
+        debug.warn('🔧 [Avatar] Empty avatar response for:', cacheKey)
         return defaultAvatar
       }
     } catch (err: any) {
-      console.error('🔧 [Avatar] Failed to load avatar for:', cacheKey, err)
+      debug.error('🔧 [Avatar] Failed to load avatar for:', cacheKey, err)
       error.value = err.message || 'Failed to load avatar'
       return defaultAvatar
     } finally {
@@ -67,7 +68,7 @@ export function useAvatar() {
         URL.revokeObjectURL(url)
       }
       avatarCache.delete(cacheKey)
-      console.log('🔧 [Avatar] Cleared cache for:', cacheKey)
+      debug.log('🔧 [Avatar] Cleared cache for:', cacheKey)
     }
   }
 
@@ -81,7 +82,7 @@ export function useAvatar() {
       }
     }
     avatarCache.clear()
-    console.log('🔧 [Avatar] Cleared all avatar cache')
+    debug.log('🔧 [Avatar] Cleared all avatar cache')
   }
 
   /**
@@ -116,7 +117,7 @@ export function useReactiveAvatar(userId?: string | number) {
     try {
       avatarUrl.value = await getAvatarUrl(userId)
     } catch (err) {
-      console.error('Failed to load reactive avatar:', err)
+      debug.error('Failed to load reactive avatar:', err)
       avatarUrl.value = defaultAvatar
     }
   }
@@ -125,7 +126,7 @@ export function useReactiveAvatar(userId?: string | number) {
     try {
       avatarUrl.value = await refreshAvatar(userId)
     } catch (err) {
-      console.error('Failed to refresh reactive avatar:', err)
+      debug.error('Failed to refresh reactive avatar:', err)
       avatarUrl.value = defaultAvatar
     }
   }

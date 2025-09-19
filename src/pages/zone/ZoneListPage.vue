@@ -1,26 +1,20 @@
 <template>
-  <q-page class="zones-page">
-    <div class="q-pa-md">
-      <!-- 页面标题 -->
-      <div class="row items-center q-mb-lg">
-        <div class="col">
-          <h4 class="q-my-none">{{ $t('navigation.zones') }}</h4>
-          <p class="text-grey-6 q-mt-xs q-mb-none">
-            {{ $t('zones.subtitle') }}
-          </p>
-        </div>
-        <div class="col-auto">
-          <q-btn
-            color="primary"
-            icon="refresh"
-            :label="$t('common.refresh')"
-            @click="handleRefresh"
-            :loading="loading"
-          />
-        </div>
-      </div>
+  <PageLayout
+    :title="$t('navigation.zones')"
+    :subtitle="$t('zones.subtitle')"
+    icon="public"
+  >
+    <template #actions>
+      <q-btn
+        color="primary"
+        icon="refresh"
+        :label="$t('common.refresh')"
+        @click="handleRefresh"
+        :loading="loading"
+      />
+    </template>
 
-      <!-- 当前Zone信息 -->
+    <!-- 当前Zone信息 -->
       <div class="row q-mb-lg">
         <div class="col-12">
           <q-card class="current-zone-card">
@@ -148,7 +142,6 @@
           </q-card>
         </div>
       </div>
-    </div>
 
     <!-- Zone切换确认对话框 -->
     <q-dialog v-model="switchDialog.show" persistent>
@@ -183,7 +176,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </q-page>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
@@ -192,6 +185,7 @@ import { useI18n } from 'vue-i18n'
 import { useZones } from '../../composables/useZones'
 import { useNotify } from '../../composables/useNotify'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
+import PageLayout from '../../components/layout/PageLayout.vue'
 import type { Zone } from '../../types'
 
 const { t } = useI18n()

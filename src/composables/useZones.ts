@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import debug from "src/utils/debug"
 import { useNotify } from './useNotify'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
@@ -55,7 +56,7 @@ export function useZones() {
         total_routes: response.total_routes || 0
       }
     } catch (error) {
-      console.error('获取zone概览失败:', error)
+      debug.error('获取zone概览失败:', error)
       notify.error(t('zones.fetchOverviewError'))
     } finally {
       loading.value = false
@@ -75,7 +76,7 @@ export function useZones() {
         currentZone.value = availableZones.value[0] || null
       }
     } catch (error) {
-      console.error('获取可访问zones失败:', error)
+      debug.error('获取可访问zones失败:', error)
       notify.error(t('zones.fetchAvailableZonesError'))
     } finally {
       loading.value = false
@@ -103,7 +104,7 @@ export function useZones() {
       totalItems.value = response.meta.total
       
     } catch (error) {
-      console.error('获取zones列表失败:', error)
+      debug.error('获取zones列表失败:', error)
       notify.error(t('zones.fetchZonesError'))
     } finally {
       loading.value = false
@@ -126,7 +127,7 @@ export function useZones() {
       
       return true
     } catch (error) {
-      console.error('切换zone失败:', error)
+      debug.error('切换zone失败:', error)
       notify.error(t('zones.switchFailed'))
       return false
     } finally {
@@ -146,7 +147,7 @@ export function useZones() {
       await fetchOverview()
       return response
     } catch (error) {
-      console.error('创建zone失败:', error)
+      debug.error('创建zone失败:', error)
       notify.error(t('zones.createError'))
       return null
     } finally {
@@ -165,7 +166,7 @@ export function useZones() {
       await fetchZones()
       return response
     } catch (error) {
-      console.error('更新zone失败:', error)
+      debug.error('更新zone失败:', error)
       notify.error(t('zones.updateError'))
       return null
     } finally {
@@ -185,7 +186,7 @@ export function useZones() {
       await fetchOverview()
       return true
     } catch (error) {
-      console.error('删除zone失败:', error)
+      debug.error('删除zone失败:', error)
       notify.error(t('zones.deleteError'))
       return false
     } finally {
@@ -199,7 +200,7 @@ export function useZones() {
       const response = await zoneService.getZoneById(id)
       return response
     } catch (error) {
-      console.error('获取zone详情失败:', error)
+      debug.error('获取zone详情失败:', error)
       notify.error(t('zones.fetchDetailsError'))
       return null
     }
@@ -212,7 +213,7 @@ export function useZones() {
       zoneStatistics.value[zoneId] = response
       return response
     } catch (error) {
-      console.error('获取zone统计失败:', error)
+      debug.error('获取zone统计失败:', error)
       return null
     }
   }

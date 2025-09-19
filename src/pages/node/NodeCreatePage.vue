@@ -1,13 +1,11 @@
 <template>
-  <q-page class="q-pa-md">
+  <PageLayout
+    :title="$t('nodes.createNode')"
+    :subtitle="$t('nodes.createFirstNode')"
+    icon="add_circle"
+  >
     <div class="row justify-center">
       <div class="col-12 col-md-8 col-lg-6">
-        <!-- 页面标题 -->
-        <div class="text-h4 q-mb-md">
-          <q-icon name="add_circle" class="q-mr-sm" />
-          创建节点
-        </div>
-
         <!-- 创建表单 -->
         <q-card>
           <q-card-section>
@@ -116,15 +114,17 @@
         </q-card>
       </div>
     </div>
-  </q-page>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useNodes, useNotify } from '../../composables'
 import { CreateNodeRequest, VpnType } from '../../types/node'
+import PageLayout from '../../components/layout/PageLayout.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -191,21 +191,21 @@ const onSubmit = async () => {
     const newNode = await createNode(nodeData)
     
     if (newNode) {
-      console.log('创建的节点数据:', newNode)
+      debug.log('创建的节点数据:', newNode)
       notifySuccess('节点创建成功')
       // 跳转到节点详情页 - 使用node_id或id字段
       const nodeId = newNode.node_id || newNode.id
-      console.log('节点ID:', nodeId, '(node_id:', newNode.node_id, ', id:', newNode.id, ')')
+      debug.log('节点ID:', nodeId, '(node_id:', newNode.node_id, ', id:', newNode.id, ')')
       if (nodeId) {
         router.push(`/nodes/${nodeId}`)
       } else {
-        console.warn('节点创建成功但无法获取节点ID，跳转到节点列表')
+        debug.warn('节点创建成功但无法获取节点ID，跳转到节点列表')
         router.push('/nodes')
       }
     }
     
   } catch (error) {
-    console.error('创建节点失败:', error)
+    debug.error('创建节点失败:', error)
     notifyError('创建节点失败，请重试')
   } finally {
     isCreating.value = false

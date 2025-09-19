@@ -190,6 +190,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useRoutes } from '../../../composables/useRoutes'
@@ -250,7 +251,7 @@ const submitRequest = async () => {
     
     showSuccessDialog.value = true
   } catch (error) {
-    console.error('提交路由请求失败:', error)
+    debug.error('提交路由请求失败:', error)
     notify.error(t('routes.create.step4.submitError'))
   } finally {
     submitting.value = false
@@ -285,7 +286,7 @@ onMounted(() => {
     selectedFriendNode.value = JSON.parse(savedFriendNode)
     selectedMyNode.value = JSON.parse(savedMyNode)
   } catch (error) {
-    console.error('解析已保存的数据失败:', error)
+    debug.error('解析已保存的数据失败:', error)
     router.push('/routes/create/prev_1')
     return
   }

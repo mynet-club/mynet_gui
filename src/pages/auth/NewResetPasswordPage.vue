@@ -1,5 +1,5 @@
 <template>
-  <q-page class="auth-layout">
+  <div class="auth-page">
     <div class="auth-container">
       <q-card class="auth-card q-pa-lg">
         <q-card-section class="text-center">
@@ -90,11 +90,12 @@
         </q-card-section>
       </q-card>
     </div>
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -196,7 +197,7 @@ const handleResetPassword = async () => {
       throw new Error(response.data.message || t('auth.passwordResetFailed'))
     }
   } catch (error: any) {
-    console.error('Password reset failed:', error)
+    debug.error('Password reset failed:', error)
     $q.notify({
       type: 'negative',
       message: error.response?.data?.message || error.message || t('auth.passwordResetFailed'),

@@ -1,4 +1,5 @@
 import { ref, reactive } from 'vue'
+import debug from "src/utils/debug"
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { apiService } from '../services/api'
@@ -23,20 +24,20 @@ export function useProfile() {
 
   // 初始化表单数据
   const initializeForm = () => {
-    console.log('🔧 [useProfile] Initializing form with user:', authStore.user)
+    debug.log('🔧 [useProfile] Initializing form with user:', authStore.user)
     
     if (authStore.user) {
       form.name = authStore.user.name || ''
       form.phone = authStore.user.phone || ''
       form.signature = authStore.user.signature || ''
       
-      console.log('🔧 [useProfile] Form initialized:', {
+      debug.log('🔧 [useProfile] Form initialized:', {
         name: form.name,
         phone: form.phone,
         signature: form.signature
       })
     } else {
-      console.log('🔧 [useProfile] No user data available for form initialization')
+      debug.log('🔧 [useProfile] No user data available for form initialization')
     }
   }
 
@@ -53,21 +54,20 @@ export function useProfile() {
         signature: form.signature
       })
 
-      if (response.data.success) {
-        // 更新本地用户数据
-        authStore.user.name = response.data.name
-        authStore.user.phone = response.data.phone || authStore.user.phone
-        authStore.user.signature = response.data.signature || ''
+      // API 服务层已经处理了成功判断，这里直接使用返回的用户数据
+      const userData = response.data
+      
+      // 更新本地用户数据
+      authStore.user.name = userData.name
+      authStore.user.phone = userData.phone || authStore.user.phone
+      authStore.user.signature = userData.signature || ''
 
-        $q.notify({
-          type: 'positive',
-          message: response.data.message || t('user.profileUpdated')
-        })
-      } else {
-        throw new Error(response.data.message || 'Update failed')
-      }
+      $q.notify({
+        type: 'positive',
+        message: t('user.profileUpdated')
+      })
     } catch (error: any) {
-      console.error('资料更新失败:', error)
+      debug.error('资料更新失败:', error)
       
       let errorMessage = t('user.profileUpdateFailed')
       if (error.response?.data?.message) {

@@ -4,6 +4,7 @@
  */
 
 import type { KeyType, LocalKeyPair, KeyValidationResult } from '../types/nodeKeys'
+import debug from "src/utils/debug"
 import { ED25519_KEY_SPEC } from '../types/nodeKeys'
 
 /**
@@ -200,7 +201,7 @@ export const copyKeyToClipboard = async (key: string): Promise<boolean> => {
     await navigator.clipboard.writeText(key)
     return true
   } catch (err) {
-    console.error('复制到剪贴板失败:', err)
+    debug.error('复制到剪贴板失败:', err)
     return false
   }
 }

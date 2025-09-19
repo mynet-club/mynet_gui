@@ -54,10 +54,65 @@ export default defineConfig((/* ctx */) => {
         VITE_PUSHER_APP_KEY: process.env.VITE_PUSHER_APP_KEY,
         VITE_REVERB_HOST: process.env.VITE_REVERB_HOST,
         VITE_REVERB_PORT: process.env.VITE_REVERB_PORT,
-        VITE_REVERB_SCHEME: process.env.VITE_REVERB_SCHEME
+        VITE_REVERB_SCHEME: process.env.VITE_REVERB_SCHEME,
+        // Debug 相关环境变量
+        VITE_ENABLE_DEBUG: process.env.VITE_ENABLE_DEBUG,
+        VITE_ENABLE_CONSOLE_LOG: process.env.VITE_ENABLE_CONSOLE_LOG,
+        VITE_LOG_LEVEL: process.env.VITE_LOG_LEVEL
       },
       
-      // extendViteConf (viteConf) {},
+      // 生产环境移除调试代码
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          // 根据环境变量决定是否移除 console
+          drop_console: process.env.VITE_ENABLE_CONSOLE_LOG !== 'true',
+          // 移除所有 debugger 语句
+          drop_debugger: true,
+          // 根据日志级别移除特定的console调用
+          pure_funcs: process.env.VITE_LOG_LEVEL === 'error' 
+            ? ['console.log', 'console.info', 'console.debug', 'console.warn']
+            : process.env.VITE_LOG_LEVEL === 'warn'
+            ? ['console.log', 'console.info', 'console.debug']
+            : ['console.log', 'console.info', 'console.debug']
+        }
+      },
+      
+      // 扩展 Vite 配置以支持更精细的控制
+      extendViteConf(viteConf, { isClient, isServer }) {
+        // 只在生产环境客户端构建时应用
+        if (isClient && process.env.NODE_ENV === 'production') {
+          viteConf.esbuild = {
+            ...viteConf.esbuild,
+            // 移除 console 和 debugger (ESBuild 方式)
+            drop: ['console', 'debugger']
+          }
+        }
+        
+        // 开发环境优化配置
+        if (process.env.NODE_ENV === 'development') {
+          // 确保路径解析正确
+          viteConf.resolve = {
+            ...viteConf.resolve,
+            alias: {
+              ...viteConf.resolve?.alias,
+              'src': '/src'
+            }
+          }
+          
+          // 优化服务器配置
+          viteConf.server = {
+            ...viteConf.server,
+            fs: {
+              strict: false
+            },
+            hmr: {
+              overlay: true
+            }
+          }
+        }
+      },
+      
       // viteVuePluginOptions: {},
 
       // 移除Vue i18n编译插件，使用纯运行时模式

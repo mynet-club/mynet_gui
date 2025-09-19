@@ -1,4 +1,5 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import debug from "src/utils/debug"
 import { useAuthStore } from '../stores/auth'
 import { useWebSocket } from '../services/websocket'
 import { apiService } from '../services/api'
@@ -55,7 +56,7 @@ export function useDashboard() {
       const response = await apiService.getDashboardData()
       dashboardData.value = response.data
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error)
+      debug.error('Failed to fetch dashboard data:', error)
     } finally {
       isLoading.value = false
     }
@@ -73,7 +74,7 @@ export function useDashboard() {
       }
       realtimeData.value = mockRealtimeData
     } catch (error) {
-      console.error('Failed to fetch realtime data:', error)
+      debug.error('Failed to fetch realtime data:', error)
     }
   }
 
@@ -88,7 +89,7 @@ export function useDashboard() {
       ]
       recentActivities.value = mockActivities
     } catch (error) {
-      console.error('Failed to fetch recent activities:', error)
+      debug.error('Failed to fetch recent activities:', error)
     }
   }
 

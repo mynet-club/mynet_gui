@@ -655,6 +655,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../stores/auth'
@@ -820,7 +821,7 @@ const copyToClipboard = async (text: string | number | undefined) => {
       timeout: 2000
     })
   } catch (error) {
-    console.error('复制失败:', error)
+    debug.error('复制失败:', error)
     $q.notify({
       type: 'negative',
       message: t('common.copyFailed'),
@@ -861,7 +862,7 @@ const saveAvatar = async () => {
       timeout: 3000
     })
   } catch (error) {
-    console.error('头像上传失败:', error)
+    debug.error('头像上传失败:', error)
     $q.notify({
       type: 'negative',
       message: t('user.avatarUpdateFailed'),
@@ -883,7 +884,7 @@ const toggle2FA = async (enabled: boolean) => {
       timeout: 3000
     })
   } catch (error) {
-    console.error('2FA设置失败:', error)
+    debug.error('2FA设置失败:', error)
     twoFactorEnabled.value = !enabled // 恢复原状态
     $q.notify({
       type: 'negative',
@@ -910,7 +911,7 @@ const revokeSession = async (sessionId: string) => {
       timeout: 3000
     })
   } catch (error) {
-    console.error('撤销会话失败:', error)
+    debug.error('撤销会话失败:', error)
     $q.notify({
       type: 'negative',
       message: t('user.sessionRevokeFailed'),
@@ -932,7 +933,7 @@ const onSubmit = async () => {
       timeout: 3000
     })
   } catch (error) {
-    console.error('更新资料失败:', error)
+    debug.error('更新资料失败:', error)
     $q.notify({
       type: 'negative',
       message: t('user.profileUpdateFailed'),
@@ -969,7 +970,7 @@ const changePassword = async () => {
       timeout: 3000
     })
   } catch (error) {
-    console.error('修改密码失败:', error)
+    debug.error('修改密码失败:', error)
     $q.notify({
       type: 'negative',
       message: t('user.passwordChangeFailed'),

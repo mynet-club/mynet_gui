@@ -1,70 +1,79 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row q-gutter-md">
-      <!-- 左侧主要内容 -->
-      <div class="col-12 col-lg-8">
-        <!-- 页面标题和操作按钮 -->
-        <div class="row items-center justify-between q-mb-md">
-          <div class="text-h4">
-            <q-icon name="device_hub" class="q-mr-sm" />
-            {{ $t('nodes.detail.title') }}
-          </div>
-          <div class="row q-gutter-sm">
-            <!-- 编辑下拉菜单 -->
-            <q-btn-dropdown
-              color="primary"
-              outline
-              icon="edit"
-              label="{{ $t('common.edit') }}"
-              :disable="!node || isLoading"
-            >
-              <q-list>
-                <q-item clickable v-close-popup @click="goToEditBasic">
-                  <q-item-section avatar>
-                    <q-icon name="info" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>{{ $t('nodes.detail.basicInfo') }}</q-item-label>
-                  </q-item-section>
-                </q-item>
-                <q-item clickable v-close-popup @click="goToEditConfig">
-                  <q-item-section avatar>
-                    <q-icon name="settings" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>{{ $t('nodes.detail.nodeConfig') }}</q-item-label>
-                  </q-item-section>
-                </q-item>
-                <q-item clickable v-close-popup @click="goToEditNetwork">
-                  <q-item-section avatar>
-                    <q-icon name="router" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>{{ $t('nodes.detail.networkConfig') }}</q-item-label>
-                  </q-item-section>
-                </q-item>
-                <q-item clickable v-close-popup @click="goToEditKeys">
-                  <q-item-section avatar>
-                    <q-icon name="vpn_key" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>{{ $t('nodes.detail.keyManagement') }}</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-btn-dropdown>
-            <q-btn
-              color="negative"
-              outline
-              @click="confirmDelete"
-              :disable="!node || isLoading"
-            >
-              <q-icon name="delete" class="q-mr-xs" />
-              {{ $t('common.delete') }}
-            </q-btn>
-          </div>
-        </div>
+  <PageLayout
+    :title="$t('nodes.detail.title')"
+    :subtitle="node?.node_name || $t('common.loading')"
+    icon="device_hub"
+  >
+    <template #actions>
+      <div class="row q-gutter-sm">
+        <!-- 编辑下拉菜单 -->
+        <q-btn-dropdown
+          color="primary"
+          outline
+          icon="edit"
+          :label="$t('common.edit')"
+          :disable="!node || isLoading"
+        >
+          <q-list>
+            <q-item clickable v-close-popup @click="goToEditBasic">
+              <q-item-section avatar>
+                <q-icon name="info" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ $t('nodes.detail.basicInfo') }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup @click="goToEditConfig">
+              <q-item-section avatar>
+                <q-icon name="settings" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ $t('nodes.detail.nodeConfig') }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup @click="goToEditNetwork">
+              <q-item-section avatar>
+                <q-icon name="router" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ $t('nodes.detail.networkConfig') }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup @click="goToEditKeys">
+              <q-item-section avatar>
+                <q-icon name="vpn_key" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ $t('nodes.detail.keyManagement') }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
 
+        <!-- 删除按钮 -->
+        <q-btn
+          color="negative"
+          outline
+          icon="delete"
+          :label="$t('common.delete')"
+          @click="showDeleteConfirm = true"
+          :disable="!node || isLoading"
+        />
+        
+        <!-- 返回按钮 -->
+        <q-btn
+          color="grey-7"
+          outline
+          icon="arrow_back"
+          :label="$t('common.back')"
+          @click="$router.push('/nodes')"
+        />
+      </div>
+    </template>
+
+    <div class="row q-gutter-md">
+      <!-- 左侧：基本信息和应用信息 -->
+      <div class="col-12 col-md-6">
         <!-- 基本信息 - 紧凑布局 -->
         <q-card class="q-mb-md">
           <q-card-section>
@@ -319,7 +328,7 @@
                 outline
                 size="sm"
                 icon="settings"
-                label="{{ $t('nodes.networkConfig') }}"
+                :label="$t('nodes.networkConfig')"
                 @click="goToNetworkConfig"
                 :disable="!node || isLoading"
               />
@@ -376,7 +385,7 @@
                     class="q-mr-xs q-mb-xs"
                   >
                     {{ publicIp }}
-                    <q-tooltip v-if="isIPv6(publicIp)">IPv6 地址</q-tooltip>
+                    <q-tooltip v-if="isIPv6(publicIp)">{{ $t('nodes.detail.ipv6Address') }}</q-tooltip>
                   </q-chip>
                 </div>
               </div>
@@ -397,7 +406,7 @@
                 outline
                 size="sm"
                 icon="settings"
-                label="{{ $t('nodes.fields.ipManagement') }}"
+                :label="$t('nodes.fields.ipManagement')"
                 @click="goToIPManagement"
                 :disable="!node || isLoading"
               />
@@ -472,7 +481,7 @@
                 outline
                 block
                 icon="refresh"
-                label="{{ $t('nodes.refreshData') }}"
+                :label="$t('nodes.refreshData')"
                 @click="refreshData"
                 :loading="isRefreshing"
               />
@@ -501,11 +510,12 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </q-page>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import debug from "src/utils/debug"
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -513,6 +523,7 @@ import { useNode, useNotify } from '../../composables'
 import { NodeStatus, VpnType, NODE_STATUS, NODE_TYPE, NODE_TYPE_NAMES, type NodeIndexService, type NodeDeviceInfo } from '../../types/node'
 import { nodeService } from '../../services/node/nodeService'
 import type { NodeNetworkConfig } from '../../types/node'
+import PageLayout from '../../components/layout/PageLayout.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -751,7 +762,7 @@ const loadIndexServices = async () => {
     const response = await nodeService.getNodeIndexServices(nodeId.value)
     indexServices.value = response.data?.index_services || []
   } catch (error) {
-    console.error('加载索引服务器失败:', error)
+    debug.error('加载索引服务器失败:', error)
     indexServices.value = []
   } finally {
     loadingIndexServices.value = false
@@ -766,7 +777,7 @@ const loadNetworkConfig = async () => {
     const response = await nodeService.getNodeNetworkConfig(nodeId.value)
     networkConfig.value = response.data
   } catch (error) {
-    console.error('加载网络配置失败:', error)
+    debug.error('加载网络配置失败:', error)
     networkConfig.value = null
   } finally {
     loadingNetworkConfig.value = false
@@ -785,7 +796,7 @@ const loadDeviceInfo = async () => {
       deviceInfo.value = null
     }
   } catch (error) {
-    console.error('加载设备信息失败:', error)
+    debug.error('加载设备信息失败:', error)
     deviceInfo.value = null
   } finally {
     loadingDeviceInfo.value = false
@@ -802,7 +813,7 @@ const loadRouteCount = async () => {
     // routeCount.value = response.data?.length || 0
     routeCount.value = 0 // 临时设置为0
   } catch (error) {
-    console.error('加载路由数量失败:', error)
+    debug.error('加载路由数量失败:', error)
     routeCount.value = 0
   } finally {
     loadingRoutes.value = false
@@ -878,7 +889,7 @@ const refreshData = async () => {
     ])
     notifySuccess(t('nodes.dataRefreshed'))
   } catch (error) {
-    console.error('刷新数据失败:', error)
+    debug.error('刷新数据失败:', error)
     notifyError(t('nodes.refreshFailed'))
   } finally {
     isRefreshing.value = false
@@ -900,8 +911,8 @@ const deleteNode = async () => {
       router.push('/nodes')
     }
   } catch (error) {
-    console.error('删除节点失败:', error)
-    notifyError('删除节点失败，请重试')
+    debug.error('删除节点失败:', error)
+    notifyError(t('node.detail.deleteNodeFailed'))
   } finally {
     isDeleting.value = false
     showDeleteDialog.value = false

@@ -3,7 +3,7 @@
     <!-- 页面标题和VPN类型显示 -->
     <div class="row items-center justify-between q-mb-lg">
       <div class="column">
-        <div class="text-h6">节点配置</div>
+        <div class="text-h6">{{ $t('nodes.edit.config.title') }}</div>
         <div class="text-caption text-grey-6">
           {{ currentVpnConfig?.name }} - {{ currentVpnConfig?.description }}
         </div>
@@ -48,7 +48,7 @@
                   class="config-item q-mb-md"
                 >
                   <div class="config-label text-subtitle2 q-mb-sm">
-                    {{ param.name }}
+                    {{ param.name.startsWith('node.config.') ? $t(param.name) : param.name }}
                     <span v-if="param.required" class="text-red">*</span>
                     <q-icon name="help" class="q-ml-xs text-grey-6" size="sm">
                       <q-tooltip>{{ param.description }}</q-tooltip>
@@ -126,7 +126,7 @@
                   <q-toggle
                     v-if="param.type === 'boolean'"
                     v-model="formData[key]"
-                    :label="formData[key] ? '启用' : '禁用'"
+                    :label="formData[key] ? $t('common.enabled') : $t('common.disabled')"
                     :disable="loading"
                     color="primary"
                   />
@@ -186,7 +186,7 @@
                   no-caps
                 >
                   <q-icon name="save" class="q-mr-sm" />
-                  保存配置
+                  {{ $t('nodes.edit.config.saveConfig') }}
                 </q-btn>
                 
                 <q-btn
@@ -197,7 +197,7 @@
                   no-caps
                 >
                   <q-icon name="refresh" class="q-mr-sm" />
-                  重置
+                  {{ $t('common.reset') }}
                 </q-btn>
                 
                 <q-btn
@@ -209,7 +209,7 @@
                   no-caps
                 >
                   <q-icon name="download" class="q-mr-sm" />
-                  导出配置
+                  {{ $t('nodes.edit.config.exportConfig') }}
                 </q-btn>
               </div>
             </q-form>
@@ -223,8 +223,8 @@
           <q-card>
             <q-card-section>
               <div class="row items-center justify-between q-mb-md">
-                <div class="text-h6">完整配置预览</div>
-                <div class="text-caption text-grey-6">基本配置 + 专家配置</div>
+                <div class="text-h6">{{ $t('nodes.edit.config.previewConfig') }}</div>
+                <div class="text-caption text-grey-6">{{ $t('nodes.edit.config.fullConfigPreview') }}</div>
                 <q-btn
                   color="grey-7"
                   flat
@@ -234,7 +234,7 @@
                   @click="copyConfig"
                   size="sm"
                 >
-                  <q-tooltip>复制配置</q-tooltip>
+                  <q-tooltip>{{ $t('nodes.edit.config.copyConfig') }}</q-tooltip>
                 </q-btn>
               </div>
               <div class="config-preview-container">
@@ -250,8 +250,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import debug from "src/utils/debug"
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 import { useNotify } from '../../../composables'
 import { vpnConfigData } from '../../../config/vpnConfig'
 import { VPNConfigParameter, NodeConfigForm } from '../../../types/vpnConfig'
@@ -261,6 +263,7 @@ import type { ConfigUpdateRequest, NodeConfigApiResponse } from '../../../types/
 
 const route = useRoute()
 const $q = useQuasar()
+const { t } = useI18n()
 const { success: notifySuccess, error: notifyError } = useNotify()
 
 // 获取节点ID
@@ -318,8 +321,8 @@ const currentModeConfig = computed(() => {
 })
 
 const modeOptions = computed(() => [
-  { label: '基本配置', value: 'base' },
-  { label: '专家配置', value: 'expert' }
+  { label: t('nodes.edit.config.basicConfig'), value: 'base' },
+  { label: t('nodes.edit.config.expertConfig'), value: 'expert' }
 ])
 
 const hasChanges = computed(() => {
@@ -330,59 +333,59 @@ const hasChanges = computed(() => {
 // 完整配置预览（包含基本配置和专家配置）
 const configPreview = computed(() => {
   const versionConfig = currentVersionConfig.value
-  if (!versionConfig || !formData.value) return '# 请填写配置参数'
+  if (!versionConfig || !formData.value) return t('nodes.edit.config.pleaseConfigureParams')
   
   const lines: string[] = []
   
   if (vpnType.value === 'gnb') {
     // GNB 配置格式 (key=value)
-    lines.push('# GNB 节点配置文件 (完整配置)')
-    lines.push(`# 生成时间: ${new Date().toLocaleString()}`)
+    lines.push(t('nodes.edit.config.gnbConfigFile'))
+    lines.push(`${t('nodes.edit.config.generateTime')}: ${new Date().toLocaleString()}`)
     lines.push('')
     
     // 基本配置部分
-    lines.push('# ==================== 基本配置 ====================')
+    lines.push(`# ==================== ${t('nodes.edit.config.basicConfig')} ====================`)
     const baseConfig = versionConfig.modes.base
     if (baseConfig) {
-      renderConfigSection(lines, baseConfig.parameters, '基本配置')
+      renderConfigSection(lines, baseConfig.parameters, t('nodes.edit.config.basicConfig'))
     }
     
     lines.push('')
-    lines.push('# ==================== 专家配置 ====================')
+    lines.push(`# ==================== ${t('nodes.edit.config.expertConfig')} ====================`)
     const expertConfig = versionConfig.modes.expert
     if (expertConfig) {
-      renderConfigSection(lines, expertConfig.parameters, '专家配置')
+      renderConfigSection(lines, expertConfig.parameters, t('nodes.edit.config.expertConfig'))
     }
     
   } else if (vpnType.value === 'wireguard') {
     // WireGuard 配置格式 (INI格式)
-    lines.push('# WireGuard 节点配置文件 (完整配置)')
-    lines.push(`# 生成时间: ${new Date().toLocaleString()}`)
+    lines.push(t('nodes.edit.config.wireguardConfigFile'))
+    lines.push(`${t('nodes.edit.config.generateTime')}: ${new Date().toLocaleString()}`)
     lines.push('')
     lines.push('[Interface]')
     
     // 基本配置部分
-    lines.push('# ==================== 基本配置 ====================')
+    lines.push(`# ==================== ${t('nodes.edit.config.basicConfig')} ====================`)
     const baseConfig = versionConfig.modes.base
     if (baseConfig) {
-      renderConfigSection(lines, baseConfig.parameters, '基本配置', true)
+      renderConfigSection(lines, baseConfig.parameters, t('nodes.edit.config.basicConfig'), true)
     }
     
-    lines.push('# ==================== 专家配置 ====================')
+    lines.push(`# ==================== ${t('nodes.edit.config.expertConfig')} ====================`)
     const expertConfig = versionConfig.modes.expert
     if (expertConfig) {
-      renderConfigSection(lines, expertConfig.parameters, '专家配置', true)
+      renderConfigSection(lines, expertConfig.parameters, t('nodes.edit.config.expertConfig'), true)
     }
     
     lines.push('')
     lines.push('[Peer]')
-    lines.push('# Peer配置需要根据具体需求设置')
-    lines.push('# PublicKey = <对端公钥>')
-    lines.push('# Endpoint = <对端地址:端口>')
-    lines.push('# AllowedIPs = <允许的IP范围>')
+    lines.push(t('nodes.edit.config.peerConfigNote'))
+    lines.push(t('nodes.edit.config.peerPublicKey'))
+    lines.push(t('nodes.edit.config.peerEndpoint'))
+    lines.push(t('nodes.edit.config.peerAllowedIPs'))
   }
   
-  return lines.join('\n') || '# 暂无配置内容'
+  return lines.join('\n') || t('nodes.edit.config.noConfigContent')
 })
 
 // 渲染配置段的辅助函数
@@ -427,7 +430,7 @@ const renderConfigSection = (lines: string[], parameters: Record<string, VPNConf
       // 显示必填项或有默认值的项，即使当前值为空
       hasContent = true
       const rawValue = value || param.default || ''
-      lines.push(`# ${param.description || param.name} ${param.required ? '(必填)' : '(可选)'}`)
+      lines.push(`# ${param.description || param.name} ${param.required ? t('node.config.required') : t('node.config.optional')}`)
       
       // 转换参数名：下划线换成连字符
       const configKey = key.replace(/_/g, '-')
@@ -486,27 +489,27 @@ const getValidationRules = (param: VPNConfigParameter) => {
   const rules: any[] = []
   
   if (param.required) {
-    rules.push((val: any) => (val !== undefined && val !== null && val !== '') || '此项为必填项')
+    rules.push((val: any) => (val !== undefined && val !== null && val !== '') || t('node.config.validation.required'))
   }
   
   if (param.type === 'integer') {
     rules.push((val: any) => {
       if (val === undefined || val === null || val === '') return true
       const num = Number(val)
-      return !isNaN(num) || '请输入有效的数字'
+      return !isNaN(num) || t('node.config.validation.invalidNumber')
     })
     
     if (param.min !== undefined) {
       rules.push((val: any) => {
         if (val === undefined || val === null || val === '') return true
-        return Number(val) >= param.min! || `最小值为 ${param.min}`
+        return Number(val) >= param.min! || t('node.config.validation.minValue', { min: param.min })
       })
     }
     
     if (param.max !== undefined) {
       rules.push((val: any) => {
         if (val === undefined || val === null || val === '') return true
-        return Number(val) <= param.max! || `最大值为 ${param.max}`
+        return Number(val) <= param.max! || t('node.config.validation.maxValue', { max: param.max })
       })
     }
   }
@@ -515,7 +518,7 @@ const getValidationRules = (param: VPNConfigParameter) => {
     rules.push((val: any) => {
       if (val === undefined || val === null || val === '') return true
       const regex = new RegExp(param.validation!)
-      return regex.test(val) || '输入格式不正确'
+      return regex.test(val) || t('node.config.validation.invalidFormat')
     })
   }
   
@@ -531,14 +534,14 @@ const getSelectOptions = (options: Record<string, string>) => {
 
 // 初始化完整的表单数据结构（包含所有模式的所有参数）
 const initializeFormData = () => {
-  console.log('初始化完整表单数据结构')
+  debug.log('初始化完整表单数据结构')
   
   const fullData: Record<string, any> = {}
   
   // 获取当前VPN类型的完整版本配置
   const versionConfig = currentVersionConfig.value
   if (!versionConfig) {
-    console.warn('未找到版本配置')
+    debug.warn('未找到版本配置')
     return
   }
   
@@ -588,7 +591,7 @@ const initializeFormData = () => {
   // 重置编辑状态
   hasUserEdited.value = false
   
-  console.log('完整表单数据初始化完成:', fullData)
+  debug.log('完整表单数据初始化完成:', fullData)
 }
 
 // 获取网络字段的默认值
@@ -607,11 +610,11 @@ const getNetworkFieldDefault = (field: string): any => {
 
 // 安全地用服务器数据覆盖对应参数（只覆盖API架构中存在的参数）
 const safeOverrideWithServerData = (serverData: Record<string, any>) => {
-  console.log('安全覆盖服务器数据:', serverData)
+  debug.log('安全覆盖服务器数据:', serverData)
   
   const versionConfig = currentVersionConfig.value
   if (!versionConfig) {
-    console.warn('无版本配置，跳过服务器数据覆盖')
+    debug.warn('无版本配置，跳过服务器数据覆盖')
     return
   }
   
@@ -634,24 +637,24 @@ const safeOverrideWithServerData = (serverData: Record<string, any>) => {
         const validOptions = Object.keys(param.options)
         if (validOptions.includes(String(value))) {
           convertedValue = String(value)  // 确保是字符串
-          console.log(`验证multi-button参数 ${key}: ${value} -> ${convertedValue}`)
+          debug.log(`验证multi-button参数 ${key}: ${value} -> ${convertedValue}`)
         } else {
-          console.warn(`multi-button参数 ${key} 的值 ${value} 不在有效选项中:`, validOptions)
+          debug.warn(`multi-button参数 ${key} 的值 ${value} 不在有效选项中:`, validOptions)
           convertedValue = param.default || validOptions[0] // 使用默认值或第一个选项
         }
       }
       
       formData.value[key] = convertedValue
-      console.log(`覆盖参数 ${key}:`, value, '->', convertedValue)
+      debug.log(`覆盖参数 ${key}:`, value, '->', convertedValue)
     } else {
-      console.log(`跳过无效参数 ${key}:`, value)
+      debug.log(`跳过无效参数 ${key}:`, value)
     }
   })
 }
 
 // 简化的模式切换（不需要保存和加载数据，因为使用统一的数据结构）
 const switchConfigMode = (newMode: 'base' | 'expert') => {
-  console.log(`切换配置模式: ${configMode.value} -> ${newMode}`)
+  debug.log(`切换配置模式: ${configMode.value} -> ${newMode}`)
   configMode.value = newMode
   // 不需要额外的数据操作，因为使用统一的formData
 }
@@ -661,16 +664,16 @@ const resetForm = () => {
   // 重置为原始数据
   formData.value = { ...originalFormData.value }
   hasUserEdited.value = false
-  notifySuccess('表单已重置')
+  notifySuccess(t('common.formReset'))
 }
 
 const copyConfig = async () => {
   try {
     await navigator.clipboard.writeText(configPreview.value)
-    notifySuccess('配置已复制到剪贴板')
+    notifySuccess(t('node.config.configCopied'))
   } catch (error) {
-    console.error('复制失败:', error)
-    notifyError('复制失败，请手动选择复制')
+    debug.error('复制失败:', error)
+    notifyError(t('node.config.copyFailed'))
   }
 }
 
@@ -688,10 +691,10 @@ const exportConfig = async () => {
     a.download = `node-${nodeId.value}-${vpnType.value}-config${currentVersionConfig.value?.config_file_extension || '.conf'}`
     a.click()
     URL.revokeObjectURL(url)
-    notifySuccess('配置文件已导出')
+    notifySuccess(t('node.config.configExported'))
   } catch (error) {
-    console.error('导出配置失败:', error)
-    notifyError('导出配置失败，请稍后重试')
+    debug.error('导出配置失败:', error)
+    notifyError(t('node.config.exportFailed'))
   } finally {
     exporting.value = false
   }
@@ -699,7 +702,7 @@ const exportConfig = async () => {
 
 const onSubmit = async () => {
   if (!hasChanges.value) {
-    notifyError('没有需要保存的更改')
+    notifyError(t('common.noChangesToSave'))
     return
   }
   
@@ -722,7 +725,7 @@ const onSubmit = async () => {
       listen: formData.value.listen || 9001
     }
     
-    console.log('提交的配置数据（分别提交字段）:', submitData)
+    debug.log('提交的配置数据（分别提交字段）:', submitData)
     
     // 调用API保存配置（扁平化字段格式）
     await nodeConfigService.updateNodeConfig(nodeId.value, submitData)
@@ -731,12 +734,12 @@ const onSubmit = async () => {
     originalFormData.value = { ...formData.value }
     hasUserEdited.value = false
     
-    notifySuccess('节点配置保存成功')
+    notifySuccess(t('nodes.edit.config.saveSuccess'))
     
   } catch (error: any) {
-    console.error('保存节点配置失败:', error)
-    const errorMsg = error?.response?.data?.message || error?.message || '保存失败，请重试'
-    notifyError(`保存失败: ${errorMsg}`)
+    debug.error(t('nodes.edit.config.saveFailedLog'), error)
+    const errorMsg = error?.response?.data?.message || error?.message || t('nodes.edit.config.saveFailedRetry')
+    notifyError(`${t('nodes.edit.config.saveFailedPrefix')}: ${errorMsg}`)
   } finally {
     saving.value = false
   }
@@ -786,14 +789,14 @@ onMounted(async () => {
       
       // 尝试从API获取节点的具体配置
       try {
-        console.log('尝试加载节点配置:', nodeId.value)
+        debug.log('尝试加载节点配置:', nodeId.value)
         const configResponse = await nodeConfigService.getNodeConfig(nodeId.value)
         
-        console.log('API返回的完整响应:', configResponse)
+        debug.log('API返回的完整响应:', configResponse)
         
         // 检查新的扁平化数据格式
         if (configResponse.success && configResponse.data) {
-          console.log('检测到新的扁平化数据格式:', configResponse.data)
+          debug.log('检测到新的扁平化数据格式:', configResponse.data)
           
           // 先初始化完整的默认数据结构
           initializeFormData()
@@ -804,7 +807,7 @@ onMounted(async () => {
           // 保存为原始数据
           originalFormData.value = { ...formData.value }
           
-          console.log('节点配置加载成功（新格式）:', {
+          debug.log('节点配置加载成功（新格式）:', {
             vpnType: vpnType.value,
             configMode: configMode.value,
             formData: formData.value,
@@ -812,10 +815,10 @@ onMounted(async () => {
           })
         } else {
           // 尝试旧的数据格式
-          console.log('尝试旧的数据格式...')
+          debug.log('尝试旧的数据格式...')
           const responseData = configResponse.data as unknown as NodeConfigApiResponse
           
-          console.log('API返回的配置数据（旧格式）:', responseData)
+          debug.log('API返回的配置数据（旧格式）:', responseData)
           
           // 从API响应中提取配置信息
           const customConfig = responseData.custom_config
@@ -852,19 +855,19 @@ onMounted(async () => {
             // 保存为原始数据
             originalFormData.value = { ...formData.value }
             
-            console.log('节点配置加载成功（旧格式）:', {
+            debug.log('节点配置加载成功（旧格式）:', {
               vpnType: vpnType.value,
               configMode: configMode.value,
               formData: formData.value
             })
           } else {
-            console.log('custom_config 或 basic_config 不存在，使用默认值')
+            debug.log('custom_config 或 basic_config 不存在，使用默认值')
             // 如果没有配置数据，使用默认值
             initializeFormData()
           }
         }
       } catch (configError: any) {
-        console.log('节点配置不存在或加载失败，使用默认值:', configError?.response?.status)
+        debug.log('节点配置不存在或加载失败，使用默认值:', configError?.response?.status)
         // 如果是404错误或其他错误，使用默认值初始化
         initializeFormData()
       }
@@ -873,8 +876,8 @@ onMounted(async () => {
     }
     
   } catch (error: any) {
-    console.error('加载节点配置失败:', error)
-    notifyError('加载配置失败')
+    debug.error('加载节点配置失败:', error)
+    notifyError(t('node.config.loadConfigFailed'))
     initializeFormData() // 出错时使用默认值
   } finally {
     loading.value = false

@@ -1,4 +1,5 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import debug from "src/utils/debug"
 import { cacheManager } from '../utils/cacheManager'
 
 /**
@@ -181,7 +182,7 @@ export function useDataPrefetch() {
           storage: 'memory'
         })
       } catch (error) {
-        console.warn(`预取数据失败: ${item.key}`, error)
+        debug.warn(`预取数据失败: ${item.key}`, error)
       }
       
       // 添加延迟避免阻塞主线程

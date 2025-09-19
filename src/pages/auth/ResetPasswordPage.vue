@@ -1,5 +1,5 @@
 <template>
-  <q-page class="auth-layout">
+  <div class="auth-page">
     <div class="auth-container">
       <q-card class="auth-card q-pa-lg">
         <q-card-section class="text-center">
@@ -178,11 +178,12 @@
         </q-card>
       </q-dialog>
     </div>
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -204,6 +205,7 @@ const requestEmail = ref('')
 const form = reactive({
   email: '',
   token: '',
+  code: '',
   password: '',
   confirmPassword: ''
 })
@@ -255,17 +257,25 @@ const validateEmail = (email: string) => {
 
 // 验证重置令牌
 const validateToken = async () => {
-  if (!form.email || !form.token) {
+  if (!form.email || (!form.token && !form.code)) {
     tokenValid.value = false
     validating.value = false
     return
   }
 
   try {
-    const response = await apiService.validateResetToken({
-      email: form.email,
-      token: form.token
-    })
+    const requestData: any = {
+      email: form.email
+    }
+    
+    // 根据参数类型决定使用token还是code
+    if (form.token) {
+      requestData.token = form.token
+    } else if (form.code) {
+      requestData.code = form.code
+    }
+    
+    const response = await apiService.validateResetToken(requestData)
 
     if (response.data.success) {
       tokenValid.value = true
@@ -274,7 +284,7 @@ const validateToken = async () => {
       tokenValid.value = false
     }
   } catch (error: any) {
-    console.error('Token validation failed:', error)
+    debug.error('Token validation failed:', error)
     tokenValid.value = false
     
     $q.notify({
@@ -292,12 +302,20 @@ const resetPassword = async () => {
   resetting.value = true
   
   try {
-    const response = await apiService.resetPassword({
+    const requestData: any = {
       email: form.email,
-      token: form.token,
       password: form.password,
       password_confirmation: form.confirmPassword
-    })
+    }
+    
+    // 根据参数类型决定使用token还是code
+    if (form.token) {
+      requestData.token = form.token
+    } else if (form.code) {
+      requestData.code = form.code
+    }
+    
+    const response = await apiService.resetPassword(requestData)
 
     if (response.data.success) {
       $q.notify({
@@ -314,7 +332,7 @@ const resetPassword = async () => {
       throw new Error(response.data.message || t('auth.resetFailed'))
     }
   } catch (error: any) {
-    console.error('Password reset failed:', error)
+    debug.error('Password reset failed:', error)
     
     $q.notify({
       type: 'negative',
@@ -378,6 +396,7 @@ onMounted(() => {
   // 从URL参数获取重置信息
   form.email = (route.query.email as string) || ''
   form.token = (route.query.token as string) || ''
+  form.code = (route.query.code as string) || ''
 
   // 验证令牌
   validateToken()

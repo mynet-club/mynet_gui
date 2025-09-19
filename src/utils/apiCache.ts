@@ -1,4 +1,5 @@
 import { cacheManager, type CacheOptions } from './cacheManager'
+import debug from "src/utils/debug"
 
 /**
  * API缓存装饰器配置
@@ -52,12 +53,12 @@ export function apiCache(config: ApiCacheConfig = {}) {
       // 尝试从缓存获取
       const cached = cacheManager.get(cacheKey, storage)
       if (cached !== null) {
-        console.log(`📦 [Cache] Hit: ${cacheKey}`)
+        debug.log(`📦 [Cache] Hit: ${cacheKey}`)
         return cached
       }
 
       // 执行原方法
-      console.log(`🔄 [Cache] Miss: ${cacheKey}`)
+      debug.log(`🔄 [Cache] Miss: ${cacheKey}`)
       const result = await originalMethod.apply(this, args)
 
       // 缓存结果

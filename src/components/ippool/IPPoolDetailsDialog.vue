@@ -193,6 +193,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useIPPools } from '../../composables/useIPPools'
@@ -252,7 +253,7 @@ const fetchNodes = async () => {
       }))
     }
   } catch (error) {
-    console.error('Failed to fetch nodes:', error)
+    debug.error('Failed to fetch nodes:', error)
   } finally {
     nodesLoading.value = false
   }
@@ -316,7 +317,7 @@ const loadAllocations = async () => {
     allocations.value = response.allocations || []
     showAllocations.value = true
   } catch (error) {
-    console.error('Failed to load allocations:', error)
+    debug.error('Failed to load allocations:', error)
   } finally {
     allocationsLoading.value = false
   }
@@ -335,7 +336,7 @@ const onAllocateSubmit = async () => {
       loadAllocations()
     }
   } catch (error) {
-    console.error('Failed to allocate IP:', error)
+    debug.error('Failed to allocate IP:', error)
   } finally {
     allocateLoading.value = false
   }
@@ -355,14 +356,14 @@ const confirmReleaseIP = (allocation: IPAllocation) => {
       emit('release')
       loadAllocations()
     } catch (error) {
-      console.error('Failed to release IP:', error)
+      debug.error('Failed to release IP:', error)
     }
   })
 }
 
 const exportPool = () => {
   // 实现导出功能
-  console.log('Export pool:', props.pool)
+  debug.log('Export pool:', props.pool)
 }
 
 const onClose = () => {

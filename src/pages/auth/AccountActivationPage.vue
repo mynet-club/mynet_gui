@@ -1,5 +1,5 @@
 <template>
-  <q-page class="auth-layout">
+  <div class="auth-page">
     <div class="auth-container">
       <q-card class="auth-card q-pa-lg">
         <q-card-section class="text-center">
@@ -107,11 +107,12 @@
         </q-card-section>
       </q-card>
     </div>
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import debug from "src/utils/debug"
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -171,7 +172,7 @@ const statusConfig = computed(() => {
 
 onMounted(() => {
   // 调试信息：打印URL参数
-  console.log('🔧 [AccountActivation] URL parameters:', {
+  debug.log('🔧 [AccountActivation] URL parameters:', {
     email: email.value,
     token: token.value,
     user_id: userId.value,
@@ -180,12 +181,12 @@ onMounted(() => {
   })
   
   // 详细检查 route.query 对象
-  console.log('🔧 [AccountActivation] route.query keys:', Object.keys(route.query))
-  console.log('🔧 [AccountActivation] route.query.user_id:', route.query.user_id)
-  console.log('🔧 [AccountActivation] route.query["amp;user_id"]:', route.query['amp;user_id'])
+  debug.log('🔧 [AccountActivation] route.query keys:', Object.keys(route.query))
+  debug.log('🔧 [AccountActivation] route.query.user_id:', route.query.user_id)
+  debug.log('🔧 [AccountActivation] route.query["amp;user_id"]:', route.query['amp;user_id'])
   
   // 调试条件判断
-  console.log('🔧 [AccountActivation] Condition check:', {
+  debug.log('🔧 [AccountActivation] Condition check:', {
     'email.value': email.value,
     'userId.value': userId.value,
     'token.value': token.value,
@@ -195,14 +196,14 @@ onMounted(() => {
   
   // 暂时注释掉跳转逻辑用于调试
   // if (!email.value && !userId.value) {
-  //   console.log('🔧 [AccountActivation] No email or user_id, redirecting to register')
+  //   debug.log('🔧 [AccountActivation] No email or user_id, redirecting to register')
   //   router.replace('/auth/register')
   //   return
   // }
 
   // 如果有token参数，尝试自动激活（支持email或user_id）
   if ((email.value || userId.value) && token.value) {
-    console.log('🔧 [AccountActivation] Auto-activating with token')
+    debug.log('🔧 [AccountActivation] Auto-activating with token')
     autoActivate()
   } else if (fromRegister.value) {
     // 从注册页面跳转过来，显示成功提示并开始倒计时
@@ -213,7 +214,7 @@ onMounted(() => {
     })
     startCountdown()
   } else {
-    console.log('🔧 [AccountActivation] No auto-activation conditions met')
+    debug.log('🔧 [AccountActivation] No auto-activation conditions met')
   }
 })
 
@@ -266,7 +267,7 @@ const autoActivate = async () => {
       throw new Error(response.data.message || t('auth.activationFailed'))
     }
   } catch (error: any) {
-    console.error('Auto activation failed:', error)
+    debug.error('Auto activation failed:', error)
     activationFailed.value = true
     $q.notify({
       type: 'negative',
@@ -283,7 +284,7 @@ const handleActivation = async () => {
   try {
     const response = await apiService.activateAccount({
       email: email.value,
-      token: activationCode.value
+      code: activationCode.value
     })
     
     if (response.data.success) {
@@ -302,7 +303,7 @@ const handleActivation = async () => {
       throw new Error(response.data.message || t('auth.activationFailed'))
     }
   } catch (error: any) {
-    console.error('Activation failed:', error)
+    debug.error('Activation failed:', error)
     $q.notify({
       type: 'negative',
       message: error.response?.data?.message || error.message || t('auth.activationFailed'),
@@ -334,7 +335,7 @@ const handleResendCode = async () => {
       throw new Error(response.data.message || t('auth.resendCodeFailed'))
     }
   } catch (error: any) {
-    console.error('Resend code failed:', error)
+    debug.error('Resend code failed:', error)
     $q.notify({
       type: 'negative',
       message: error.response?.data?.message || error.message || t('auth.resendCodeFailed'),

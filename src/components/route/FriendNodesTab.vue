@@ -263,6 +263,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import ResponsiveCardGrid from '../common/ResponsiveCardGrid.vue'
@@ -337,7 +338,7 @@ const handleConnectToNode = async (friendNode: FriendNode) => {
     nodeSelectionDialog.value.show = true
     
   } catch (error) {
-    console.error('获取我的节点失败:', error)
+    debug.error('获取我的节点失败:', error)
     notify.error(t('routes.friendNodes.loadNodesError'))
   }
 }
@@ -385,7 +386,7 @@ const confirmConnection = async () => {
     resetDialogState()
     
   } catch (error) {
-    console.error('创建路由请求失败:', error)
+    debug.error('创建路由请求失败:', error)
     notify.error(t('routes.friendNodes.connectionError'))
   }
 }

@@ -1,4 +1,5 @@
 import { LocalStorage } from 'quasar'
+import debug from "src/utils/debug"
 import axios from 'axios';
 import { api } from '../services/api';
 
@@ -34,7 +35,7 @@ export class TokenManager {
       LocalStorage.set('refresh_token', tokenData.refresh_token)
     }
     
-    console.log('🔧 [TokenManager] Token data saved:', {
+    debug.log('🔧 [TokenManager] Token data saved:', {
       access_token: tokenData.auth_token.substring(0, 20) + '...',
       expires_at: new Date(tokenData.auth_token_expires_in).toISOString(),
       has_refresh_token: !!tokenData.refresh_token
@@ -74,7 +75,7 @@ export class TokenManager {
     
     const isExpired = Date.now() > expiry
     
-    console.log('🔧 [TokenManager] Token expiry check:', {
+    debug.log('🔧 [TokenManager] Token expiry check:', {
       currentTime: new Date().toISOString(),
       expiryTime: new Date(expiry).toISOString(),
       isExpired,
@@ -107,13 +108,13 @@ export class TokenManager {
         throw new Error('No refresh token available')
       }
       
-      console.log('🔧 [TokenManager] Starting token refresh...')
+      debug.log('🔧 [TokenManager] Starting token refresh...')
       
       const newAccessToken = await this.performTokenRefresh(refreshToken)
-      console.log('🔧 [TokenManager] Token refresh successful')
+      debug.log('🔧 [TokenManager] Token refresh successful')
       return newAccessToken
     } catch (error) {
-      console.error('🔧 [TokenManager] Token refresh failed:', error)
+      debug.error('🔧 [TokenManager] Token refresh failed:', error)
       throw error
     } finally {
       this.isRefreshing = false;
@@ -155,7 +156,7 @@ export class TokenManager {
       this.saveTokenData(newTokenData);
       return newTokenData.auth_token;
     } catch (error) {
-      console.error('🔧 [TokenManager] Token refresh API call failed:', error);
+      debug.error('🔧 [TokenManager] Token refresh API call failed:', error);
       this.clearTokens();
       throw error;
     }
@@ -171,7 +172,7 @@ export class TokenManager {
     // 在过期前5分钟刷新
     const refreshTime = expiryTime - Date.now() - (5 * 60 * 1000)
     
-    console.log('🔧 [TokenManager] Token refresh scheduling:', {
+    debug.log('🔧 [TokenManager] Token refresh scheduling:', {
       expiryTime: new Date(expiryTime).toISOString(),
       currentTime: new Date().toISOString(),
       refreshTime: refreshTime,
@@ -179,32 +180,32 @@ export class TokenManager {
     })
     
     if (refreshTime > 0) {
-      console.log('🔧 [TokenManager] Scheduling token refresh in', Math.round(refreshTime / 1000 / 60), 'minutes')
+      debug.log('🔧 [TokenManager] Scheduling token refresh in', Math.round(refreshTime / 1000 / 60), 'minutes')
       
       this.refreshTimer = window.setTimeout(() => {
-        console.log('🔧 [TokenManager] Auto-refreshing token...')
+        debug.log('🔧 [TokenManager] Auto-refreshing token...')
         this.refreshToken().catch(error => {
-          console.error('🔧 [TokenManager] Auto-refresh failed:', error)
+          debug.error('🔧 [TokenManager] Auto-refresh failed:', error)
           // 可以在这里触发登出或重新登录
         })
       }, refreshTime)
     } else if (refreshTime > -60 * 60 * 1000) {
       // 如果已经过了刷新时间，但还没超过1小时，可能是时间差问题，延迟10秒再检查
-      console.log('🔧 [TokenManager] Token may be expired or expiring soon, scheduling delayed check in 10 seconds')
+      debug.log('🔧 [TokenManager] Token may be expired or expiring soon, scheduling delayed check in 10 seconds')
       this.refreshTimer = window.setTimeout(() => {
         // 再次检查 token 是否真的过期
         if (this.isTokenExpired()) {
-          console.log('🔧 [TokenManager] Token confirmed expired, attempting refresh...')
+          debug.log('🔧 [TokenManager] Token confirmed expired, attempting refresh...')
           this.refreshToken().catch(error => {
-            console.error('🔧 [TokenManager] Delayed refresh failed:', error)
+            debug.error('🔧 [TokenManager] Delayed refresh failed:', error)
           })
         } else {
-          console.log('🔧 [TokenManager] Token is still valid, rescheduling...')
+          debug.log('🔧 [TokenManager] Token is still valid, rescheduling...')
           this.scheduleTokenRefresh(expiryTime)
         }
       }, 10000) // 10秒后执行
     } else {
-      console.log('🔧 [TokenManager] Token is too old, not scheduling refresh')
+      debug.log('🔧 [TokenManager] Token is too old, not scheduling refresh')
     }
   }
   
@@ -219,7 +220,7 @@ export class TokenManager {
       this.refreshTimer = null
     }
     
-    console.log('🔧 [TokenManager] All tokens cleared')
+    debug.log('🔧 [TokenManager] All tokens cleared')
   }
   
   // 获取 token 剩余时间（分钟）

@@ -48,7 +48,7 @@
         <div class="detail-item">
           <q-icon name="info" size="xs" class="q-mr-xs" />
           <span class="text-body2">
-            状态: <span :class="getStatusTextClass(service.service_status)">
+            {{ $t('zoneServices.serviceCard.statusLabel') }}: <span :class="getStatusTextClass(service.service_status)">
               {{ getStatusLabel(service.service_status) }}
             </span>
           </span>
@@ -57,7 +57,7 @@
         <!-- 关联节点 -->
         <div v-if="(service as any).associated_node" class="detail-item">
           <q-icon name="hub" size="xs" class="q-mr-xs" />
-          <span class="text-body2">节点: {{ (service as any).associated_node }}</span>
+          <span class="text-body2">{{ $t('zoneServices.serviceCard.nodeLabel') }}: {{ (service as any).associated_node }}</span>
         </div>
 
         <div v-if="service.creator_name" class="detail-item">
@@ -76,7 +76,7 @@
           size="sm"
           color="primary"
           icon="edit"
-          label="编辑"
+          :label="$t('zoneServices.serviceCard.edit')"
           @click="$emit('edit', service)"
         />
 
@@ -85,7 +85,7 @@
           size="sm"
           color="negative"
           icon="delete"
-          label="删除"
+          :label="$t('zoneServices.serviceCard.delete')"
           @click="$emit('delete', service)"
         />
       </template>
@@ -97,7 +97,7 @@
           size="sm"
           color="primary"
           icon="launch"
-          label="连接"
+          :label="$t('zoneServices.serviceCard.connect')"
           @click="$emit('connect', service)"
         />
         
@@ -106,7 +106,7 @@
           size="sm"
           color="grey"
           icon="info"
-          label="详情"
+          :label="$t('zoneServices.serviceCard.details')"
           @click="$emit('details', service)"
         />
       </template>
@@ -189,22 +189,24 @@ const getStatusLabel = (status: number | string) => {
   const numStatus = typeof status === 'string' ? parseInt(status) : status
   switch (numStatus) {
     case 1:
-      return '运行中'
+      return t('zoneServices.serviceCard.status.running')
     case 0:
-      return '已停止'
+      return t('zoneServices.serviceCard.status.stopped')
     case 2:
-      return '等待中'
+      return t('zoneServices.serviceCard.status.waiting')
     case -1:
-      return '错误'
+      return t('zoneServices.serviceCard.status.error')
     default:
-      return '未知'
+      return t('zoneServices.serviceCard.status.unknown')
   }
 }
 
 // 获取认证状态文本
 const getAuthStatusText = () => {
   const authConfig = (props.service as any).service_config?.auth
-  return authConfig?.required ? '需要认证' : '无需认证'
+  return authConfig?.required 
+    ? t('zoneServices.serviceCard.auth.required')
+    : t('zoneServices.serviceCard.auth.notRequired')
 }
 
 // 获取状态文字样式类

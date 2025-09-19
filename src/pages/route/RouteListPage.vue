@@ -127,6 +127,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useRoutes } from '../../composables/useRoutes'
@@ -251,7 +252,7 @@ const fetchAllFriendNodes = async () => {
     const response = await getAllFriendNodes()
     allFriendNodesData.value = response
   } catch (error) {
-    console.error('获取所有好友节点失败:', error)
+    debug.error('获取所有好友节点失败:', error)
     notify.error(t('routes.fetchAllFriendNodesError'))
   } finally {
     friendNodesLoading.value = false
@@ -283,7 +284,7 @@ onMounted(async () => {
   }
   if (route.query.friend) {
     // 如果指定了好友ID，可以在好友节点标签页中高亮显示
-    console.log('Show friend nodes for:', route.query.friend)
+    debug.log('Show friend nodes for:', route.query.friend)
   }
 })
 </script>

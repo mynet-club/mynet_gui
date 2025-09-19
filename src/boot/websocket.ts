@@ -1,4 +1,5 @@
 import { boot } from 'quasar/wrappers'
+import debug from "src/utils/debug"
 import { useWebSocket } from '../services/websocket'
 import { useAuthStore } from '../stores/auth'
 
@@ -18,20 +19,20 @@ export default boot(({ app }) => {
 
       // 监听时间更新事件 - 新格式
       on('time_update', (data: { timestamp: number, formatted_time: string, zone_id: number }) => {
-        console.log(`[时间更新] 当前时间: ${data.formatted_time}, Unix时间戳: ${data.timestamp}, Zone ID: ${data.zone_id}`)
+        debug.log(`[时间更新] 当前时间: ${data.formatted_time}, Unix时间戳: ${data.timestamp}, Zone ID: ${data.zone_id}`)
       })
 
       // 监听连接和断开事件
       on('connected', (data) => {
-        console.log('🔌 [WebSocket] 已连接', data)
+        debug.log('🔌 [WebSocket] 已连接', data)
       })
       
       on('disconnected', (data) => {
-        console.log('🔌 [WebSocket] 已断开', data)
+        debug.log('🔌 [WebSocket] 已断开', data)
         isWebSocketInitialized = false
       })
 
-      console.log('🔌 [WebSocket] 尝试连接...')
+      debug.log('🔌 [WebSocket] 尝试连接...')
     }
   }
 
@@ -40,7 +41,7 @@ export default boot(({ app }) => {
     const { disconnect } = useWebSocket()
     disconnect()
     isWebSocketInitialized = false
-    console.log('🔌 [Boot] WebSocket 主动断开连接')
+    debug.log('🔌 [Boot] WebSocket 主动断开连接')
   }
 
   // 监听认证状态变化
@@ -57,7 +58,7 @@ export default boot(({ app }) => {
   authStore.$subscribe((mutation, state) => {
     // 仅在认证状态真正发生变化时才处理
     if (previousAuthState !== authStore.isAuthenticated) {
-      console.log('🔌 [WebSocket] 认证状态变化', 
+      debug.log('🔌 [WebSocket] 认证状态变化', 
         previousAuthState ? '已登出' : '已登录', 
         authStore.isAuthenticated
       )
@@ -68,7 +69,7 @@ export default boot(({ app }) => {
 
   // 如果用户已登录，立即连接WebSocket
   if (authStore.isAuthenticated && authStore.user?.zone_id) {
-    console.log('🔌 [Boot] 用户已登录，初始化WebSocket')
+    debug.log('🔌 [Boot] 用户已登录，初始化WebSocket')
     // 延迟初始化，确保其他系统已加载
     setTimeout(() => {
       initWebSocket()
@@ -79,5 +80,5 @@ export default boot(({ app }) => {
   app.config.globalProperties.$initWebSocket = initWebSocket
   app.config.globalProperties.$closeWebSocket = closeWebSocket
 
-  console.log('🔌 [Boot] WebSocket system initialized')
+  debug.log('🔌 [Boot] WebSocket system initialized')
 })

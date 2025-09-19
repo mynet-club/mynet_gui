@@ -1,0 +1,341 @@
+{
+  "version": "1.0.0",
+  "title": "MyNet 帮助文档",
+  "description": "MyNet 网络管理系统用户帮助文档",
+  "lastUpdated": "2025-09-15",
+  "navigation": [
+    {
+      "id": "overview",
+      "title": "系统概述",
+      "icon": "info",
+      "children": [
+        {
+          "id": "what-is-mynet",
+          "title": "什么是 MyNet",
+          "file": "overview/what-is-mynet.md"
+        },
+        {
+          "id": "basic-concepts",
+          "title": "基本概念",
+          "file": "overview/basic-concepts.md"
+        },
+        {
+          "id": "system-architecture",
+          "title": "系统架构",
+          "file": "overview/system-architecture.md"
+        }
+      ]
+    },
+    {
+      "id": "getting-started",
+      "title": "快速入门",
+      "icon": "rocket_launch",
+      "children": [
+        {
+          "id": "registration",
+          "title": "用户注册",
+          "file": "getting-started/registration.md"
+        },
+        {
+          "id": "login",
+          "title": "登录系统",
+          "file": "getting-started/login.md"
+        },
+        {
+          "id": "first-setup",
+          "title": "首次配置",
+          "file": "getting-started/first-setup.md"
+        },
+        {
+          "id": "quick-tour",
+          "title": "界面导览",
+          "file": "getting-started/quick-tour.md"
+        }
+      ]
+    },
+    {
+      "id": "user-guide",
+      "title": "用户指南",
+      "icon": "book",
+      "children": [
+        {
+          "id": "ip-pools",
+          "title": "IP 池管理",
+          "children": [
+            {
+              "id": "create-ip-pool",
+              "title": "创建 IP 池",
+              "file": "user-guide/ip-pools/create-ip-pool.md"
+            },
+            {
+              "id": "manage-ip-pool",
+              "title": "管理 IP 池",
+              "file": "user-guide/ip-pools/manage-ip-pool.md"
+            },
+            {
+              "id": "ip-allocation",
+              "title": "IP 分配",
+              "file": "user-guide/ip-pools/ip-allocation.md"
+            }
+          ]
+        },
+        {
+          "id": "nodes",
+          "title": "节点管理",
+          "children": [
+            {
+              "id": "create-node",
+              "title": "创建节点",
+              "file": "user-guide/nodes/create-node.md"
+            },
+            {
+              "id": "node-configuration",
+              "title": "节点配置",
+              "file": "user-guide/nodes/node-configuration.md"
+            },
+            {
+              "id": "node-monitoring",
+              "title": "节点监控",
+              "file": "user-guide/nodes/node-monitoring.md"
+            },
+            {
+              "id": "key-management",
+              "title": "密钥管理",
+              "file": "user-guide/nodes/key-management.md"
+            }
+          ]
+        },
+        {
+          "id": "routes",
+          "title": "路由管理",
+          "children": [
+            {
+              "id": "create-route",
+              "title": "创建路由",
+              "file": "user-guide/routes/create-route.md"
+            },
+            {
+              "id": "friend-connections",
+              "title": "好友连接",
+              "file": "user-guide/routes/friend-connections.md"
+            },
+            {
+              "id": "route-monitoring",
+              "title": "路由监控",
+              "file": "user-guide/routes/route-monitoring.md"
+            },
+            {
+              "id": "connection-requests",
+              "title": "连接请求",
+              "file": "user-guide/routes/connection-requests.md"
+            }
+          ]
+        },
+        {
+          "id": "services",
+          "title": "服务管理",
+          "children": [
+            {
+              "id": "create-service",
+              "title": "创建服务",
+              "file": "user-guide/services/create-service.md"
+            },
+            {
+              "id": "service-sharing",
+              "title": "服务分享",
+              "file": "user-guide/services/service-sharing.md"
+            },
+            {
+              "id": "public-services",
+              "title": "公共服务",
+              "file": "user-guide/services/public-services.md"
+            },
+            {
+              "id": "service-discovery",
+              "title": "服务发现",
+              "file": "user-guide/services/service-discovery.md"
+            }
+          ]
+        },
+        {
+          "id": "zones",
+          "title": "域管理",
+          "children": [
+            {
+              "id": "understanding-zones",
+              "title": "理解域概念",
+              "file": "user-guide/zones/understanding-zones.md"
+            },
+            {
+              "id": "create-zone",
+              "title": "创建新域",
+              "file": "user-guide/zones/create-zone.md"
+            },
+            {
+              "id": "switch-zones",
+              "title": "切换域",
+              "file": "user-guide/zones/switch-zones.md"
+            },
+            {
+              "id": "zone-isolation",
+              "title": "域隔离",
+              "file": "user-guide/zones/zone-isolation.md"
+            }
+          ]
+        },
+        {
+          "id": "social",
+          "title": "社交功能",
+          "children": [
+            {
+              "id": "add-friends",
+              "title": "添加好友",
+              "file": "user-guide/social/add-friends.md"
+            },
+            {
+              "id": "friend-requests",
+              "title": "好友申请",
+              "file": "user-guide/social/friend-requests.md"
+            },
+            {
+              "id": "invitations",
+              "title": "邀请机制",
+              "file": "user-guide/social/invitations.md"
+            },
+            {
+              "id": "user-search",
+              "title": "用户搜索",
+              "file": "user-guide/social/user-search.md"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "advanced",
+      "title": "高级功能",
+      "icon": "settings",
+      "children": [
+        {
+          "id": "vpn-configuration",
+          "title": "VPN 配置",
+          "file": "advanced/vpn-configuration.md"
+        },
+        {
+          "id": "security-settings",
+          "title": "安全设置",
+          "file": "advanced/security-settings.md"
+        },
+        {
+          "id": "monitoring-dashboard",
+          "title": "监控面板",
+          "file": "advanced/monitoring-dashboard.md"
+        },
+        {
+          "id": "api-usage",
+          "title": "API 使用",
+          "file": "advanced/api-usage.md"
+        },
+        {
+          "id": "automation",
+          "title": "自动化配置",
+          "file": "advanced/automation.md"
+        }
+      ]
+    },
+    {
+      "id": "troubleshooting",
+      "title": "故障排除",
+      "icon": "build",
+      "children": [
+        {
+          "id": "common-issues",
+          "title": "常见问题",
+          "file": "troubleshooting/common-issues.md"
+        },
+        {
+          "id": "connection-problems",
+          "title": "连接问题",
+          "file": "troubleshooting/connection-problems.md"
+        },
+        {
+          "id": "performance-issues",
+          "title": "性能问题",
+          "file": "troubleshooting/performance-issues.md"
+        },
+        {
+          "id": "error-codes",
+          "title": "错误代码",
+          "file": "troubleshooting/error-codes.md"
+        },
+        {
+          "id": "logs-analysis",
+          "title": "日志分析",
+          "file": "troubleshooting/logs-analysis.md"
+        }
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "常见问题",
+      "icon": "help",
+      "children": [
+        {
+          "id": "general-faq",
+          "title": "一般问题",
+          "file": "faq/general-faq.md"
+        },
+        {
+          "id": "technical-faq",
+          "title": "技术问题",
+          "file": "faq/technical-faq.md"
+        },
+        {
+          "id": "billing-faq",
+          "title": "计费问题",
+          "file": "faq/billing-faq.md"
+        }
+      ]
+    },
+    {
+      "id": "reference",
+      "title": "参考资料",
+      "icon": "library_books",
+      "children": [
+        {
+          "id": "glossary",
+          "title": "术语表",
+          "file": "reference/glossary.md"
+        },
+        {
+          "id": "keyboard-shortcuts",
+          "title": "快捷键",
+          "file": "reference/keyboard-shortcuts.md"
+        },
+        {
+          "id": "api-reference",
+          "title": "API 参考",
+          "file": "reference/api-reference.md"
+        },
+        {
+          "id": "changelog",
+          "title": "更新日志",
+          "file": "reference/changelog.md"
+        }
+      ]
+    }
+  ],
+  "searchConfig": {
+    "enabled": true,
+    "placeholder": "搜索帮助内容...",
+    "highlightResults": true,
+    "maxResults": 10
+  },
+  "features": {
+    "breadcrumb": true,
+    "backToTop": true,
+    "printPage": true,
+    "shareLink": true,
+    "feedback": true
+  }
+}

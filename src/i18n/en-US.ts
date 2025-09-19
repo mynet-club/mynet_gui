@@ -1,7 +1,7 @@
 export default {
   app: {
     name: 'MyNet',
-    tagline: 'Advanced Network Management System'
+    tagline: 'Social-Based Network Management System'
   },
   common: {
     login: 'Login',
@@ -54,7 +54,17 @@ export default {
     seconds: 'seconds',
     minutes: 'minutes',
     hours: 'hours',
-    days: 'days'
+    days: 'days',
+    confirm: 'Confirm',
+    required: 'Required',
+    optional: 'Optional',
+    formReset: 'Form has been reset',
+    allChangesReset: 'All changes have been reset',
+    noChangesToSave: 'No changes to save'
+  },
+  welcome: {
+    title: 'Welcome to MyNet',
+    subtitle: 'Social-Based Network Management System'
   },
   settings: {
     language: 'Language Settings',
@@ -70,14 +80,19 @@ export default {
     }
   },
   auth: {
+    login: 'Login',
+    register: 'Register',
     loginTitle: 'Welcome Back',
     loginSubtitle: 'Please sign in to your account',
     registerTitle: 'Create Account',
     registerSubtitle: 'Please fill in the information below',
     forgotPasswordTitle: 'Forgot Password',
     forgotPasswordSubtitle: 'Please enter your email address',
+    resetPasswordTitle: 'Reset Password',
+    resetPasswordSubtitle: 'Please set your new password',
     emailVerificationTitle: 'Email Verification',
     emailVerificationSubtitle: 'Please enter the verification code',
+    resetVerificationSubtitle: 'We have sent a 6-digit verification code to {email}',
     email: 'Email',
     password: 'Password',
     confirmPassword: 'Confirm Password',
@@ -87,35 +102,58 @@ export default {
     loginButton: 'Sign In',
     registerButton: 'Sign Up',
     sendResetLink: 'Send Reset Link',
+    resetPasswordButton: 'Reset Password',
     verifyEmail: 'Verify Email',
     resendCode: 'Resend Code',
+    resendCodeCountdown: 'Resend ({seconds}s)',
     verificationCode: 'Verification Code',
     agreeTerms: 'I agree to the terms of service',
+    ageVerification: 'I confirm that I am 14 years or older and eligible to access network services',
+    minorProtectionTitle: 'Minor Protection',
+    minorProtectionMessage: 'this platform only allows users aged 14 and above to access. According to relevant laws and regulations, we need to confirm your age eligibility. If you are under 14, please use network services under the supervision of a guardian.',
     noAccount: "Don't have an account?",
     alreadyHaveAccount: 'Already have an account?',
     rememberPassword: 'Remember your password?',
     backToLogin: 'Back to Login',
+    backToForgotPassword: 'Back to Forgot Password',
     loginLink: 'Sign In',
     registerLink: 'Sign Up',
     continueToLogin: 'Continue to Login',
+    didntReceiveCode: "Didn't receive the code?",
     emailRequired: 'Email is required',
     passwordRequired: 'Password is required',
     confirmPasswordRequired: 'Please confirm your password',
     nameRequired: 'Name is required',
     emailInvalid: 'Please enter a valid email address',
     passwordMinLength: 'Password must be at least 8 characters',
+    passwordTooShort: 'Password must be at least 8 characters',
     passwordMismatch: 'Passwords do not match',
     verificationCodeRequired: 'Verification code is required',
+    verificationCodeInvalid: 'Invalid verification code format',
     loginFailed: 'Login failed. Please check your credentials',
     registrationSuccessful: 'Registration successful! Please check your email for verification',
     passwordResetSent: 'Password reset link sent to your email!',
+    passwordResetSuccess: 'Password reset successful! Redirecting to login page...',
+    passwordResetFailed: 'Password reset failed',
     emailVerified: 'Email verified successfully!',
     verificationCodeSent: 'Verification code sent!',
+    verificationFailed: 'Verification failed',
+    resendCodeFailed: 'Failed to resend verification code',
+    sendResetCodeFailed: 'Failed to send reset code',
     resendCooldown: 'Resend available in {seconds} seconds',
     verificationSuccess: 'Verification Successful',
     verificationSuccessSubtitle: 'Your email has been verified. You can now sign in',
+    namePlaceholder: 'Please enter your name',
+    emailPlaceholder: 'Please enter your email',
+    passwordPlaceholder: 'Please enter your password',
+    newPasswordPlaceholder: 'Please enter new password',
+    confirmPasswordPlaceholder: 'Please confirm your password',
+    verificationCodePlaceholder: 'Please enter 6-digit code',
+    invitationPlaceholder: 'Please enter invitation code (required)',
+    invitationRequired: 'Please enter invitation code',
     
     // Account activation related
+    accountActivation: 'Account Activation',
     accountNeedsActivation: 'Account Needs Activation',
     accountNeedsActivationMessage: 'Your account has not been activated yet. Please check the activation email in your mailbox.',
     activationEmailExpired: 'Activation Email Expired',
@@ -124,7 +162,73 @@ export default {
     resendActivationEmail: 'Resend Activation Email',
     gotoActivationPage: 'Go to Activation Page',
     activationEmailResent: 'Activation email has been resent, please check your mailbox',
-    resendActivationFailed: 'Failed to resend activation email, please try again later'
+    resendActivationFailed: 'Failed to resend activation email, please try again later',
+    activationInstruction: 'Please select activation method',
+    useCode: 'Use Verification Code',
+    checkEmail: 'Check Email',
+    activationCode: 'Activation Code',
+    activate: 'Activate',
+    activating: 'Activating...',
+    activationSuccess: 'Activation Successful',
+    activationFailed: 'Activation Failed',
+    accountActivated: 'Your account has been successfully activated!',
+    alreadyActivated: 'Account Already Activated',
+    accountAlreadyActive: 'Your account is already active',
+    invalidActivationLink: 'Invalid or expired activation link',
+    activationError: 'Error occurred during activation',
+    checkEmailInstruction: 'We have sent an activation link to your email',
+    checkEmailForReset: 'Please check your email for the password reset link',
+    enterActivationCode: 'Enter Activation Code',
+    enterCodeInstruction: 'Please enter the 6-digit activation code you received',
+    codeRequired: 'Please enter verification code',
+    codeLength: 'Verification code must be 6 digits',
+    codeResent: 'Verification code has been resent',
+    emailResent: 'Email has been resent',
+    resendFailed: 'Resend failed',
+    goToLogin: 'Go to Login',
+    backToRegister: 'Back to Register',
+    missingParameters: 'Missing required parameters',
+    registrationComplete: 'Registration complete! Please login to your account',
+    
+    // Password reset related
+    resetPassword: 'Reset Password',
+    resetPasswordInstruction: 'Please set your new password',
+    verifyToken: 'Verify Token',
+    validatingToken: 'Validating token...',
+    tokenValid: 'Token validation successful',
+    tokenInvalid: 'Invalid or expired token',
+    tokenValidationFailed: 'Token validation failed',
+    newPassword: 'New Password',
+    passwordStrength: 'Password Strength',
+    selectMethod: 'Select Method',
+    resetMethodInstruction: 'Please select the method to reset your password',
+    resetCode: 'Reset Code',
+    verify: 'Verify',
+    enterEmail: 'Enter Email',
+    sendResetCode: 'Send Reset Code',
+    requestNewReset: 'Request New Reset Link',
+    resetLinkSent: 'Reset link sent',
+    resetCodeSent: 'Reset code sent',
+    requestFailed: 'Request failed',
+    invalidCode: 'Invalid verification code',
+    resetFailed: 'Reset failed',
+    sendFailed: 'Send failed',
+    send: 'Send',
+    
+    // Password strength levels
+    strength: {
+      weak: 'Weak',
+      fair: 'Fair',
+      good: 'Good',
+      strong: 'Strong'
+    },
+    
+    // Additional fields
+    confirmNewPassword: 'Confirm New Password',
+    passwordWeak: 'Weak',
+    passwordFair: 'Fair',
+    passwordGood: 'Good',
+    passwordStrong: 'Strong'
   },
   dashboard: {
     title: 'Dashboard',
@@ -273,7 +377,471 @@ export default {
       noDeviceInfo: 'No device information available',
       deviceInfoNote: 'Device information needs to be reported by the client',
       statisticsInDevelopment: 'Statistics feature is under development...',
-      defaultGroup: 'Default'
+      defaultGroup: 'Default',
+      ipv6Address: 'IPv6 Address'
+    },
+    
+    // List page
+    subtitle: 'Manage and monitor network nodes',
+    createNode: 'Create Node',
+    noData: 'No Nodes',
+    noDataDescription: 'No nodes have been created yet',
+    createFirstNode: 'Create First Node',
+    view: 'View',
+    enable: 'Enable',
+    disable: 'Disable',
+    createdAt: 'Created at',
+    gettingConfigSuggestions: 'Getting config suggestions...',
+    nextStepSuggestion: 'Next Step Suggestion',
+    
+    // Delete confirmation dialog
+    deleteConfirmTitle: 'Confirm Delete',
+    deleteCancel: 'Cancel',
+    deleteConfirmAction: 'Delete',
+    
+    // Edit page
+    edit: {
+      title: 'Edit Node',
+      saveAllChanges: 'Save All Changes',
+      resetChanges: 'Reset Changes',
+      confirmLeave: 'Confirm Leave',
+      unsavedChangesMessage: 'You have unsaved changes, are you sure you want to leave?',
+      allChangesSaved: 'All changes saved',
+      saveFailed: 'Save failed, please try again',
+      confirmReset: 'Confirm Reset',
+      resetChangesMessage: 'Are you sure you want to reset all changes?',
+      
+      // Tabs
+      tabs: {
+        basic: 'Basic Information',
+        network: 'Network Configuration',
+        config: 'Node Configuration',
+        keys: 'Key Management'
+      },
+      
+      // Basic information page
+      basic: {
+        nameRequired: 'Node name is required',
+        nameMaxLength: 'Node name cannot exceed 50 characters',
+        descriptionMaxLength: 'Description cannot exceed 500 characters',
+        versionPlaceholder: 'Software version (e.g., v1.0.0)',
+        nodeTypeMultiSelect: 'Node Type (multiple selection)',
+        currentSelection: 'Current selection',
+        currentStatus: 'Current status: {status}',
+        saveBasicInfo: 'Save Basic Information',
+        noSelection: 'No selection',
+        loadTypesDefinitionFailed: 'Failed to load node types definition',
+        formReset: 'Form has been reset',
+        basicInfoSaved: 'Basic information saved successfully',
+        saveFailed: 'Save failed, please try again',
+        vpnTypeSwitched: 'Switched to {type}, please set relevant ports in node configuration page',
+        
+        // Node types
+        nodeTypes: {
+          edge: 'Edge Node',
+          relay: 'Relay Node',
+          gateway: 'Gateway Node',
+          master: 'Master Node',
+          backup: 'Backup Node',
+          monitor: 'Monitor Node',
+          proxy: 'Proxy Node',
+          special: 'Special Node'
+        }
+      },
+      
+      // Network configuration page
+      network: {
+        loadingConfig: 'Loading network configuration...',
+        basicConfig: 'Basic Configuration',
+        nodeVirtualIP: 'Node Virtual IP',
+        selectIP: 'Select IP',
+        selectIPFromPool: 'Select an available IP address from your IP pool as the node virtual IP',
+        ipGroupSequence: 'Group sequence',
+        virtualInterface: 'Virtual interface name',
+        interfacePlaceholder: 'Default is gnb0',
+        lanIPs: 'LAN IP addresses',
+        lanIPsDescription: 'LAN IP address, format: 192.168.1.1',
+        lanIPsHint: 'Configure the node\'s IP address in the local area network for direct connections within the LAN',
+        addLanIP: 'Add LAN IP',
+        publicIPs: 'Public IP addresses',
+        publicIPsDescription: 'Public IP address, format: 1.2.3.4',
+        publicIPsHint: 'Configure the node\'s public IP address for cross-network connections',
+        addPublicIP: 'Add Public IP',
+        indexServers: 'Index servers',
+        indexServersDescription: 'Index server address, format: IP:Port',
+        indexServersHint: 'Index servers are used for node discovery and routing, multiple servers can be configured for improved availability',
+        addIndexServer: 'Add Index Server',
+        manualConfig: 'Manual configuration',
+        autoDetect: 'Auto detect',
+        detectIPs: 'Detect IPs',
+        addIP: 'Add IP',
+        removeIP: 'Remove IP',
+        networkConfigSaved: 'Network configuration saved successfully',
+        networkConfigSaveFailed: 'Failed to save network configuration',
+        ipDetectionFailed: 'IP detection failed',
+        invalidIPFormat: 'Invalid IP address format',
+        duplicateIP: 'Duplicate IP address',
+        saveNetworkConfig: 'Save Network Configuration',
+        resetNetwork: 'Reset network configuration',
+        confirmResetNetwork: 'Are you sure you want to reset network configuration?',
+        
+        // Connection test
+        testConnection: {
+          selectVirtualIpFirst: 'Please select node virtual IP first',
+          testing: 'Testing connection...',
+          resultTitle: 'Connection Test Result',
+          successMessage: 'Network configuration test passed!',
+          virtualIpLabel: 'Node Virtual IP',
+          failureMessage: 'Connection test failed, please check network configuration'
+        },
+        
+        // Save related
+        save: {
+          noChanges: 'No changes to save',
+          noChangesDetected: 'No changes detected, no need to save',
+          success: 'Network configuration saved successfully, updated {count} fields',
+          errorLog: 'Failed to save network configuration:',
+          defaultError: 'Save failed, please try again',
+          errorPrefix: 'Save failed'
+        },
+        
+        // Validation related
+        validation: {
+          formErrors: 'Please check and fix form errors',
+          virtualIpRequired: 'Please select node virtual IP'
+        }
+      },
+      
+      // Node configuration page
+      config: {
+        title: 'Node Configuration',
+        loadingConfig: 'Loading node configuration...',
+        portConfig: 'Port Configuration',
+        listenPort: 'Listen port',
+        discoveryPort: 'Discovery port',
+        webUIPort: 'Web UI port',
+        sslConfig: 'SSL Configuration',
+        enableSSL: 'Enable SSL',
+        certPath: 'Certificate path',
+        keyPath: 'Private key path',
+        advancedConfig: 'Advanced Configuration',
+        logLevel: 'Log level',
+        maxConnections: 'Max connections',
+        connectionTimeout: 'Connection timeout',
+        heartbeatInterval: 'Heartbeat interval',
+        configGenerated: 'Configuration generated',
+        configGenerateFailed: 'Failed to generate configuration',
+        configExported: 'Configuration exported',
+        configExportFailed: 'Failed to export configuration',
+        configImported: 'Configuration imported',
+        configImportFailed: 'Failed to import configuration',
+        invalidConfigFile: 'Invalid configuration file format',
+        portInUse: 'Port is already in use',
+        portOutOfRange: 'Port number must be between 1-65535',
+        generateConfig: 'Generate Configuration',
+        exportConfig: 'Export Configuration',
+        importConfig: 'Import Configuration',
+        previewConfig: 'Preview Configuration',
+        saveNodeConfig: 'Save Node Configuration',
+        resetConfig: 'Reset Configuration',
+        confirmResetConfig: 'Are you sure you want to reset node configuration?',
+        saveConfig: 'Save Configuration',
+        basicConfig: 'Basic Configuration',
+        expertConfig: 'Expert Configuration',
+        copyConfig: 'Copy Configuration',
+        
+        // VPN types and versions
+        gnbVirtualNetwork: 'GNB Virtual Network',
+        wireGuard: 'WireGuard',
+        openVPN: 'OpenVPN',
+        defaultVersion: 'Default Version (Latest)',
+        
+        // VPN configuration parameter translations
+        nodeId: 'Node ID',
+        networkInterface: 'Network Interface Name',
+        listenPortConfig: 'Listen Port',
+        mtu: 'MTU (Maximum Transmission Unit)',
+        multiSocket: 'Multi Socket',
+        directForwarding: 'Direct Forwarding',
+        unifiedForwarding: 'Unified Forwarding',
+        standardForwarding: 'Standard Relay Forwarding',
+        addressSecure: 'Address Security',
+        ipv4Only: 'IPv4 Only',
+        ipv6Only: 'IPv6 Only',
+        keepalive: 'Keepalive Interval (seconds)',
+        forward: 'Forwarding Function',
+        daemon: 'Daemon Mode',
+        compression: 'Compression',
+        compressionLevel: 'Compression Level',
+        memory: 'Memory Scale',
+        esArgs: 'ES Arguments',
+        
+        // WireGuard parameters
+        interfaceAddress: 'Interface Address',
+        multiConnection: 'Multi Connection Support',
+        daemonMode: 'Daemon Mode',
+        dnsServers: 'DNS Servers',
+        persistentKeepalive: 'Persistent Keepalive (seconds)',
+        allowedIPs: 'Allowed IPs',
+        endpoint: 'Endpoint Address',
+        fwmark: 'FwMark Firewall Mark',
+        routeTable: 'Route Table',
+        saveConfigFile: 'Save Configuration',
+        preUpScript: 'Pre-Up Script',
+        postUpScript: 'Post-Up Script',
+        preDownScript: 'Pre-Down Script',
+        postDownScript: 'Post-Down Script',
+        presharedKey: 'Preshared Key',
+        roaming: 'Roaming Support',
+        handshakeTimeout: 'Handshake Timeout (seconds)',
+        fullConfigPreview: 'Basic Configuration + Expert Configuration',
+        pleaseConfigureParams: '# Please configure parameters',
+        gnbConfigFile: '# GNB Node Configuration File (Complete Configuration)',
+        wireguardConfigFile: '# WireGuard Node Configuration File (Complete Configuration)',
+        generateTime: '# Generated at',
+        peerConfigNote: '# Peer configuration needs to be set according to specific requirements',
+        peerPublicKey: '# PublicKey = <peer public key>',
+        peerEndpoint: '# Endpoint = <peer address:port>',
+        peerAllowedIPs: '# AllowedIPs = <allowed IP ranges>',
+        noConfigContent: '# No configuration content',
+        saveSuccess: 'Node configuration saved successfully',
+        saveFailedLog: 'Failed to save node configuration:',
+        saveFailedRetry: 'Save failed, please try again',
+        saveFailedPrefix: 'Save failed',
+        
+        // Log levels
+        logLevels: {
+          trace: 'Trace',
+          debug: 'Debug',
+          info: 'Info',
+          warn: 'Warn',
+          error: 'Error',
+          fatal: 'Fatal'
+        }
+      },
+      
+      // Key management page
+      keys: {
+        title: 'Key Management',
+        keyList: 'Key List',
+        keyDetails: 'Key Details',
+        noKeys: 'No keys available',
+        addKey: 'Add Key',
+        keyId: 'Key ID',
+        keyType: 'Key Type',
+        fingerprint: 'Fingerprint',
+        privateKeyOnetime: 'Private Key (One-time display)',
+        privateKeyWarning: 'Private key is displayed only once, please save it immediately!',
+        loadingKeys: 'Loading key information...',
+        publicKey: 'Public key',
+        privateKey: 'Private key',
+        keyPair: 'Key pair',
+        generateKeyPair: 'Generate key pair',
+        importKey: 'Import key',
+        exportKey: 'Export key',
+        copyPublicKey: 'Copy public key',
+        copyPrivateKey: 'Copy private key',
+        showPrivateKey: 'Show private key',
+        hidePrivateKey: 'Hide private key',
+        keyFormat: 'Key format',
+        keyLength: 'Key length',
+        keyAlgorithm: 'Key algorithm',
+        keyGenerated: 'Key generated',
+        keyGenerateFailed: 'Failed to generate key',
+        keyImported: 'Key imported',
+        keyImportFailed: 'Failed to import key',
+        keyExported: 'Key exported',
+        keyExportFailed: 'Failed to export key',
+        publicKeyCopied: 'Public key copied to clipboard',
+        privateKeyCopied: 'Private key copied to clipboard',
+        keyCopyFailed: 'Failed to copy key',
+        invalidKeyFormat: 'Invalid key format',
+        keyTooShort: 'Key length is too short',
+        keyTooLong: 'Key length is too long',
+        confirmGenerateKey: 'Generating new key will overwrite existing key, continue?',
+        confirmDeleteKey: 'Are you sure you want to delete the key? This action cannot be undone',
+        keyFileSelect: 'Select key file',
+        dragDropKey: 'Drag and drop key file here or click to select',
+        saveKeyConfig: 'Save Key Configuration',
+        resetKeys: 'Reset Keys',
+        
+        // Key formats
+        formats: {
+          pem: 'PEM format',
+          der: 'DER format',
+          p12: 'PKCS#12 format',
+          jks: 'Java KeyStore format'
+        },
+        
+        // Key algorithms
+        algorithms: {
+          rsa: 'RSA',
+          ecdsa: 'ECDSA',
+          ed25519: 'Ed25519',
+          secp256k1: 'secp256k1'
+        }
+      }
+    },
+    
+    // Node operations
+    operations: {
+      title: 'Node Operations',
+      quickActions: 'Quick Actions',
+      batchOperations: 'Batch Operations',
+      
+      // Basic operations
+      start: 'Start',
+      stop: 'Stop',
+      restart: 'Restart',
+      pause: 'Pause',
+      resume: 'Resume',
+      refresh: 'Refresh',
+      sync: 'Sync',
+      backup: 'Backup',
+      restore: 'Restore',
+      upgrade: 'Upgrade',
+      downgrade: 'Downgrade',
+      reset: 'Reset',
+      
+      // Status operations
+      enable: 'Enable',
+      disable: 'Disable',
+      activate: 'Activate',
+      deactivate: 'Deactivate',
+      maintenance: 'Enter Maintenance',
+      exitMaintenance: 'Exit Maintenance',
+      
+      // Configuration operations
+      reloadConfig: 'Reload Configuration',
+      validateConfig: 'Validate Configuration',
+      exportConfig: 'Export Configuration',
+      importConfig: 'Import Configuration',
+      resetConfig: 'Reset Configuration',
+      backupConfig: 'Backup Configuration',
+      
+      // Network operations
+      reconnect: 'Reconnect',
+      disconnect: 'Disconnect',
+      ping: 'Ping Test',
+      traceroute: 'Traceroute',
+      speedTest: 'Speed Test',
+      portScan: 'Port Scan',
+      
+      // Batch operations
+      selectAll: 'Select All',
+      deselectAll: 'Deselect All',
+      batchEnable: 'Batch Enable',
+      batchDisable: 'Batch Disable',
+      batchRestart: 'Batch Restart',
+      batchUpgrade: 'Batch Upgrade',
+      batchBackup: 'Batch Backup',
+      batchDelete: 'Batch Delete',
+      
+      // Operation confirmations
+      confirmStart: 'Are you sure you want to start node "{name}"?',
+      confirmStop: 'Are you sure you want to stop node "{name}"?',
+      confirmRestart: 'Are you sure you want to restart node "{name}"?',
+      confirmReset: 'Are you sure you want to reset node "{name}"? This action cannot be undone.',
+      confirmBatchOperation: 'Are you sure you want to perform "{operation}" on {count} selected nodes?',
+      
+      // Operation results
+      operationSuccess: '{operation} operation completed successfully',
+      operationFailed: '{operation} operation failed: {error}',
+      batchOperationSuccess: 'Batch operation completed: {success} successful, {failed} failed',
+      operationInProgress: '{operation} operation is in progress...',
+      operationCancelled: 'Operation cancelled',
+      cancelOperation: 'Cancel Operation',
+      operationProgress: 'Operation progress: {percent}%'
+    },
+    
+    // Node monitoring
+    monitoring: {
+      title: 'Node Monitoring',
+      realTimeStats: 'Real-time Statistics',
+      performanceMetrics: 'Performance Metrics',
+      connectionStatus: 'Connection Status',
+      networkTraffic: 'Network Traffic',
+      resourceUsage: 'Resource Usage',
+      healthCheck: 'Health Check',
+      alertsWarnings: 'Alerts and Warnings',
+      
+      // Performance metrics
+      cpuUsage: 'CPU Usage',
+      memoryUsage: 'Memory Usage',
+      diskUsage: 'Disk Usage',
+      networkIn: 'Network In',
+      networkOut: 'Network Out',
+      uptime: 'Uptime',
+      latency: 'Latency',
+      throughput: 'Throughput',
+      errorRate: 'Error Rate',
+      connectionCount: 'Connection Count',
+      
+      // Health status
+      healthy: 'Healthy',
+      warning: 'Warning',
+      critical: 'Critical',
+      unknown: 'Unknown',
+      degraded: 'Degraded',
+      
+      // Alert types
+      alerts: {
+        highCPU: 'High CPU Usage',
+        highMemory: 'High Memory Usage',
+        highDisk: 'High Disk Usage',
+        networkTimeout: 'Network Connection Timeout',
+        connectionLost: 'Connection Lost',
+        configError: 'Configuration Error',
+        securityAlert: 'Security Alert',
+        performanceDrop: 'Performance Drop'
+      },
+      
+      // Time ranges
+      timeRange: {
+        last1Hour: 'Last 1 Hour',
+        last6Hours: 'Last 6 Hours',
+        last24Hours: 'Last 24 Hours',
+        last7Days: 'Last 7 Days',
+        last30Days: 'Last 30 Days',
+        custom: 'Custom'
+      }
+    },
+    
+    // Node logs
+    logs: {
+      title: 'Node Logs',
+      viewLogs: 'View Logs',
+      downloadLogs: 'Download Logs',
+      clearLogs: 'Clear Logs',
+      refreshLogs: 'Refresh Logs',
+      searchLogs: 'Search Logs',
+      filterLogs: 'Filter Logs',
+      logLevel: 'Log Level',
+      logTime: 'Log Time',
+      logMessage: 'Log Message',
+      logSource: 'Log Source',
+      
+      // Log level filters
+      showAll: 'Show All',
+      showErrors: 'Show Errors Only',
+      showWarnings: 'Show Warnings and Above',
+      showInfo: 'Show Info and Above',
+      showDebug: 'Show Debug and Above',
+      
+      // Log operations
+      logsCleared: 'Logs cleared',
+      logsClearFailed: 'Failed to clear logs',
+      logsDownloaded: 'Logs downloaded',
+      logsDownloadFailed: 'Failed to download logs',
+      noLogsFound: 'No logs found',
+      logsTooLarge: 'Log file is too large, please download to view',
+      
+      // Real-time logs
+      realTimeMode: 'Real-time Mode',
+      pauseRealTime: 'Pause Real-time',
+      resumeRealTime: 'Resume Real-time',
+      autoScroll: 'Auto Scroll',
+      followTail: 'Follow Tail'
     }
   },
   navigation: {
@@ -330,6 +898,21 @@ export default {
       relay: 'Relay'
     },
     
+    // Node status
+    nodeStatus: {
+      available: 'Available',
+      connected: 'Connected',
+      pending: 'Pending',
+      unavailable: 'Unavailable'
+    },
+    
+    // Connection status
+    connectionStatus: {
+      pending: 'Pending',
+      approved: 'Approved',
+      rejected: 'Rejected'
+    },
+    
     // Active routes
     activeRoutes: {
       searchPlaceholder: 'Search routes...',
@@ -354,6 +937,63 @@ export default {
       targetNode: 'Target Node',
       unknownType: 'Unknown Type',
       unknownMode: 'Unknown Mode'
+    },
+    
+    // Pending connections
+    pendingConnections: {
+      incoming: 'Incoming Requests',
+      outgoing: 'Outgoing Requests',
+      noIncomingConnections: 'No incoming connection requests',
+      noOutgoingConnections: 'No outgoing connection requests',
+      connectionType: 'Connection Type',
+      vpnType: 'VPN Type',
+      requestedAt: 'Requested At',
+      approve: 'Approve',
+      reject: 'Reject'
+    },
+    
+    // Friend nodes
+    friendNodes: {
+      searchPlaceholder: 'Search friend nodes...',
+      statusFilter: 'Status Filter',
+      noNodes: 'No friend nodes',
+      noNodesDescription: 'You don\'t have any friend nodes yet',
+      noSearchResults: 'No matching nodes found',
+      ipAddress: 'IP Address',
+      port: 'Port',
+      nodeType: 'Node Type',
+      vpnType: 'VPN Type',
+      endpoint: 'Endpoint',
+      zone: 'Zone',
+      lastSeen: 'Last Seen',
+      createdAt: 'Created At',
+      noDescription: 'No Description',
+      totalFriends: 'Total Friends',
+      totalNodes: 'Total Nodes',
+      onlineNodes: 'Online Nodes',
+      availableNodes: 'Available Nodes',
+      viewFriend: 'View Friend',
+      connect: 'Connect',
+      pending: 'Pending',
+      connected: 'Connected',
+      offline: 'Offline',
+      selectMyNode: 'Select My Node',
+      selectMyNodeHint: 'Please select the node to use for connection',
+      noAvailableNodes: 'No available nodes',
+      loadNodesError: 'Failed to load nodes',
+      myNode: 'My Node',
+      confirmConnection: 'Confirm Connection',
+      confirmConnectionHint: 'Please confirm connection details and fill in request message',
+      requestMessage: 'Request Message',
+      messagePlaceholder: 'Please describe your connection needs and usage scenario...',
+      messageRequired: 'Please enter request message',
+      messageMinLength: 'Message must be at least 10 characters',
+      messageMaxLength: 'Message cannot exceed 500 characters',
+      sendRequest: 'Send Request',
+      incompleteSelection: 'Incomplete selection',
+      connectionError: 'Connection failed',
+      defaultMessage: 'I would like to connect my node {myNodeName} to your node {friendNodeName} for network communication. Thank you!',
+      goToSocial: 'Go to Social Network'
     },
 
     // Node-based route management
@@ -408,7 +1048,61 @@ export default {
     selectZone: 'Select Zone',
     switchedTo: 'Switched to {zoneName}',
     switchFailed: 'Failed to switch zone',
-    comingSoonMessage: 'Zone management feature is under development, stay tuned!'
+    comingSoonMessage: 'Zone management feature is under development, stay tuned!',
+    
+    // Extended zone management features
+    currentZone: 'Current Zone',
+    availableZones: 'Available Zones',
+    noCurrentZone: 'No zone selected',
+    noAvailableZones: 'No available zones',
+    adminRole: 'Administrator',
+    domain: 'Domain',
+    admin: 'Administrator',
+    switchToZone: 'Switch to this zone',
+    
+    // Statistics
+    stats: {
+      totalNodes: 'Total Nodes',
+      activeNodes: 'Active Nodes',
+      routes: 'Routes',
+      users: 'Users'
+    },
+    
+    // Actions
+    actions: {
+      switch: 'Switch',
+      create: 'Create Zone',
+      edit: 'Edit',
+      delete: 'Delete',
+      refresh: 'Refresh'
+    },
+    
+    // Dialogs
+    dialogs: {
+      switchZone: {
+        title: 'Switch Zone',
+        message: 'Are you sure you want to switch to zone "{zoneName}"?',
+        warning: 'After switching zones, you will see the network configuration and data for that zone.'
+      },
+      createZone: {
+        title: 'Create New Zone',
+        nameLabel: 'Zone Name',
+        descriptionLabel: 'Zone Description',
+        create: 'Create'
+      }
+    },
+    
+    // Error messages
+    fetchOverviewError: 'Failed to fetch zone overview',
+    fetchAvailableZonesError: 'Failed to fetch available zones',
+    fetchZonesError: 'Failed to fetch zone list',
+    fetchDetailsError: 'Failed to fetch zone details',
+    createSuccess: 'Zone created successfully',
+    createError: 'Failed to create zone',
+    updateSuccess: 'Zone updated successfully',
+    updateError: 'Failed to update zone',
+    deleteSuccess: 'Zone deleted successfully',
+    deleteError: 'Failed to delete zone'
   },
   social: {
     subtitle: 'Social network connections and user management',
@@ -475,6 +1169,7 @@ export default {
       createdAt: 'Created At',
       usageCount: 'Usage Count',
       copyCode: 'Copy Code',
+      copyInviteLink: 'Copy Invitation Link',
       active: 'Active',
       used: 'Used',
       expired: 'Expired',
@@ -704,6 +1399,77 @@ export default {
     disconnected: 'Disconnected',
     heartbeat: 'Heartbeat'
   },
+  node: {
+    status: {
+      online: 'Online',
+      offline: 'Offline',
+      connecting: 'Connecting',
+      error: 'Error'
+    },
+    ip: {
+      searchPlaceholder: 'Search IP address or IP pool name...',
+      loadingMessage: 'Loading available IPs...',
+      noIPAddress: 'No available IP addresses',
+      noMatchingIP: 'No matching IP addresses found',
+      createIPPoolHint: 'Please create IP pools or allocate IP resources first',
+      tryOtherKeywords: 'Please try other search keywords',
+      status: 'Status',
+      used: 'Used',
+      available: 'Available'
+    },
+    indexServer: {
+      searchPlaceholder: 'Search server name or address...',
+      loadingMessage: 'Loading index servers...',
+      noServers: 'No available index servers',
+      noMatchingServers: 'No matching servers found',
+      contactAdminHint: 'Please contact administrator to configure index servers',
+      tryOtherKeywords: 'Please try other search keywords',
+      serverAlreadyExists: 'Selected servers already exist, no new servers added',
+      serversAdded: 'Added {count} index servers'
+    },
+    network: {
+      invalidIPFormat: 'Invalid IP address format',
+      invalidIPv4Format: 'Invalid IPv4 address format',
+      invalidIPPortFormat: 'Invalid IP:Port format, example: 192.168.1.1:8080',
+      loadConfigFailed: 'Failed to load network configuration, using default values',
+      ipSelected: 'Selected IP: {ip} (Group sequence: {ipGroupSequenceNumber})'
+    },
+    config: {
+      validation: {
+        required: 'This field is required',
+        invalidNumber: 'Please enter a valid number',
+        minValue: 'Minimum value is {min}',
+        maxValue: 'Maximum value is {max}',
+        invalidFormat: 'Invalid input format'
+      },
+      configCopied: 'Configuration copied to clipboard',
+      copyFailed: 'Copy failed, please select and copy manually',
+      configExported: 'Configuration file exported',
+      exportFailed: 'Failed to export configuration, please try again later',
+      loadConfigFailed: 'Failed to load configuration',
+      required: '(Required)',
+      optional: '(Optional)',
+      basicConfig: 'Basic Configuration',
+      basicConfigDesc: 'Required basic parameter configuration',
+      wireGuardBasicDesc: 'Required WireGuard basic parameters',
+      listenPort: 'Listen Port'
+    },
+    detail: {
+      deleteNodeFailed: 'Failed to delete node, please try again'
+    },
+    keyManagement: {
+      generateKey: 'Generate Key',
+      generateKeyForNode: 'Generate key for node {nodeId}',
+      generationMethod: 'Generation Method',
+      publicKeyContent: 'Public Key Content',
+      publicKeyRequired: 'Public key content cannot be empty',
+      generate: 'Generate',
+      create: 'Create',
+      serverGenerated: 'Server Generated',
+      uploadPublicKey: 'Upload Public Key',
+      selectKeyToViewDetails: 'Please select a key to view details'
+    }
+  },
   zoneServices: {
     subtitle: 'Zone service sharing and management',
     currentZone: 'Current Zone',
@@ -726,6 +1492,31 @@ export default {
     connect: 'Connect',
     authRequired: 'Auth Required',
     noAuth: 'No Auth',
+    
+    // ServiceCard related translations
+    serviceCard: {
+      statusLabel: 'Status',
+      nodeLabel: 'Node',
+      edit: 'Edit',
+      delete: 'Delete',
+      connect: 'Connect',
+      details: 'Details',
+      
+      // Status labels
+      status: {
+        running: 'Running',
+        stopped: 'Stopped',
+        waiting: 'Waiting',
+        error: 'Error',
+        unknown: 'Unknown'
+      },
+      
+      // Auth status
+      auth: {
+        required: 'Auth Required',
+        notRequired: 'No Auth Required'
+      }
+    },
     
     categories: {
       public: 'Public Services',
@@ -802,5 +1593,124 @@ export default {
       shareFailed: 'Failed to share service',
       approvalFailed: 'Failed to request approval'
     }
+  },
+  
+  user: {
+    overview: 'Overview',
+    editProfile: 'Edit Profile',
+    security: 'Security Settings',
+    preferences: 'Preferences',
+    activity: 'Activity Log',
+    
+    // Basic information
+    basicInfo: 'Basic Information',
+    userId: 'User ID',
+    name: 'Name',
+    email: 'Email',
+    phone: 'Phone',
+    bio: 'Bio',
+    role: 'Role',
+    joinDate: 'Join Date',
+    
+    // Statistics
+    statistics: 'Statistics',
+    totalNodes: 'Total Nodes',
+    totalRoutes: 'Total Routes',
+    totalFriends: 'Total Friends',
+    totalLogins: 'Total Logins',
+    
+    // Permissions
+    permissions: 'Permissions',
+    noPermissions: 'No special permissions',
+    
+    // Form related
+    nameRequired: 'Please enter name',
+    emailRequired: 'Please enter email',
+    emailInvalid: 'Invalid email format',
+    signature: 'Signature',
+    signatureHint: 'A simple signature or motto',
+    nameTooLong: 'Name cannot exceed 100 characters',
+    phoneTooLong: 'Phone number cannot exceed 20 characters',
+    bioHint: 'Tell us a little about yourself',
+    saveChanges: 'Save Changes',
+    cancel: 'Cancel',
+    
+    // Avatar
+    changeAvatar: 'Change Avatar',
+    avatarUrl: 'Avatar URL',
+    avatarUrlHint: 'Enter the URL of your avatar image',
+    uploadAvatar: 'Upload Avatar File',
+    avatarUpdated: 'Avatar updated successfully',
+    avatarUpdateFailed: 'Failed to update avatar',
+    avatarSizeLimit: 'Avatar file size cannot exceed 1MB',
+    avatarTypeLimit: 'Please select an image file (supports jpeg, png, jpg, gif formats)',
+    
+    // Password security
+    passwordSecurity: 'Password Security',
+    changePassword: 'Change Password',
+    changePasswordDesc: 'Change your password regularly to protect account security',
+    change: 'Change',
+    currentPassword: 'Current Password',
+    newPassword: 'New Password',
+    confirmPassword: 'Confirm Password',
+    currentPasswordRequired: 'Please enter current password',
+    newPasswordRequired: 'Please enter new password',
+    passwordMinLength: 'Password must be at least 8 characters',
+    confirmPasswordRequired: 'Please confirm new password',
+    passwordMismatch: 'Passwords do not match',
+    lastPasswordChange: 'Last password change',
+    never: 'Never',
+    passwordChanged: 'Password changed successfully',
+    passwordChangeFailed: 'Failed to change password',
+    
+    // Two-factor authentication
+    twoFactorAuth: 'Two-Factor Authentication',
+    enable2FA: 'Enable Two-Factor Authentication',
+    twoFactorAuthDesc: 'Add extra security protection to your account',
+    backupCodes: 'Backup Codes',
+    backupCodesDesc: 'Generate backup verification codes for emergencies',
+    generateCodes: 'Generate Codes',
+    '2faEnabled': 'Two-factor authentication enabled',
+    '2faDisabled': 'Two-factor authentication disabled',
+    '2faUpdateFailed': 'Failed to update two-factor authentication settings',
+    
+    // Session management
+    activeSessions: 'Active Sessions',
+    currentSession: 'Current Session',
+    activeSession: 'Active Session',
+    revokeSession: 'Revoke Session',
+    sessionRevoked: 'Session revoked',
+    sessionRevokeFailed: 'Failed to revoke session',
+    
+    // Appearance settings
+    appearance: 'Appearance',
+    theme: 'Theme',
+    themeDesc: 'Choose your preferred interface theme',
+    themeAuto: 'Follow System',
+    themeLight: 'Light Theme',
+    themeDark: 'Dark Theme',
+    language: 'Language',
+    languageDesc: 'Select interface display language',
+    
+    // Notification settings
+    notifications: 'Notifications',
+    emailNotifications: 'Email Notifications',
+    emailNotificationsDesc: 'Receive email notifications for important events',
+    pushNotifications: 'Push Notifications',
+    pushNotificationsDesc: 'Receive browser push notifications',
+    systemAlerts: 'System Alerts',
+    systemAlertsDesc: 'Receive system status and security alerts',
+    
+    // Activity log
+    recentActivity: 'Recent Activity',
+    noActivity: 'No activity records',
+    
+    // Messages
+    profileUpdated: 'Profile updated successfully',
+    profileUpdateFailed: 'Failed to update profile',
+    preferencesUpdated: 'Preferences updated',
+    preferencesUpdateFailed: 'Failed to update preferences',
+    preferencesReset: 'Preferences reset to default values',
+    resetToDefault: 'Reset to Default'
   }
 }

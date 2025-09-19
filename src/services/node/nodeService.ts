@@ -151,15 +151,6 @@ export class NodeService {
   }
 
   /**
-   * 获取节点类型定义
-   * @returns 节点类型定义
-   */
-  async getNodeTypesDefinition(): Promise<ApiResponse<any>> {
-    const response = await api.get('/nodes/types_def')
-    return response.data
-  }
-
-  /**
    * 获取用户的可用IP地址
    * @returns 可用IP列表
    */

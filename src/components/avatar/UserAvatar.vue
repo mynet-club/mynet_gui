@@ -30,7 +30,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import debug from "src/utils/debug"
 import { useAvatar } from '../../composables/useAvatar'
 
 interface Props {
@@ -77,7 +78,7 @@ const loadAvatar = async () => {
       currentAvatarUrl.value = defaultAvatar
     }
   } catch (error) {
-    console.error('Failed to load avatar:', error)
+    debug.error('Failed to load avatar:', error)
     currentAvatarUrl.value = defaultAvatar
     hasError.value = true
     emit('error', error as Error)
@@ -87,7 +88,7 @@ const loadAvatar = async () => {
 // 处理图片加载错误
 const handleError = () => {
   if (currentAvatarUrl.value !== defaultAvatar) {
-    console.log('Avatar image failed to load, using default')
+    debug.log('Avatar image failed to load, using default')
     currentAvatarUrl.value = defaultAvatar
     hasError.value = true
   }
@@ -103,10 +104,7 @@ const refresh = () => {
   loadAvatar()
 }
 
-// 组件挂载时加载头像
-onMounted(() => {
-  loadAvatar()
-})
+// 不需要 onMounted，因为 watch 已经有 immediate: true
 
 defineExpose({
   refresh,

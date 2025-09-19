@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import debug from "src/utils/debug"
 import { createPinia } from 'pinia'
 import { Quasar } from 'quasar'
 
@@ -14,7 +15,7 @@ import 'quasar/src/css/index.sass'
 // Import app css
 import './css/app.css'
 
-console.log('🚀 [Main] Starting MyNet Quasar application')
+debug.log('🚀 [Main] Starting MyNet Quasar application')
 
 // Create the Vue application
 const myApp = createApp(App)
@@ -31,4 +32,4 @@ myApp.use(Quasar, {
 // Mount the app
 myApp.mount('#q-app')
 
-console.log('✅ [Main] Application mounted successfully')
+debug.log('✅ [Main] Application mounted successfully')

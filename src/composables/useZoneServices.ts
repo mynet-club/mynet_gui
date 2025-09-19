@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import debug from "src/utils/debug"
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { zoneServiceApi } from '../services/zone/zoneServiceApi'
@@ -111,7 +112,7 @@ export function useZoneServices() {
       anonymousServices.value = anonymousRes.data || []
       myServices.value = myRes.data || []
     } catch (error) {
-      console.error('Failed to load services:', error)
+      debug.error('Failed to load services:', error)
       $q.notify({
         type: 'negative',
         message: t('zoneServices.errors.loadFailed')
@@ -138,7 +139,7 @@ export function useZoneServices() {
       }
       return false
     } catch (error) {
-      console.error('Failed to create service:', error)
+      debug.error('Failed to create service:', error)
       $q.notify({
         type: 'negative',
         message: t('zoneServices.errors.createFailed')
@@ -166,7 +167,7 @@ export function useZoneServices() {
       }
       return false
     } catch (error) {
-      console.error('Failed to update service:', error)
+      debug.error('Failed to update service:', error)
       $q.notify({
         type: 'negative',
         message: t('zoneServices.errors.updateFailed')
@@ -193,7 +194,7 @@ export function useZoneServices() {
       }
       return false
     } catch (error) {
-      console.error('Failed to delete service:', error)
+      debug.error('Failed to delete service:', error)
       $q.notify({
         type: 'negative',
         message: t('zoneServices.errors.deleteFailed')
@@ -223,7 +224,7 @@ export function useZoneServices() {
       }
       return false
     } catch (error) {
-      console.error('Failed to share service:', error)
+      debug.error('Failed to share service:', error)
       $q.notify({
         type: 'negative',
         message: t('zoneServices.errors.shareFailed')
@@ -252,7 +253,7 @@ export function useZoneServices() {
       }
       return false
     } catch (error) {
-      console.error('Failed to request approval:', error)
+      debug.error('Failed to request approval:', error)
       $q.notify({
         type: 'negative',
         message: t('zoneServices.errors.approvalFailed')
@@ -267,7 +268,7 @@ export function useZoneServices() {
       const response = await zoneServiceApi.getMyServices()
       myServices.value = response.data || []
     } catch (error) {
-      console.error('Failed to load my services:', error)
+      debug.error('Failed to load my services:', error)
     }
   }
 

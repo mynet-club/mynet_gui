@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import debug from "src/utils/debug"
 import { LocalStorage, Dark } from 'quasar'
 
 // 主题类型定义
@@ -147,7 +148,7 @@ export const useTheme = () => {
   const setThemeMode = (mode: ThemeMode) => {
     currentTheme.value.mode = mode
     applyTheme()
-    console.log(`Theme mode changed to: ${mode}`)
+    debug.log(`Theme mode changed to: ${mode}`)
   }
   
   // 设置主题颜色
@@ -157,7 +158,7 @@ export const useTheme = () => {
       currentTheme.value.accentColor = accentColor
     }
     applyTheme()
-    console.log(`Theme colors changed: primary=${primaryColor}, accent=${accentColor}`)
+    debug.log(`Theme colors changed: primary=${primaryColor}, accent=${accentColor}`)
   }
   
   // 应用预设主题
@@ -166,7 +167,7 @@ export const useTheme = () => {
     if (preset) {
       currentTheme.value = { ...currentTheme.value, ...preset }
       applyTheme()
-      console.log(`Preset theme applied: ${presetName}`)
+      debug.log(`Preset theme applied: ${presetName}`)
     }
   }
   
@@ -174,14 +175,14 @@ export const useTheme = () => {
   const setCustomTheme = (config: Partial<ThemeConfig>) => {
     currentTheme.value = { ...currentTheme.value, ...config }
     applyTheme()
-    console.log('Custom theme applied:', config)
+    debug.log('Custom theme applied:', config)
   }
   
   // 重置主题
   const resetTheme = () => {
     currentTheme.value = { ...defaultThemeConfig }
     applyTheme()
-    console.log('Theme reset to default')
+    debug.log('Theme reset to default')
   }
   
   // 获取当前主题

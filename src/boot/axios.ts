@@ -1,10 +1,11 @@
 import { boot } from 'quasar/wrappers'
+import debug from "src/utils/debug"
 import { apiService } from '../services/api'
 
 export default boot(({ app }) => {
   // 配置全局错误处理
   const handleApiError = (error: any) => {
-    console.error('API Error:', error)
+    debug.error('API Error:', error)
     
     // 根据错误类型显示不同的通知
     if (error.response) {
@@ -18,7 +19,7 @@ export default boot(({ app }) => {
           localStorage.removeItem('user_info')
           // 移除强制跳转，让路由守卫或组件处理认证失败
           // window.location.href = '/auth/login'
-          console.warn('🔧 [Axios] 401 Unauthorized - Auth tokens cleared')
+          debug.warn('🔧 [Axios] 401 Unauthorized - Auth tokens cleared')
           break
         case 403:
           // 权限不足
@@ -47,5 +48,5 @@ export default boot(({ app }) => {
   // 挂载到全局属性
   app.config.globalProperties.$handleApiError = handleApiError
   
-  console.log('🌐 [Boot] Axios configuration initialized')
+  debug.log('🌐 [Boot] Axios configuration initialized')
 }) 

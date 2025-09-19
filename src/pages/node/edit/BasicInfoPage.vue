@@ -1,16 +1,17 @@
 <template>
   <div class="basic-info-page q-pa-md">
-    <div class="text-h6 q-mb-md">基础信息</div>
+    <div class="text-h6 q-mb-md">{{ $t('nodes.edit.tabs.basic') }}</div>
     
     <q-form @submit="onSubmit" class="q-gutter-md">
       <!-- 节点名称 -->
       <q-input
         v-model="form.node_name"
         outlined
-        placeholder="节点名称"
+        :label="$t('nodes.detail.nodeName')"
+        :placeholder="$t('nodes.detail.nodeName')"
         :rules="[
-          val => !!val || '节点名称不能为空',
-          val => val.length <= 50 || '节点名称长度不能超过50个字符'
+          val => !!val || $t('nodes.edit.basic.nameRequired'),
+          val => val.length <= 50 || $t('nodes.edit.basic.nameMaxLength')
         ]"
         :disable="loading"
       />
@@ -21,16 +22,17 @@
         type="textarea"
         rows="4"
         outlined
-        placeholder="节点描述"
+        :label="$t('nodes.fields.description')"
+        :placeholder="$t('nodes.fields.description')"
         :rules="[
-          val => !val || val.length <= 500 || '描述长度不能超过500个字符'
+          val => !val || val.length <= 500 || $t('nodes.edit.basic.descriptionMaxLength')
         ]"
         :disable="loading"
       />
 
       <!-- VPN类型 -->
       <div class="q-mb-md">
-        <div class="text-subtitle2 q-mb-sm">VPN类型</div>
+        <div class="text-subtitle2 q-mb-sm">{{ $t('nodes.detail.vpnType') }}</div>
         <div class="vpn-type-buttons">
           <q-btn
             v-for="type in vpnTypeOptions"
@@ -54,13 +56,14 @@
       <q-input
         v-model="form.node_app_version"
         outlined
-        placeholder="软件版本 (例如: v1.0.0)"
+        :label="$t('nodes.detail.appVersion')"
+        :placeholder="$t('nodes.edit.basic.versionPlaceholder')"
         :disable="loading"
       />
 
       <!-- 节点类型 -->
       <div class="q-mb-md">
-        <div class="text-subtitle2 q-mb-sm">节点类型 (可多选)</div>
+        <div class="text-subtitle2 q-mb-sm">{{ $t('nodes.edit.basic.nodeTypeMultiSelect') }}</div>
         <div class="node-type-buttons">
           <q-btn
             v-for="type in nodeTypeOptions"
@@ -79,18 +82,18 @@
           </q-btn>
         </div>
         <div class="text-caption text-grey-6 q-mt-sm">
-          当前选择值: {{ form.node_type }} ({{ getNodeTypeNames() }})
+          {{ $t('nodes.edit.basic.currentSelection') }}: {{ form.node_type }} ({{ getNodeTypeNames() }})
         </div>
       </div>
 
       <!-- 节点状态 -->
       <div class="q-mb-md">
-        <div class="text-subtitle2 q-mb-sm">节点状态</div>
+        <div class="text-subtitle2 q-mb-sm">{{ $t('nodes.detail.status') }}</div>
         <q-toggle
           v-model="form.node_status_active"
           :true-value="'active'"
           :false-value="'inactive'"
-          :label="`当前状态: ${form.node_status_active === 'active' ? '激活' : '停用'}`"
+          :label="$t('nodes.edit.basic.currentStatus', { status: form.node_status_active === 'active' ? $t('common.active') : $t('common.inactive') })"
           color="primary"
           :disable="loading"
         />
@@ -105,7 +108,7 @@
           :disable="!hasChanges || loading"
         >
           <q-icon name="save" class="q-mr-sm" />
-          保存基础信息
+          {{ $t('nodes.edit.basic.saveBasicInfo') }}
         </q-btn>
         
         <q-btn
@@ -115,7 +118,7 @@
           :disable="saving || !hasChanges || loading"
         >
           <q-icon name="refresh" class="q-mr-sm" />
-          重置
+          {{ $t('common.reset') }}
         </q-btn>
       </div>
     </q-form>
@@ -124,11 +127,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, inject } from 'vue'
+import debug from "src/utils/debug"
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useNode, useNotify } from '../../../composables'
 import { nodeService } from '../../../services/node/nodeService'
 import { NodeType, UpdateNodeRequest, VpnType } from '../../../types/node'
 
+const { t } = useI18n()
 const route = useRoute()
 const { success: notifySuccess, error: notifyError } = useNotify()
 
@@ -168,18 +174,15 @@ const vpnTypeOptions = ref([
   { label: 'OpenVPN', value: 'openvpn' as VpnType, icon: 'security' }
 ])
 
-// 节点类型定义数据
-const nodeTypesDefinition = ref<any>(null)
-
-const nodeTypeOptions = ref([
-  { label: '边缘节点', value: 1, icon: 'router', key: 'NODE_TYPE_EDGE' },
-  { label: '中继节点', value: 2, icon: 'repeat', key: 'NODE_TYPE_RELAY' },
-  { label: '网关节点', value: 4, icon: 'router', key: 'NODE_TYPE_GATEWAY' },
-  { label: '主节点', value: 8, icon: 'dns', key: 'NODE_TYPE_MASTER' },
-  { label: '备用节点', value: 16, icon: 'backup', key: 'NODE_TYPE_BACKUP' },
-  { label: '监控节点', value: 32, icon: 'monitor_heart', key: 'NODE_TYPE_MONITOR' },
-  { label: '代理节点', value: 64, icon: 'hub', key: 'NODE_TYPE_PROXY' },
-  { label: '特殊节点', value: 128, icon: 'star', key: 'NODE_TYPE_SPECIAL' }
+const nodeTypeOptions = computed(() => [
+  { label: t('nodes.edit.basic.nodeTypes.edge'), value: 1, icon: 'router', key: 'NODE_TYPE_EDGE' },
+  { label: t('nodes.edit.basic.nodeTypes.relay'), value: 2, icon: 'repeat', key: 'NODE_TYPE_RELAY' },
+  { label: t('nodes.edit.basic.nodeTypes.gateway'), value: 4, icon: 'router', key: 'NODE_TYPE_GATEWAY' },
+  { label: t('nodes.edit.basic.nodeTypes.master'), value: 8, icon: 'dns', key: 'NODE_TYPE_MASTER' },
+  { label: t('nodes.edit.basic.nodeTypes.backup'), value: 16, icon: 'backup', key: 'NODE_TYPE_BACKUP' },
+  { label: t('nodes.edit.basic.nodeTypes.monitor'), value: 32, icon: 'monitor_heart', key: 'NODE_TYPE_MONITOR' },
+  { label: t('nodes.edit.basic.nodeTypes.proxy'), value: 64, icon: 'hub', key: 'NODE_TYPE_PROXY' },
+  { label: t('nodes.edit.basic.nodeTypes.special'), value: 128, icon: 'star', key: 'NODE_TYPE_SPECIAL' }
 ])
 
 const tagOptions = ref([
@@ -247,22 +250,12 @@ const getNodeTypeNames = (): string => {
   const selectedTypes = nodeTypeOptions.value
     .filter(type => hasNodeType(type.value))
     .map(type => type.label)
-  return selectedTypes.length > 0 ? selectedTypes.join(', ') : '未选择'
-}
-
-// 加载节点类型定义
-const loadNodeTypesDefinition = async () => {
-  try {
-    const response = await nodeService.getNodeTypesDefinition()
-    nodeTypesDefinition.value = response.data
-  } catch (error) {
-    console.error('加载节点类型定义失败:', error)
-  }
+  return selectedTypes.length > 0 ? selectedTypes.join(', ') : t('nodes.edit.basic.noSelection')
 }
 
 const resetForm = () => {
   form.value = { ...originalData.value }
-  notifySuccess('表单已重置')
+  notifySuccess(t('nodes.edit.basic.formReset'))
 }
 
 const onSubmit = async () => {
@@ -278,12 +271,12 @@ const onSubmit = async () => {
 
     const success = await updateNode(updateData)
     if (success) {
-      notifySuccess('基础信息保存成功')
+      notifySuccess(t('nodes.edit.basic.basicInfoSaved'))
       originalData.value = { ...form.value }
     }
   } catch (error) {
-    console.error('保存基础信息失败:', error)
-    notifyError('保存失败，请重试')
+    debug.error('保存基础信息失败:', error)
+    notifyError(t('nodes.edit.basic.saveFailed'))
   }
 }
 
@@ -291,7 +284,7 @@ const onSubmit = async () => {
 const handleVpnTypeChange = (newType: VpnType) => {
   // 直接切换VPN类型，端口配置交给节点配置页面处理
   form.value.vpn_type = newType
-  notifySuccess(`已切换到 ${newType.toUpperCase()}，请到节点配置页面设置相关端口`)
+  notifySuccess(t('nodes.edit.basic.vpnTypeSwitched', { type: newType.toUpperCase() }))
 }
 
 // 监听节点数据变化
@@ -307,9 +300,6 @@ watch(
 
 // 组件挂载时初始化
 onMounted(async () => {
-  // 加载节点类型定义
-  await loadNodeTypesDefinition()
-  
   // 如果使用了注入的数据并且节点已经存在，直接初始化表单
   if (injectedNodeData && node.value) {
     initializeForm()
