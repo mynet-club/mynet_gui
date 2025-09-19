@@ -20,19 +20,11 @@
 
         <!-- 语言切换 -->
         <q-btn-dropdown 
-     const mainNavigationItems = computed((): NavigationItem[] => [
-  {
-    name: 'dashboard',
-    label: 'navigation.dashboard',
-    icon: 'dashboard',
-    path: '/app/dashboard'
-  },
-  {
-    name: 'nodes',
-    label: 'navigation.nodes',
-    icon: 'dns',
-    path: '/app/nodes'
-  },        dense
+          dense
+          :icon="'language'"
+          :label="$q.screen.gt.sm ? getCurrentLanguageLabel() : ''"
+          class="q-mr-sm"
+        >
           :icon="'language'"
           :label="$q.screen.gt.sm ? getCurrentLanguageLabel() : ''"
           class="q-mr-sm"
