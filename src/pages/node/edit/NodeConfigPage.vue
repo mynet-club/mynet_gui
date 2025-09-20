@@ -5,7 +5,7 @@
       <div class="column">
         <div class="text-h6">{{ $t('nodes.edit.config.title') }}</div>
         <div class="text-caption text-grey-6">
-          {{ currentVpnConfig?.name }} - {{ currentVpnConfig?.description }}
+          {{ currentVpnConfig?.name?.startsWith('vpn.config.') ? $t(currentVpnConfig.name) : currentVpnConfig?.name }} - {{ currentVpnConfig?.description }}
         </div>
       </div>
       
@@ -35,9 +35,9 @@
                 <input type="hidden" :value="nodeId" name="nodeid" />
                 
                 <div class="text-subtitle1 q-mb-md">
-                  {{ currentModeConfig.name }}
+                  {{ currentModeConfig.name.startsWith('vpn.config.') ? $t(currentModeConfig.name) : currentModeConfig.name }}
                   <q-icon name="info" class="q-ml-sm text-grey-6" size="sm">
-                    <q-tooltip>{{ currentModeConfig.description }}</q-tooltip>
+                    <q-tooltip>{{ currentModeConfig.description.startsWith('vpn.config.') ? $t(currentModeConfig.description) : currentModeConfig.description }}</q-tooltip>
                   </q-icon>
                 </div>
                 
