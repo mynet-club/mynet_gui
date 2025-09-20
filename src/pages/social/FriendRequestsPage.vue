@@ -1,142 +1,180 @@
 <template>
-  <PageLayout
-    :title="$t('social.friendRequests.title')"
-    :subtitle="$t('social.friendRequests.subtitle')"
-    icon="person_add"
-  >
-    <!-- 统计卡片 -->
+  <q-page padding>
+    <div class="page-header q-mb-lg">
+      <h4 class="text-h4 q-ma-none">{{ $t('social.friendRequests.title') }}</h4>
+      <p class="text-grey-6 q-ma-none q-mt-sm">{{ $t('social.subtitle') }}</p>
+    </div>
+
+    <!-- 请求类型切换 -->
+    <div class="row q-mb-md">
+      <q-tabs
+        v-model="requestType"
+        dense
+        class="text-grey"
+        active-color="primary"
+        indicator-color="primary"
+        align="left"
+        @update:model-value="handleRequestTypeChange"
+      >
+        <q-tab name="received" :label="$t('social.friendRequests.received')" />
+        <q-tab name="sent" :label="$t('social.friendRequests.sent')" />
+      </q-tabs>
+    </div>
+
+    <!-- 请求列表 -->
     <ResponsiveCardGrid
-      :items="requestsStatsCards"
+      :items="currentRequests"
       :loading="loading"
-      :loading-count="2"
-      variant="compact"
+      :loading-count="8"
+      variant="standard"
       spacing="normal"
+      :empty-icon="'person_add'"
+      :empty-title="$t('social.friendRequests.noRequests')"
       :clickable="false"
-      class="q-mb-lg"
     >
-      <template #default="{ item }">
+      <template #default="{ item: request, index }">
         <q-card-section>
           <div class="row items-center">
             <div class="col">
-              <div class="text-h6">{{ item.value }}</div>
-              <div class="text-body2 text-grey-6">{{ item.title }}</div>
+              <div class="row items-center q-mb-sm">
+                <q-avatar size="50px" class="q-mr-sm">
+                  <img 
+                    v-if="requestType === 'received' ? request.requester_avatar : request.target_avatar" 
+                    :src="requestType === 'received' ? request.requester_avatar || '' : request.target_avatar || ''"
+                    :alt="requestType === 'received' ? request.requester_name || '' : request.target_name || ''"
+                  />
+                  <q-icon v-else name="person" size="30px" />
+                </q-avatar> 
+                <div>
+                  <div class="text-h6 text-weight-bold">
+                    {{ requestType === 'received' ? request.from_user_name : request.to_user_name }}
+                  </div>
+                  <div class="text-caption text-grey-6">
+                    {{ $t('social.friendRequests.requestTime') }}: {{ formatDate(request.created_at) }}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 请求消息 -->
+              <div v-if="request.message" class="q-mt-sm">
+                <div class="text-caption text-grey-6">{{ $t('social.friendRequests.message') }}:</div>
+                <div class="text-body2 q-mt-xs">{{ request.message }}</div>
+              </div>
             </div>
-            <div>
-              <q-icon :name="item.icon" size="2rem" :color="item.color" />
+            
+            <!-- 操作按钮 -->
+            <div class="col-auto">
+              <div v-if="requestType === 'received' && request.status === 'pending'" class="q-gutter-sm">
+                <q-btn
+                  @click="acceptRequest(request)"
+                  color="positive"
+                  :label="$t('social.friendRequests.accept')"
+                  size="sm"
+                  no-caps
+                  :loading="loading"
+                />
+                <q-btn
+                  @click="rejectRequest(request)"
+                  color="negative"
+                  :label="$t('social.friendRequests.reject')"
+                  size="sm"
+                  outline
+                  no-caps
+                  :loading="loading"
+                />
+              </div>
+              
+              <div v-else-if="requestType === 'sent'" class="q-gutter-sm">
+                <q-chip
+                  :color="getStatusColor(request.status)"
+                  text-color="white"
+                  :label="$t(`social.friendRequests.status.${request.status}`)"
+                  size="sm"
+                />
+                <q-btn
+                  v-if="request.status === 'pending'"
+                  @click="cancelRequest(request)"
+                  color="negative"
+                  :label="$t('social.friendRequests.cancel')"
+                  size="sm"
+                  outline
+                  no-caps
+                  :loading="loading"
+                />
+              </div>
             </div>
           </div>
         </q-card-section>
       </template>
     </ResponsiveCardGrid>
-
-    <!-- 好友请求列表 -->
-    <q-card>
-      <q-card-section>
-        <div class="text-h6 q-mb-md">{{ $t('social.friendRequests.pending') }}</div>
-        
-        <ResponsiveCardGrid
-          :items="friendRequests"
-          :loading="loadingRequests"
-          :loading-count="4"
-          spacing="normal"
-          variant="compact"
-          :clickable="false"
-        >
-          <template #default="{ item }">
-            <SocialCard
-              :user="item"
-              type="request"
-              @action="handleRequestAction"
-            />
-          </template>
-          <template #empty>
-            <div class="text-center text-grey-6 q-pa-xl">
-              <q-icon name="person_add" size="4rem" class="q-mb-md" />
-              <div class="text-h6">{{ $t('social.friendRequests.empty.title') }}</div>
-              <div class="text-body2">{{ $t('social.friendRequests.empty.description') }}</div>
-            </div>
-          </template>
-        </ResponsiveCardGrid>
-      </q-card-section>
-    </q-card>
-  </PageLayout>
+  </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useQuasar } from 'quasar'
-import { useSocial, useNotify } from '../../composables'
-import PageLayout from '../../components/layout/PageLayout.vue'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
-import SocialCard from '../../components/social/SocialCard.vue'
+import { useSocial } from '../../composables/useSocial'
+import type { FriendRequest } from '../../types'
 
 const { t } = useI18n()
-const $q = useQuasar()
-const { success: notifySuccess, error: notifyError } = useNotify()
-
-// 使用组合式函数
-const {
+const { 
   friendRequests,
-  loadingRequests,
-  loading,
-  loadFriendRequests,
+  loading, 
+  fetchFriendRequests, 
   acceptFriendRequest,
-  rejectFriendRequest
+  rejectFriendRequest,
+  currentRequestType,
+  handleRequestTypeChange: handleTypeChange
 } = useSocial()
 
-// 统计卡片数据
-const requestsStatsCards = computed(() => [
-  {
-    title: t('social.stats.pendingRequests'),
-    value: friendRequests.value?.length || 0,
-    icon: 'pending',
-    color: 'warning'
-  },
-  {
-    title: t('social.stats.todayRequests'),
-    value: friendRequests.value?.filter(r => isToday(r.created_at)).length || 0,
-    icon: 'today',
-    color: 'info'
-  }
-])
+const requestType = ref<'received' | 'sent'>('received')
 
-// 工具函数
-const isToday = (dateString: string): boolean => {
-  const today = new Date()
+// 使用 composable 返回的 friendRequests（它实际上是 currentRequests 计算属性）
+const currentRequests = computed(() => {
+  return friendRequests.value
+})
+
+const handleRequestTypeChange = (type: 'received' | 'sent') => {
+  requestType.value = type
+  handleTypeChange(type)
+}
+
+const acceptRequest = async (request: FriendRequest) => {
+  await acceptFriendRequest(request.request_id.toString())
+}
+
+const rejectRequest = async (request: FriendRequest) => {
+  await rejectFriendRequest(request.request_id.toString())
+}
+
+const cancelRequest = async (request: FriendRequest) => {
+  // TODO: 实现取消发送的好友请求
+  console.log('Cancel request:', request)
+}
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'pending': return 'orange'
+    case 'accepted': return 'positive'
+    case 'rejected': return 'negative'
+    default: return 'grey'
+  }
+}
+
+const formatDate = (dateString: string) => {
   const date = new Date(dateString)
-  return today.toDateString() === date.toDateString()
+  return date.toLocaleDateString()
 }
 
-// 事件处理
-const handleRequestAction = async (action: string, user: any) => {
-  try {
-    switch (action) {
-      case 'accept':
-        await acceptFriendRequest(user.id)
-        notifySuccess(t('social.friendRequests.acceptedSuccess'))
-        break
-      case 'reject':
-        await rejectFriendRequest(user.id)
-        notifySuccess(t('social.friendRequests.rejectedSuccess'))
-        break
-      default:
-        console.log('Unknown action:', action)
-    }
-  } catch (error: any) {
-    notifyError(error.message || t('social.friendRequests.actionFailed'))
-  }
-}
-
-// 组件挂载时加载数据
-onMounted(async () => {
-  await loadFriendRequests()
+onMounted(() => {
+  fetchFriendRequests('received')
 })
 </script>
 
-<style scoped>
-.friend-requests-page {
-  max-width: 1200px;
-  margin: 0 auto;
+<style lang="scss" scoped>
+.page-header {
+  border-bottom: 1px solid var(--q-separator-color);
+  padding-bottom: 1rem;
 }
 </style>

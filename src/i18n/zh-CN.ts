@@ -61,7 +61,20 @@ export default {
     optional: '可选',
     formReset: '表单已重置',
     allChangesReset: '已重置所有更改',
-    noChangesToSave: '没有需要保存的更改'
+    noChangesToSave: '没有需要保存的更改',
+    send: '发送'
+  },
+  errors: {
+    loadFailed: '加载失败',
+    removeFailed: '删除失败',
+    acceptFailed: '接受失败',
+    rejectFailed: '拒绝失败',
+    inviteFailed: '邀请失败',
+    emailInviteFailed: '邮件邀请失败'
+  },
+  validation: {
+    required: '此字段为必填项',
+    invalidEmail: '请输入有效的邮箱地址'
   },
   welcome: {
     title: '欢迎使用 MyNet',
@@ -1395,6 +1408,13 @@ export default {
   social: {
     subtitle: '社交网络连接和用户管理',
     comingSoonMessage: '社交网络功能正在开发中，敬请期待！',
+    // 操作按钮
+    actions: {
+      addFriend: '添加好友',
+      accept: '接受',
+      reject: '拒绝',
+      removeFriend: '删除好友'
+    },
     // 概览统计
     overview: {
       title: '社交概览',
@@ -1408,12 +1428,14 @@ export default {
       title: '好友列表',
       searchPlaceholder: '搜索好友...',
       noFriends: '暂无好友',
+      empty: '还没有好友，去邀请一些朋友加入吧！',
       online: '在线',
       offline: '离线',
       nodes: '节点',
       routes: '路由',
       friendshipDate: '成为好友时间',
       removeFriend: '删除好友',
+      removed: '好友已删除',
       viewNodes: '查看节点',
       lastActive: '最后活跃'
     },
@@ -1423,6 +1445,7 @@ export default {
       received: '收到的请求',
       sent: '发送的请求',
       noRequests: '暂无好友请求',
+      empty: '暂无好友请求',
       accept: '接受',
       reject: '拒绝',
       message: '消息',
@@ -1433,6 +1456,13 @@ export default {
         accepted: '已接受',
         rejected: '已拒绝'
       }
+    },
+    // 请求结果消息
+    requests: {
+      title: '好友请求',
+      empty: '暂无好友请求',
+      accepted: '好友请求已接受',
+      rejected: '好友请求已拒绝'
     },
     // 用户搜索
     search: {
@@ -1448,6 +1478,11 @@ export default {
     // 邀请码
     invitations: {
       title: '邀请码管理',
+      invite: '邀请好友',
+      emailLabel: '邮箱地址',
+      empty: '暂无可邀请用户',
+      sent: '邀请已发送',
+      emailSent: '邀请邮件已发送到 {email}',
       createNew: '生成新邀请码',
       code: '邀请码',
       status: '状态',

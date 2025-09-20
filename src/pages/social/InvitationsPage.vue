@@ -1,234 +1,370 @@
 <template>
-  <PageLayout
-    :title="$t('social.invitations.title')"
-    :subtitle="$t('social.invitations.subtitle')"
-    icon="send"
-  >
-    <template #actions>
-      <q-btn
-        color="primary"
-        icon="add"
-        :label="$t('social.invitations.create')"
-        @click="handleCreateInvitation"
-      />
-    </template>
+  <q-page padding>
+    <div class="page-header q-mb-lg">
+      <h4 class="text-h4 q-ma-none">{{ $t('social.invitations.title') }}</h4>
+      <p class="text-grey-6 q-ma-none q-mt-sm">{{ $t('social.subtitle') }}</p>
+    </div>
 
-    <!-- 统计卡片 -->
-    <ResponsiveCardGrid
-      :items="invitationsStatsCards"
-      :loading="loading"
-      :loading-count="3"
-      variant="compact"
-      spacing="normal"
-      :clickable="false"
-      class="q-mb-lg"
-    >
-      <template #default="{ item }">
-        <q-card-section>
-          <div class="row items-center">
-            <div class="col">
-              <div class="text-h6">{{ item.value }}</div>
-              <div class="text-body2 text-grey-6">{{ item.title }}</div>
-            </div>
-            <div>
-              <q-icon :name="item.icon" size="2rem" :color="item.color" />
-            </div>
-          </div>
-        </q-card-section>
-      </template>
-    </ResponsiveCardGrid>
+    <!-- 功能选项卡 -->
+    <div class="row q-mb-md">
+      <q-tabs
+        v-model="activeTab"
+        dense
+        class="text-grey"
+        active-color="primary"
+        indicator-color="primary"
+        align="left"
+      >
+        <q-tab name="search" :label="$t('social.search.title')" icon="search" />
+        <q-tab name="invitations" :label="$t('social.invitations.title')" icon="card_giftcard" />
+      </q-tabs>
+    </div>
 
-    <!-- 邀请列表 -->
-    <q-card>
-      <q-card-section>
-        <div class="text-h6 q-mb-md">{{ $t('social.invitations.list') }}</div>
-        
-        <ResponsiveCardGrid
-          :items="invitations"
-          :loading="loadingInvitations"
-          :loading-count="4"
-          spacing="normal"
-          variant="compact"
-          :clickable="false"
-        >
-          <template #default="{ item }">
-            <q-card>
-              <q-card-section>
-                <div class="row items-center">
-                  <div class="col">
-                    <div class="text-subtitle1">{{ item.code }}</div>
-                    <div class="text-caption text-grey-6">
-                      {{ $t('social.invitations.status') }}: 
-                      <q-chip
-                        :color="getStatusColor(item.status)"
-                        text-color="white"
-                        size="sm"
-                      >
-                        {{ getStatusText(item.status) }}
-                      </q-chip>
-                    </div>
-                    <div class="text-caption text-grey-6">
-                      {{ $t('social.invitations.createdAt') }}: {{ formatDate(item.created_at) }}
-                    </div>
-                    <div v-if="item.expires_at" class="text-caption text-grey-6">
-                      {{ $t('social.invitations.expiresAt') }}: {{ formatDate(item.expires_at) }}
-                    </div>
-                  </div>
+    <!-- 搜索用户标签页 -->
+    <div v-show="activeTab === 'search'">
+      <!-- 搜索框 -->
+      <div class="row q-mb-md">
+        <div class="col-12 col-md-8">
+          <q-input
+            v-model="searchQuery"
+            :placeholder="$t('social.search.placeholder')"
+            outlined
+            dense
+            clearable
+            @keyup.enter="handleSearch"
+          >
+            <template v-slot:prepend>
+              <q-icon name="search" />
+            </template>
+            <template v-slot:append>
+              <q-btn
+                @click="handleSearch"
+                color="primary"
+                :label="$t('common.search')"
+                size="sm"
+                no-caps
+                :disable="!searchQuery.trim()"
+                :loading="searchLoading"
+              />
+            </template>
+          </q-input>
+        </div>
+      </div>
+
+      <!-- 搜索结果 -->
+      <ResponsiveCardGrid
+        :items="searchResults"
+        :loading="searchLoading"
+        :loading-count="6"
+        variant="standard"
+        spacing="normal"
+        :empty-icon="searchQuery.trim() ? 'search_off' : 'search'"
+        :empty-title="searchQuery.trim() ? $t('social.search.noResults') : $t('social.search.title')"
+        :clickable="false"
+      >
+        <template #default="{ item: user, index }">
+          <q-card-section>
+            <div class="row items-center">
+              <div class="col">
+                <div class="row items-center q-mb-sm">
+                  <q-avatar size="50px" class="q-mr-md">
+                    <img v-if="user.avatar" :src="user.avatar" :alt="user.name" />
+                    <q-icon v-else name="person" size="30px" />
+                  </q-avatar>
                   <div>
-                    <q-btn
-                      flat
-                      round
-                      color="primary"
-                      icon="content_copy"
-                      @click="copyInvitationCode(item.code)"
-                    >
-                      <q-tooltip>{{ $t('social.invitations.copyCode') }}</q-tooltip>
-                    </q-btn>
-                    <q-btn
-                      flat
-                      round
-                      color="negative"
-                      icon="delete"
-                      @click="handleDeleteInvitation(item)"
-                    >
-                      <q-tooltip>{{ $t('social.invitations.delete') }}</q-tooltip>
-                    </q-btn>
+                    <div class="text-h6 text-weight-bold">{{ user.name }}</div>
+                    <div class="text-caption text-grey-6">
+                      {{ $t('social.search.zone') }}: {{ user.zone_name }}
+                    </div>
+                    <div class="text-caption text-grey-6">
+                      {{ $t('social.search.lastActive') }}: {{ formatDate(user.last_active) }}
+                    </div>
                   </div>
                 </div>
-              </q-card-section>
-            </q-card>
-          </template>
-          <template #empty>
-            <div class="text-center text-grey-6 q-pa-xl">
-              <q-icon name="send" size="4rem" class="q-mb-md" />
-              <div class="text-h6">{{ $t('social.invitations.empty.title') }}</div>
-              <div class="text-body2">{{ $t('social.invitations.empty.description') }}</div>
-              <q-btn
-                color="primary"
-                :label="$t('social.invitations.create')"
-                class="q-mt-md"
-                @click="handleCreateInvitation"
-              />
+              </div>
+              
+              <div class="col-auto">
+                <q-btn
+                  v-if="user.is_friend"
+                  color="positive"
+                  :label="$t('social.search.friend')"
+                  size="sm"
+                  no-caps
+                  disabled
+                  icon="check"
+                />
+                <q-btn
+                  v-else-if="user.has_pending_request"
+                  color="orange"
+                  :label="$t('social.search.requested')"
+                  size="sm"
+                  no-caps
+                  disabled
+                  icon="schedule"
+                />
+                <q-btn
+                  v-else
+                  @click="sendFriendRequest(user.user_id, user.name)"
+                  color="primary"
+                  :label="$t('social.search.addFriend')"
+                  size="sm"
+                  no-caps
+                  icon="person_add"
+                  :loading="loading"
+                />
+              </div>
             </div>
-          </template>
-        </ResponsiveCardGrid>
-      </q-card-section>
-    </q-card>
-  </PageLayout>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            <div class="row q-gutter-md text-center">
+              <div class="col">
+                <div class="text-h6 text-primary">{{ user.node_count }}</div>
+                <div class="text-caption text-grey-6">{{ $t('social.friends.nodes') }}</div>
+              </div>
+              <div class="col">
+                <div class="text-h6 text-secondary">{{ (user as any).mutual_friends || 0 }}</div>
+                <div class="text-caption text-grey-6">{{ $t('social.friends.mutualFriends') }}</div>
+              </div>
+            </div>
+          </q-card-section>
+        </template>
+      </ResponsiveCardGrid>
+    </div>
+
+    <!-- 邀请码管理标签页 -->
+    <div v-show="activeTab === 'invitations'">
+      <div class="row q-mb-md">
+        <div class="col-auto">
+          <q-btn
+            @click="createInvitation"
+            color="primary"
+            :label="$t('social.invitations.createNew')"
+            icon="add"
+            no-caps
+            :loading="loading"
+          />
+        </div>
+      </div>
+
+      <!-- 邀请码列表 -->
+      <ResponsiveCardGrid
+        :items="invitations"
+        :loading="loading"
+        :loading-count="8"
+        variant="standard"
+        spacing="normal"
+        :empty-icon="'card_giftcard'"
+        :empty-title="$t('social.invitations.noInvitations')"
+        :clickable="false"
+      >
+        <template #default="{ item: invitation, index }">
+          <q-card-section>
+            <div class="row items-center q-mb-sm">
+              <div class="col">
+                <div class="row items-center">
+                  <q-icon name="card_giftcard" size="30px" class="q-mr-md" color="primary" />
+                  <div>
+                    <div class="text-h6 text-weight-bold text-mono">{{ invitation.invitation_code }}</div>
+                    <div class="text-caption text-grey-6">
+                      {{ $t('social.invitations.createdAt') }}: {{ formatDate(invitation.created_at) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-auto">
+                <q-chip
+                  :color="getStatusColor(invitation.invitation_status)"
+                  text-color="white"
+                  :label="$t(`social.invitations.${getInvitationStatus(invitation.invitation_status)}`)"
+                  size="md"
+                />
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            <div class="invitation-details">
+              <div class="detail-row">
+                <q-icon name="schedule" size="sm" color="grey-6" class="q-mr-sm" />
+                <span class="text-caption text-grey-6">
+                  {{ $t('social.invitations.expiresAt') }}: {{ formatDate(invitation.expires_at) }}
+                </span>
+              </div>
+              <div class="detail-row">
+                <q-icon name="people" size="sm" color="info" class="q-mr-sm" />
+                <span class="text-caption text-grey-6">
+                  {{ $t('social.invitations.usageCount') }}: {{ invitation.used_count }} / {{ invitation.max_uses }}
+                </span>
+              </div>
+              <div v-if="invitation.used_at" class="detail-row">
+                <q-icon name="check_circle" size="sm" color="positive" class="q-mr-sm" />
+                <span class="text-caption text-grey-6">
+                  {{ $t('social.invitations.usedAt') }}: {{ formatDate(invitation.used_at) }}
+                </span>
+              </div>
+              <div v-if="invitation.used_by" class="detail-row">
+                <q-icon name="person" size="sm" color="info" class="q-mr-sm" />
+                <span class="text-caption text-grey-6">
+                  {{ $t('social.invitations.usedBy') }}: {{ invitation.used_by }}
+                </span>
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-card-actions v-if="invitation.is_valid || (getInvitationStatus(invitation.invitation_status) === 'expired' && invitation.used_count === 0)" align="right">
+            <q-btn
+              v-if="invitation.is_valid"
+              @click="copyInvitationLink(invitation.invitation_code)"
+              flat
+              color="primary"
+              :label="$t('social.invitations.copyInviteLink')"
+              icon="content_copy"
+              size="sm"
+              no-caps
+            />
+            <q-btn
+              v-if="getInvitationStatus(invitation.invitation_status) === 'expired' && invitation.used_count === 0"
+              @click="deleteInvitation(invitation)"
+              flat
+              color="negative"
+              :label="$t('common.delete')"
+              icon="delete"
+              size="sm"
+              no-caps
+              :loading="loading"
+            />
+          </q-card-actions>
+        </template>
+
+        <template #emptyAction>
+          <q-btn
+            @click="createInvitation"
+            color="primary"
+            :label="$t('social.invitations.createNew')"
+            icon="add"
+            :loading="loading"
+          />
+        </template>
+      </ResponsiveCardGrid>
+    </div>
+  </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
-import { useSocial, useNotify } from '../../composables'
-import PageLayout from '../../components/layout/PageLayout.vue'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
+import { useSocial } from '../../composables/useSocial'
+import type { Invitation, SearchUser } from '../../types'
 
 const { t } = useI18n()
 const $q = useQuasar()
-const { success: notifySuccess, error: notifyError } = useNotify()
-
-// 使用组合式函数
-const {
+const { 
   invitations,
-  loadingInvitations,
-  loading,
-  loadInvitations,
-  createInvitation,
-  deleteInvitation,
-  getStatusText,
-  getStatusColor
+  searchResults,
+  searchLoading,
+  loading, 
+  fetchInvitations,
+  createInvitation: createInvite,
+  deleteInvitation: deleteInvite,
+  searchUsers,
+  sendFriendRequest: sendRequest
 } = useSocial()
 
-// 统计卡片数据
-const invitationsStatsCards = computed(() => [
-  {
-    title: t('social.stats.totalInvitations'),
-    value: invitations.value?.length || 0,
-    icon: 'send',
-    color: 'primary'
-  },
-  {
-    title: t('social.stats.activeInvitations'),
-    value: invitations.value?.filter(i => i.status === 'active').length || 0,
-    icon: 'check_circle',
-    color: 'positive'
-  },
-  {
-    title: t('social.stats.expiredInvitations'),
-    value: invitations.value?.filter(i => i.status === 'expired').length || 0,
-    icon: 'schedule',
-    color: 'negative'
-  }
-])
+const activeTab = ref<'search' | 'invitations'>('search')
+const searchQuery = ref('')
 
-// 工具函数
-const formatDate = (dateString: string): string => {
-  return new Date(dateString).toLocaleString()
-}
-
-const copyInvitationCode = async (code: string) => {
-  try {
-    await navigator.clipboard.writeText(code)
-    notifySuccess(t('social.invitations.codeCopied'))
-  } catch (error) {
-    notifyError(t('social.invitations.copyFailed'))
+const handleSearch = async () => {
+  if (searchQuery.value.trim()) {
+    await searchUsers(searchQuery.value.trim())
   }
 }
 
-// 事件处理
-const handleCreateInvitation = () => {
-  $q.dialog({
-    title: t('social.invitations.create'),
-    message: t('social.invitations.createDescription'),
-    ok: {
-      label: t('common.create'),
-      color: 'primary'
-    },
-    cancel: {
-      label: t('common.cancel')
-    }
-  }).onOk(async () => {
-    try {
-      await createInvitation()
-      notifySuccess(t('social.invitations.createSuccess'))
-    } catch (error: any) {
-      notifyError(error.message || t('social.invitations.createFailed'))
-    }
+const sendFriendRequest = async (userId: string, userName: string) => {
+  await sendRequest(userId, userName)
+}
+
+const createInvitation = async () => {
+  await createInvite()
+}
+
+const deleteInvitation = async (invitation: Invitation) => {
+  await deleteInvite(invitation)
+}
+
+const copyInvitationLink = (code: string) => {
+  const baseUrl = window.location.origin
+  const link = `${baseUrl}/auth/register?invitation=${code}`
+  
+  navigator.clipboard.writeText(link).then(() => {
+    $q.notify({
+      type: 'positive',
+      message: t('social.invitations.linkCopied'),
+      position: 'top'
+    })
+  }).catch(() => {
+    $q.notify({
+      type: 'negative', 
+      message: t('social.invitations.copyFailed'),
+      position: 'top'
+    })
   })
 }
 
-const handleDeleteInvitation = (invitation: any) => {
-  $q.dialog({
-    title: t('social.invitations.delete'),
-    message: t('social.invitations.deleteConfirm', { code: invitation.code }),
-    ok: {
-      label: t('common.delete'),
-      color: 'negative'
-    },
-    cancel: {
-      label: t('common.cancel')
-    }
-  }).onOk(async () => {
-    try {
-      await deleteInvitation(invitation.id)
-      notifySuccess(t('social.invitations.deleteSuccess'))
-    } catch (error: any) {
-      notifyError(error.message || t('social.invitations.deleteFailed'))
-    }
-  })
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString()
 }
 
-// 组件挂载时加载数据
-onMounted(async () => {
-  await loadInvitations()
+const getInvitationStatus = (status: number) => {
+  switch (status) {
+    case 1:
+      return 'active'
+    case 2:
+      return 'used'
+    case 0:
+      return 'expired'
+    default:
+      return 'unknown'
+  }
+}
+
+const getStatusColor = (status: number) => {
+  const statusString = getInvitationStatus(status)
+  switch (statusString) {
+    case 'active':
+      return 'positive'
+    case 'used':
+      return 'info'
+    case 'expired':
+      return 'negative'
+    default:
+      return 'grey'
+  }
+}
+
+onMounted(() => {
+  fetchInvitations()
 })
 </script>
 
-<style scoped>
-.invitations-page {
-  max-width: 1200px;
-  margin: 0 auto;
+<style lang="scss" scoped>
+.page-header {
+  border-bottom: 1px solid var(--q-separator-color);
+  padding-bottom: 1rem;
+}
+
+.invitation-details {
+  .detail-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 }
 </style>
