@@ -236,16 +236,6 @@
           <q-icon name="refresh" class="q-mr-sm" />
           {{ $t('common.reset') }}
         </q-btn>
-        
-        <q-btn
-          color="secondary"
-          outline
-          @click="testConnection"
-          :disable="saving || loading || loadingNetworkConfig || !form.node_ip"
-        >
-          <q-icon name="network_check" class="q-mr-sm" />
-          {{ $t('nodes.edit.network.testConnection') }}
-        </q-btn>
       </div>
     </q-form>
 
@@ -604,33 +594,6 @@ const onIndexDialogClose = (value: boolean) => {
     setTimeout(() => {
       isProcessingSelection.value = false
     }, 300)
-  }
-}
-
-const testConnection = async () => {
-  if (!form.value.node_ip) {
-    notifyError(t('nodes.edit.network.testConnection.selectVirtualIpFirst'))
-    return
-  }
-
-  try {
-    $q.loading.show({
-      message: t('nodes.edit.network.testConnection.testing')
-    })
-    
-    // 模拟连接测试
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    $q.loading.hide()
-    
-    $q.dialog({
-      title: t('nodes.edit.network.testConnection.resultTitle'),
-      message: `${t('nodes.edit.network.testConnection.successMessage')}\n${t('nodes.edit.network.testConnection.virtualIpLabel')}: ${form.value.node_ip}`,
-      ok: true
-    })
-  } catch (error) {
-    $q.loading.hide()
-    notifyError(t('nodes.edit.network.testConnection.failureMessage'))
   }
 }
 

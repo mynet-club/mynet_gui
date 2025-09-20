@@ -483,17 +483,8 @@ export default {
         duplicateIP: 'Duplicate IP address',
         saveNetworkConfig: 'Save Network Configuration',
         resetNetwork: 'Reset network configuration',
+        advancedConfig: 'Advanced Configuration',
         confirmResetNetwork: 'Are you sure you want to reset network configuration?',
-        
-        // Connection test
-        testConnection: {
-          selectVirtualIpFirst: 'Please select node virtual IP first',
-          testing: 'Testing connection...',
-          resultTitle: 'Connection Test Result',
-          successMessage: 'Network configuration test passed!',
-          virtualIpLabel: 'Node Virtual IP',
-          failureMessage: 'Connection test failed, please check network configuration'
-        },
         
         // Save related
         save: {
@@ -629,7 +620,6 @@ export default {
         addKey: 'Add Key',
         keyId: 'Key ID',
         keyType: 'Key Type',
-        fingerprint: 'Fingerprint',
         privateKeyOnetime: 'Private Key (One-time display)',
         privateKeyWarning: 'Private key is displayed only once, please save it immediately!',
         loadingKeys: 'Loading key information...',
@@ -1453,7 +1443,8 @@ export default {
       basicConfigDesc: 'Required basic parameter configuration',
       wireGuardBasicDesc: 'Required WireGuard basic parameters',
       listenPort: 'Listen Port',
-      gnbVirtualNetwork: 'GNB Virtual Network'
+      gnbVirtualNetwork: 'GNB Virtual Network',
+      defaultVersion: 'Default Version (Latest)'
     },
     detail: {
       deleteNodeFailed: 'Failed to delete node, please try again'

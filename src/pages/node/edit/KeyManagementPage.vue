@@ -12,16 +12,7 @@
             <q-skeleton-loader v-if="loading" type="QCard" />
             <div v-else>
               <q-list separator>
-              }).onCancel(() => {
-              // 下载私钥
-              const filename = `node_${nodeId.value}_private_key.txt`
-              const blob = new Blob([result.private_key], { type: 'text/plain' })
-              const url = URL.createObjectURL(blob)
-              const a = document.createElement('a')
-              a.href = url
-              a.download = filename
-              a.click()
-              URL.revokeObjectURL(url)    <q-item
+                <q-item
                   v-for="key in keys"
                   :key="key.id"
                   clickable
@@ -104,14 +95,6 @@
                 <template v-slot:control>
                   <div class="self-center full-width no-outline">
                     {{ selectedKey.key_type }}
-                  </div>
-                </template>
-              </q-field>
-              
-              <q-field :label="$t('nodes.edit.keys.fingerprint')" stack-label>
-                <template v-slot:control>
-                  <div class="self-center full-width no-outline text-mono">
-                    {{ selectedKey.fingerprint }}
                   </div>
                 </template>
               </q-field>
@@ -299,7 +282,7 @@
               <strong>⚠️ 重要提醒：更新密钥会带来以下风险</strong>
             </p>
             <ul class="q-pl-md">
-              <li>现有的所有SSH连接将会断开</li>
+              <li>现有的所有连接将会断开</li>
               <li>之前配置的公钥访问将失效</li>
               <li>需要重新配置所有依赖此密钥的服务</li>
               <li>如果没有备用访问方式，可能导致节点无法访问</li>

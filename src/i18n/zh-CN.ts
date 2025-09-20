@@ -653,17 +653,8 @@ export default {
         duplicateIP: 'IP地址重复',
         saveNetworkConfig: '保存网络配置',
         resetNetwork: '重置网络配置',
+        advancedConfig: '高级配置',
         confirmResetNetwork: '确定要重置网络配置吗？',
-        
-        // 连接测试
-        testConnection: {
-          selectVirtualIpFirst: '请先选择节点虚拟IP',
-          testing: '正在测试连接...',
-          resultTitle: '连接测试结果',
-          successMessage: '网络配置测试通过！',
-          virtualIpLabel: '节点虚拟IP',
-          failureMessage: '连接测试失败，请检查网络配置'
-        },
         
         // 保存相关
         save: {
@@ -799,7 +790,6 @@ export default {
         addKey: '添加密钥',
         keyId: '密钥ID',
         keyType: '密钥类型',
-        fingerprint: '指纹',
         privateKeyOnetime: '私钥 (仅此一次显示)',
         privateKeyWarning: '私钥仅显示一次，请立即保存！',
         loadingKeys: '正在加载密钥信息...',
