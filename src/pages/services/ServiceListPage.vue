@@ -67,9 +67,9 @@
 
     <!-- 服务管理导航 -->
     <div class="section-header q-mb-md">
-      <h5 class="q-my-none">{{ $t('zoneServices.navigation.title') }}</h5>
+      <h5 class="q-my-none">{{ $t('navigation.services.title') }}</h5>
       <p class="text-grey-6 q-mt-xs q-mb-none">
-        {{ $t('zoneServices.navigation.description') }}
+        {{ $t('navigation.services.description') }}
       </p>
     </div>
 
@@ -144,32 +144,32 @@ const {
 // 导航项配置
 const navigationItems = computed(() => [
   {
-    title: t('zoneServices.navigation.publicServices'),
-    description: t('zoneServices.navigation.publicServicesDescription'),
+    title: t('navigation.services.publicServices'),
+    description: t('navigation.services.publicServicesDescription'),
     icon: 'public',
     color: 'primary',
     count: publicServices.value.length,
     action: () => router.push('/app/services/public')
   },
   {
-    title: t('zoneServices.navigation.friendServices'),
-    description: t('zoneServices.navigation.friendServicesDescription'),
+    title: t('navigation.services.friendServices'),
+    description: t('navigation.services.friendServicesDescription'),
     icon: 'group', 
     color: 'positive',
     count: friendServices.value.length,
     action: () => router.push('/app/services/friends')
   },
   {
-    title: t('zoneServices.navigation.anonymousServices'),
-    description: t('zoneServices.navigation.anonymousServicesDescription'),
+    title: t('navigation.services.anonymousServices'),
+    description: t('navigation.services.anonymousServicesDescription'),
     icon: 'visibility_off',
     color: 'warning',
     count: anonymousServices.value.length,
     action: () => router.push('/app/services/anonymous')
   },
   {
-    title: t('zoneServices.navigation.myServices'),
-    description: t('zoneServices.navigation.myServicesDescription'),
+    title: t('navigation.services.myServices'),
+    description: t('navigation.services.myServicesDescription'),
     icon: 'person_add',
     color: 'accent',
     count: myServices.value.length,

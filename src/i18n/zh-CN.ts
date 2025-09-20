@@ -20,6 +20,8 @@ export default {
     loading: '加载中...',
     error: '错误',
     success: '成功',
+    warning: '警告',
+    enter: '立即进入',
     connected: '已连接',
     disconnected: '未连接',
     profile: '个人资料',
@@ -879,11 +881,17 @@ export default {
     zoneServices: '区域服务',
     services: {
       title: '服务管理',
+      description: '管理和访问各类网络服务',
       overview: '服务概览',
+      overviewDescription: '查看服务统计和快速导航',
       publicServices: '公共服务',
+      publicServicesDescription: '浏览公开可用的网络服务',
       friendServices: '好友服务',
+      friendServicesDescription: '访问好友分享的服务资源',
       anonymousServices: '匿名服务',
-      myServices: '我的服务'
+      anonymousServicesDescription: '发现匿名共享的服务',
+      myServices: '我的服务',
+      myServicesDescription: '管理和分享你创建的服务'
     },
     social: {
       title: '社交网络',
@@ -2001,22 +2009,6 @@ export default {
       deleteFailed: '删除服务失败',
       shareFailed: '分享服务失败',
       approvalFailed: '申请公开失败'
-    },
-    
-    // 导航
-    navigation: {
-      title: '服务管理',
-      description: '管理和访问各类网络服务',
-      overview: '服务概览',
-      overviewDescription: '查看服务统计和快速导航',
-      publicServices: '公共服务',
-      publicServicesDescription: '浏览公开可用的网络服务',
-      friendServices: '好友服务',
-      friendServicesDescription: '访问好友分享的服务资源',
-      anonymousServices: '匿名服务',
-      anonymousServicesDescription: '发现匿名共享的服务',
-      myServices: '我的服务',
-      myServicesDescription: '管理和分享你创建的服务'
     }
   },
   
