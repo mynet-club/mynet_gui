@@ -862,7 +862,13 @@ export default {
     systemTools: '系统工具',
     dashboard: '仪表板',
     nodes: '节点管理',
-    routes: '路由管理',
+    routes: {
+      title: '路由管理',
+      overview: '路由概览',
+      active: '活跃路由',
+      pending: '待处理连接',
+      friends: '好友节点'
+    },
     ippools: 'IP池管理',
     zones: '区域管理',
     zoneSharing: '区域分享',
@@ -1403,7 +1409,19 @@ export default {
     updateSuccess: '区域更新成功',
     updateError: '更新区域失败',
     deleteSuccess: '区域删除成功',
-    deleteError: '删除区域失败'
+    deleteError: '删除区域失败',
+    
+    // 导航
+    navigation: {
+      overview: '路由概览',
+      overviewDescription: '查看路由统计和快速操作',
+      activeRoutes: '活跃路由',
+      activeRoutesDescription: '管理当前活跃的网络路由连接',
+      pendingConnections: '待处理连接',
+      pendingConnectionsDescription: '处理待批准的连接请求',
+      friendNodes: '好友节点',
+      friendNodesDescription: '浏览和管理好友的网络节点'
+    }
   },
   social: {
     subtitle: '社交网络连接和用户管理',
@@ -1984,6 +2002,22 @@ export default {
       deleteFailed: '删除服务失败',
       shareFailed: '分享服务失败',
       approvalFailed: '申请公开失败'
+    },
+    
+    // 导航
+    navigation: {
+      title: '服务管理',
+      description: '管理和访问各类网络服务',
+      overview: '服务概览',
+      overviewDescription: '查看服务统计和快速导航',
+      publicServices: '公共服务',
+      publicServicesDescription: '浏览公开可用的网络服务',
+      friendServices: '好友服务',
+      friendServicesDescription: '访问好友分享的服务资源',
+      anonymousServices: '匿名服务',
+      anonymousServicesDescription: '发现匿名共享的服务',
+      myServices: '我的服务',
+      myServicesDescription: '管理和分享你创建的服务'
     }
   },
   

@@ -142,6 +142,24 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '路由管理', requiresAuth: true }
       },
       {
+        path: 'routes/active',
+        name: 'routes-active',
+        component: () => import('../pages/route/ActiveRoutesPage.vue'),
+        meta: { title: '活跃路由', requiresAuth: true }
+      },
+      {
+        path: 'routes/pending',
+        name: 'routes-pending',
+        component: () => import('../pages/route/PendingConnectionsPage.vue'),
+        meta: { title: '待处理连接', requiresAuth: true }
+      },
+      {
+        path: 'routes/friends',
+        name: 'routes-friends',
+        component: () => import('../pages/route/FriendNodesPage.vue'),
+        meta: { title: '好友节点', requiresAuth: true }
+      },
+      {
         path: 'routes/create/prev_1',
         name: 'route-create-step1',
         component: () => import('../pages/route/create/Step1FriendSelection.vue'),
@@ -180,8 +198,32 @@ const routes: RouteRecordRaw[] = [
       { 
         path: 'services', 
         name: 'services',
-        component: () => import('../pages/zone/ZoneSharingPage.vue'),
+        component: () => import('../pages/services/ServiceListPage.vue'),
         meta: { title: '服务管理', requiresAuth: true }
+      },
+      {
+        path: 'services/public',
+        name: 'services-public',
+        component: () => import('../pages/services/PublicServicesPage.vue'),
+        meta: { title: '公共服务', requiresAuth: true }
+      },
+      {
+        path: 'services/friends',
+        name: 'services-friends', 
+        component: () => import('../pages/services/FriendServicesPage.vue'),
+        meta: { title: '好友服务', requiresAuth: true }
+      },
+      {
+        path: 'services/anonymous',
+        name: 'services-anonymous',
+        component: () => import('../pages/services/AnonymousServicesPage.vue'),
+        meta: { title: '匿名服务', requiresAuth: true }
+      },
+      {
+        path: 'services/my',
+        name: 'services-my',
+        component: () => import('../pages/services/MyServicesPage.vue'),
+        meta: { title: '我的服务', requiresAuth: true }
       },
       
       // 社交网络基础路由重定向

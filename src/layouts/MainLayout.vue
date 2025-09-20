@@ -558,13 +558,70 @@ const networkNavigationItems = computed((): NavigationItem[] => [
     name: 'routes',
     label: 'navigation.routes',
     icon: 'alt_route',
-    path: '/app/routes'
+    children: [
+      {
+        name: 'routes-overview',
+        label: 'navigation.routes.overview',
+        icon: 'dashboard',
+        path: '/app/routes'
+      },
+      {
+        name: 'routes-active',
+        label: 'navigation.routes.active',
+        icon: 'route',
+        path: '/app/routes/active'
+      },
+      {
+        name: 'routes-pending',
+        label: 'navigation.routes.pending',
+        icon: 'schedule',
+        path: '/app/routes/pending'
+      },
+      {
+        name: 'routes-friends',
+        label: 'navigation.routes.friends',
+        icon: 'lan',
+        path: '/app/routes/friends'
+      }
+    ]
   },
   {
     name: 'services',
     label: 'navigation.services',
     icon: 'apps',
-    path: '/app/services'
+    path: '/app/services',
+    children: [
+      {
+        name: 'services-overview',
+        label: 'zoneServices.navigation.overview',
+        icon: 'dashboard',
+        path: '/app/services'
+      },
+      {
+        name: 'services-public',
+        label: 'zoneServices.navigation.publicServices',
+        icon: 'public',
+        path: '/app/services/public'
+      },
+      {
+        name: 'services-friends',
+        label: 'zoneServices.navigation.friendServices',
+        icon: 'group',
+        path: '/app/services/friends'
+      },
+      {
+        name: 'services-anonymous',
+        label: 'zoneServices.navigation.anonymousServices',
+        icon: 'visibility_off',
+        path: '/app/services/anonymous'
+      },
+      {
+        name: 'services-my',
+        label: 'zoneServices.navigation.myServices',
+        icon: 'person_add',
+        path: '/app/services/my'
+      }
+    ]
   },
   {
     name: 'social',
