@@ -126,10 +126,11 @@
         >
           <template v-slot:label>
             <div class="row items-center no-wrap q-gutter-xs">
-              <UserAvatar
-                :user-id="user?.user_id || user?.id"
-                size="32px"
-                class="user-avatar-header"
+                            <UserAvatar
+                v-if="user?.user_id"
+                :userId="user.user_id"
+                size="lg"
+                class="q-mr-md"
               />
               <span v-if="$q.screen.gt.sm" class="text-white">{{ user?.name || 'User' }}</span>
             </div>
@@ -200,24 +201,50 @@
           {{ $t('navigation.mainFeatures') }}
         </q-item-label>
 
-        <q-item 
-          v-for="item in mainNavigationItems"
-          :key="item.name"
-          clickable 
-          :to="item.path"
-          exact
-          class="nav-item"
-        >
-          <q-item-section avatar>
-            <q-icon :name="item.icon" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>{{ $t(item.label) }}</q-item-label>
-            <q-item-label caption v-if="item.description">
-              {{ $t(item.description) }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+        <template v-for="item in mainNavigationItems" :key="item.name">
+          <!-- 有子菜单的项目 -->
+          <q-expansion-item
+            v-if="item.children"
+            :icon="item.icon"
+            :label="$t(item.label + '.title')"
+            header-class="nav-item"
+          >
+            <q-item 
+              v-for="child in item.children"
+              :key="child.name"
+              clickable 
+              :to="child.path"
+              exact
+              class="nav-item nav-child-item"
+            >
+              <q-item-section avatar>
+                <q-icon :name="child.icon" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ $t(child.label) }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-expansion-item>
+
+          <!-- 普通菜单项 -->
+          <q-item 
+            v-else
+            clickable 
+            :to="item.path"
+            exact
+            class="nav-item"
+          >
+            <q-item-section avatar>
+              <q-icon :name="item.icon" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ $t(item.label) }}</q-item-label>
+              <q-item-label caption v-if="item.description">
+                {{ $t(item.description) }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </template>
 
         <q-separator class="q-my-md" />
 
@@ -226,24 +253,50 @@
           {{ $t('navigation.networkConfig') }}
         </q-item-label>
 
-        <q-item 
-          v-for="item in networkNavigationItems"
-          :key="item.name"
-          clickable 
-          :to="item.path"
-          exact
-          class="nav-item"
-        >
-          <q-item-section avatar>
-            <q-icon :name="item.icon" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>{{ $t(item.label) }}</q-item-label>
-            <q-item-label caption v-if="item.description">
-              {{ $t(item.description) }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+        <template v-for="item in networkNavigationItems" :key="item.name">
+          <!-- 有子菜单的项目 -->
+          <q-expansion-item
+            v-if="item.children"
+            :icon="item.icon"
+            :label="$t(item.label + '.title')"
+            header-class="nav-item"
+          >
+            <q-item 
+              v-for="child in item.children"
+              :key="child.name"
+              clickable 
+              :to="child.path"
+              exact
+              class="nav-item nav-child-item"
+            >
+              <q-item-section avatar>
+                <q-icon :name="child.icon" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ $t(child.label) }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-expansion-item>
+
+          <!-- 普通菜单项 -->
+          <q-item 
+            v-else
+            clickable 
+            :to="item.path"
+            exact
+            class="nav-item"
+          >
+            <q-item-section avatar>
+              <q-icon :name="item.icon" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ $t(item.label) }}</q-item-label>
+              <q-item-label caption v-if="item.description">
+                {{ $t(item.description) }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </template>
 
         <q-separator class="q-my-md" />
 
@@ -397,7 +450,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive } from 'vue'
-import debug from "src/utils/debug"
+import debug from "../utils/debug"
 import { useRouter } from 'vue-router'
 import { useQuasar, date, LocalStorage } from 'quasar'
 import { useAuthStore } from '../stores/auth'
@@ -466,11 +519,12 @@ interface NavigationItem {
   name: string
   label: string
   icon: string
-  path: string
+  path?: string
   description?: string
   badge?: string | number
   badgeColor?: string
   comingSoon?: boolean
+  children?: NavigationItem[]
 }
 
 // 创建一个composable来管理sidebar统计数据
@@ -516,7 +570,26 @@ const networkNavigationItems = computed((): NavigationItem[] => [
     name: 'social',
     label: 'navigation.social',
     icon: 'group',
-    path: '/app/social'
+    children: [
+      {
+        name: 'social-friends',
+        label: 'navigation.social.friends',
+        icon: 'people',
+        path: '/app/social/friends'
+      },
+      {
+        name: 'social-requests',
+        label: 'navigation.social.requests',
+        icon: 'person_add',
+        path: '/app/social/requests'
+      },
+      {
+        name: 'social-invitations',
+        label: 'navigation.social.invitations',
+        icon: 'send',
+        path: '/app/social/invitations'
+      }
+    ]
   }
 ])
 
@@ -834,6 +907,15 @@ onMounted(async () => {
       opacity: 0.6;
       cursor: not-allowed;
       pointer-events: none;
+    }
+  }
+  
+  // 子菜单项样式
+  .nav-child-item {
+    padding-left: 56px; // 增加左边距以显示层级关系
+    
+    .q-item__section--avatar {
+      min-width: 40px;
     }
   }
   

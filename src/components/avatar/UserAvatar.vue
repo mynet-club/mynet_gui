@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import debug from "src/utils/debug"
+import debug from "../../utils/debug"
 import { useAvatar } from '../../composables/useAvatar'
 
 interface Props {
@@ -70,18 +70,17 @@ const avatarClass = computed(() => {
 
 // 加载头像
 const loadAvatar = async () => {
+  hasError.value = false
+  debug.log('🔧 [UserAvatar] Loading avatar for userId:', props.userId)
+  
   try {
-    hasError.value = false
-    if (props.userId) {
-      currentAvatarUrl.value = await getAvatarUrl(props.userId)
-    } else {
-      currentAvatarUrl.value = defaultAvatar
-    }
+    // 如果有userId就传递，否则获取当前用户头像
+    currentAvatarUrl.value = await getAvatarUrl(props.userId)
+    debug.log('🔧 [UserAvatar] Avatar loaded successfully:', currentAvatarUrl.value.substring(0, 50) + '...')
   } catch (error) {
-    debug.error('Failed to load avatar:', error)
+    debug.error('🔧 [UserAvatar] Failed to load avatar:', error)
     currentAvatarUrl.value = defaultAvatar
     hasError.value = true
-    emit('error', error as Error)
   }
 }
 

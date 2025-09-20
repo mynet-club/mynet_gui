@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import debug from "src/utils/debug"
+import debug from '../utils/debug'
 import { apiService } from '../services/api'
 
 // 头像缓存
@@ -48,8 +48,14 @@ export function useAvatar() {
         return defaultAvatar
       }
     } catch (err: any) {
-      debug.error('🔧 [Avatar] Failed to load avatar for:', cacheKey, err)
-      error.value = err.message || 'Failed to load avatar'
+      // 404错误是正常的，用户可能没有设置头像，不记录日志
+      if (err?.response?.status === 404) {
+        // 静默处理404，返回默认头像
+      } else {
+        // 只有非404错误才记录日志
+        debug.error('🔧 [Avatar] Failed to load avatar for:', cacheKey, err)
+        error.value = err.message || 'Failed to load avatar'
+      }
       return defaultAvatar
     } finally {
       loading.value = false

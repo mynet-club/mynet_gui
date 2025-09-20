@@ -183,11 +183,31 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/zone/ZoneSharingPage.vue'),
         meta: { title: '服务管理', requiresAuth: true }
       },
+      
+      // 社交网络基础路由重定向
       { 
         path: 'social', 
-        name: 'social',
-        component: () => import('../pages/social/SocialPage.vue'),
-        meta: { title: '社交网络', requiresAuth: true }
+        redirect: '/app/social/friends'
+      },
+      
+      // 社交网络子路由
+      { 
+        path: 'social/friends', 
+        name: 'social-friends',
+        component: () => import('../pages/social/FriendsPage.vue'),
+        meta: { title: '好友列表', requiresAuth: true }
+      },
+      { 
+        path: 'social/requests', 
+        name: 'social-requests',
+        component: () => import('../pages/social/FriendRequestsPage.vue'),
+        meta: { title: '好友请求', requiresAuth: true }
+      },
+      { 
+        path: 'social/invitations', 
+        name: 'social-invitations',
+        component: () => import('../pages/social/InvitationsPage.vue'),
+        meta: { title: '邀请管理', requiresAuth: true }
       },
       
       // 系统模块路由

@@ -846,7 +846,12 @@ export default {
     zoneSharing: 'Zone Sharing',
     zoneServices: 'Zone Services',
     services: 'Service Management',
-    social: 'Social Network',
+    social: {
+      title: 'Social Network',
+      friends: 'Friends',
+      requests: 'Friend Requests',
+      invitations: 'Invitations'
+    },
     apiTest: 'API Testing',
     help: 'Help Documentation'
   },

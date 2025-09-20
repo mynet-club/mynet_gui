@@ -855,7 +855,12 @@ export default {
     zoneSharing: '区域分享',
     zoneServices: '区域服务',
     services: '服务管理',
-    social: '社交网络',
+    social: {
+      title: '社交网络',
+      friends: '好友列表',
+      requests: '好友请求',
+      invitations: '邀请管理'
+    },
     apiTest: 'API测试',
     help: '帮助文档'
   },
