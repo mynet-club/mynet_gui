@@ -869,6 +869,10 @@ export default {
       pending: '待处理连接',
       friends: '好友节点'
     },
+    // 单独的导航键值，用于页面标题
+    activeRoutes: '活跃路由',
+    pendingConnections: '待处理连接',
+    friendNodes: '好友节点',
     ippools: 'IP池管理',
     zones: '区域管理',
     zoneSharing: '区域分享',
@@ -938,6 +942,7 @@ export default {
     
     // 活跃路由
     activeRoutes: {
+      subtitle: '管理当前活跃的网络路由连接',
       searchPlaceholder: '搜索路由...',
       statusFilter: '状态过滤',
       noRoutes: '暂无活跃路由',
@@ -962,16 +967,9 @@ export default {
       unknownMode: '未知模式'
     },
 
-    // 中继模式
-    relayModes: {
-      direct: '直连',
-      relay: '中继',
-      p2p: '点对点',
-      hybrid: '混合模式'
-    },
-    
     // 待处理连接
     pendingConnections: {
+      subtitle: '处理待批准的连接请求',
       incoming: '接收请求',
       outgoing: '发送请求',
       noIncomingConnections: '暂无接收的连接请求',
@@ -980,53 +978,47 @@ export default {
       vpnType: 'VPN类型',
       requestedAt: '请求时间',
       approve: '批准',
-      reject: '拒绝'
-    },
-    
-    // 好友节点
-    friendNodes: {
-      searchPlaceholder: '搜索好友节点...',
-      statusFilter: '状态过滤',
-      noNodes: '暂无好友节点',
-      noNodesDescription: '您还没有任何好友的节点信息',
-      noSearchResults: '未找到匹配节点',
-      ipAddress: 'IP地址',
-      port: '端口',
-      nodeType: '节点类型',
-      vpnType: 'VPN类型',
-      endpoint: '端点',
-      zone: '区域',
-      lastSeen: '最后在线',
-      createdAt: '创建时间',
-      noDescription: '暂无描述',
-      totalFriends: '好友总数',
-      totalNodes: '节点总数',
-      onlineNodes: '在线节点',
-      availableNodes: '可用节点',
-      viewFriend: '查看好友',
-      connect: '连接',
-      pending: '待处理',
-      connected: '已连接',
-      offline: '离线',
-      selectMyNode: '选择我的节点',
-      selectMyNodeHint: '请选择要用于连接的节点',
-      noAvailableNodes: '没有可用的节点',
-      loadNodesError: '加载节点失败',
-      myNode: '我的节点',
-      confirmConnection: '确认连接',
-      confirmConnectionHint: '请确认连接信息并填写请求消息',
-      requestMessage: '请求消息',
-      messagePlaceholder: '请描述您的连接需求和使用场景...',
-      messageRequired: '请输入请求消息',
-      messageMinLength: '消息至少需要10个字符',
-      messageMaxLength: '消息不能超过500个字符',
-      sendRequest: '发送请求',
-      incompleteSelection: '选择信息不完整',
-      connectionError: '连接失败',
-      defaultMessage: '我希望通过我的节点 {myNodeName} 连接到您的节点 {friendNodeName}，用于网络通信。谢谢！',
-      goToSocial: '前往社交网络'
+      reject: '拒绝',
+      viewDetails: '查看详情',
+      connectionDetails: '连接详情',
+      approveSuccess: '连接请求已批准',
+      approveError: '批准连接请求失败',
+      rejectSuccess: '连接请求已拒绝',
+      rejectError: '拒绝连接请求失败'
     },
 
+    // 好友节点
+    friendNodes: {
+      subtitle: '浏览和管理好友的网络节点',
+      goToSocial: '去社交管理',
+      noNodes: '暂无好友节点',
+      noNodesDescription: '您还没有任何好友的节点信息',
+      noDescription: '暂无描述',
+      vpnType: 'VPN类型',
+      endpoint: '端点',
+      lastSeen: '最后在线',
+      viewFriend: '查看好友',
+      connect: '连接',
+      offline: '离线',
+      selectMyNode: '选择我的节点',
+      selectMyNodeHint: '选择用于建立连接的本地节点',
+      noAvailableNodes: '暂无可用节点',
+      sendConnectionRequest: '发送连接请求',
+      connectionRequestHint: '向好友发送连接请求以建立路由',
+      friendNode: '好友节点',
+      myNode: '我的节点',
+      requestMessage: '请求消息',
+      requestMessageHint: '向好友说明连接目的'
+    },
+
+    // 中继模式
+    relayModes: {
+      direct: '直连',
+      relay: '中继',
+      p2p: '点对点',
+      hybrid: '混合模式'
+    },
+    
     // 基于节点的路由管理
     nodeBased: {
       selectNode: '选择我的节点',
