@@ -593,31 +593,31 @@ const networkNavigationItems = computed((): NavigationItem[] => [
     children: [
       {
         name: 'services-overview',
-        label: 'zoneServices.navigation.overview',
+        label: 'navigation.services.overview',
         icon: 'dashboard',
         path: '/app/services'
       },
       {
         name: 'services-public',
-        label: 'zoneServices.navigation.publicServices',
+        label: 'navigation.services.publicServices',
         icon: 'public',
         path: '/app/services/public'
       },
       {
         name: 'services-friends',
-        label: 'zoneServices.navigation.friendServices',
+        label: 'navigation.services.friendServices',
         icon: 'group',
         path: '/app/services/friends'
       },
       {
         name: 'services-anonymous',
-        label: 'zoneServices.navigation.anonymousServices',
+        label: 'navigation.services.anonymousServices',
         icon: 'visibility_off',
         path: '/app/services/anonymous'
       },
       {
         name: 'services-my',
-        label: 'zoneServices.navigation.myServices',
+        label: 'navigation.services.myServices',
         icon: 'person_add',
         path: '/app/services/my'
       }

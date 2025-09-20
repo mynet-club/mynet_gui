@@ -877,7 +877,14 @@ export default {
     zones: '区域管理',
     zoneSharing: '区域分享',
     zoneServices: '区域服务',
-    services: '服务管理',
+    services: {
+      title: '服务管理',
+      overview: '服务概览',
+      publicServices: '公共服务',
+      friendServices: '好友服务',
+      anonymousServices: '匿名服务',
+      myServices: '我的服务'
+    },
     social: {
       title: '社交网络',
       friends: '好友列表',
