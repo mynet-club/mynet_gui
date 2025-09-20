@@ -7,25 +7,25 @@ import { VPNConfigData } from '../types/vpnConfig'
 
 export const vpnConfigData: VPNConfigData = {
   gnb: {
-    name: 'node.config.gnbVirtualNetwork',
+    name: 'vpn.config.gnbVirtualNetwork',
     description: 'GNU Network Bridge - 去中心化P2P虚拟网络',
     enabled: true,
     supported_versions: ['default', 'v1.4.8', 'v1.4.7', 'v1.3.0'],
     default_version: 'default',
     versions: {
       default: {
-        name: 'node.config.defaultVersion',
+        name: 'vpn.config.defaultVersion',
         interface_name: 'gnb_tun',
         default_port: 9001,
         recommended_mtu: 1400,
         config_file_extension: '.conf',
         modes: {
           base: {
-            name: 'node.config.basicConfig',
-            description: 'node.config.basicConfigDesc',
+            name: 'vpn.config.basicConfig',
+            description: 'vpn.config.basicConfigDesc',
             parameters: {
               nodeid: {
-                name: 'node.config.nodeId',
+                name: 'vpn.config.nodeId',
                 type: 'integer',
                 min: 1000000000000000,
                 max: 9007199254740991,
@@ -33,7 +33,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '节点唯一标识符，从IP池范围选择'
               },
               ifname: {
-                name: 'node.config.networkInterface',
+                name: 'vpn.config.networkInterface',
                 type: 'string',
                 default: 'gnb_tun',
                 required: true,
@@ -41,7 +41,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: 'GNB虚拟网卡接口名称'
               },
               listen: {
-                name: 'node.config.listenPortConfig',
+                name: 'vpn.config.listenPortConfig',
                 type: 'integer',
                 default: 9001,
                 min: 1024,
@@ -50,7 +50,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '节点监听的UDP端口号'
               },
               mtu: {
-                name: 'node.config.mtu',
+                name: 'vpn.config.mtu',
                 type: 'integer',
                 default: 1450,
                 min: 1280,
@@ -58,7 +58,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '网络最大传输单元（IPv6最小1280；典型1280~1450，推荐1450）'
               },
               multi_socket: {
-                name: 'node.config.multiSocket',
+                name: 'vpn.config.multiSocket',
                 type: 'multi-button',
                 default: 'off',
                 options: {
@@ -70,11 +70,11 @@ export const vpnConfigData: VPNConfigData = {
             }
           },
           expert: {
-            name: 'node.config.expertConfig',
+            name: 'vpn.config.expertConfig',
             description: '可选的高级参数配置，可不写入配置文件',
             parameters: {
               direct_forwarding: {
-                name: 'node.config.directForwarding',
+                name: 'vpn.config.directForwarding',
                 type: 'multi-button',
                 default: 'on',
                 options: {
@@ -84,7 +84,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '启用直接转发模式'
               },
               unified_forwarding: {
-                name: 'node.config.unifiedForwarding',
+                name: 'vpn.config.unifiedForwarding',
                 type: 'multi-button',
                 default: 'auto',
                 options: {
@@ -97,7 +97,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '统一转发模式配置'
               },
               standard_forwarding: {
-                name: 'node.config.standardForwarding',
+                name: 'vpn.config.standardForwarding',
                 type: 'multi-button',
                 default: 'on',
                 options: {
@@ -107,7 +107,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '启用标准中继转发'
               },
               address_secure: {
-                name: 'node.config.addressSecure',
+                name: 'vpn.config.addressSecure',
                 type: 'multi-button',
                 default: 'on',
                 options: {
@@ -117,7 +117,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '启用地址安全验证机制'
               },
               ipv4_only: {
-                name: 'node.config.ipv4Only',
+                name: 'vpn.config.ipv4Only',
                 type: 'multi-button',
                 default: 'off',
                 options: {
@@ -127,7 +127,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '仅使用 IPv4 套接字（与 ipv6_only 互斥）'
               },
               ipv6_only: {
-                name: 'node.config.ipv6Only',
+                name: 'vpn.config.ipv6Only',
                 type: 'multi-button',
                 default: 'off',
                 options: {
@@ -137,7 +137,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '仅使用 IPv6 套接字（与 ipv4_only 互斥）'
               },
               keepalive: {
-                name: 'node.config.keepalive',
+                name: 'vpn.config.keepalive',
                 type: 'integer',
                 default: 25,
                 min: 1,
@@ -145,7 +145,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '发送保活包的间隔时间'
               },
               forward: {
-                name: 'node.config.forward',
+                name: 'vpn.config.forward',
                 type: 'multi-button',
                 default: 'on',
                 options: {
@@ -155,7 +155,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '启用数据包转发功能'
               },
               daemon: {
-                name: 'node.config.daemon',
+                name: 'vpn.config.daemon',
                 type: 'multi-button',
                 default: 'on',
                 options: {
@@ -165,7 +165,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '以守护进程方式运行'
               },
               zip: {
-                name: 'node.config.compression',
+                name: 'vpn.config.compression',
                 type: 'multi-button',
                 default: 'auto',
                 options: {
@@ -175,7 +175,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '压缩策略'
               },
               zip_level: {
-                name: 'node.config.compressionLevel',
+                name: 'vpn.config.compressionLevel',
                 type: 'integer',
                 default: -1,
                 min: -1,
@@ -183,7 +183,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '-1(默认) ~ 9（9压缩比高但更耗CPU）'
               },
               memory: {
-                name: 'node.config.memory',
+                name: 'vpn.config.memory',
                 type: 'multi-button',
                 default: 'tiny',
                 options: {
@@ -195,7 +195,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '内存与缓存规模（tiny/small/large/huge）'
               },
               es_argv: {
-                name: 'node.config.esArgs',
+                name: 'vpn.config.esArgs',
                 type: 'string',
                 default: '--upnp',
                 description: '传给 gnb_es 的单个参数（如 --upnp）'
@@ -207,25 +207,25 @@ export const vpnConfigData: VPNConfigData = {
     }
   },
   wireguard: {
-    name: 'node.config.wireGuard',
+    name: 'vpn.config.wireGuard',
     description: 'WireGuard - 现代高性能VPN协议',
     enabled: true,
     supported_versions: ['default', 'v1.0.0', 'v0.0.20201221'],
     default_version: 'default',
     versions: {
       default: {
-        name: 'node.config.defaultVersion',
+        name: 'vpn.config.defaultVersion',
         interface_name: 'WG01',
         default_port: 51820,
         recommended_mtu: 1420,
         config_file_extension: '.conf',
         modes: {
           base: {
-            name: 'node.config.basicConfig',
-            description: 'node.config.wireGuardBasicDesc',
+            name: 'vpn.config.basicConfig',
+            description: 'vpn.config.wireGuardBasicDesc',
             parameters: {
               ifname: {
-                name: 'node.config.networkInterface',
+                name: 'vpn.config.networkInterface',
                 type: 'string',
                 default: 'WG01',
                 required: true,
@@ -233,14 +233,14 @@ export const vpnConfigData: VPNConfigData = {
                 description: 'WireGuard网卡接口名称'
               },
               listen_address: {
-                name: 'node.config.interfaceAddress',
+                name: 'vpn.config.interfaceAddress',
                 type: 'string',
                 default: '10.0.0.1/24',
                 required: true,
                 description: 'WireGuard接口IP地址，CIDR格式'
               },
               listen_port: {
-                name: 'node.config.listenPortConfig',
+                name: 'vpn.config.listenPortConfig',
                 type: 'integer',
                 default: 51820,
                 min: 1,
@@ -249,7 +249,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: 'WireGuard监听端口'
               },
               mtu: {
-                name: 'node.config.mtu',
+                name: 'vpn.config.mtu',
                 type: 'integer',
                 default: 1420,
                 min: 1280,
@@ -257,7 +257,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '网络最大传输单元，建议值：1420'
               },
               multi_socket: {
-                name: 'node.config.multiConnection',
+                name: 'vpn.config.multiConnection',
                 type: 'select',
                 default: 'on',
                 options: {
@@ -267,7 +267,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '支持多个并发连接'
               },
               ipv4_only: {
-                name: 'node.config.ipv4Only',
+                name: 'vpn.config.ipv4Only',
                 type: 'select',
                 default: 'off',
                 options: {
@@ -277,7 +277,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '仅使用IPv4协议'
               },
               ipv6_only: {
-                name: 'node.config.ipv6Only',
+                name: 'vpn.config.ipv6Only',
                 type: 'select',
                 default: 'off',
                 options: {
@@ -287,7 +287,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '仅使用IPv6协议'
               },
               daemon: {
-                name: 'node.config.daemonMode',
+                name: 'vpn.config.daemonMode',
                 type: 'select',
                 default: 'on',
                 options: {
@@ -299,17 +299,17 @@ export const vpnConfigData: VPNConfigData = {
             }
           },
           expert: {
-            name: 'node.config.expertConfig',
+            name: 'vpn.config.expertConfig',
             description: '可选的WireGuard高级参数配置',
             parameters: {
               dns: {
-                name: 'node.config.dnsServers',
+                name: 'vpn.config.dnsServers',
                 type: 'string',
                 default: '8.8.8.8,1.1.1.1',
                 description: 'DNS服务器列表，逗号分隔'
               },
               persistent_keepalive: {
-                name: 'node.config.persistentKeepalive',
+                name: 'vpn.config.persistentKeepalive',
                 type: 'integer',
                 default: 25,
                 min: 0,
@@ -317,19 +317,19 @@ export const vpnConfigData: VPNConfigData = {
                 description: 'WireGuard保活间隔，0表示禁用'
               },
               allowed_ips: {
-                name: 'node.config.allowedIPs',
+                name: 'vpn.config.allowedIPs',
                 type: 'string',
                 default: '0.0.0.0/0,::/0',
                 description: '允许通过的IP范围，逗号分隔'
               },
               endpoint: {
-                name: 'node.config.endpoint',
+                name: 'vpn.config.endpoint',
                 type: 'string',
                 default: '',
                 description: '对端地址，格式：IP或域名:端口'
               },
               fwmark: {
-                name: 'node.config.fwmark',
+                name: 'vpn.config.fwmark',
                 type: 'integer',
                 default: 0,
                 min: 0,
@@ -337,7 +337,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '防火墙标记，十六进制格式，0表示禁用'
               },
               table: {
-                name: 'node.config.routeTable',
+                name: 'vpn.config.routeTable',
                 type: 'string',
                 default: 'auto',
                 options: {
@@ -348,7 +348,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '路由表设置，auto/off/数字'
               },
               save_config: {
-                name: 'node.config.saveConfigFile',
+                name: 'vpn.config.saveConfigFile',
                 type: 'select',
                 default: 'on',
                 options: {
@@ -358,37 +358,37 @@ export const vpnConfigData: VPNConfigData = {
                 description: '自动保存配置更改'
               },
               pre_up: {
-                name: 'node.config.preUpScript',
+                name: 'vpn.config.preUpScript',
                 type: 'text',
                 default: '',
                 description: '接口启动前执行的命令，%i代表接口名'
               },
               post_up: {
-                name: 'node.config.postUpScript',
+                name: 'vpn.config.postUpScript',
                 type: 'text',
                 default: '',
                 description: '接口启动后执行的命令，常用于防火墙规则'
               },
               pre_down: {
-                name: 'node.config.preDownScript',
+                name: 'vpn.config.preDownScript',
                 type: 'text',
                 default: '',
                 description: '接口停止前执行的命令'
               },
               post_down: {
-                name: 'node.config.postDownScript',
+                name: 'vpn.config.postDownScript',
                 type: 'text',
                 default: '',
                 description: '接口停止后执行的命令，清理防火墙规则'
               },
               preshared_key: {
-                name: 'node.config.presharedKey',
+                name: 'vpn.config.presharedKey',
                 type: 'string',
                 default: '',
                 description: '可选的预共享密钥，增强安全性'
               },
               roaming: {
-                name: 'node.config.roaming',
+                name: 'vpn.config.roaming',
                 type: 'select',
                 default: 'on',
                 options: {
@@ -398,7 +398,7 @@ export const vpnConfigData: VPNConfigData = {
                 description: '支持端点IP地址变化时自动更新'
               },
               handshake_timeout: {
-                name: 'node.config.handshakeTimeout',
+                name: 'vpn.config.handshakeTimeout',
                 type: 'integer',
                 default: 180,
                 min: 1,
@@ -412,7 +412,7 @@ export const vpnConfigData: VPNConfigData = {
     }
   },
   openvpn: {
-    name: 'node.config.openVPN',
+    name: 'vpn.config.openVPN',
     description: 'OpenVPN - 传统VPN解决方案',
     enabled: false,
     supported_versions: ['default', 'v2.6.0', 'v2.5.0'],

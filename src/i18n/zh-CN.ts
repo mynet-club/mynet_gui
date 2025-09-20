@@ -2064,5 +2064,60 @@ export default {
     preferencesUpdateFailed: '偏好设置更新失败',
     preferencesReset: '偏好设置已重置为默认值',
     resetToDefault: '重置为默认'
+  },
+  
+  // VPN配置相关翻译
+  vpn: {
+    config: {
+      // 基础配置
+      gnbVirtualNetwork: 'GNB虚拟网络',
+      wireGuard: 'WireGuard',
+      openVPN: 'OpenVPN',
+      defaultVersion: '默认版本 (Latest)',
+      basicConfig: '基本配置',
+      basicConfigDesc: '必需的基础参数配置',
+      expertConfig: '专家配置',
+      wireGuardBasicDesc: '必需的WireGuard基础参数',
+      
+      // VPN配置参数翻译
+      nodeId: '节点ID',
+      networkInterface: '网络接口名称',
+      listenPortConfig: '监听端口',
+      listenPort: '监听端口',
+      mtu: 'MTU (最大传输单元)',
+      multiSocket: '多路复用',
+      directForwarding: '直接转发',
+      unifiedForwarding: '统一转发',
+      standardForwarding: '标准中继转发',
+      addressSecure: '地址安全',
+      ipv4Only: '仅IPv4',
+      ipv6Only: '仅IPv6',
+      keepalive: '保活间隔(秒)',
+      forward: '转发功能',
+      daemon: '守护进程',
+      compression: '压缩',
+      compressionLevel: '压缩等级',
+      memory: '内存刻度',
+      esArgs: 'ES参数',
+      
+      // WireGuard参数
+      interfaceAddress: '接口地址',
+      multiConnection: '多连接支持',
+      daemonMode: '守护进程模式',
+      dnsServers: 'DNS服务器',
+      persistentKeepalive: '持续保活(秒)',
+      allowedIPs: '允许的IP',
+      endpoint: '端点地址',
+      fwmark: 'FwMark防火墙标记',
+      routeTable: '路由表',
+      saveConfigFile: '保存配置',
+      preUpScript: '启动前脚本',
+      postUpScript: '启动后脚本',
+      preDownScript: '关闭前脚本',
+      postDownScript: '关闭后脚本',
+      presharedKey: '预共享密钥',
+      roaming: '漫游支持',
+      handshakeTimeout: '握手超时(秒)'
+    }
   }
 }

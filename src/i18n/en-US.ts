@@ -1704,5 +1704,60 @@ export default {
     preferencesUpdateFailed: 'Failed to update preferences',
     preferencesReset: 'Preferences reset to default values',
     resetToDefault: 'Reset to Default'
+  },
+  
+  // VPN configuration related translations
+  vpn: {
+    config: {
+      // Basic configuration
+      gnbVirtualNetwork: 'GNB Virtual Network',
+      wireGuard: 'WireGuard',
+      openVPN: 'OpenVPN',
+      defaultVersion: 'Default Version (Latest)',
+      basicConfig: 'Basic Configuration',
+      basicConfigDesc: 'Required basic parameter configuration',
+      expertConfig: 'Expert Configuration',
+      wireGuardBasicDesc: 'Required WireGuard basic parameters',
+      
+      // VPN configuration parameter translations
+      nodeId: 'Node ID',
+      networkInterface: 'Network Interface Name',
+      listenPortConfig: 'Listen Port',
+      listenPort: 'Listen Port',
+      mtu: 'MTU (Maximum Transmission Unit)',
+      multiSocket: 'Multi Socket',
+      directForwarding: 'Direct Forwarding',
+      unifiedForwarding: 'Unified Forwarding',
+      standardForwarding: 'Standard Relay Forwarding',
+      addressSecure: 'Address Security',
+      ipv4Only: 'IPv4 Only',
+      ipv6Only: 'IPv6 Only',
+      keepalive: 'Keepalive Interval (seconds)',
+      forward: 'Forward Function',
+      daemon: 'Daemon Process',
+      compression: 'Compression',
+      compressionLevel: 'Compression Level',
+      memory: 'Memory Scale',
+      esArgs: 'ES Arguments',
+      
+      // WireGuard parameters
+      interfaceAddress: 'Interface Address',
+      multiConnection: 'Multi Connection Support',
+      daemonMode: 'Daemon Mode',
+      dnsServers: 'DNS Servers',
+      persistentKeepalive: 'Persistent Keepalive (seconds)',
+      allowedIPs: 'Allowed IPs',
+      endpoint: 'Endpoint Address',
+      fwmark: 'FwMark Firewall Mark',
+      routeTable: 'Route Table',
+      saveConfigFile: 'Save Configuration',
+      preUpScript: 'Pre-Up Script',
+      postUpScript: 'Post-Up Script',
+      preDownScript: 'Pre-Down Script',
+      postDownScript: 'Post-Down Script',
+      presharedKey: 'Preshared Key',
+      roaming: 'Roaming Support',
+      handshakeTimeout: 'Handshake Timeout (seconds)'
+    }
   }
 }

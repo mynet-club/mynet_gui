@@ -48,7 +48,7 @@
                   class="config-item q-mb-md"
                 >
                   <div class="config-label text-subtitle2 q-mb-sm">
-                    {{ param.name.startsWith('node.config.') ? $t(param.name) : param.name }}
+                    {{ param.name.startsWith('vpn.config.') ? $t(param.name) : param.name }}
                     <span v-if="param.required" class="text-red">*</span>
                     <q-icon name="help" class="q-ml-xs text-grey-6" size="sm">
                       <q-tooltip>{{ param.description }}</q-tooltip>
