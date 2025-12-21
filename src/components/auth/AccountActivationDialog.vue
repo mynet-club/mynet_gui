@@ -34,7 +34,7 @@
             <q-form @submit="activateWithCode">
               <q-input
                 v-model="form.code"
-                :label="$t('auth.activationCode')"
+                :placeholder="$t('auth.activationCode')"
                 outlined
                 dense
                 maxlength="6"

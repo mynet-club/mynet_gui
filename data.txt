@@ -1,0 +1,436 @@
+{
+    "success": true,
+    "data": {
+        "connections": [
+            {
+                "id": null,
+                "node_id": 8283289760467957,
+                "peer_id": 4997342800601732,
+                "online": true,
+                "conn_type": "direct_ipv4",
+                "latency": 73.938,
+                "rx_bytes": 1514323856,
+                "tx_bytes": 4983468589,
+                "seen_at": "2025-12-18T13:49:04+00:00",
+                "snapshot_at": "2025-12-18T13:53:08+00:00",
+                "created_at": "2025-12-18T13:53:08+00:00",
+                "is_realtime": true,
+                "peer_node_status": 2
+            },
+            {
+                "id": null,
+                "node_id": 8283289760467957,
+                "peer_id": 3722810996882027,
+                "online": true,
+                "conn_type": "direct_ipv4",
+                "latency": 7.821,
+                "rx_bytes": 914646,
+                "tx_bytes": 548877,
+                "seen_at": "2025-12-18T13:49:04+00:00",
+                "snapshot_at": "2025-12-18T13:53:08+00:00",
+                "created_at": "2025-12-18T13:53:08+00:00",
+                "is_realtime": true,
+                "peer_node_status": 2
+            },
+            {
+                "id": null,
+                "node_id": 8283289760467957,
+                "peer_id": 6802325343720556,
+                "online": false,
+                "conn_type": "none",
+                "latency": 0,
+                "rx_bytes": 0,
+                "tx_bytes": 0,
+                "seen_at": "2025-12-18T13:49:04+00:00",
+                "snapshot_at": "2025-12-18T13:53:08+00:00",
+                "created_at": "2025-12-18T13:53:08+00:00",
+                "is_realtime": true,
+                "peer_node_status": 2
+            },
+            {
+                "id": null,
+                "node_id": 8283289760467957,
+                "peer_id": 8107260975133902,
+                "online": false,
+                "conn_type": "none",
+                "latency": 0,
+                "rx_bytes": 0,
+                "tx_bytes": 0,
+                "seen_at": "2025-12-18T13:49:04+00:00",
+                "snapshot_at": "2025-12-18T13:53:08+00:00",
+                "created_at": "2025-12-18T13:53:08+00:00",
+                "is_realtime": true,
+                "peer_node_status": 2
+            },
+            {
+                "id": null,
+                "node_id": 8283289760467957,
+                "peer_id": 5063883630803570,
+                "online": false,
+                "conn_type": "relay",
+                "latency": 0,
+                "rx_bytes": 0,
+                "tx_bytes": 0,
+                "seen_at": "2025-12-18T13:49:04+00:00",
+                "snapshot_at": "2025-12-18T13:53:08+00:00",
+                "created_at": "2025-12-18T13:53:08+00:00",
+                "is_realtime": true,
+                "peer_node_status": 1
+            },
+            {
+                "id": null,
+                "node_id": 8283289760467957,
+                "peer_id": 3121976778981937,
+                "online": true,
+                "conn_type": "direct_ipv4",
+                "latency": 320.186,
+                "rx_bytes": 3572,
+                "tx_bytes": 2872,
+                "seen_at": "2025-12-18T13:48:31+00:00",
+                "snapshot_at": "2025-12-18T13:53:08+00:00",
+                "created_at": "2025-12-18T13:53:08+00:00",
+                "is_realtime": true,
+                "peer_node_status": 1
+            },
+            {
+                "id": null,
+                "node_id": 8283289760467957,
+                "peer_id": 3083655905420403,
+                "online": true,
+                "conn_type": "direct_ipv4",
+                "latency": 66.161,
+                "rx_bytes": 23584,
+                "tx_bytes": 25763,
+                "seen_at": "2025-12-18T13:49:04+00:00",
+                "snapshot_at": "2025-12-18T13:53:08+00:00",
+                "created_at": "2025-12-18T13:53:08+00:00",
+                "is_realtime": true,
+                "peer_node_status": 1
+            },
+            {
+                "id": null,
+                "node_id": 8283289760467957,
+                "peer_id": 3262545119526215,
+                "online": true,
+                "conn_type": "direct_ipv4",
+                "latency": 264.801,
+                "rx_bytes": 25731415,
+                "tx_bytes": 118035947,
+                "seen_at": "2025-12-18T13:49:04+00:00",
+                "snapshot_at": "2025-12-18T13:53:08+00:00",
+                "created_at": "2025-12-18T13:53:08+00:00",
+                "is_realtime": true,
+                "peer_node_status": 1
+            },
+            {
+                "id": null,
+                "node_id": 8283289760467957,
+                "peer_id": 3432214327824236,
+                "online": false,
+                "conn_type": "none",
+                "latency": 0,
+                "rx_bytes": 0,
+                "tx_bytes": 0,
+                "seen_at": "2025-12-18T13:49:04+00:00",
+                "snapshot_at": "2025-12-18T13:53:08+00:00",
+                "created_at": "2025-12-18T13:53:08+00:00",
+                "is_realtime": true,
+                "peer_node_status": 2
+            },
+            {
+                "id": null,
+                "node_id": 8283289760467957,
+                "peer_id": 4968815887404982,
+                "online": true,
+                "conn_type": "direct_ipv4",
+                "latency": 24.737,
+                "rx_bytes": 3738188744,
+                "tx_bytes": 1089243999,
+                "seen_at": "2025-12-18T13:49:04+00:00",
+                "snapshot_at": "2025-12-18T13:53:08+00:00",
+                "created_at": "2025-12-18T13:53:08+00:00",
+                "is_realtime": true,
+                "peer_node_status": 2
+            },
+            {
+                "id": null,
+                "node_id": 8283289760467957,
+                "peer_id": 7026160319377661,
+                "online": false,
+                "conn_type": "none",
+                "latency": 0,
+                "rx_bytes": 0,
+                "tx_bytes": 0,
+                "seen_at": "2025-12-18T13:49:04+00:00",
+                "snapshot_at": "2025-12-18T13:53:08+00:00",
+                "created_at": "2025-12-18T13:53:08+00:00",
+                "is_realtime": true,
+                "peer_node_status": 2
+            },
+            {
+                "id": null,
+                "node_id": 8283289760467957,
+                "peer_id": 7243713186087905,
+                "online": true,
+                "conn_type": "direct_ipv4",
+                "latency": 42.69,
+                "rx_bytes": 0,
+                "tx_bytes": 0,
+                "seen_at": "2025-12-18T13:49:04+00:00",
+                "snapshot_at": "2025-12-18T13:53:08+00:00",
+                "created_at": "2025-12-18T13:53:08+00:00",
+                "is_realtime": true,
+                "peer_node_status": 2
+            }
+        ],
+        "nodes_metadata": {
+            "8283289760467957": {
+                "node_id": 8283289760467957,
+                "node_name": "\u548c\u8c10\u5bb6\u56ed",
+                "zone_id": 3678250676883169,
+                "node_status": 2,
+                "user_id": 3844197700300659,
+                "user_name": "arthur",
+                "user_email": "luoyueliang@gmail.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.182.236.182",
+                        "route_type": "node_ip"
+                    },
+                    {
+                        "ip_address": "192.168.0.2",
+                        "route_type": "lan_ip"
+                    }
+                ],
+                "source": "self"
+            },
+            "4997342800601732": {
+                "node_id": 4997342800601732,
+                "node_name": "\u65b0\u52a0\u5761",
+                "zone_id": 3678250676883169,
+                "node_status": 2,
+                "user_id": 3844197700300659,
+                "user_name": "arthur",
+                "user_email": "luoyueliang@gmail.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.182.236.180",
+                        "route_type": "node_ip"
+                    }
+                ],
+                "source": "user_node"
+            },
+            "3722810996882027": {
+                "node_id": 3722810996882027,
+                "node_name": "\u7ef4\u5ea6\u7a7a\u95f4",
+                "zone_id": 3678250676883169,
+                "node_status": 2,
+                "user_id": 3844197700300659,
+                "user_name": "arthur",
+                "user_email": "luoyueliang@gmail.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.182.236.178",
+                        "route_type": "node_ip"
+                    },
+                    {
+                        "ip_address": "192.168.8.1",
+                        "route_type": "lan_ip"
+                    }
+                ],
+                "source": "user_node"
+            },
+            "6802325343720556": {
+                "node_id": 6802325343720556,
+                "node_name": "\u963f\u91cc\u4e91",
+                "zone_id": 3678250676883169,
+                "node_status": 2,
+                "user_id": 3844197700300659,
+                "user_name": "arthur",
+                "user_email": "luoyueliang@gmail.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.182.236.179",
+                        "route_type": "node_ip"
+                    }
+                ],
+                "source": "user_node"
+            },
+            "8107260975133902": {
+                "node_id": 8107260975133902,
+                "node_name": "\u6e56\u5357\u8001\u5bb6",
+                "zone_id": 3678250676883169,
+                "node_status": 2,
+                "user_id": 3844197700300659,
+                "user_name": "arthur",
+                "user_email": "luoyueliang@gmail.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.182.236.183",
+                        "route_type": "node_ip"
+                    },
+                    {
+                        "ip_address": "192.168.10.2",
+                        "route_type": "lan_ip"
+                    }
+                ],
+                "source": "user_node"
+            },
+            "5063883630803570": {
+                "node_id": 5063883630803570,
+                "node_name": "\u9992\u5934\u5185\u7f51",
+                "zone_id": 3678250676883169,
+                "node_status": 1,
+                "user_id": 3844197700300659,
+                "user_name": "arthur",
+                "user_email": "luoyueliang@gmail.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.182.236.184",
+                        "route_type": "node_ip"
+                    },
+                    {
+                        "ip_address": "192.168.100.1",
+                        "route_type": "lan_ip"
+                    }
+                ],
+                "source": "user_node"
+            },
+            "3121976778981937": {
+                "node_id": 3121976778981937,
+                "node_name": "liuyangzheng",
+                "zone_id": 3678250676883169,
+                "node_status": 1,
+                "user_id": 3844197700300659,
+                "user_name": "arthur",
+                "user_email": "luoyueliang@gmail.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.182.236.186",
+                        "route_type": "node_ip"
+                    }
+                ],
+                "source": "user_node"
+            },
+            "3083655905420403": {
+                "node_id": 3083655905420403,
+                "node_name": "\u5929\u6d25Home",
+                "zone_id": 3678250676883169,
+                "node_status": 1,
+                "user_id": 4956965132407888,
+                "user_name": "\u7b11\u7b11",
+                "user_email": "360720125@qq.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.159.248.154",
+                        "route_type": "node_ip"
+                    },
+                    {
+                        "ip_address": "192.168.20.1",
+                        "route_type": "lan_ip"
+                    }
+                ],
+                "source": "friend_node"
+            },
+            "3262545119526215": {
+                "node_id": 3262545119526215,
+                "node_name": "lizhe",
+                "zone_id": 3678250676883169,
+                "node_status": 1,
+                "user_id": 5813566186226457,
+                "user_name": "lizhe666",
+                "user_email": "lizhe666@gmail.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.237.149.244",
+                        "route_type": "node_ip"
+                    },
+                    {
+                        "ip_address": "192.168.88.2",
+                        "route_type": "lan_ip"
+                    }
+                ],
+                "source": "friend_node"
+            },
+            "3432214327824236": {
+                "node_id": 3432214327824236,
+                "node_name": "sunpengOffice-discard",
+                "zone_id": 3678250676883169,
+                "node_status": 2,
+                "user_id": 1516760171634468,
+                "user_name": "\u5b59\u9e4f",
+                "user_email": "spwo@msn.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.150.14.220",
+                        "route_type": "node_ip"
+                    }
+                ],
+                "source": "friend_node"
+            },
+            "4968815887404982": {
+                "node_id": 4968815887404982,
+                "node_name": "herenet\u5317\u4eac",
+                "zone_id": 3678250676883169,
+                "node_status": 2,
+                "user_id": 4836969326951076,
+                "user_name": "herenet",
+                "user_email": "herenet@126.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.147.97.76",
+                        "route_type": "node_ip"
+                    },
+                    {
+                        "ip_address": "192.168.4.1",
+                        "route_type": "lan_ip"
+                    },
+                    {
+                        "ip_address": "192.168.2.1",
+                        "route_type": "lan_ip"
+                    }
+                ],
+                "source": "friend_node"
+            },
+            "7026160319377661": {
+                "node_id": 7026160319377661,
+                "node_name": "sunpengHome",
+                "zone_id": 3678250676883169,
+                "node_status": 2,
+                "user_id": 1516760171634468,
+                "user_name": "\u5b59\u9e4f",
+                "user_email": "spwo@msn.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.150.14.225",
+                        "route_type": "node_ip"
+                    }
+                ],
+                "source": "friend_node"
+            },
+            "7243713186087905": {
+                "node_id": 7243713186087905,
+                "node_name": "spHomeOpenWrt",
+                "zone_id": 3678250676883169,
+                "node_status": 2,
+                "user_id": 1516760171634468,
+                "user_name": "\u5b59\u9e4f",
+                "user_email": "spwo@msn.com",
+                "ip_addresses": [
+                    {
+                        "ip_address": "10.150.14.222",
+                        "route_type": "node_ip"
+                    }
+                ],
+                "source": "friend_node"
+            }
+        },
+        "filter": {
+            "node_id": 8283289760467957,
+            "peer_node_id": null,
+            "last_only": true
+        }
+    },
+    "message": "\u67e5\u8be2\u6210\u529f",
+    "request_id": "c7aa6e92-0082-44c9-b0b8-5247723716fe"
+}

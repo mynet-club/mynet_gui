@@ -108,10 +108,10 @@
           class="q-mr-sm"
         >
           <q-badge 
-            v-if="unreadNotifications > 0"
+            v-if="unreadCount > 0"
             color="negative"
             floating
-            :label="unreadNotifications > 99 ? '99+' : unreadNotifications"
+            :label="displayUnreadCount"
           />
           <q-tooltip>
             {{ $t('common.notifications') }}
@@ -383,68 +383,7 @@
     </q-dialog>
 
     <!-- Notification Dialog -->
-    <q-dialog v-model="showNotificationDialog">
-      <q-card style="min-width: 400px; max-width: 500px">
-        <q-card-section class="row items-center q-pb-none">
-          <div class="text-h6">{{ $t('common.notifications') }}</div>
-          <q-space />
-          <q-btn 
-            flat 
-            dense
-            round
-            icon="done_all"
-            @click="markAllAsRead"
-            :disable="unreadNotifications === 0"
-          >
-            <q-tooltip>{{ $t('notifications.markAllRead') }}</q-tooltip>
-          </q-btn>
-          <q-btn icon="close" flat round dense v-close-popup />
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <div v-if="notifications.length === 0" class="text-center text-grey-6 q-py-md">
-            {{ $t('notifications.empty') }}
-          </div>
-          <div v-else>
-            <q-list>
-              <q-item
-                v-for="notification in notifications"
-                :key="notification.id"
-                :class="{'bg-grey-1': !notification.read}"
-                clickable
-                @click="markAsRead(notification.id)"
-              >
-                <q-item-section avatar>
-                  <q-icon
-                    :name="getNotificationIcon(notification.type)"
-                    :color="getNotificationColor(notification.type)"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>{{ notification.title }}</q-item-label>
-                  <q-item-label caption>{{ notification.message }}</q-item-label>
-                  <q-item-label caption class="text-grey-6">
-                    {{ formatTime(notification.timestamp) }}
-                  </q-item-label>
-                </q-item-section>
-                <q-item-section side v-if="!notification.read">
-                  <q-badge color="primary" />
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn 
-            flat 
-            :label="$t('common.close')" 
-            color="primary" 
-            v-close-popup 
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <NotificationDialog v-model="showNotificationDialog" />
   </q-layout>
 </template>
 
@@ -457,9 +396,11 @@ import { useAuthStore } from '../stores/auth'
 import { useWebSocket } from '../services/websocket'
 import { useTheme } from '../composables/useTheme'
 import { useSidebarStats } from '../composables/useSidebarStats'
+import { useNotifications } from '../composables/useNotifications'
 import { useI18n } from 'vue-i18n'
 import ZoneSelector from '../components/common/ZoneSelector.vue'
 import UserAvatar from '../components/avatar/UserAvatar.vue'
+import NotificationDialog from '../components/notification/NotificationDialog.vue'
 import { DEFAULT_GLOBAL_ZONE } from '../config/app'
 
 const $q = useQuasar()
@@ -468,6 +409,7 @@ const authStore = useAuthStore()
 const { isConnected, connect } = useWebSocket()
 const { themeMode: currentThemeMode, setThemeMode, getThemeOptions, initializeTheme } = useTheme()
 const { stats: sidebarStats, init: initSidebarStats } = useSidebarStats()
+const { unreadCount, displayUnreadCount } = useNotifications()
 const { locale, t } = useI18n()
 
 // 响应式数据
@@ -477,37 +419,8 @@ const showNotificationDialog = ref(false)
 const currentLanguage = ref(locale.value)
 const isDev = ref(true) // 开发模式调试
 
-// 消息提醒数据
-const notifications = ref([
-  {
-    id: 1,
-    title: 'System Alert',
-    message: 'Node server-01 is experiencing high CPU usage',
-    type: 'warning',
-    timestamp: new Date().toISOString(),
-    read: false
-  },
-  {
-    id: 2,
-    title: 'Zone Update',
-    message: 'TechCorpVPN zone configuration has been updated',
-    type: 'info',
-    timestamp: new Date(Date.now() - 3600000).toISOString(),
-    read: false
-  },
-  {
-    id: 3,
-    title: 'Connection Success',
-    message: 'Successfully connected to all network nodes',
-    type: 'success',
-    timestamp: new Date(Date.now() - 7200000).toISOString(),
-    read: true
-  }
-])
-
 // 计算属性
 const user = computed(() => authStore.user)
-const unreadNotifications = computed(() => notifications.value.filter(n => !n.read).length)
 
 const supportedLanguages = computed(() => [
   { code: 'en-US', name: 'English', nativeName: 'English' },
@@ -539,20 +452,45 @@ const mainNavigationItems = computed((): NavigationItem[] => [
     path: '/dashboard'
   },
   {
-    name: 'nodes',
-    label: 'navigation.nodes',
-    icon: 'dns',
-    path: '/nodes'
+    name: 'social',
+    label: 'navigation.social',
+    icon: 'group',
+    children: [
+      {
+        name: 'social-friends',
+        label: 'navigation.social.friends',
+        icon: 'people',
+        path: '/app/social/friends'
+      },
+      {
+        name: 'social-requests',
+        label: 'navigation.social.requests',
+        icon: 'person_add',
+        path: '/app/social/requests'
+      },
+      {
+        name: 'social-invitations',
+        label: 'navigation.social.invitations',
+        icon: 'send',
+        path: '/app/social/invitations'
+      }
+    ]
   }
 ])
 
 // 网络配置导航项
 const networkNavigationItems = computed((): NavigationItem[] => [
-  {
-    name: 'ippools',
-    label: 'navigation.ippools',
+{
+  name: 'ippools',
+  label: 'navigation.ippools',
+  icon: 'dns',
+  path: '/app/ippools'
+},
+{
+    name: 'nodes',
+    label: 'navigation.nodes',
     icon: 'dns',
-    path: '/app/ippools'
+    path: '/app/nodes'
   },
   {
     name: 'routes',
@@ -622,31 +560,6 @@ const networkNavigationItems = computed((): NavigationItem[] => [
         path: '/app/services/my'
       }
     ]
-  },
-  {
-    name: 'social',
-    label: 'navigation.social',
-    icon: 'group',
-    children: [
-      {
-        name: 'social-friends',
-        label: 'navigation.social.friends',
-        icon: 'people',
-        path: '/app/social/friends'
-      },
-      {
-        name: 'social-requests',
-        label: 'navigation.social.requests',
-        icon: 'person_add',
-        path: '/app/social/requests'
-      },
-      {
-        name: 'social-invitations',
-        label: 'navigation.social.invitations',
-        icon: 'send',
-        path: '/app/social/invitations'
-      }
-    ]
   }
 ])
 
@@ -708,6 +621,15 @@ const changeLanguage = async (newLocale: string) => {
     // 更新当前语言状态
     currentLanguage.value = newLocale
     
+    // 同步到服务端
+    try {
+      const { apiService } = await import('../services/api')
+      await apiService.updateUserProfile({ language: newLocale })
+      debug.log('🌐 [MainLayout] Language synced to server:', newLocale)
+    } catch (apiError) {
+      debug.warn('🌐 [MainLayout] Failed to sync language to server:', apiError)
+    }
+    
     // 使用 $q.notify
     $q.notify({
       type: 'positive',
@@ -723,13 +645,36 @@ const changeLanguage = async (newLocale: string) => {
   }
 }
 
-const changeTheme = (mode: string) => {
-  setThemeMode(mode as any)
-  $q.notify({
-    type: 'positive',
-    message: t('settings.themeChanged', { theme: mode }),
-    timeout: 2000
-  })
+const changeTheme = async (mode: string) => {
+  try {
+    setThemeMode(mode as any)
+    
+    // 保存到本地存储
+    LocalStorage.set('user_theme', mode)
+    
+    // 同步到服务端
+    try {
+      const { apiService } = await import('../services/api')
+      await apiService.updateUserProfile({ theme: mode })
+      debug.log('🎨 [MainLayout] Theme synced to server:', mode)
+    } catch (apiError) {
+      debug.warn('🎨 [MainLayout] Failed to sync theme to server (API may not support theme field yet):', apiError)
+      // 服务端可能还不支持theme字段，不影响本地使用
+    }
+    
+    $q.notify({
+      type: 'positive',
+      message: t('settings.themeChanged', { theme: mode }),
+      timeout: 2000
+    })
+  } catch (error) {
+    debug.error('🎨 [MainLayout] Unexpected error in changeTheme:', error)
+    $q.notify({
+      type: 'warning',
+      message: t('settings.themeChanged', { theme: mode }),
+      timeout: 2000
+    })
+  }
 }
 
 const goToProfileSettings = () => {
@@ -754,55 +699,6 @@ const logout = async () => {
 const formatTime = (timestamp: string) => {
   if (!timestamp) return 'N/A'
   return date.formatDate(timestamp, 'YYYY-MM-DD HH:mm:ss')
-}
-
-// 消息提醒相关方法
-const markAllAsRead = () => {
-  notifications.value.forEach(notification => {
-    notification.read = true
-  })
-  $q.notify({
-    type: 'positive',
-    message: 'All notifications marked as read',
-    timeout: 2000
-  })
-}
-
-const markAsRead = (id: number) => {
-  const notification = notifications.value.find(n => n.id === id)
-  if (notification) {
-    notification.read = true
-  }
-}
-
-const getNotificationIcon = (type: string) => {
-  switch (type) {
-    case 'warning':
-      return 'warning'
-    case 'info':
-      return 'info'
-    case 'success':
-      return 'check_circle'
-    case 'error':
-      return 'error'
-    default:
-      return 'notifications'
-  }
-}
-
-const getNotificationColor = (type: string) => {
-  switch (type) {
-    case 'warning':
-      return 'orange'
-    case 'info':
-      return 'blue'
-    case 'success':
-      return 'green'
-    case 'error':
-      return 'red'
-    default:
-      return 'primary'
-  }
 }
 
 // 确保 wsConnectionStats 正确声明

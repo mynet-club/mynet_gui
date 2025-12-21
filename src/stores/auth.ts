@@ -64,6 +64,46 @@ export const useAuthStore = defineStore('auth', () => {
       if (user.value) {
         LocalStorage.set('user_info', JSON.stringify(user.value))
         debug.log('🔧 [AUTH] Saved user info to LocalStorage:', user.value)
+        
+        // 应用用户偏好设置
+        if (user.value.preferences) {
+          // 应用主题设置
+          if (user.value.preferences.theme) {
+            LocalStorage.set('user_theme', user.value.preferences.theme)
+            debug.log('🔧 [AUTH] Applied user theme from server:', user.value.preferences.theme)
+            
+            // 立即应用主题
+            try {
+              const { useTheme } = await import('../composables/useTheme')
+              const { setThemeMode } = useTheme()
+              setThemeMode(user.value.preferences.theme as any)
+              debug.log('🎨 [AUTH] Theme applied immediately:', user.value.preferences.theme)
+            } catch (error) {
+              debug.error('🎨 [AUTH] Failed to apply theme:', error)
+            }
+          }
+          
+          // 应用语言设置
+          if (user.value.preferences.language) {
+            LocalStorage.set('app-locale', user.value.preferences.language)
+            debug.log('🔧 [AUTH] Applied user language from server:', user.value.preferences.language)
+            
+            // 立即应用语言
+            try {
+              const { setLocale } = await import('../boot/i18n')
+              await setLocale(user.value.preferences.language as 'zh-CN' | 'en-US')
+              debug.log('🌐 [AUTH] Language applied immediately:', user.value.preferences.language)
+            } catch (error) {
+              debug.error('🌐 [AUTH] Failed to apply language:', error)
+            }
+          }
+          
+          // 应用时区设置
+          if (user.value.preferences.timezone) {
+            LocalStorage.set('user_timezone', user.value.preferences.timezone)
+            debug.log('🔧 [AUTH] Applied user timezone from server:', user.value.preferences.timezone)
+          }
+        }
       }
       
       // 初始化用户Zone
@@ -184,6 +224,43 @@ export const useAuthStore = defineStore('auth', () => {
       if (user.value) {
         LocalStorage.set('user_info', JSON.stringify(user.value))
         debug.log('🔧 [AUTH] Updated user_info in LocalStorage after refresh')
+        
+        // 检查用户偏好设置是否与本地不同
+        if (user.value.preferences) {
+          // 检查主题设置
+          if (user.value.preferences.theme) {
+            const currentLocalTheme = LocalStorage.getItem('user_theme')
+            if (currentLocalTheme !== user.value.preferences.theme) {
+              debug.log('🔧 [AUTH] User theme from server differs from local:', {
+                server: user.value.preferences.theme,
+                local: currentLocalTheme
+              })
+              // 记录差异但不自动覆盖，避免用户体验突变
+            }
+          }
+          
+          // 检查语言设置
+          if (user.value.preferences.language) {
+            const currentLocalLanguage = LocalStorage.getItem('app-locale')
+            if (currentLocalLanguage !== user.value.preferences.language) {
+              debug.log('🔧 [AUTH] User language from server differs from local:', {
+                server: user.value.preferences.language,
+                local: currentLocalLanguage
+              })
+            }
+          }
+          
+          // 检查时区设置
+          if (user.value.preferences.timezone) {
+            const currentLocalTimezone = LocalStorage.getItem('user_timezone')
+            if (currentLocalTimezone !== user.value.preferences.timezone) {
+              debug.log('🔧 [AUTH] User timezone from server differs from local:', {
+                server: user.value.preferences.timezone,
+                local: currentLocalTimezone
+              })
+            }
+          }
+        }
       }
     } catch (error) {
       debug.error('Refresh user data error:', error)

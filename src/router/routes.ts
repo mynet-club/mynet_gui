@@ -148,6 +148,30 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '活跃路由', requiresAuth: true }
       },
       {
+        path: 'routes/active/:nodeId',
+        name: 'routes-active-node',
+        component: () => import('../pages/route/ActiveRoutesPage.vue'),
+        meta: { title: '节点路由', requiresAuth: true }
+      },
+      {
+        path: 'routes/active/:nodeId/list',
+        name: 'routes-active-node-list',
+        component: () => import('../pages/route/ActiveRoutesPage.vue'),
+        meta: { title: '节点路由列表', requiresAuth: true }
+      },
+      {
+        path: 'routes/active/:nodeId/topology',
+        name: 'routes-active-node-topology',
+        component: () => import('../pages/route/ActiveRoutesPage.vue'),
+        meta: { title: '网络拓扑图', requiresAuth: true }
+      },
+      {
+        path: 'routes/active/:nodeId/p-:peerId',
+        name: 'routes-active-connection',
+        component: () => import('../pages/route/ConnectionDetailsPage.vue'),
+        meta: { title: '连接详情', requiresAuth: true }
+      },
+      {
         path: 'routes/pending',
         name: 'routes-pending',
         component: () => import('../pages/route/PendingConnectionsPage.vue'),
@@ -259,6 +283,14 @@ const routes: RouteRecordRaw[] = [
         name: 'help',
         component: () => import('../pages/help/HelpPageSimple.vue'),
         meta: { title: '帮助文档' }
+      },
+      
+      // 示例页面路由
+      { 
+        path: 'examples/form-style-guide', 
+        name: 'form-style-guide',
+        component: () => import('../pages/examples/FormStyleGuidePage.vue'),
+        meta: { title: '表单风格指南' }
       },
       { 
         path: 'system/token-debug', 

@@ -32,7 +32,7 @@
               
               <q-input
                 v-model="form.node_name"
-                label="节点名称"
+                placeholder="节点名称"
                 required
                 :rules="[
                   val => !!val || '节点名称不能为空',
@@ -44,7 +44,7 @@
 
               <q-input
                 v-model="form.description"
-                label="节点描述"
+                placeholder="节点描述"
                 type="textarea"
                 rows="3"
                 outlined
@@ -193,11 +193,11 @@ const onSubmit = async () => {
     if (newNode) {
       debug.log('创建的节点数据:', newNode)
       notifySuccess('节点创建成功')
-      // 跳转到节点详情页 - 使用node_id或id字段
+      // 跳转到节点编辑页面 - 使用node_id或id字段
       const nodeId = newNode.node_id || newNode.id
       debug.log('节点ID:', nodeId, '(node_id:', newNode.node_id, ', id:', newNode.id, ')')
       if (nodeId) {
-        router.push(`/nodes/${nodeId}`)
+        router.push(`/app/nodes/${nodeId}/edit/basic`)
       } else {
         debug.warn('节点创建成功但无法获取节点ID，跳转到节点列表')
         router.push('/app/nodes')

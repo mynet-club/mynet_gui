@@ -1,0 +1,816 @@
+<template>
+  <div class="node-topology-view">
+    <q-card>
+      <q-card-section>
+        <div class="row items-center q-mb-md">
+          <div class="col">
+            <div class="text-h6">网络拓扑图</div>
+            <div class="text-caption text-grey-6">
+              星形网络拓扑 - {{ connections.length }} 个连接节点
+            </div>
+          </div>
+          <div class="col-auto">
+            <q-btn-group flat>
+              <q-btn
+                flat
+                dense
+                icon="zoom_in"
+                @click="zoomIn"
+              >
+                <q-tooltip>放大</q-tooltip>
+              </q-btn>
+              <q-btn
+                flat
+                dense
+                icon="zoom_out"
+                @click="zoomOut"
+              >
+                <q-tooltip>缩小</q-tooltip>
+              </q-btn>
+              <q-btn
+                flat
+                dense
+                icon="center_focus_strong"
+                @click="resetView"
+              >
+                <q-tooltip>重置视图</q-tooltip>
+              </q-btn>
+            </q-btn-group>
+          </div>
+        </div>
+
+        <!-- SVG 拓扑图 -->
+        <div class="topology-container" ref="containerRef">
+          <svg
+            ref="svgRef"
+            :width="svgWidth"
+            :height="svgHeight"
+            @wheel.prevent="handleWheel"
+          >
+            <g :transform="transformString">
+              <!-- 连接线 -->
+              <g class="connections-group">
+                <!-- 直连线条（直线） -->
+                <line
+                  v-for="(conn, index) in visualConnections.filter(c => isDirectConnection(c))"
+                  :key="`line-${index}`"
+                  :x1="centerNode.x"
+                  :y1="centerNode.y"
+                  :x2="conn.x"
+                  :y2="conn.y"
+                  :stroke="getConnectionColor(conn)"
+                  :stroke-width="getConnectionWidth(conn)"
+                  :stroke-dasharray="conn.online ? '0' : '5,5'"
+                  class="connection-line"
+                  @mouseenter="showConnectionTooltip(conn, $event)"
+                  @mouseleave="hideTooltip"
+                >
+                </line>
+                
+                <!-- 中继连接（曲线） -->
+                <path
+                  v-for="(conn, index) in visualConnections.filter(c => !isDirectConnection(c))"
+                  :key="`path-${index}`"
+                  :d="getRelayPath(conn)"
+                  :stroke="getConnectionColor(conn)"
+                  :stroke-width="getConnectionWidth(conn)"
+                  @mouseenter="showNodeTooltip(conn, $event)"
+                  @mouseleave="hideTooltip"
+                >
+                  <!-- 节点圆形（淡色背景 + 边框） -->
+                  <circle
+                    :cx="conn.x"
+                    :cy="conn.y"
+                    :r="nodeRadius"
+                    fill="white"
+                    :stroke="getNodeBorderColor(conn)"
+                    stroke-width="2"
+                    class="node-circle"
+                  />
+                  
+                  <!-- 节点图标 -->
+                  <text
+                    :x="conn.x"
+                    :y="conn.y"
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                    class="node-icon"
+                    :fill="getNodeBorderColor(conn)"
+                    font-size="16"
+                  >{{ getNodeIcon(conn) }}</text>
+                  
+                  <!-- 节点标签 -->
+                  <text
+                    :x="conn.x"
+                    :y="conn.y + nodeRadius + 15"
+                    text-anchor="middle"
+                    class="node-label"
+                    font-size="12"
+                  >{{ getNodeLabel(conn) }}
+                    :y="conn.y + nodeRadius + 30"
+                    text-anchor="middle"
+                    class="node-status"
+                    font-size="10"
+                    :fill="getStatusColor(conn)"
+                  >{{ getStatusLabel(conn) }}</text>
+                  
+                  <!-- 延迟显示（如果在线） -->
+                  <text
+                    v-if="conn.online && conn.latency"
+                    :x="conn.x"
+                    :y="conn.y - nodeRadius - 10"
+                    text-anchor="middle"
+                    class="node-latency"
+                    font-size="10"
+                    fill="#666"
+                  >{{ conn.latency.toFixed(1) }}ms</text>
+                </g>
+              </g>
+
+              <!-- 中心节点（当前节点） -->
+              <g class="center-node" @click="handleCenterNodeClick">
+                <circle
+                  :cx="centerNode.x"
+                  :cy="centerNode.y"
+                  :r="centerNodeRadius"
+                  fill="#1976d2"
+                  stroke="#0d47a1"
+                  stroke-width="3"
+                  class="center-node-circle"
+                />
+                
+                <text
+                  :x="centerNode.x"
+                  :y="centerNode.y"
+                  text-anchor="middle"
+                  dominant-baseline="middle"
+                  class="center-node-icon"
+                  fill="white"
+                  font-size="24"
+                >🖥️</text>
+                
+                <text
+                  :x="centerNode.x"
+                  :y="centerNode.y + centerNodeRadius + 20"
+                  text-awhite"
+                  stroke="#1976d2"
+                  stroke-width="3"
+                  class="center-node-circle"
+                />
+                
+                <text
+                  :x="centerNode.x"
+                  :y="centerNode.y"
+                  text-anchor="middle"
+                  dominant-baseline="middle"
+                  class="center-node-icon"
+                  fill="#1976d2"
+                  font-size="24"
+                >🖥️</text>
+                
+                <text
+                  :x="centerNode.x"
+                  :y="centerNode.y + centerNodeRadius + 20"
+                  text-anchor="middle"
+                  class="center-node-label"
+                  font-size="14"
+                  font-weight="bold"
+                >{{ centerNodeName }}</text>
+                
+                <text
+                  :x="centerNode.x"
+                  :y="centerNode.y + centerNodeRadius + 40"
+                  text-anchor="middle"
+                  class="center-node-info"
+                  font-size="11"
+                  fill="#666"
+                >当前节点</text>
+              </g>
+            </g>
+          </svg>
+
+          <!-- Tooltip 提示框 -->
+          <div
+            v-if="tooltip.show"
+            class="topology-tooltip"
+            :style="{
+              left: tooltip.x + 'px',
+              top: tooltip.y + 'px'
+            }"
+          >
+            <div v-if="tooltip.type === 'node'" class="tooltip-content">
+              <div class="tooltip-title">{{ tooltip.data.node_name }}</div>
+              <div class="tooltip-row">
+                <span class="tooltip-label">状态:</span>
+                <q-chip
+                  :color="NodeStatusManager.getStatusColor(tooltip.data.node_status)"
+                  text-color="white"
+                  size="sm"
+                  dense
+                >
+                  {{ NodeStatusManager.getStatusText(tooltip.data.node_status) }}
+                </q-chip>
+              </div>
+              <div class="tooltip-row" v-if="tooltip.data.conn_type">
+                <span class="tooltip-label">连接:</span>
+                <span>{{ getConnectionTypeName(tooltip.data.conn_type) }}</span>
+              </div>
+              <div class="tooltip-row" v-if="tooltip.data.latency">
+                <span class="tooltip-label">延迟:</span>
+                <span>{{ tooltip.data.latency.toFixed(1) }}ms</span>
+              </div>
+              <div class="tooltip-row" v-if="tooltip.data.user_name">
+                <span class="tooltip-label">用户:</span>
+                <span>{{ tooltip.data.user_name }}</span>
+              </div>
+              <div class="tooltip-row">
+                <span class="tooltip-label">流量:</span>
+                <span>↓{{ formatBytes(tooltip.data.rx_bytes) }} ↑{{ formatBytes(tooltip.data.tx_bytes) }}</span>
+              </div>
+            </div>
+            <div v-else-if="tooltip.type === 'connection'" class="tooltip-content">
+              <div class="tooltip-title">连接信息</div>
+              <div class="tooltip-row">
+                <span class="tooltip-label">目标:</span>
+                <span>{{ tooltip.data.node_name }}</span>
+              </div>
+              <div class="tooltip-row">
+                <span class="tooltip-label">类型:</span>
+                <span>{{ getConnectionTypeName(tooltip.data.conn_type) }}</span>
+              </div>
+              <div class="tooltip-row">
+                <span class="tooltip-label">状态:</span>
+                <q-chip
+                  :color="tooltip.data.online ? 'positive' : 'negative'"
+                  text-color="white"
+                  size="sm"
+                  dense
+                >
+                  {{ tooltip.data.online ? '在线' : '离线' }}
+                </q-chip>
+              </div>
+              <div class="tooltip-row" v-if="tooltip.data.latency">
+                <span class="tooltip-label">延迟:</span>
+                <span>{{ tooltip.data.latency.toFixed(1) }}ms</span>
+              </div>
+              <div class="tooltip-row">
+                <span class="tooltip-label">接收:</span>
+                <span>{{ formatBytes(tooltip.data.rx_bytes) }}</span>
+              </div>
+              <div class="tooltip-row">
+                <span class="tooltip-label">发送:</span>
+                <span>{{ formatBytes(tooltip.data.tx_bytes) }}</span>
+              </div>
+            </div>
+          </divdiv class="legend-dot" style="background: #ffc107"></div>
+              <span class="text-caption">未完成配置</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-line" style="border-top: 2px solid #4caf50"></div>
+              <span class="text-caption">直连</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-line" style="border-top: 2px solid #2196f3"></div>
+              <span class="text-caption">中继</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-line" style="border-top: 2px dashed #999"></div>
+              <span class="text-caption">无连接</span>
+            </div>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+
+    <!-- 节点详情弹窗 -->
+    <q-dialog v-model="showNodeDialog">
+      <q-card style="min-width: 400px">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">{{ selectedNode?.node_name }}</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section v-if="selectedNode">
+          <div class="q-gutter-sm">
+            <div class="row items-center">
+              <div class="col-4 text-grey-7">节点状态:</div>
+              <div class="col">
+                <q-chip
+                  :color="NodeStatusManager.getStatusColor(selectedNode.node_status)"
+                  text-color="white"
+                  size="sm"
+                >
+                  {{ NodeStatusManager.getStatusText(selectedNode.node_status) }}
+                </q-chip>
+              </div>
+            </div>
+            
+            <div class="row items-center">
+              <div class="col-4 text-grey-7">连接状态:</div>
+              <div class="col">
+                <q-chip
+                  :color="selectedNode.online ? 'positive' : 'negative'"
+                  text-color="white"
+                  size="sm"
+                >
+                  {{ selectedNode.online ? '在线' : '离线' }}
+                </q-chip>
+              </div>
+            </div>
+
+            <div v-if="selectedNode.conn_type" class="row items-center">
+              <div class="col-4 text-grey-7">连接类型:</div>
+              <div class="col">{{ getConnectionTypeName(selectedNode.conn_type) }}</div>
+            </div>
+
+            <div v-if="selectedNode.latency" class="row items-center">
+              <div class="col-4 text-grey-7">延迟:</div>
+              <div class="col">{{ selectedNode.latency.toFixed(1) }} ms</div>
+            </div>
+
+            <div v-if="selectedNode.user_name" class="row items-center">
+              <div class="col-4 text-grey-7">所属用户:</div>
+              <div class="col">{{ selectedNode.user_name }}</div>
+            </div>
+
+            <div v-if="selectedNode.ip_addresses && selectedNode.ip_addresses.length > 0">
+              <div class="text-grey-7 q-mb-xs">IP地址:</div>
+              <div class="row q-gutter-xs">
+                <q-chip
+                  v-for="(ip, idx) in selectedNode.ip_addresses"
+                  :key="idx"
+                  size="sm"
+                  color="primary"
+                  text-color="white"
+                >
+                  {{ ip.ip_address }}
+                </q-chip>
+              </div>
+            </div>
+
+            <div class="row items-center">
+              <div class="col-4 text-grey-7">流量:</div>
+              <div class="col">
+                ↓ {{ formatBytes(selectedNode.rx_bytes) }} / 
+                ↑ {{ formatBytes(selectedNode.tx_bytes) }}
+              </div>
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn
+            flat
+
+// Tooltip 状态
+const tooltip = ref({
+  show: false,
+  type: 'node' as 'node' | 'connection',
+  x: 0,
+  y: 0,
+  data: null as any
+})
+            label="查看详情"
+            color="primary"
+            @click="viewNodeDetails"
+          />
+          <q-btn flat label="关闭" color="grey" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { NodeStatusManager } from '../../utils/nodeStatus'
+import { formatBytes } from '../../utils/dateFormat'
+
+interface Props {
+  connections: any[]
+  loading: boolean
+  centerNodeName?: string
+  nodeId: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  centerNodeName: '当前节点'
+})
+
+const emit = defineEmits<{
+  'connection-click': [connection: any]
+}>()
+
+const router = useRouter()
+
+// SVG 容器和变换
+const containerRef = ref<HTMLElement>()
+const svgRef = ref<SVGElement>()
+const svgWidth = ref(1000)
+const svgHeight = ref(700)
+const scale = ref(1)
+const translateX = ref(0)
+const translateY = ref(0)
+
+// 节点尺寸
+const centerNodeRadius = 40
+const nodeRadius = 30
+
+// 中心节点位置
+const centerNode = computed(() => ({
+  x: svgWidth.value / 2,
+  y: svgHeight.value / 2
+}))
+const status = conn.node_status
+  
+  if (status === 2) return '#4caf50'  // 在线
+  if (status === 1) return '#ff9800'  // 启用但离线
+  if (status === 0) return '#9e9e9e'  // 已禁用
+  if (status === -1) return '#ffc107' // 未完成配置
+  return '#9e9e9e'
+}
+
+// 判断是否为直连
+const isDirectConnection = (conn: any) => {
+  const connType = conn.conn_type || 'none'
+  return connType.includes('direct')
+}
+
+// 获取中继路径（贝塞尔曲线）
+const getRelayPath = (conn: any) => {
+  const centerX = centerNode.value.x
+  const centerY = centerNode.value.y
+  const targetX = conn.x
+  const targetY = conn.y
+  
+  // 计算控制点（在路径的垂直方向偏移）
+  const midX = (centerX + targetX) / 2
+  const midY = (centerY + targetY) / 2
+  
+  // 计算垂直于连接线的方向
+  const dx = targetX - centerX
+  const dy = targetY - centerY
+  const len = Math.sqrt(dx * dx + dy * dy)
+  
+  // 垂直向量
+  const perpX = -dy / len
+  const perpY = dx / len
+  
+  // 控制点偏移量（曲线弯曲程度）
+  const offset = 50
+  const controlX = midX + perpX * offset
+  const controlY = midY + perpY * offset
+  
+  // 二次贝塞尔曲线
+  return `M ${centerX} ${centerY} Q ${controlX} ${controlY} ${targetX} ${targetY}`
+}
+
+// 显示节点 Tooltip
+const showNodeTooltip = (conn: any, event: MouseEvent) => {
+  if (containerRef.value) {
+    const rect = containerRef.value.getBoundingClientRect()
+    tooltip.value = {
+      show: true,
+      type: 'node',
+      x: event.clientX - rect.left + 15,
+      y: event.clientY - rect.top + 15,
+      data: conn
+    }
+  }
+}
+
+// 显示连接 Tooltip
+const showConnectionTooltip = (conn: any, event: MouseEvent) => {
+  if (containerRef.value) {
+    const rect = containerRef.value.getBoundingClientRect()
+    tooltip.value = {
+      show: true,
+      type: 'connection',
+      x: event.clientX - rect.left + 15,
+      y: event.clientY - rect.top + 15,
+      data: conn
+    }
+  }
+}
+
+// 隐藏 Tooltip
+const hideTooltip = () => {
+  tooltip.value.show = false
+const selectedNode = ref<any>(null)
+const showNodeDialog = ref(false)
+
+// 计算可视化连接（圆形分布）
+const visualConnections = computed(() => {
+  const connections = props.connections
+  const count = connections.length
+  if (count === 0) return []
+
+  const radius = Math.min(svgWidth.value, svgHeight.value) * 0.35
+  const centerX = centerNode.value.x
+  const centerY = centerNode.value.y
+
+  return connections.map((conn, index) => {
+    // 计算角度（均匀分布）
+    const angle = (2 * Math.PI * index) / count - Math.PI / 2
+    
+    return {
+      ...conn,
+      x: centerX + radius * Math.cos(angle),
+      y: centerY + radius * Math.sin(angle),
+      angle
+    }
+  })
+})
+
+// 变换字符串
+const transformString = computed(() => {
+  return `translate(${translateX.value}, ${translateY.value}) scale(${scale.value})`
+})
+
+// 获取连接线颜色
+const getConnectionColor = (conn: any) => {
+  if (!conn.online) return '#999'
+  
+  const connType = conn.conn_type || 'none'
+  if (connType.includes('direct')) return '#4caf50'
+  if (connType === 'relay' || connType === 'derp') return '#2196f3'
+  return '#999'
+}
+
+// 获取连接线宽度（根据延迟）
+const getConnectionWidth = (conn: any) => {
+  if (!conn.online || !conn.latency) return 2
+  
+  if (conn.latency < 50) return 4
+  if (conn.latency < 100) return 3
+  return 2
+}
+
+// 获取节点颜色（根据节点状态）
+const getNodeColor = (conn: any) => {
+  const status = conn.node_status
+  
+  if (status === 2) return '#4caf50'  // 在线
+  if (status === 1) return '#ff9800'  // 启用但离线
+  if (status === 0) return '#9e9e9e'  // 已禁用
+  if (status === -1) return '#ffc107' // 未完成配置
+  return '#9e9e9e'
+}
+
+// 获取节点边框颜色
+const getNodeBorderColor = (conn: any) => {
+  if (conn.online) return '#2e7d32'
+  recursor: pointer;
+    
+    &:hover {
+      stroke-width: 4 !important;
+    }
+    
+    &.relay-line {
+      // 中继连接的特殊样式
+    }
+  }
+
+  .peer-node {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      .node-circle {
+        stroke-width: 3;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+      }
+    }
+    
+    &.node-offline {
+      opacity: 0.6;
+    }
+  }
+
+  .center-node {
+    cursor: pointer;
+    
+    &:hover {
+      .center-node-circle {
+        filter: drop-shadow(0 3px 6px rgba(25,118,210,0.3)
+  }
+  return colorMap[color] || '#666'
+}
+
+// 获取连接类型名称
+const getConnectionTypeName = (type: string) => {
+  const typeMap: Record<string, string> = {
+    'direct_ipv4': '直连 IPv4',
+    'direct_ipv6': '直连 IPv6',
+    'relay': '中继',
+    'derp': 'DERP 中继',
+    'none': '无连接'
+  }
+  return typeMap[type] || type
+}
+
+// 获取连接提示信息
+const getConnectionTooltip = (conn: any) => {
+  const name = conn.node_name || `Node ${conn.peer_id}`
+  const status = conn.online ? '在线' : '离线'
+  const type = getConnectionTypeName(conn.conn_type)
+  const latency = conn.latency ? `${conn.latency.toFixed(1)}ms` : 'N/A'
+  
+  return `${name}\n状态: ${status}\n类型: ${type}\n延迟: ${latency}`
+}
+
+// 缩放控制
+const zoomIn = () => {
+  scale.value = Math.min(scale.value * 1.2, 3)
+}
+
+const zoomOut = () => {
+
+  .topology-tooltip {
+    position: absolute;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 1000;
+    pointer-events: none;
+    min-width: 200px;
+    max-width: 300px;
+    
+    .tooltip-content {
+      .tooltip-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e0e0e0;
+        color: #333;
+      }
+      
+      .tooltip-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+        font-size: 12px;
+        
+        .tooltip-label {
+          font-weight: 500;
+          color: #666;
+          min-width: 50px;
+        }
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+  scale.value = Math.max(scale.value / 1.2, 0.3)
+}
+
+const resetView = () => {
+  scale.value = 1
+  translateX.value = 0
+  translateY.value = 0
+}
+
+// 鼠标滚轮缩放
+const handleWheel = (event: WheelEvent) => {
+  const delta = event.deltaY > 0 ? 0.9 : 1.1
+  scale.value = Math.max(0.3, Math.min(3, scale.value * delta))
+}
+
+// 节点点击
+const handleNodeClick = (conn: any) => {
+  selectedNode.value = conn
+  showNodeDialog.value = true
+}
+
+const handleCenterNodeClick = () => {
+  // 可以显示当前节点的详细信息
+}
+
+const viewNodeDetails = () => {
+  if (selectedNode.value) {
+    const peerId = selectedNode.value.peer_id || selectedNode.value.node_id
+    router.push(`/app/routes/active/${props.nodeId}/p-${peerId}`)
+  }
+}
+
+// 响应容器大小变化
+const updateSize = () => {
+  if (containerRef.value) {
+    const rect = containerRef.value.getBoundingClientRect()
+    svgWidth.value = rect.width
+    svgHeight.value = Math.max(600, rect.height)
+  }
+}
+
+onMounted(() => {
+  updateSize()
+  window.addEventListener('resize', updateSize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateSize)
+})
+
+// 监听连接变化，重置视图
+watch(() => props.connections.length, () => {
+  resetView()
+})
+</script>
+
+<style lang="scss" scoped>
+.node-topology-view {
+  .topology-container {
+    width: 100%;
+    min-height: 600px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fafafa;
+    
+    svg {
+      display: block;
+      cursor: grab;
+      
+      &:active {
+        cursor: grabbing;
+      }
+    }
+  }
+
+  .connection-line {
+    transition: stroke-width 0.2s ease;
+    
+    &:hover {
+      stroke-width: 4 !important;
+    }
+  }
+
+  .peer-node {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      .node-circle {
+        filter: brightness(1.2);
+        stroke-width: 3;
+      }
+    }
+    
+    &.node-offline {
+      opacity: 0.7;
+    }
+  }
+
+  .center-node {
+    cursor: pointer;
+    
+    &:hover {
+      .center-node-circle {
+        filter: brightness(1.1);
+      }
+    }
+  }
+
+  .node-label,
+  .node-status,
+  .center-node-label,
+  .center-node-info {
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .topology-legend {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+    background: #f5f5f5;
+    border-radius: 4px;
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      
+      .legend-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid #666;
+      }
+      
+      .legend-line {
+        width: 30px;
+        height: 0;
+      }
+    }
+  }
+}
+</style>

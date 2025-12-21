@@ -1,6 +1,6 @@
 <template>
   <PageLayout
-    :title="$t('navigation.routes')"
+    :title="$t('navigation.routes.title')"
     :subtitle="$t('routes.subtitle')"
     icon="route"
   >
@@ -177,8 +177,8 @@ const statsCards = computed(() => [
 const navigationCards = computed(() => [
   {
     id: 'active-routes',
-    title: t('routes.navigation.activeRoutes'),
-    description: t('routes.navigation.activeRoutesDescription'),
+    title: t('routes.index.activeRoutes'),
+    description: t('routes.index.activeRoutesDescription'),
     icon: 'route',
     color: 'primary',
     buttonText: t('common.view'),
@@ -194,8 +194,8 @@ const navigationCards = computed(() => [
   },
   {
     id: 'pending-connections',
-    title: t('routes.navigation.pendingConnections'),
-    description: t('routes.navigation.pendingConnectionsDescription'),
+    title: t('routes.index.pendingConnections'),
+    description: t('routes.index.pendingConnectionsDescription'),
     icon: 'schedule',
     color: 'orange',
     buttonText: t('common.manage'),
@@ -211,8 +211,8 @@ const navigationCards = computed(() => [
   },
   {
     id: 'friend-nodes',
-    title: t('routes.navigation.friendNodes'),
-    description: t('routes.navigation.friendNodesDescription'),
+    title: t('routes.index.friendNodes'),
+    description: t('routes.index.friendNodesDescription'),
     icon: 'lan',
     color: 'positive',
     buttonText: t('common.browse'),

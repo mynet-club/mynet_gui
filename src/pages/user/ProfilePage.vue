@@ -94,19 +94,19 @@
               <q-form class="q-gutter-md">
                 <q-input
                   v-model="profileForm.name"
-                  :label="$t('user.name')"
+                  :placeholder="$t('user.name')"
                   outlined
                   dense
                 />
                 <q-input
                   v-model="profileForm.phone"
-                  :label="$t('user.phone')"
+                  :placeholder="$t('user.phone')"
                   outlined
                   dense
                 />
                 <q-input
                   v-model="profileForm.signature"
-                  :label="$t('user.signature')"
+                  :placeholder="$t('user.signature')"
                   type="textarea"
                   outlined
                   dense

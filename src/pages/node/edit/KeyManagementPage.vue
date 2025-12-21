@@ -218,7 +218,7 @@
             <q-select
               v-model="newKey.generation_method"
               :options="generationMethodOptions"
-              :label="$t('node.keyManagement.generationMethod')"
+              :placeholder="$t('node.keyManagement.generationMethod')"
               emit-value
               map-options
             />
@@ -226,7 +226,7 @@
             <q-input
               v-if="newKey.generation_method === 'upload'"
               v-model="newKey.public_key"
-              :label="$t('node.keyManagement.publicKeyContent')"
+              :placeholder="$t('node.keyManagement.publicKeyContent')"
               type="textarea"
               rows="4"
               required

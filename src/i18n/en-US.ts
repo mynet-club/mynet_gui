@@ -60,7 +60,43 @@ export default {
     optional: 'Optional',
     formReset: 'Form has been reset',
     allChangesReset: 'All changes have been reset',
-    noChangesToSave: 'No changes to save'
+    noChangesToSave: 'No changes to save',
+    send: 'Send',
+    view: 'View',
+    manage: 'Manage',
+    browse: 'Browse',
+    total: 'Total',
+    available: 'Available'
+  },
+  errors: {
+    loadFailed: 'Load failed',
+    removeFailed: 'Remove failed',
+    acceptFailed: 'Accept failed',
+    rejectFailed: 'Reject failed',
+    inviteFailed: 'Invite failed',
+    emailInviteFailed: 'Email invite failed'
+  },
+  notifications: {
+    empty: 'No notifications',
+    markAllRead: 'Mark all as read',
+    markAsRead: 'Mark as read',
+    markedAsRead: 'Marked as read',
+    markAsReadFailed: 'Failed to mark as read',
+    allMarkedAsRead: 'All marked as read',
+    markAllAsReadFailed: 'Failed to mark all as read',
+    deleted: 'Notification deleted',
+    deleteFailed: 'Failed to delete notification',
+    clearRead: 'Clear read',
+    clearReadConfirm: 'Are you sure you want to clear all read notifications?',
+    readCleared: 'Read notifications cleared',
+    clearReadFailed: 'Failed to clear read notifications',
+    filter: 'Filter',
+    all: 'All',
+    unreadOnly: 'Unread only'
+  },
+  validation: {
+    required: 'This field is required',
+    invalidEmail: 'Please enter a valid email address'
   },
   welcome: {
     title: 'Welcome to MyNet',
@@ -840,12 +876,35 @@ export default {
     systemTools: 'System Tools',
     dashboard: 'Dashboard',
     nodes: 'Node Management',
-    routes: 'Route Management',
+    routes: {
+      title: 'Route Management',
+      overview: 'Route Overview',
+      active: 'Active Routes',
+      pending: 'Pending Connections',
+      friends: 'Friend Nodes'
+    },
+    // Individual navigation keys for page titles
+    activeRoutes: 'Active Routes',
+    pendingConnections: 'Pending Connections',
+    friendNodes: 'Friend Nodes',
     ippools: 'IP Pool Management',
     zones: 'Zone Management',
     zoneSharing: 'Zone Sharing',
     zoneServices: 'Zone Services',
-    services: 'Service Management',
+    services: {
+      title: 'Service Management',
+      description: 'Manage and access various network services',
+      overview: 'Service Overview',
+      overviewDescription: 'View service statistics and quick navigation',
+      publicServices: 'Public Services',
+      publicServicesDescription: 'Browse publicly available network services',
+      friendServices: 'Friend Services',
+      friendServicesDescription: 'Access services shared by friends',
+      anonymousServices: 'Anonymous Services',
+      anonymousServicesDescription: 'Discover anonymously shared services',
+      myServices: 'My Services',
+      myServicesDescription: 'Manage and share services you created'
+    },
     social: {
       title: 'Social Network',
       friends: 'Friends',
@@ -910,6 +969,7 @@ export default {
     
     // Active routes
     activeRoutes: {
+      subtitle: 'Manage currently active network route connections',
       searchPlaceholder: 'Search routes...',
       statusFilter: 'Status Filter',
       noRoutes: 'No active routes',
@@ -936,6 +996,7 @@ export default {
     
     // Pending connections
     pendingConnections: {
+      subtitle: 'Handle pending connection requests',
       incoming: 'Incoming Requests',
       outgoing: 'Outgoing Requests',
       noIncomingConnections: 'No incoming connection requests',
@@ -944,11 +1005,18 @@ export default {
       vpnType: 'VPN Type',
       requestedAt: 'Requested At',
       approve: 'Approve',
-      reject: 'Reject'
+      reject: 'Reject',
+      viewDetails: 'View Details',
+      connectionDetails: 'Connection Details',
+      approveSuccess: 'Connection request approved',
+      approveError: 'Failed to approve connection request',
+      rejectSuccess: 'Connection request rejected',
+      rejectError: 'Failed to reject connection request'
     },
     
     // Friend nodes
     friendNodes: {
+      subtitle: 'Browse and manage friend network nodes',
       searchPlaceholder: 'Search friend nodes...',
       statusFilter: 'Status Filter',
       noNodes: 'No friend nodes',
@@ -988,7 +1056,17 @@ export default {
       incompleteSelection: 'Incomplete selection',
       connectionError: 'Connection failed',
       defaultMessage: 'I would like to connect my node {myNodeName} to your node {friendNodeName} for network communication. Thank you!',
-      goToSocial: 'Go to Social Network'
+      goToSocial: 'Go to Social Network',
+      sendConnectionRequest: 'Send Connection Request',
+      connectionRequestHint: 'Send a connection request to your friend to establish a route',
+      friendNode: 'Friend Node',
+      requestMessageHint: 'Explain the purpose of the connection to your friend',
+      stats: {
+        friendsCount: 'Total Friends',
+        totalNodes: 'Total Nodes',
+        onlineNodes: 'Online Nodes',
+        offlineNodes: 'Offline Nodes'
+      }
     },
 
     // Node-based route management
@@ -1020,6 +1098,33 @@ export default {
       }
     },
 
+    // Node routes display
+    nodeRoutes: {
+      nodeId: 'Node ID',
+      totalRoutes: 'Total Routes',
+      noDescription: 'No Description',
+      searchPlaceholder: 'Search route information...',
+      refresh: 'Refresh',
+      noRoutes: 'No routes for this node',
+      noSearchResults: 'No matching routes found',
+      tryDifferentSearch: 'Please try different search terms',
+      noRoutesForNode: 'This node hasn\'t established any route connections yet',
+      vpnType: 'VPN Type',
+      relayMode: 'Relay Mode',
+      priority: 'Priority',
+      remoteUser: 'Remote User',
+      lastUpdate: 'Last Update',
+      viewDetails: 'View Details',
+      editRoute: 'Edit Route',
+      disconnect: 'Disconnect',
+      unknownType: 'Unknown Type',
+      unknownMode: 'Unknown Mode',
+      direction: {
+        outgoing: 'Outgoing Route',
+        incoming: 'Incoming Route'
+      }
+    },
+
     // Relay modes
     relayModes: {
       direct: 'Direct',
@@ -1031,7 +1136,222 @@ export default {
     // Actions
     actions: {
       createRoute: 'Create Route',
-      refreshRoutes: 'Refresh Routes'
+      refreshRoutes: 'Refresh Routes',
+      connect: 'Connect',
+      disconnect: 'Disconnect',
+      approve: 'Approve',
+      reject: 'Reject',
+      viewDetails: 'View Details'
+    },
+
+    // Configuration management
+    config: {
+      description: 'Route configuration file contains all necessary network routing information, can be downloaded and applied to your network devices.',
+      configStatus: 'Configuration Status',
+      configReady: 'Configuration Ready',
+      configNotReady: 'Configuration Not Generated',
+      lastUpdated: 'Last Updated',
+      never: 'Never',
+      configDetails: 'Configuration Details',
+      version: 'Version',
+      format: 'Format',
+      entries: 'Entries',
+      preview: 'Preview',
+      copy: 'Copy',
+      copied: 'Copied to clipboard',
+      download: 'Download Configuration',
+      refresh: 'Refresh Configuration',
+      routeEntries: 'Route Entries',
+      nodeId: 'Node ID',
+      ipAddress: 'IP Address',
+      mask: 'Subnet Mask',
+      gateway: 'Gateway',
+      metric: 'Metric',
+      actions: 'Actions',
+      entryDetails: 'Entry Details'
+    },
+
+    // Route details
+    details: {
+      basicInfo: 'Basic Information',
+      routeId: 'Route ID',
+      status: 'Status',
+      connectionType: 'Connection Type',
+      createdAt: 'Created At',
+      lastActive: 'Last Active',
+      nodeInfo: 'Node Information',
+      sourceNode: 'Source Node',
+      targetNode: 'Target Node',
+      nodeName: 'Node Name',
+      ipAddress: 'IP Address',
+      mask: 'Subnet Mask',
+      friendName: 'Friend Name',
+      performance: 'Performance Metrics',
+      bandwidth: 'Bandwidth',
+      latency: 'Latency',
+      packetLoss: 'Packet Loss',
+      uptime: 'Uptime',
+      connectionStats: 'Connection Statistics',
+      bandwidthIn: 'Inbound Bandwidth',
+      bandwidthOut: 'Outbound Bandwidth',
+      bytesSent: 'Bytes Sent',
+      bytesReceived: 'Bytes Received',
+      disconnect: 'Disconnect'
+    },
+
+    // Create route workflow
+    create: {
+      // Step names
+      steps: {
+        selectFriend: 'Select Friend',
+        selectFriendNode: 'Select Friend Node',
+        selectMyNode: 'Select My Node',
+        submitRequest: 'Submit Request'
+      },
+      
+      // Step 1 - Select friend
+      step1: {
+        title: 'Create Route - Select Friend',
+        subtitle: 'Choose the friend to establish connection with',
+        selectFriend: 'Select Friend',
+        searchFriends: 'Search friends...',
+        noFriends: 'No friends available',
+        friendInfo: 'Nodes: {nodes} | Status: {status}',
+        availableNodes: 'Available Nodes',
+        totalNodes: 'Total Nodes',
+        nextStep: 'Next Step',
+        pleaseSelectFriend: 'Please select a friend'
+      },
+      
+      // Step 2 - Select friend node
+      step2: {
+        title: 'Create Route - Select Friend Node',
+        subtitle: 'Select {friendName}\'s node for connection',
+        selectedFriend: 'Selected Friend',
+        changeFriend: 'Change Friend',
+        selectFriendNode: 'Select Friend Node',
+        loadingNodes: 'Loading nodes...',
+        noNodes: 'This friend has no available nodes',
+        unknownLocation: 'Unknown Location',
+        nodeStatus: 'Status',
+        connections: 'Connections',
+        latency: 'Latency',
+        connectionsFull: 'Connections Full',
+        nextStep: 'Next Step',
+        pleaseSelectNode: 'Please select a node',
+        nodeCannotConnect: 'This node cannot be connected at the moment',
+        fetchNodesError: 'Failed to fetch friend nodes',
+        noFriendSelected: 'No friend selected'
+      },
+      
+      // Step 3 - Select my node
+      step3: {
+        title: 'Create Route - Select My Node',
+        subtitle: 'Select your node for connection',
+        selectionSummary: 'Selection Summary',
+        selectedFriend: 'Selected Friend',
+        selectedFriendNode: 'Selected Friend Node',
+        selectMyNode: 'Select My Node',
+        searchNodes: 'Search nodes...',
+        filterByStatus: 'Filter by Status',
+        allStatus: 'All Status',
+        onlineOnly: 'Online Only',
+        availableOnly: 'Available Only',
+        connectedOnly: 'Connected Only',
+        pendingOnly: 'Pending Only',
+        loadingNodes: 'Loading nodes...',
+        noAvailableNodes: 'No available nodes',
+        createNodeHint: 'You can create a node first',
+        unknownLocation: 'Unknown Location',
+        nodeStatus: 'Status',
+        connections: 'Connections',
+        bandwidth: 'Bandwidth',
+        connectionStatusLabel: 'Connection Status',
+        alreadyConnected: 'Already Connected',
+        requestSent: 'Request Sent',
+        requestReceived: 'Request Received',
+        requestRejected: 'Request Rejected',
+        connectionsFull: 'Connections Full',
+        nextStep: 'Next Step',
+        pleaseSelectNode: 'Please select a node',
+        nodeAlreadyConnected: 'This node has already established connection with target node',
+        requestAlreadySent: 'Connection request already sent to this node',
+        requestAlreadyReceived: 'Connection request already received from this node',
+        nodeCannotConnect: 'This node cannot be connected at the moment',
+        cannotProceedWithConnection: 'This node has connection relationship, cannot proceed',
+        fetchNodesError: 'Failed to fetch nodes',
+        noFriendSelected: 'No friend selected',
+        noFriendNodeSelected: 'No friend node selected',
+        
+        // Connection status
+        connectionStatus: {
+          connected: 'Connected',
+          pendingSent: 'Request Sent',
+          pendingReceived: 'Request Received',
+          rejected: 'Request Rejected',
+          none: 'No Connection',
+          unknown: 'Status Unknown'
+        },
+        
+        // Node not available reason
+        nodeNotAvailable: 'Node temporarily unavailable'
+      },
+      
+      // Step 4 - Submit request
+      step4: {
+        title: 'Create Route - Submit Request',
+        subtitle: 'Fill in connection request information',
+        selectionSummary: 'Selection Summary',
+        targetFriend: 'Target Friend',
+        targetNode: 'Target Node',
+        sourceNode: 'Source Node',
+        requestForm: 'Request Form',
+        requestMessage: 'Request Message',
+        messagePlaceholder: 'Please describe your connection needs and usage scenario...',
+        messageHint: 'Please provide detailed connection purpose to help friend approve quickly',
+        messageRequired: 'Please enter request message',
+        messageMinLength: 'Request message must be at least 10 characters',
+        messageMaxLength: 'Request message cannot exceed 500 characters',
+        connectionPriority: 'Connection Priority',
+        priorityHint: 'High priority connections will be processed first',
+        expectedBandwidth: 'Expected Bandwidth',
+        bandwidthRequired: 'Please enter expected bandwidth',
+        bandwidthMaxValue: 'Bandwidth cannot exceed 1000Mbps',
+        bandwidthHint: 'Set according to your actual needs',
+        connectionDuration: 'Connection Duration',
+        durationHint: 'Set the validity period of connection',
+        autoReconnect: 'Auto Reconnect',
+        connectionProtocol: 'Connection Protocol',
+        protocolHint: 'Recommended to use auto protocol',
+        submitRequest: 'Submit Request',
+        incompleteSelection: 'Selection information incomplete',
+        submitError: 'Failed to submit request',
+        requestSubmitted: 'Request Submitted',
+        requestSubmittedMessage: 'Your connection request has been successfully submitted, waiting for friend approval',
+        viewRoutes: 'View Routes',
+        createAnother: 'Create Another',
+        submitting: 'Submitting...',
+        defaultMessage: 'I would like to establish a network connection between our nodes for better communication. Please approve this request. Thank you!',
+        priorities: {
+          low: 'Low',
+          normal: 'Normal',
+          high: 'High'
+        },
+        durations: {
+          oneWeek: '1 Week',
+          oneMonth: '1 Month',
+          threeMonths: '3 Months',
+          sixMonths: '6 Months',
+          oneYear: '1 Year',
+          permanent: 'Permanent'
+        },
+        protocols: {
+          auto: 'Auto',
+          wireguard: 'WireGuard',
+          openvpn: 'OpenVPN',
+          ipsec: 'IPSec'
+        }
+      }
     },
 
     // Error messages

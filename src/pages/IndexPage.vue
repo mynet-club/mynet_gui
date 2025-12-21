@@ -197,16 +197,32 @@ const getThemeBadgeText = () => {
   }
 }
 
-const changeTheme = (newTheme: string) => {
+const changeTheme = async (newTheme: string) => {
   debug.log('🎨 [IndexPage] Changing theme to:', newTheme)
   
-  currentTheme.value = newTheme
-  setThemeMode(newTheme as any)
-  
-  // 保存到本地存储
-  LocalStorage.set('user_theme', newTheme)
-  
-  debug.log('🎨 [IndexPage] Theme changed successfully to:', newTheme)
+  try {
+    currentTheme.value = newTheme
+    setThemeMode(newTheme as any)
+    
+    // 保存到本地存储
+    LocalStorage.set('user_theme', newTheme)
+    
+    // 如果用户已登录，同步到服务端
+    if (isAuthenticated.value) {
+      try {
+        const { apiService } = await import('../services/api')
+        await apiService.updateUserProfile({ theme: newTheme })
+        debug.log('🎨 [IndexPage] Theme synced to server:', newTheme)
+      } catch (apiError) {
+        debug.warn('🎨 [IndexPage] Failed to sync theme to server (API may not support theme field yet):', apiError)
+        // 服务端可能还不支持theme字段，不影响本地使用
+      }
+    }
+    
+    debug.log('🎨 [IndexPage] Theme changed successfully to:', newTheme)
+  } catch (error) {
+    debug.error('🎨 [IndexPage] Unexpected error in changeTheme:', error)
+  }
 }
 
 // 语言切换方法
@@ -223,6 +239,17 @@ const changeLanguage = async (newLanguage: string) => {
     
     // 保存到本地存储 - 使用与i18n配置一致的键名
     LocalStorage.set('app-locale', newLanguage)
+    
+    // 如果用户已登录，同步到服务端
+    if (isAuthenticated.value) {
+      try {
+        const { apiService } = await import('../services/api')
+        await apiService.updateUserProfile({ language: newLanguage })
+        debug.log('🌐 [IndexPage] Language synced to server:', newLanguage)
+      } catch (apiError) {
+        debug.warn('🌐 [IndexPage] Failed to sync language to server:', apiError)
+      }
+    }
     
     debug.log('🌐 [IndexPage] Language changed successfully to:', newLanguage)
     

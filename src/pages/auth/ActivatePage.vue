@@ -43,7 +43,7 @@
               <q-form @submit="manualActivate" class="q-gutter-md">
                 <q-input
                   v-model="activationCode"
-                  :label="$t('auth.activationCode')"
+                  :placeholder="$t('auth.activationCode')"
                   outlined
                   dense
                   maxlength="6"

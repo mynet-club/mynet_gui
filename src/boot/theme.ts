@@ -3,19 +3,34 @@ import debug from "src/utils/debug"
 import { Dark, LocalStorage } from 'quasar'
 
 export default boot(({ app }) => {
-  // 从本地存储获取主题设置
+  // 从本地存储获取主题设置（优先使用 user_theme，兼容旧的 darkMode）
+  const savedTheme = LocalStorage.getItem('user_theme') as string | null
   const savedDarkMode = LocalStorage.getItem('darkMode')
   
-  if (savedDarkMode !== null) {
-    // 设置深色模式
+  if (savedTheme) {
+    // 新的主题系统：'light' | 'dark' | 'auto'
+    switch (savedTheme) {
+      case 'light':
+        Dark.set(false)
+        break
+      case 'dark':
+        Dark.set(true)
+        break
+      case 'auto':
+      default:
+        Dark.set('auto')
+        break
+    }
+    debug.log('🎨 [Boot] Applied theme from user_theme:', savedTheme)
+  } else if (savedDarkMode !== null) {
+    // 兼容旧的 darkMode 设置
     Dark.set(savedDarkMode === 'true')
+    debug.log('🎨 [Boot] Applied legacy darkMode:', savedDarkMode)
   } else {
     // 默认跟随系统设置
     Dark.set('auto')
+    debug.log('🎨 [Boot] Using auto theme (system preference)')
   }
-  
-  // 监听系统主题变化
-  // Dark.setAuto(true) // 这个方法不存在，使用媒体查询监听
   
   // 主题切换函数
   const toggleDarkMode = () => {

@@ -7,7 +7,6 @@
       <q-input
         v-model="form.node_name"
         outlined
-        :label="$t('nodes.detail.nodeName')"
         :placeholder="$t('nodes.detail.nodeName')"
         :rules="[
           val => !!val || $t('nodes.edit.basic.nameRequired'),
@@ -22,7 +21,6 @@
         type="textarea"
         rows="4"
         outlined
-        :label="$t('nodes.fields.description')"
         :placeholder="$t('nodes.fields.description')"
         :rules="[
           val => !val || val.length <= 500 || $t('nodes.edit.basic.descriptionMaxLength')

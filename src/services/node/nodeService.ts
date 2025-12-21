@@ -17,7 +17,8 @@ import type {
   NodeIndexServicesResponse,
   NodeStatusInfo,
   NodeDeviceInfo,
-  NodeDeviceInfoResponse
+  NodeDeviceInfoResponse,
+  BatchNodeDeviceInfoResponse
 } from '../../types/node'
 import type { 
   ApiResponse, 
@@ -105,12 +106,72 @@ export class NodeService {
   }
 
   /**
+   * 启动节点
+   * @param nodeId 节点ID
+   * @param reason 操作原因（可选）
+   * @returns 启动结果
+   */
+  async startNode(nodeId: string, reason?: string): Promise<ApiResponse<any>> {
+    const response = await api.post(`/nodes/${nodeId}/operator`, {
+      action: 'start',
+      params: {
+        reason: reason || '手动启动'
+      }
+    })
+    return response.data
+  }
+
+  /**
+   * 停止节点
+   * @param nodeId 节点ID
+   * @param reason 操作原因（可选）
+   * @returns 停止结果
+   */
+  async stopNode(nodeId: string, reason?: string): Promise<ApiResponse<any>> {
+    const response = await api.post(`/nodes/${nodeId}/operator`, {
+      action: 'stop',
+      params: {
+        reason: reason || '手动停止'
+      }
+    })
+    return response.data
+  }
+
+  /**
+   * 重启节点
+   * @param nodeId 节点ID
+   * @param reason 操作原因（可选）
+   * @returns 重启结果
+   */
+  async restartNode(nodeId: string, reason?: string): Promise<ApiResponse<any>> {
+    const response = await api.post(`/nodes/${nodeId}/operator`, {
+      action: 'restart',
+      params: {
+        reason: reason || '手动重启'
+      }
+    })
+    return response.data
+  }
+
+  /**
    * 获取节点设备信息
    * @param nodeId 节点ID
    * @returns 设备信息
    */
   async getNodeDeviceInfo(nodeId: string): Promise<NodeDeviceInfoResponse> {
     const response = await api.get(`/nodes/${nodeId}/deviceinfo`)
+    return response.data
+  }
+
+  /**
+   * 批量获取节点设备信息
+   * @param nodeIds 节点ID列表
+   * @returns 批量设备信息
+   */
+  async getBatchNodeDeviceInfo(nodeIds: Array<string | number>): Promise<BatchNodeDeviceInfoResponse> {
+    const response = await api.put('/nodes/deviceinfo', {
+      node_ids: nodeIds
+    })
     return response.data
   }
 

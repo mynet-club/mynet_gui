@@ -91,7 +91,7 @@
                 <q-form @submit="validateResetCode">
                   <q-input
                     v-model="form.resetCode"
-                    :label="$t('auth.resetCode')"
+                    :placeholder="$t('auth.resetCode')"
                     outlined
                     dense
                     maxlength="6"

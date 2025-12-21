@@ -100,6 +100,21 @@ export function usePreferencesManagement() {
       // 保存到 LocalStorage
       LocalStorage.set('user_preferences', preferences.value)
       
+      // 同步到服务端（使用updateUserProfile API）
+      try {
+        const { apiService } = await import('../services/api')
+        await apiService.updateUserProfile({
+          theme: preferences.value.theme,
+          language: preferences.value.language,
+          timezone: preferences.value.timezone
+          // 注意：notifications和privacy可能需要单独的API
+        })
+        debug.log('🔧 [Preferences] Preferences synced to server')
+      } catch (apiError) {
+        debug.warn('🔧 [Preferences] Failed to sync to server (API may not support all fields yet):', apiError)
+        // 继续执行，不影响本地保存
+      }
+      
       debug.log('🔧 [Preferences] Saved preferences:', preferences.value)
       
       $q.notify({
@@ -147,10 +162,25 @@ export function usePreferencesManagement() {
   }
 
   // 更新主题设置
-  const updateTheme = (newTheme: string) => {
-    preferences.value.theme = newTheme
-    // 触发主题切换
-    // TODO: 与 Quasar 主题系统集成
+  const updateTheme = async (newTheme: string) => {
+    try {
+      preferences.value.theme = newTheme
+      
+      // 保存到 LocalStorage
+      LocalStorage.set('user_preferences', preferences.value)
+      
+      // 同步到服务端
+      try {
+        const { apiService } = await import('../services/api')
+        await apiService.updateUserProfile({ theme: newTheme })
+        debug.log('🔧 [Preferences] Theme updated and synced:', newTheme)
+      } catch (apiError) {
+        debug.warn('🔧 [Preferences] Failed to sync theme (API may not support theme field yet):', apiError)
+        // 即使服务端同步失败，本地设置也已更新
+      }
+    } catch (error) {
+      debug.error('🔧 [Preferences] Unexpected error in updateTheme:', error)
+    }
   }
 
   // 组件挂载时加载数据

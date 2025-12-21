@@ -44,6 +44,7 @@ export default {
     unknown: '未知',
     unknownUser: '未知用户',
     notSet: '未设置',
+    searchPlaceholder: '请输入搜索关键词...',
     noDescription: '无描述',
     enabled: '启用',
     disabled: '禁用',
@@ -64,7 +65,12 @@ export default {
     formReset: '表单已重置',
     allChangesReset: '已重置所有更改',
     noChangesToSave: '没有需要保存的更改',
-    send: '发送'
+    send: '发送',
+    view: '查看',
+    manage: '管理',
+    browse: '浏览',
+    total: '总计',
+    available: '可用'
   },
   errors: {
     loadFailed: '加载失败',
@@ -73,6 +79,24 @@ export default {
     rejectFailed: '拒绝失败',
     inviteFailed: '邀请失败',
     emailInviteFailed: '邮件邀请失败'
+  },
+  notifications: {
+    empty: '暂无通知',
+    markAllRead: '全部已读',
+    markAsRead: '标记为已读',
+    markedAsRead: '已标记为已读',
+    markAsReadFailed: '标记已读失败',
+    allMarkedAsRead: '全部已标记为已读',
+    markAllAsReadFailed: '全部标记已读失败',
+    deleted: '通知已删除',
+    deleteFailed: '删除通知失败',
+    clearRead: '清空已读',
+    clearReadConfirm: '确定要清空所有已读通知吗？',
+    readCleared: '已读通知已清空',
+    clearReadFailed: '清空已读失败',
+    filter: '筛选',
+    all: '全部',
+    unreadOnly: '仅未读'
   },
   validation: {
     required: '此字段为必填项',
@@ -342,9 +366,12 @@ export default {
       confirmMigrate: '确定要迁移节点 "{name}" 吗？',
       
       // 操作结果
-      startSuccess: '节点启动成功',
-      stopSuccess: '节点停止成功',
-      restartSuccess: '节点重启成功',
+      startSuccess: '节点 {name} 启动成功',
+      stopSuccess: '节点 {name} 停止成功',
+      restartSuccess: '节点 {name} 重启成功',
+      commandCreated: '{action}指令已创建，等待节点 {name} 执行',
+      commandCreatedSimple: '{action}指令已创建，等待节点 {name} 执行',
+      actionFailed: '节点{action}失败',
       pauseSuccess: '节点暂停成功',
       resumeSuccess: '节点恢复成功',
       backupSuccess: '节点备份成功',
@@ -979,7 +1006,78 @@ export default {
       sourceNode: '源节点',
       targetNode: '目标节点',
       unknownType: '未知类型',
-      unknownMode: '未知模式'
+      unknownMode: '未知模式',
+      
+      // 视图模式
+      viewMode: {
+        card: '卡片模式',
+        list: '列表模式'
+      },
+      
+      // 列表视图
+      listView: {
+        title: '节点连接列表',
+        searchPlaceholder: '搜索节点名称、IP...',
+        totalConnections: '共 {count} 条连接',
+        noConnections: '暂无连接数据',
+        noSearchResults: '未找到匹配的连接',
+        columns: {
+          nodeName: '节点名称',
+          ipAddress: 'IP地址',
+          status: '状态',
+          connectionType: '连接类型',
+          latency: '延迟',
+          traffic: '流量',
+          lastSeen: '最后可见',
+          actions: '操作'
+        }
+      },
+      
+      // 连接详情
+      connectionDetails: {
+        title: '连接详情',
+        subtitle: '查看两个节点之间的连接状态和历史数据',
+        sourceNode: '本节点',
+        peerNode: '对端节点',
+        connectionStatus: '连接状态',
+        connectionType: '连接类型',
+        latency: '延迟',
+        lastSeen: '最后可见',
+        trafficStats: '流量统计',
+        rxBytes: '接收流量',
+        txBytes: '发送流量',
+        totalBytes: '总流量',
+        history: '连接历史',
+        loadingDetails: '加载连接详情...',
+        nodeInfo: {
+          nodeId: '节点ID',
+          nodeName: '节点名称',
+          owner: '所属用户',
+          status: '节点状态'
+        },
+        timeRange: {
+          '1h': '1小时',
+          '6h': '6小时',
+          '24h': '24小时',
+          '7d': '7天'
+        }
+      },
+      
+      // 连接类型
+      connectionTypes: {
+        direct_ipv4: '直连 IPv4',
+        direct_ipv6: '直连 IPv6',
+        relay: '中继',
+        derp: 'DERP 中继'
+      },
+      
+      // 状态
+      status: {
+        online: '在线',
+        offline: '离线',
+        connected: '已连接',
+        disconnected: '已断开'
+      }
     },
 
     // 待处理连接
@@ -1023,7 +1121,13 @@ export default {
       friendNode: '好友节点',
       myNode: '我的节点',
       requestMessage: '请求消息',
-      requestMessageHint: '向好友说明连接目的'
+      requestMessageHint: '向好友说明连接目的',
+      stats: {
+        friendsCount: '好友数',
+        totalNodes: '节点总数',
+        onlineNodes: '在线节点',
+        offlineNodes: '离线节点'
+      }
     },
 
     // 中继模式
@@ -1194,6 +1298,11 @@ export default {
         connections: '连接数',
         latency: '延迟',
         connectionsFull: '连接数已满',
+        nodeNotAvailable: '节点不可用',
+        cannotConnect: '无法连接到此节点',
+        possibleReasons: '可能的原因',
+        existingConnection: '已存在路由连接',
+        pendingRequest: '存在待处理的连接请求',
         nextStep: '下一步',
         pleaseSelectNode: '请选择一个节点',
         nodeCannotConnect: '该节点暂时无法连接',
@@ -1251,7 +1360,10 @@ export default {
         },
         
         // 节点不可用原因
-        nodeNotAvailable: '节点暂时不可用'
+        nodeNotAvailable: '节点暂时不可用',
+        nodeUnconfigured: '节点未配置',
+        nodeDisabled: '节点已禁用',
+        nodeMaintenance: '节点维护中'
       },
       
       // 第四步 - 提交申请
@@ -1321,6 +1433,38 @@ export default {
       // 通用消息
       requestSubmitted: '路由申请已提交',
       submitError: '提交申请失败'
+    },
+    
+    // 路由概览页面导航卡片
+    index: {
+      title: '路由概览',
+      subtitle: '管理和监控网络路由连接',
+      overview: '路由概览',
+      overviewDescription: '查看路由统计和快速操作',
+      activeRoutes: '活跃路由',
+      activeRoutesDescription: '管理当前活跃的网络路由连接',
+      pendingConnections: '待处理连接',
+      pendingConnectionsDescription: '处理待批准的连接请求',
+      friendNodes: '好友节点',
+      friendNodesDescription: '浏览和管理好友的网络节点',
+      
+      // 统计标签
+      statistics: {
+        total: '总计',
+        active: '活跃',
+        pending: '待处理',
+        available: '可用',
+        connected: '已连接'
+      },
+      
+      // 快速操作
+      quickActions: {
+        createRoute: '创建路由',
+        refreshData: '刷新数据',
+        viewAll: '查看全部',
+        manage: '管理',
+        browse: '浏览'
+      }
     },
     
     // 对话框
@@ -1416,19 +1560,7 @@ export default {
     updateSuccess: '区域更新成功',
     updateError: '更新区域失败',
     deleteSuccess: '区域删除成功',
-    deleteError: '删除区域失败',
-    
-    // 导航
-    navigation: {
-      overview: '路由概览',
-      overviewDescription: '查看路由统计和快速操作',
-      activeRoutes: '活跃路由',
-      activeRoutesDescription: '管理当前活跃的网络路由连接',
-      pendingConnections: '待处理连接',
-      pendingConnectionsDescription: '处理待批准的连接请求',
-      friendNodes: '好友节点',
-      friendNodesDescription: '浏览和管理好友的网络节点'
-    }
+    deleteError: '删除区域失败'
   },
   social: {
     subtitle: '社交网络连接和用户管理',

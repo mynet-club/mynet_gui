@@ -170,6 +170,39 @@
                 </q-item-section>
                 <q-item-section>{{ $t('nodes.disable') }}</q-item-section>
               </q-item>
+              
+              <q-separator />
+              
+              <q-item 
+                clickable 
+                @click="handleNodeAction(node, 'start')"
+                :disable="statusChanging[node.node_id]"
+              >
+                <q-item-section avatar>
+                  <q-icon name="play_arrow" color="positive" />
+                </q-item-section>
+                <q-item-section>{{ $t('nodes.operations.start') }}</q-item-section>
+              </q-item>
+              <q-item 
+                clickable 
+                @click="handleNodeAction(node, 'stop')"
+                :disable="statusChanging[node.node_id]"
+              >
+                <q-item-section avatar>
+                  <q-icon name="stop" color="negative" />
+                </q-item-section>
+                <q-item-section>{{ $t('nodes.operations.stop') }}</q-item-section>
+              </q-item>
+              <q-item 
+                clickable 
+                @click="handleNodeAction(node, 'restart')"
+                :disable="statusChanging[node.node_id]"
+              >
+                <q-item-section avatar>
+                  <q-icon name="refresh" color="orange" />
+                </q-item-section>
+                <q-item-section>{{ $t('nodes.operations.restart') }}</q-item-section>
+              </q-item>
             </q-list>
           </q-btn-dropdown>
           
@@ -400,13 +433,43 @@ const checkAndLoadUnconfiguredNodes = async () => {
   await Promise.allSettled(loadPromises)
 }
 
-// 加载所有节点的设备信息（用于显示操作系统信息）
+// 批量加载所有节点的设备信息（用于显示操作系统信息）
 const loadAllNodesDeviceInfo = async () => {
-  const loadPromises = filteredNodes.value.map(node => 
-    loadNodeDeviceInfo(node.node_id)
+  // 过滤出还没有加载设备信息的节点
+  const nodesToLoad = filteredNodes.value.filter(node => 
+    !nodeDeviceInfo.value[node.node_id] && !loadingDeviceInfo.value[node.node_id]
   )
   
-  await Promise.allSettled(loadPromises)
+  if (nodesToLoad.length === 0) {
+    return // 所有节点信息已加载
+  }
+  
+  const nodeIds = nodesToLoad.map(node => node.node_id)
+  
+  try {
+    // 批量标记为加载中
+    nodeIds.forEach(id => {
+      loadingDeviceInfo.value[id] = true
+    })
+    
+    const response = await nodeService.getBatchNodeDeviceInfo(nodeIds)
+    
+    if (response.success && response.data.devices) {
+      // 将批量获取的设备信息存储到对应的节点
+      response.data.devices.forEach(item => {
+        if (item.exists && item.device_info) {
+          nodeDeviceInfo.value[item.node_id] = item.device_info
+        }
+      })
+    }
+  } catch (error) {
+    debug.error('批量获取节点设备信息失败:', error)
+  } finally {
+    // 清除加载状态
+    nodeIds.forEach(id => {
+      loadingDeviceInfo.value[id] = false
+    })
+  }
 }
 
 // 操作方法
@@ -477,6 +540,52 @@ const changeNodeStatus = async (node: Node, newStatus: number) => {
   } catch (error) {
     debug.error('更新节点状态失败:', error)
     notifyError(t('nodes.status.updateFailed'))
+  } finally {
+    statusChanging.value[nodeId] = false
+  }
+}
+
+// 节点操作方法（启动、停止、重启）
+const handleNodeAction = async (node: Node, action: 'start' | 'stop' | 'restart') => {
+  const nodeId = node.node_id
+  
+  try {
+    statusChanging.value[nodeId] = true
+    
+    let result: any
+    // 根据操作类型调用对应的 API
+    switch (action) {
+      case 'start':
+        result = await nodeService.startNode(String(nodeId))
+        break
+      case 'stop':
+        result = await nodeService.stopNode(String(nodeId))
+        break
+      case 'restart':
+        result = await nodeService.restartNode(String(nodeId))
+        break
+    }
+    
+    // 显示操作指令创建成功的消息
+    if (result && result.data) {
+      notifySuccess(t('nodes.operations.commandCreated', {
+        name: node.node_name,
+        action: t(`nodes.operations.${action}`),
+        commandId: result.data.command_id
+      }))
+    } else {
+      notifySuccess(t('nodes.operations.commandCreatedSimple', {
+        name: node.node_name,
+        action: t(`nodes.operations.${action}`)
+      }))
+    }
+    
+    // 刷新节点列表以获取最新状态
+    await refreshNodes()
+    
+  } catch (error) {
+    debug.error(`节点${action}操作失败:`, error)
+    notifyError(t('nodes.operations.actionFailed', { action: t(`nodes.operations.${action}`) }))
   } finally {
     statusChanging.value[nodeId] = false
   }

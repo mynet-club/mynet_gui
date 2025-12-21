@@ -117,7 +117,7 @@
               <q-select
                 v-model="statusFilter"
                 :options="statusOptions"
-                :label="$t('routes.create.step3.filterByStatus')"
+                :placeholder="$t('routes.create.step3.filterByStatus')"
                 outlined
                 dense
                 style="min-width: 150px"
@@ -252,6 +252,9 @@
                       <span v-if="node.status === -1">{{ $t('routes.create.step3.nodeUnconfigured') }}</span>
                       <span v-else-if="node.status === 0">{{ $t('routes.create.step3.nodeDisabled') }}</span>
                       <span v-else-if="node.status === 99">{{ $t('routes.create.step3.nodeMaintenance') }}</span>
+                      <span v-else-if="node.current_connections >= node.max_connections && node.max_connections > 0">
+                        {{ $t('routes.create.step3.connectionsFull') }}
+                      </span>
                       <span v-else>{{ $t('routes.create.step3.nodeNotAvailable') }}</span>
                     </q-banner>
                   </div>
@@ -444,8 +447,12 @@ const fetchMyNodes = async () => {
       const connectionStatus = checkConnectionStatusLocal(node.id, selectedFriendNode.value?.id)
       
       // 详细的连接能力判断
+      // 检查节点连接数是否已满
+      const currentConnections = node.current_connections || 0
+      const maxConnections = node.max_connections || 0
+      const hasAvailableConnections = maxConnections === 0 || currentConnections < maxConnections
+      
       // 使用统一的状态管理器来处理状态判断
-      const hasAvailableConnections = true
       const normalizedStatus = NodeStatusManager.normalizeStatus(node.node_status, node.status)
       
       // 只有启用(1)或在线(2)状态的节点可以用于路由连接
@@ -455,26 +462,34 @@ const fetchMyNodes = async () => {
       
       const canConnectByStatus = connectionStatus.can_connect
       
+      // 优先使用后端返回的 can_connect 判断
+      const backendCanConnect = node.can_connect !== undefined ? node.can_connect : true
+      
       debug.log(`节点 ${node.name} (${node.id}):`, {
         node_data: node,
-        current_connections: node.current_connections || 'N/A',
+        current_connections: currentConnections,
+        max_connections: maxConnections,
         hasAvailableConnections,
+        backendCanConnect,
         raw_status: node.status,
         raw_node_status: node.node_status,
         normalizedStatus,
         isOnline,
         connectionStatus: connectionStatus.status,
         canConnectByStatus,
-        friendNodeId: selectedFriendNode.value?.id
+        friendNodeId: selectedFriendNode.value?.id,
+        final_can_connect: backendCanConnect && hasAvailableConnections && isOnline && canConnectByStatus
       })
       
       return {
         ...node,
         // 添加默认值以兼容模板显示
-        current_connections: node.current_connections || 0,
+        current_connections: currentConnections,
+        max_connections: maxConnections,
         // 使用统一状态管理器标准化状态
         normalized_status: normalizedStatus,
-        can_connect: hasAvailableConnections && isOnline && canConnectByStatus,
+        // 综合判断：后端判断 && 连接数未满 && 节点在线 && 无连接冲突
+        can_connect: backendCanConnect && hasAvailableConnections && isOnline && canConnectByStatus,
         connection_status: connectionStatus.status,
         connection_message: connectionStatus.message,
         connection_color: connectionStatus.color

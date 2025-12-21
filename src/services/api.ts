@@ -375,14 +375,39 @@ export const apiService = {
     }
   },
 
-  // 更新用户资料
+  // 更新用户资料（包含偏好设置）
   async updateUserProfile(data: {
     name?: string;
     phone?: string;
     signature?: string;
+    theme?: string;      // 会被转换为 preferences.theme
+    language?: string;   // 会被转换为 preferences.language
+    timezone?: string;   // 会被转换为 preferences.timezone
+    preferences?: {      // 也可以直接传递 preferences 对象
+      theme?: string;
+      language?: string;
+      timezone?: string;
+    };
   }) {
     try {
-      const response = await api.put('/users/profile', data);
+      // 如果传入了单独的 theme/language/timezone，转换为 preferences 结构
+      const requestData: any = {
+        name: data.name,
+        phone: data.phone,
+        signature: data.signature
+      };
+      
+      // 构建 preferences 对象
+      if (data.theme || data.language || data.timezone || data.preferences) {
+        requestData.preferences = {
+          ...data.preferences,
+          ...(data.theme && { theme: data.theme }),
+          ...(data.language && { language: data.language }),
+          ...(data.timezone && { timezone: data.timezone })
+        };
+      }
+      
+      const response = await api.put('/users/profile', requestData);
       
       if (response.data.success) {
         return { data: response.data.data };

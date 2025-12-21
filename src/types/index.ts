@@ -19,6 +19,11 @@ export interface User {
   permissions?: string[]
   avatar?: string
   signature?: string  // 用户签名
+  preferences?: {
+    theme?: string      // 主题设置：'light' | 'dark' | 'auto'
+    language?: string   // 语言设置：'zh-CN' | 'en-US'
+    timezone?: string   // 时区设置：'Asia/Shanghai' 等
+  }
 }
 
 export interface AuthTokens {

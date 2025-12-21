@@ -158,7 +158,23 @@
                       <template v-slot:avatar>
                         <q-icon name="warning" />
                       </template>
-                      {{ $t('routes.create.step2.connectionsFull') }}
+                      <!-- 根据具体情况显示不同的警告信息 -->
+                      <div v-if="node.current_connections >= node.max_connections && node.max_connections > 0">
+                        {{ $t('routes.create.step2.connectionsFull') }}
+                      </div>
+                      <div v-else-if="node.status !== 'enabled' && node.status !== 'online'">
+                        {{ $t('routes.create.step2.nodeNotAvailable') }}
+                      </div>
+                      <div v-else>
+                        <div>{{ $t('routes.create.step2.cannotConnect') }}</div>
+                        <div class="text-caption q-mt-xs">
+                          {{ $t('routes.create.step2.possibleReasons') }}:
+                          <ul class="q-ma-none q-pl-md">
+                            <li>{{ $t('routes.create.step2.existingConnection') }}</li>
+                            <li>{{ $t('routes.create.step2.pendingRequest') }}</li>
+                          </ul>
+                        </div>
+                      </div>
                     </q-banner>
                   </div>
 
@@ -266,10 +282,40 @@ const fetchFriendNodes = async () => {
     const nodes = await getFriendNodes(selectedFriend.value.id)
     
     // 为每个节点添加连接能力判断
-    friendNodes.value = nodes.map((node: any) => ({
-      ...node,
-      can_connect: node.current_connections < node.max_connections && node.status === 'online'
-    }))
+    friendNodes.value = nodes.map((node: any) => {
+      // 检查连接数是否已满
+      const currentConnections = node.current_connections || 0
+      const maxConnections = node.max_connections || 0
+      const hasAvailableConnections = maxConnections === 0 || currentConnections < maxConnections
+      
+      // 检查节点状态（enabled 或 online 都认为可用）
+      const isAvailable = node.status === 'enabled' || node.status === 'online'
+      
+      // 优先使用后端返回的 can_connect，如果没有则根据连接数和状态判断
+      const backendCanConnect = node.can_connect !== undefined ? node.can_connect : true
+      
+      // 详细的调试日志
+      debug.log(`好友节点 ${node.name} (${node.id}):`, {
+        raw_data: node,
+        current_connections: currentConnections,
+        max_connections: maxConnections,
+        hasAvailableConnections,
+        status: node.status,
+        isAvailable,
+        backend_can_connect: node.can_connect,
+        final_can_connect: backendCanConnect && hasAvailableConnections && isAvailable,
+        reason: !backendCanConnect ? '后端判断不可连接' : 
+                !hasAvailableConnections ? '连接数已满' : 
+                !isAvailable ? '节点不可用' : '可以连接'
+      })
+      
+      return {
+        ...node,
+        current_connections: currentConnections,
+        max_connections: maxConnections,
+        can_connect: backendCanConnect && hasAvailableConnections && isAvailable
+      }
+    })
   } catch (error) {
     debug.error('获取好友节点失败:', error)
     notify.error(t('routes.create.step2.fetchNodesError'))

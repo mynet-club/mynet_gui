@@ -224,7 +224,7 @@
                     <div class="col-12 col-md-6">
                       <q-input 
                         v-model="form.name"
-                        :label="$t('user.name')"
+                        :placeholder="$t('user.name')"
                         outlined
                         :rules="[val => !!val || $t('user.nameRequired')]"
                         :disable="isLoading"
@@ -233,7 +233,7 @@
                     <div class="col-12 col-md-6">
                       <q-input 
                         v-model="form.email"
-                        :label="$t('user.email')"
+                        :placeholder="$t('user.email')"
                         type="email"
                         outlined
                         :rules="[
@@ -247,14 +247,14 @@
                   
                   <q-input 
                     v-model="form.phone"
-                    :label="$t('user.phone')"
+                    :placeholder="$t('user.phone')"
                     outlined
                     :disable="isLoading"
                   />
   
   <q-input 
     v-model="form.bio"
-    :label="$t('user.bio')"
+    :placeholder="$t('user.bio')"
     type="textarea"
     rows="3"
     outlined
@@ -555,7 +555,7 @@
           
           <q-input
             v-model="avatarUrl"
-            :label="$t('user.avatarUrl')"
+            :placeholder="$t('user.avatarUrl')"
             outlined
             :hint="$t('user.avatarUrlHint')"
             @update:model-value="(val) => updateAvatarPreview(val as string)"
@@ -564,7 +564,7 @@
           <div class="q-mt-md">
             <q-file
               v-model="avatarFile"
-              :label="$t('user.uploadAvatar')"
+              :placeholder="$t('user.uploadAvatar')"
               outlined
               accept="image/*"
               @update:model-value="handleAvatarUpload"

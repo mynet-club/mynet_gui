@@ -108,6 +108,7 @@ const { t } = useI18n()
 
 const email = ref(route.query.email as string || '')
 const token = ref(route.query.token as string || '')
+const code = ref(route.query.code as string || '')
 const isLoading = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
@@ -119,7 +120,7 @@ const resetForm = ref({
 
 // 如果没有必要参数，跳转回忘记密码页面
 onMounted(() => {
-  if (!email.value || !token.value) {
+  if (!email.value || (!token.value && !code.value)) {
     router.replace('/auth/forgot-password')
     return
   }
@@ -174,12 +175,20 @@ const isFormValid = computed(() => {
 const handleResetPassword = async () => {
   isLoading.value = true
   try {
-    const response = await apiService.resetPassword({
+    const requestData: any = {
       email: email.value,
-      token: token.value,
       password: resetForm.value.password,
       password_confirmation: resetForm.value.confirmPassword
-    })
+    }
+    
+    // 根据参数类型决定使用token还是code
+    if (code.value) {
+      requestData.code = code.value
+    } else if (token.value) {
+      requestData.token = token.value
+    }
+    
+    const response = await apiService.resetPassword(requestData)
     
     if (response.data.success) {
       // 显示成功提示

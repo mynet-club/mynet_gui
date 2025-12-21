@@ -353,6 +353,23 @@ export interface NodeDeviceInfoResponse {
   message: string
 }
 
+// 批量节点设备信息单项
+export interface BatchDeviceInfoItem {
+  node_id: number | string            // 节点ID
+  exists: boolean                     // 设备信息是否存在
+  device_info: NodeDeviceInfo | null  // 设备信息 (不存在时为null)
+}
+
+// 批量节点设备信息响应接口
+export interface BatchNodeDeviceInfoResponse {
+  success: boolean
+  message: string
+  data: {
+    total: number                     // 总数
+    devices: BatchDeviceInfoItem[]    // 设备信息列表
+  }
+}
+
 // 节点操作结果
 export interface NodeOperationResult {
   success: boolean

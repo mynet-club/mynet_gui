@@ -20,7 +20,7 @@
         <q-select
           v-model="statusFilter"
           :options="statusOptions"
-          :label="$t('routes.nodeSelector.statusFilter')"
+          :placeholder="$t('routes.nodeSelector.statusFilter')"
           outlined
           dense
           clearable
@@ -33,7 +33,7 @@
         <q-select
           v-model="typeFilter"
           :options="typeOptions"
-          :label="$t('routes.nodeSelector.typeFilter')"
+          :placeholder="$t('routes.nodeSelector.typeFilter')"
           outlined
           dense
           clearable
