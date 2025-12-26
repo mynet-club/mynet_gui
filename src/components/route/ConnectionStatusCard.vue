@@ -30,7 +30,7 @@
             <q-icon name="timer" color="orange" size="md" />
             <div class="text-caption text-grey-6 q-mt-xs">延迟</div>
             <div class="text-subtitle1 text-weight-medium">
-              {{ connectionDetails.latency ? `${connectionDetails.latency.toFixed(1)} ms` : 'N/A' }}
+              {{ connectionDetails.latency ? `${connectionDetails.latency.toFixed(1)} ms` : '—' }}
             </div>
           </div>
         </div>
@@ -50,6 +50,9 @@
 
 <script setup lang="ts">
 import { formatRelativeTime } from '../../utils/dateFormat'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 interface Props {
   connectionDetails: any
@@ -58,7 +61,7 @@ interface Props {
 defineProps<Props>()
 
 const getConnectionTypeName = (type: string) => {
-  if (!type) return 'N/A'
+  if (!type) return t('common.unknown')
   
   const typeMap: Record<string, string> = {
     'direct_ipv4': '直连 IPv4',

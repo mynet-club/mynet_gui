@@ -3,6 +3,16 @@
  * 统一处理时区和格式化问题
  */
 
+import { i18n } from '../boot/i18n'
+
+const t = (key: string, params?: Record<string, any>) => {
+  if (i18n.global) {
+    return i18n.global.t(key, params)
+  }
+  // Fallback if i18n is not initialized
+  return key
+}
+
 /**
  * 格式化日期时间 - 显示完整的日期和时间
  * @param dateStr 日期字符串（ISO 8601格式或其他可解析格式）
@@ -10,11 +20,11 @@
  * @returns 格式化后的本地时间字符串，如：2025-12-15 14:30:45
  */
 export function formatDateTime(dateStr: string | null | undefined, includeSeconds = true): string {
-  if (!dateStr) return 'N/A'
+  if (!dateStr) return t('common.noData')
   
   try {
     const date = new Date(dateStr)
-    if (isNaN(date.getTime())) return 'Invalid Date'
+    if (isNaN(date.getTime())) return t('common.invalidDate')
     
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -40,11 +50,11 @@ export function formatDateTime(dateStr: string | null | undefined, includeSecond
  * @returns 格式化后的日期字符串，如：2025-12-15
  */
 export function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return 'N/A'
+  if (!dateStr) return t('common.noData')
   
   try {
     const date = new Date(dateStr)
-    if (isNaN(date.getTime())) return 'Invalid Date'
+    if (isNaN(date.getTime())) return t('common.invalidDate')
     
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -64,11 +74,11 @@ export function formatDate(dateStr: string | null | undefined): string {
  * @returns 格式化后的时间字符串，如：14:30:45
  */
 export function formatTime(dateStr: string | null | undefined, includeSeconds = true): string {
-  if (!dateStr) return 'N/A'
+  if (!dateStr) return t('common.noData')
   
   try {
     const date = new Date(dateStr)
-    if (isNaN(date.getTime())) return 'Invalid Time'
+    if (isNaN(date.getTime())) return t('common.invalidTime')
     
     const hours = String(date.getHours()).padStart(2, '0')
     const minutes = String(date.getMinutes()).padStart(2, '0')
@@ -91,11 +101,11 @@ export function formatTime(dateStr: string | null | undefined, includeSeconds = 
  * @returns 相对时间字符串
  */
 export function formatRelativeTime(dateStr: string | null | undefined): string {
-  if (!dateStr) return 'N/A'
+  if (!dateStr) return t('common.noData')
   
   try {
     const date = new Date(dateStr)
-    if (isNaN(date.getTime())) return 'Invalid Date'
+    if (isNaN(date.getTime())) return t('common.invalidDate')
     
     const now = new Date()
     const diffMs = now.getTime() - date.getTime()
@@ -105,13 +115,13 @@ export function formatRelativeTime(dateStr: string | null | undefined): string {
     const diffDays = Math.floor(diffHours / 24)
     
     if (diffSeconds < 60) {
-      return '刚刚'
+      return t('common.justNow')
     } else if (diffMinutes < 60) {
-      return `${diffMinutes}分钟前`
+      return t('common.minutesAgo', { n: diffMinutes })
     } else if (diffHours < 24) {
-      return `${diffHours}小时前`
+      return t('common.hoursAgo', { n: diffHours })
     } else if (diffDays < 7) {
-      return `${diffDays}天前`
+      return t('common.daysAgo', { n: diffDays })
     } else {
       // 超过7天显示完整日期
       return formatDateTime(dateStr, false)
@@ -129,7 +139,7 @@ export function formatRelativeTime(dateStr: string | null | undefined): string {
  * @returns 格式化后的大小字符串，如：1.5 MB
  */
 export function formatBytes(bytes: number | null | undefined, decimals = 2): string {
-  if (bytes === null || bytes === undefined) return 'N/A'
+  if (bytes === null || bytes === undefined) return t('common.noData')
   if (bytes === 0) return '0 Bytes'
   
   const k = 1024

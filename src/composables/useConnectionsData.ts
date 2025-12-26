@@ -5,6 +5,7 @@
  */
 
 import debug from '../utils/debug'
+import { NodeStatusManager } from '../utils/nodeStatus'
 
 /**
  * 连接数据接口
@@ -165,33 +166,21 @@ export function getConnectionTypeText(connType: string): string {
 }
 
 /**
- * 获取节点状态文本
+ * 获取节点状态文本（使用统一的NodeStatusManager）
  * @param nodeStatus - 节点状态码
  * @returns 状态文本
  */
 export function getNodeStatusText(nodeStatus: number): string {
-  const statusMap: Record<number, string> = {
-    2: '在线',
-    1: '启用但离线',
-    0: '已禁用',
-    '-1': '未完成配置'
-  }
-  return statusMap[nodeStatus] || '未知状态'
+  return NodeStatusManager.getStatusText(nodeStatus)
 }
 
 /**
- * 获取节点状态颜色
+ * 获取节点状态颜色（使用统一的NodeStatusManager）
  * @param nodeStatus - 节点状态码
  * @returns Quasar 颜色名称
  */
 export function getNodeStatusColor(nodeStatus: number): string {
-  const colorMap: Record<number, string> = {
-    2: 'positive',   // 在线 - 绿色
-    1: 'warning',    // 启用但离线 - 橙色
-    0: 'grey',       // 已禁用 - 灰色
-    '-1': 'warning'  // 未完成配置 - 黄色
-  }
-  return colorMap[nodeStatus] || 'grey'
+  return NodeStatusManager.getStatusColor(nodeStatus)
 }
 
 /**

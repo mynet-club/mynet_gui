@@ -167,56 +167,80 @@
           >
             <!-- 节点信息 -->
             <div v-if="tooltip.type === 'node'" class="tooltip-content">
-              <div class="tooltip-title">{{ tooltip.data.node_name || tooltip.data.peer_node_name }}</div>
-              
-              <!-- 节点状态 (来自 node_status / peer_node_status) -->
-              <div class="tooltip-row">
-                <span class="tooltip-label">节点状态</span>
-                <q-chip
-                  :color="getNodeStatusColorValue(tooltip.data)"
-                  text-color="white"
-                  size="sm"
-                  dense
-                >
-                  {{ getNodeStatusLabel(tooltip.data) }}
-                </q-chip>
-              </div>
-              
-              <!-- 虚拟 IP -->
-              <div class="tooltip-row" v-if="getVirtualIp(tooltip.data)">
-                <span class="tooltip-label">虚拟 IP</span>
-                <span class="tooltip-value">{{ getVirtualIp(tooltip.data) }}</span>
-              </div>
-              
-              <!-- 公网 IP -->
-              <div class="tooltip-row" v-if="tooltip.data.wanip">
-                <span class="tooltip-label">公网 IP</span>
-                <span class="tooltip-value">{{ tooltip.data.wanip }}</span>
-              </div>
-              
-              <!-- 最后通信时间 (在线或离线都显示) -->
-              <div class="tooltip-row" v-if="getLastSeenTime(tooltip.data)">
-                <span class="tooltip-label">{{ tooltip.data.online ? '最后通信' : '最后上线' }}</span>
-                <span class="tooltip-value">{{ formatRelativeTime(getLastSeenTime(tooltip.data)) }}</span>
-              </div>
-              
-              <!-- 分隔线：连接相关信息 -->
-              <template v-if="tooltip.data.online && (tooltip.data.latency || tooltip.data.rx_bytes || tooltip.data.tx_bytes)">
-                <div class="tooltip-divider"></div>
+              <template v-if="(topologyDisplay = getNodeTopologyDisplay(tooltip.data))">
+                <!-- NodeSummary: 身份 -->
+                <div class="tooltip-title">{{ topologyDisplay.title }}</div>
                 
-                <!-- 连接延迟 -->
-                <div class="tooltip-row" v-if="tooltip.data.latency">
-                  <span class="tooltip-label">延迟</span>
-                  <span class="tooltip-value">{{ tooltip.data.latency.toFixed(1) }} ms</span>
+                <!-- NodeSummary: 状态 - 两个独立维度 -->
+                <div class="tooltip-section">
+                  <div class="tooltip-row">
+                    <span class="tooltip-label">{{ topologyDisplay.status.node.label }}</span>
+                    <q-chip
+                      :color="topologyDisplay.status.node.color"
+                      text-color="white"
+                      size="sm"
+                      dense
+                    >
+                      {{ topologyDisplay.status.node.text }}
+                    </q-chip>
+                  </div>
+                  
+                  <div class="tooltip-row">
+                    <span class="tooltip-label">{{ topologyDisplay.status.link.label }}</span>
+                    <q-chip
+                      :color="topologyDisplay.status.link.color"
+                      text-color="white"
+                      size="sm"
+                      dense
+                      :outline="topologyDisplay.status.link.outline"
+                    >
+                      <q-icon :name="topologyDisplay.status.link.icon" size="xs" class="q-mr-xs" />
+                      {{ topologyDisplay.status.link.text }}
+                    </q-chip>
+                  </div>
                 </div>
                 
-                <!-- 流量统计 -->
-                <div class="tooltip-row" v-if="tooltip.data.rx_bytes || tooltip.data.tx_bytes">
-                  <span class="tooltip-label">流量</span>
-                  <span class="tooltip-value">
-                    ⬇ {{ formatBytes(tooltip.data.rx_bytes || 0) }} / 
-                    ⬆ {{ formatBytes(tooltip.data.tx_bytes || 0) }}
-                  </span>
+                <div class="tooltip-divider"></div>
+                
+                <!-- NodeSummary: 网络信息 -->
+                <div class="tooltip-section">
+                  <div class="tooltip-row">
+                    <span class="tooltip-label">
+                      <q-icon :name="topologyDisplay.network.virtualIp.icon" size="xs" class="q-mr-xs" />
+                      {{ topologyDisplay.network.virtualIp.label }}
+                    </span>
+                    <span class="tooltip-value">{{ topologyDisplay.network.virtualIp.value }}</span>
+                  </div>
+                  
+                  <div v-if="topologyDisplay.network.wanIp" class="tooltip-row">
+                    <span class="tooltip-label">
+                      <q-icon :name="topologyDisplay.network.wanIp.icon" size="xs" class="q-mr-xs" />
+                      {{ topologyDisplay.network.wanIp.label }}
+                    </span>
+                    <span class="tooltip-value">{{ topologyDisplay.network.wanIp.value }}</span>
+                  </div>
+                </div>
+                
+                <!-- 次要信息：仅链路在线时显示 -->
+                <template v-if="topologyDisplay.details">
+                  <div class="tooltip-divider"></div>
+                  <div class="tooltip-section">
+                    <div v-if="topologyDisplay.details.latency" class="tooltip-row">
+                      <span class="tooltip-label">{{ topologyDisplay.details.latency.label }}</span>
+                      <span class="tooltip-value">{{ topologyDisplay.details.latency.value }}</span>
+                    </div>
+                    
+                    <div v-if="topologyDisplay.details.traffic" class="tooltip-row">
+                      <span class="tooltip-label">{{ topologyDisplay.details.traffic.label }}</span>
+                      <span class="tooltip-value">{{ topologyDisplay.details.traffic.value }}</span>
+                    </div>
+                  </div>
+                </template>
+                
+                <!-- 最后可见时间 -->
+                <div v-if="topologyDisplay.time" class="tooltip-row">
+                  <span class="tooltip-label text-grey-6">{{ topologyDisplay.time.label }}</span>
+                  <span class="tooltip-value text-caption">{{ formatRelativeTime(topologyDisplay.time.value) }}</span>
                 </div>
               </template>
             </div>
@@ -226,13 +250,15 @@
               <div class="tooltip-title">连接线 → {{ tooltip.data.node_name || tooltip.data.peer_node_name }}</div>
               
               <div class="tooltip-row">
-                <span class="tooltip-label">连接状态</span>
+                <span class="tooltip-label">链路状态</span>
                 <q-chip
-                  :color="tooltip.data.online ? 'positive' : 'negative'"
+                  :color="tooltip.data.online ? 'positive' : 'grey-6'"
                   text-color="white"
                   size="sm"
                   dense
+                  :outline="!tooltip.data.online"
                 >
+                  <q-icon :name="tooltip.data.online ? 'link' : 'link_off'" size="xs" class="q-mr-xs" />
                   {{ tooltip.data.online ? '在线' : '离线' }}
                 </q-chip>
               </div>
@@ -439,6 +465,8 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { formatBytes, formatRelativeTime } from '../../utils/dateFormat'
+import type { NodeSummary } from '../../models/nodeSummary'
+import { getNodeTopologyDisplay } from '../../models/nodeSummary'
 import { 
   getConnectionTypeText, 
   getNodeStatusText, 
@@ -448,7 +476,7 @@ import {
 } from '../../composables/useConnectionsData'
 
 interface Props {
-  connections: any[]
+  connections: NodeSummary[]
   loading: boolean
   centerNodeName?: string
   nodeId: string
@@ -495,6 +523,9 @@ const tooltip = ref({
   y: 0,
   data: null as any
 })
+
+// Topology Display 变量（用于模板中的赋值）
+let topologyDisplay: ReturnType<typeof getNodeTopologyDisplay> | null = null
 
 // 高亮状态
 const hoveredNodeId = ref<string | null>(null)
@@ -845,6 +876,10 @@ watch(() => props.connections.length, () => {
         height: 1px;
         background: rgba(255, 255, 255, 0.1);
         margin: 8px 0;
+      }
+      
+      .tooltip-section {
+        margin: 4px 0;
       }
       
       .tooltip-row {

@@ -26,6 +26,13 @@
           @click="handleBack"
         />
         
+        <!-- Peer统计信息 -->
+        <div v-if="currentView !== 'node-list'" class="q-px-md">
+          <q-chip color="primary" text-color="white" icon="hub">
+            <span class="text-weight-medium">活跃Peer: {{ peerStats.active }}/{{ peerStats.total }}</span>
+          </q-chip>
+        </div>
+        
         <!-- 视图切换（仅在路由列表视图显示）-->
         <q-btn-toggle
           v-if="currentView !== 'node-list'"
@@ -79,7 +86,7 @@
     <!-- 视图1: 节点列表 -->
     <NodeListView
       v-if="currentView === 'node-list'"
-      :nodes="nodes as any[]"
+      :nodes="nodesWithStats as any[]"
       :loading="nodesLoading"
       :active-routes="activeRoutes"
       @node-select="handleNodeSelect"
@@ -119,10 +126,9 @@ import { ref, onMounted, computed, watch } from 'vue'
 import debug from "../../utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
-import { useRoutes } from '../../composables/useRoutes'
 import { useNodes } from '../../composables/useNodes'
 import { useNotify } from '../../composables/useNotify'
-import { processConnectionsData } from '../../composables/useConnectionsData'
+import { extractNodeSummaries, type NodeSummary } from '../../models/nodeSummary'
 import PageLayout from '../../components/layout/PageLayout.vue'
 import NodeListView from '../../components/route/NodeListView.vue'
 import NodeRouteCardView from '../../components/route/NodeRouteCardView.vue'
@@ -136,12 +142,7 @@ const router = useRouter()
 const route = useRoute()
 const notify = useNotify()
 
-const {
-  loading,
-  activeRoutes,
-  fetchActiveRoutes
-} = useRoutes()
-
+// 使用 useNodes 获取节点列表（用于节点列表视图）
 const {
   loading: nodesLoading,
   nodes,
@@ -149,21 +150,29 @@ const {
 } = useNodes()
 
 // 响应式状态
+const activeRoutes = ref<any[]>([])
 const selectedNodeInfo = ref<any>(null)
-const nodeRoutesList = ref<any[]>([])
+const nodeRoutesList = ref<NodeSummary[]>([])
 const routesLoading = ref(false)
 const displayMode = ref<'card' | 'list' | 'topology'>('card')
 const showAllPeers = ref(false) // 是否显示所有节点（包括 down 的）
+const nodeStats = ref<Map<string, { activeRoutes: number; endpoint: string }>>(new Map()) // 节点统计信息
 
-// 路由参数
+// 当前节点ID
 const currentNodeId = computed(() => route.params.nodeId as string)
 
-// 当前视图判断
+// Peer统计数据
+const peerStats = computed(() => {
+  const total = nodeRoutesList.value.length
+  const active = nodeRoutesList.value.filter(summary => summary.link_status === 1).length
+  return { active, total }
+})
+
+// 当前视图类型
 const currentView = computed(() => {
-  const { nodeId } = route.params
   const { name } = route
   
-  if (!nodeId) {
+  if (!currentNodeId.value) {
     return 'node-list' // 节点列表视图
   } else if (name === 'routes-active-node-list') {
     return 'routes-list' // 路由列表视图（表格模式）
@@ -191,30 +200,42 @@ const pageSubtitle = computed(() => {
   return '查看节点的活跃连接'
 })
 
+// 带统计信息的节点列表
+const nodesWithStats = computed(() => {
+  return nodes.value.map(node => {
+    const nodeId = String((node as any).node_id || (node as any).id)
+    const stats = nodeStats.value.get(nodeId)
+    return {
+      ...node,
+      activeRoutesCount: stats?.activeRoutes,
+      endpoint: stats?.endpoint
+    }
+  })
+})
+
 // 路由数据处理方法
-// 处理连接数据：按用户分组
-const processConnectionsByUser = (connections: any[]) => {
-  const userGroups = new Map<string, any[]>()
+// 为 NodeSummary 添加用户分组信息（供 Card 视图使用）
+const addUserGroupInfo = (summaries: NodeSummary[]) => {
+  const userGroups = new Map<string, NodeSummary[]>()
   
-  connections.forEach(conn => {
-    const userName = conn.user_name || conn.peer_user_name || conn.user_email || '未知用户'
+  summaries.forEach(summary => {
+    const userName = summary.user_name || '未知用户'
     if (!userGroups.has(userName)) {
       userGroups.set(userName, [])
     }
-    userGroups.get(userName)!.push(conn)
+    userGroups.get(userName)!.push(summary)
   })
   
-  // 转换为数组格式，添加分组信息
+  // 添加分组信息
   const result: any[] = []
-  userGroups.forEach((conns, userName) => {
-    conns.forEach((conn, index) => {
+  userGroups.forEach((items, userName) => {
+    items.forEach((summary, index) => {
       result.push({
-        ...conn,
-        userEmail: userName,
+        ...summary,
         _groupInfo: {
           userEmail: userName,
           isFirstInGroup: index === 0,
-          groupSize: conns.length
+          groupSize: items.length
         }
       })
     })
@@ -303,26 +324,27 @@ const fetchNodeConnections = async (nodeId: string | number) => {
     debug.log('连接数据:', connections)
     debug.log('节点元数据:', nodesMetadata)
     
-    // 使用统一的数据处理函数
-    const processedConnections = processConnectionsData(connections, nodesMetadata)
+    // ✅ 使用 NodeSummary 模型提炼数据
+    const summaries = extractNodeSummaries(connections, nodesMetadata)
     
-    debug.log('处理后的连接数据:', processedConnections)
+    debug.log('提炼后的 NodeSummary:', summaries)
     
     // 统计连接状态
-    const totalConnections = processedConnections.length
-    const activeConnections = processedConnections.filter((c: any) => c.online).length
+    const totalConnections = summaries.length
+    const activeConnections = summaries.filter(s => s.link_status === 1).length
     const inactiveConnections = totalConnections - activeConnections
     
     debug.log('连接状态统计:', {
       总数: totalConnections,
-      活跃: activeConnections,
-      不活跃: inactiveConnections
+      '链路在线': activeConnections,
+      '链路离线': inactiveConnections
     })
     
-    // 按用户分组
-    nodeRoutesList.value = processConnectionsByUser(processedConnections)
+    // 直接使用 summaries，不需要分组信息
+    nodeRoutesList.value = summaries
     
-    debug.log('最终处理结果:', nodeRoutesList.value)
+    debug.log('最终 NodeSummary 列表:', nodeRoutesList.value)
+    debug.log('NodeSummary 数量:', summaries.length)
     
   } catch (error) {
     debug.error('获取节点路由数据失败:', error)
@@ -360,15 +382,74 @@ const handleRefresh = async () => {
   if (currentNodeId.value) {
     await fetchNodeConnections(currentNodeId.value)
   } else {
-    await Promise.all([
-      loadNodes(),
-      fetchActiveRoutes()
-    ])
+    await loadNodesFromMonitor()
   }
 }
 
 const handleCreateRoute = () => {
   router.push('/app/routes/create/prev_1')
+}
+
+// 批量获取节点统计信息
+const fetchNodeStats = async (nodeList: any[]) => {
+  try {
+    debug.log('开始批量获取节点统计信息', nodeList.length)
+    
+    // 为每个节点并发请求统计数据
+    const statsPromises = nodeList.map(async (node) => {
+      const nodeId = String((node as any).node_id || (node as any).id)
+      try {
+        const response = await api.get('/monitor/history/connections', {
+          params: {
+            node_id: nodeId,
+            last: 1  // 只获取最新数据
+          }
+        })
+        
+        if (response.data?.success && response.data?.data) {
+          const connections = response.data.data.connections || []
+          const nodesMetadata = response.data.data.nodes_metadata || {}
+          
+          // 统计活跃路由数量
+          const activeRoutes = connections.filter((conn: any) => conn.online === true).length
+          
+          // 从nodes_metadata中提取endpoint信息
+          const nodeMetadata = nodesMetadata[nodeId]
+          let endpoint = 'N/A'
+          if (nodeMetadata?.ip_addresses && Array.isArray(nodeMetadata.ip_addresses)) {
+            const nodeIp = nodeMetadata.ip_addresses.find((ip: any) => ip.route_type === 'node_ip')
+            if (nodeIp && nodeIp.ip_address && nodeIp.listen_port) {
+              endpoint = `${nodeIp.ip_address}:${nodeIp.listen_port}`
+            }
+          }
+          
+          return {
+            nodeId,
+            stats: { activeRoutes, endpoint }
+          }
+        }
+      } catch (error) {
+        debug.warn(`获取节点 ${nodeId} 统计失败:`, error)
+      }
+      return {
+        nodeId,
+        stats: { activeRoutes: 0, endpoint: 'N/A' }
+      }
+    })
+    
+    const results = await Promise.all(statsPromises)
+    
+    // 更新nodeStats
+    const newStats = new Map<string, { activeRoutes: number; endpoint: string }>()
+    results.forEach(({ nodeId, stats }) => {
+      newStats.set(nodeId, stats)
+    })
+    nodeStats.value = newStats
+    
+    debug.log('节点统计信息获取完成', nodeStats.value)
+  } catch (error) {
+    debug.error('批量获取节点统计失败:', error)
+  }
 }
 
 // 监听路由参数变化
@@ -413,10 +494,14 @@ watch(
 
 // 初始化
 onMounted(async () => {
-  await Promise.all([
-    loadNodes(),
-    fetchActiveRoutes()
-  ])
+  // 只在节点列表视图时加载节点数据
+  if (!currentNodeId.value) {
+    await loadNodes()
+    // 加载节点统计信息
+    if (nodes.value.length > 0) {
+      await fetchNodeStats(nodes.value)
+    }
+  }
 })
 </script>
 

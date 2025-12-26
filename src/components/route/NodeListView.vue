@@ -93,28 +93,6 @@
               />
             </div>
           </div>
-
-          <!-- 节点信息 -->
-          <div class="row q-gutter-md text-center">
-            <div class="col">
-              <div class="text-body2 text-weight-medium">
-                {{ (node as any).vpn_type?.toUpperCase() || 'N/A' }}
-              </div>
-              <div class="text-caption text-grey-6">VPN类型</div>
-            </div>
-            <div class="col">
-              <div class="text-body2 text-weight-medium">
-                {{ getNodeRouteCount(node) }}
-              </div>
-              <div class="text-caption text-grey-6">活跃路由</div>
-            </div>
-            <div class="col">
-              <div class="text-body2 text-weight-medium">
-                {{ (node as any).endpoint || 'N/A' }}
-              </div>
-              <div class="text-caption text-grey-6">节点端点</div>
-            </div>
-          </div>
         </q-card-section>
       </template>
     </ResponsiveCardGrid>

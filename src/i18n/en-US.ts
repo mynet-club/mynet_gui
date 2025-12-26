@@ -66,7 +66,16 @@ export default {
     manage: 'Manage',
     browse: 'Browse',
     total: 'Total',
-    available: 'Available'
+    available: 'Available',
+    debugInfo: 'Debug Information',
+    viewDetails: 'View Details',
+    noData: '—',
+    invalidDate: 'Invalid Date',
+    invalidTime: 'Invalid Time',
+    justNow: 'just now',
+    minutesAgo: '{n} minutes ago',
+    hoursAgo: '{n} hours ago',
+    daysAgo: '{n} days ago'
   },
   errors: {
     loadFailed: 'Load failed',

@@ -1,7 +1,6 @@
 <template>
   <PageLayout
     :title="pageTitle"
-    :subtitle="pageSubtitle"
     icon="cable"
   >
     <!-- 面包屑 -->
@@ -41,7 +40,7 @@
     </div>
 
     <!-- 内容区 -->
-    <div v-else class="q-gutter-lg">
+    <div v-else class="connection-details-content">
       <!-- 节点信息卡片 -->
       <div class="row q-col-gutter-md">
         <div class="col-12 col-md-6">
@@ -52,6 +51,7 @@
             :node-info="sourceNodeInfo"
             :device-info="sourceDeviceInfo"
             :loading="loadingDeviceInfo"
+            class="full-height"
           />
         </div>
         <div class="col-12 col-md-6">
@@ -62,6 +62,7 @@
             :node-info="peerNodeInfo"
             :device-info="peerDeviceInfo"
             :loading="loadingDeviceInfo"
+            class="full-height"
           />
         </div>
       </div>
@@ -80,6 +81,7 @@
       <ConnectionHistoryCard
         :connection-history="connectionHistory"
         :loading="historyLoading"
+        :time-range="historyTimeRange"
       />
     </div>
   </PageLayout>
@@ -145,7 +147,7 @@ const peerDeviceInfo = ref<NodeDeviceInfo | null>(null)
 
 // 连接历史
 const connectionHistory = ref<any[]>([])
-const historyTimeRange = ref('24h')
+const historyTimeRange = ref('1h')
 
 // 流量统计
 const trafficStats = ref({
@@ -177,13 +179,17 @@ const loadConnectionDetails = async () => {
       
       if (response.data && response.data.data?.connections?.[0]) {
         const conn = response.data.data.connections[0]
+        
+        console.log('🔍 Connection data:', conn)
+        console.log('🔍 Nodes metadata:', response.data.data.nodes_metadata)
+        
         connectionDetails.value = {
           node_id: conn.node_id,
           peer_node_id: conn.peer_node_id,
           online: conn.online || false,
           conn_type: conn.conn_type || '',
           latency: conn.latency || 0,
-          seen_at: conn.seen_at || new Date().toISOString(),
+          seen_at: conn.snapshot_at || conn.seen_at || new Date().toISOString(),
           rx_bytes: conn.rx_bytes || 0,
           tx_bytes: conn.tx_bytes || 0
         }
@@ -191,6 +197,7 @@ const loadConnectionDetails = async () => {
         // 如果监控数据包含节点元数据，更新节点信息
         const metadata = response.data.data.nodes_metadata
         if (metadata) {
+          // 处理本节点信息
           if (metadata[nodeId.value]) {
             const nodeData = metadata[nodeId.value]
             // 从ip_addresses数组中提取不同类型的IP
@@ -198,17 +205,24 @@ const loadConnectionDetails = async () => {
             const lanIps = nodeData.ip_addresses?.filter((ip: any) => ip.route_type === 'lan_ip').map((ip: any) => ip.ip_address) || []
             const publicIps = nodeData.ip_addresses?.filter((ip: any) => ip.route_type === 'public_ip').map((ip: any) => ip.ip_address) || []
             
+            // 本节点的wanip从metadata获取
+            const wanip = nodeData.wanip || publicIps[0] || ''
+            
             sourceNodeInfo.value = {
-              ...nodeData,
-              last_active: conn.seen_at,
-              network_config: {
-                node_ip: nodeIp,
-                virtual_ip: nodeIp,
-                lan_ips: lanIps,
-                public_ips: publicIps
-              }
+              node_id: nodeData.node_id,
+              node_name: nodeData.node_name,
+              node_status: nodeData.node_status,
+              node_ip: nodeIp,
+              user_name: nodeData.user_name,
+              user_email: nodeData.user_email,
+              os: nodeData.os,
+              arch: nodeData.arch,
+              wanip: wanip,
+              ip_addresses: nodeData.ip_addresses,
+              last_active: conn.snapshot_at || conn.seen_at
             }
           }
+          // 处理对端节点信息
           if (metadata[peerId.value]) {
             const nodeData = metadata[peerId.value]
             // 从ip_addresses数组中提取不同类型的IP
@@ -216,15 +230,22 @@ const loadConnectionDetails = async () => {
             const lanIps = nodeData.ip_addresses?.filter((ip: any) => ip.route_type === 'lan_ip').map((ip: any) => ip.ip_address) || []
             const publicIps = nodeData.ip_addresses?.filter((ip: any) => ip.route_type === 'public_ip').map((ip: any) => ip.ip_address) || []
             
+            // 对端的wanip优先从connection.wanip获取（这是实际连接时的对端IP）
+            // 如果没有，则从metadata获取
+            const wanip = conn.wanip || nodeData.wanip || publicIps[0] || ''
+            
             peerNodeInfo.value = {
-              ...nodeData,
-              last_active: conn.seen_at,
-              network_config: {
-                node_ip: nodeIp,
-                virtual_ip: nodeIp,
-                lan_ips: lanIps,
-                public_ips: publicIps
-              }
+              node_id: nodeData.node_id,
+              node_name: nodeData.node_name,
+              node_status: nodeData.node_status,
+              node_ip: nodeIp,
+              user_name: nodeData.user_name,
+              user_email: nodeData.user_email,
+              os: nodeData.os,
+              arch: nodeData.arch,
+              wanip: wanip,
+              ip_addresses: nodeData.ip_addresses,
+              last_active: conn.snapshot_at || conn.seen_at
             }
           }
         }
@@ -235,47 +256,6 @@ const loadConnectionDetails = async () => {
     
     // 加载历史数据
     await loadHistoryData()
-    
-    // 加载设备信息
-    await loadDeviceInfo()
-    
-    // 获取节点的详细信息（包含IP配置）
-    try {
-      const [sourceNodeResponse, peerNodeResponse] = await Promise.allSettled([
-        api.get(`/nodes/${nodeId.value}`),
-        api.get(`/nodes/${peerId.value}`)
-      ])
-      
-      if (sourceNodeResponse.status === 'fulfilled' && sourceNodeResponse.value.data.success) {
-        const nodeData = sourceNodeResponse.value.data.data
-        console.log('本节点详细信息:', nodeData)
-        if (sourceNodeInfo.value) {
-          // 构建network_config对象，从API数据中提取IP信息
-          sourceNodeInfo.value.network_config = {
-            node_ip: nodeData.node_ip || nodeData.virtual_ip,
-            virtual_ip: nodeData.virtual_ip || nodeData.node_ip,
-            public_ips: [], // 公网IP需要从其他来源获取
-            lan_ips: [] // 局域网IP需要从其他来源获取
-          }
-        }
-      }
-      
-      if (peerNodeResponse.status === 'fulfilled' && peerNodeResponse.value.data.success) {
-        const nodeData = peerNodeResponse.value.data.data
-        console.log('对端节点详细信息:', nodeData)
-        if (peerNodeInfo.value) {
-          // 构建network_config对象
-          peerNodeInfo.value.network_config = {
-            node_ip: nodeData.node_ip || nodeData.virtual_ip,
-            virtual_ip: nodeData.virtual_ip || nodeData.node_ip,
-            public_ips: [],
-            lan_ips: []
-          }
-        }
-      }
-    } catch (error) {
-      console.warn('获取节点详细信息失败:', error)
-    }
     
   } catch (error) {
     console.error('加载连接详情失败:', error)
@@ -290,7 +270,8 @@ const loadHistoryData = async () => {
   try {
     historyLoading.value = true
     
-    const timeRanges: Record<string, { hours: number }> = {
+    const timeRanges: Record<string, { hours?: number }> = {
+      'all': {}, // 不限制时间，获取所有数据
       '1h': { hours: 1 },
       '6h': { hours: 6 },
       '24h': { hours: 24 }
@@ -298,17 +279,21 @@ const loadHistoryData = async () => {
     
     const range = timeRanges[historyTimeRange.value] || { hours: 24 }
     const endTime = new Date()
-    const startTime = new Date(endTime.getTime() - range.hours * 60 * 60 * 1000)
     
-    const response = await api.get('/monitor/history/connections', {
-      params: {
-        node_id: nodeId.value,
-        peer_node_id: peerId.value,
-        start_time: startTime.toISOString().slice(0, 19).replace('T', ' '),
-        end_time: endTime.toISOString().slice(0, 19).replace('T', ' '),
-        per_page: 100
-      }
-    })
+    const params: any = {
+      node_id: nodeId.value,
+      peer_node_id: peerId.value,
+      end_time: endTime.toISOString().slice(0, 19).replace('T', ' '),
+      per_page: 100
+    }
+    
+    // 如果不是 'all'，添加 start_time
+    if (range.hours) {
+      const startTime = new Date(endTime.getTime() - range.hours * 60 * 60 * 1000)
+      params.start_time = startTime.toISOString().slice(0, 19).replace('T', ' ')
+    }
+    
+    const response = await api.get('/monitor/history/connections', { params })
     
     if (response.data && response.data.data) {
       connectionHistory.value = response.data.data.connections || []
@@ -326,7 +311,16 @@ const loadHistoryData = async () => {
           const publicIps = nodeData.ip_addresses?.filter((ip: any) => ip.route_type === 'public_ip').map((ip: any) => ip.ip_address) || []
           
           sourceNodeInfo.value = {
-            ...nodeData,
+            node_id: nodeData.node_id,
+            node_name: nodeData.node_name,
+            node_status: nodeData.node_status,
+            node_ip: nodeIp,
+            user_name: nodeData.user_name,
+            user_email: nodeData.user_email,
+            os: nodeData.os,
+            arch: nodeData.arch,
+            wanip: nodeData.wanip || publicIps[0] || '',
+            ip_addresses: nodeData.ip_addresses,
             network_config: {
               node_ip: nodeIp,
               virtual_ip: nodeIp,
@@ -342,7 +336,16 @@ const loadHistoryData = async () => {
           const publicIps = nodeData.ip_addresses?.filter((ip: any) => ip.route_type === 'public_ip').map((ip: any) => ip.ip_address) || []
           
           peerNodeInfo.value = {
-            ...nodeData,
+            node_id: nodeData.node_id,
+            node_name: nodeData.node_name,
+            node_status: nodeData.node_status,
+            node_ip: nodeIp,
+            user_name: nodeData.user_name,
+            user_email: nodeData.user_email,
+            os: nodeData.os,
+            arch: nodeData.arch,
+            wanip: nodeData.wanip || publicIps[0] || '',
+            ip_addresses: nodeData.ip_addresses,
             network_config: {
               node_ip: nodeIp,
               virtual_ip: nodeIp,
@@ -433,4 +436,19 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.connection-details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  
+  > * {
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+  }
+}
 </style>

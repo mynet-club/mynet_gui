@@ -70,7 +70,16 @@ export default {
     manage: '管理',
     browse: '浏览',
     total: '总计',
-    available: '可用'
+    available: '可用',
+    debugInfo: '调试信息',
+    viewDetails: '查看详情',
+    noData: '—',
+    invalidDate: '无效日期',
+    invalidTime: '无效时间',
+    justNow: '刚刚',
+    minutesAgo: '{n}分钟前',
+    hoursAgo: '{n}小时前',
+    daysAgo: '{n}天前'
   },
   errors: {
     loadFailed: '加载失败',
@@ -275,14 +284,67 @@ export default {
     subtitle: '网络系统概览',
     connected: '已连接',
     disconnected: '未连接',
+    
+    // 健康状态
+    health: {
+      healthy: '健康',
+      warning: '警告',
+      critical: '严重'
+    },
+    
+    // 健康消息模板
+    healthMessages: {
+      allOnline: '网络运行正常（{count} 个节点在线）',
+      someOffline: '检测到 {count} 个离线节点，建议检查',
+      criticalIssues: '检测到 {count} 个异常节点，需要立即处理',
+      lowOnlineRate: '网络状态需要关注（在线率 {rate}%）',
+      unconfigured: '有 {count} 个节点未完成配置',
+      noNodes: '暂无节点，请先创建节点'
+    },
+    
+    // 待处理任务
+    pendingTasks: {
+      offlineNodes: '{count} 个节点离线',
+      pendingConnections: '{count} 个待处理连接',
+      unconfiguredNodes: '{count} 个节点未配置',
+      failedRoutes: '{count} 个路由故障'
+    },
+    
+    // 异常项目
+    abnormalItems: {
+      title: '需要关注的问题',
+      noIssues: '所有系统运行正常，无需处理任何问题',
+      allNormal: '{nodes} 个节点全部在线，{routes} 条路由正常运行',
+      offlineNodes: '离线节点',
+      pendingConnections: '待处理连接',
+      unconfiguredNodes: '未完成配置',
+      viewAll: '查看全部',
+      handleNow: '立即处理',
+      completeConfig: '完成配置',
+      lastSeen: '最后在线：{time}',
+      neverOnline: '从未在线',
+      morePending: '还有 {count} 个待处理项'
+    },
+    
+    // 快速操作
+    quickActions: {
+      title: '快速操作',
+      createNode: '创建节点',
+      createRoute: '创建路由',
+      handleConnections: '处理连接 ({count})'
+    },
+    
+    // 统计
     stats: {
       totalNodes: '总节点数',
       onlineNodes: '在线节点',
       offlineNodes: '离线节点',
       totalRoutes: '总路由数',
       activeRoutes: '活跃路由',
-      onlineRate: '在线率'
+      onlineRate: '在线率',
+      friendConnections: '好友连接'
     },
+    
     realtimeMetrics: '实时指标',
     cpuUsage: 'CPU使用率',
     memoryUsage: '内存使用率',

@@ -2,12 +2,15 @@
   <q-card>
     <q-card-section>
       <div class="row items-center justify-between q-mb-md">
-        <div class="text-h6">连接历史</div>
+        <div>
+          <div class="text-h6">连接历史</div>
+          <div class="text-caption text-grey-6">{{ getTimeRangeLabel() }}</div>
+        </div>
         <q-btn-toggle
           v-model="historyViewMode"
           :options="[
-            { label: '图表', value: 'chart', icon: 'show_chart' },
-            { label: '列表', value: 'table', icon: 'list' }
+            { label: '图表', value: 'chart' },
+            { label: '列表', value: 'table' }
           ]"
           color="primary"
           toggle-color="primary"
@@ -65,7 +68,7 @@
               text-color="white"
               size="sm"
             >
-              {{ props.value ? `${props.value.toFixed(1)} ms` : 'N/A' }}
+              {{ props.value ? `${props.value.toFixed(1)} ms` : $t('common.noData') }}
             </q-chip>
           </q-td>
         </template>
@@ -100,6 +103,7 @@ interface ConnectionHistoryItem {
 interface Props {
   connectionHistory: ConnectionHistoryItem[]
   loading?: boolean
+  timeRange?: string
 }
 
 const props = defineProps<Props>()
@@ -112,6 +116,16 @@ const statusChartContainer = ref<HTMLDivElement>()
 let latencyChart: ECharts | null = null
 let trafficChart: ECharts | null = null
 let statusChart: ECharts | null = null
+
+const getTimeRangeLabel = () => {
+  const labels: Record<string, string> = {
+    'all': '自连接建立以来',
+    '1h': '最近 1 小时',
+    '6h': '最近 6 小时',
+    '24h': '最近 24 小时'
+  }
+  return labels[props.timeRange || '1h'] || '最近 1 小时'
+}
 
 const historyColumns = [
   { name: 'snapshot_at', label: '时间', field: 'snapshot_at', align: 'left' as const, format: (val: string) => new Date(val).toLocaleString('zh-CN') },
@@ -239,28 +253,45 @@ const initCharts = async () => {
   
   const latencies = filledHistory.map(item => item.latency || 0)
   
-  // 计算流量增量（当前值 - 前一个值）
-  const rxIncrements: number[] = []
-  const txIncrements: number[] = []
+  // 计算流量增量（当前值 - 前一个值）- 以字节为单位
+  const rxIncrementsBytes: number[] = []
+  const txIncrementsBytes: number[] = []
   
   for (let i = 0; i < filledHistory.length; i++) {
     const currentItem = filledHistory[i]
     const previousItem = filledHistory[i - 1]
     
     if (i === 0 || !currentItem) {
-      rxIncrements.push(0)
-      txIncrements.push(0)
+      rxIncrementsBytes.push(0)
+      txIncrementsBytes.push(0)
     } else if (previousItem) {
       const rxDiff = (currentItem.rx_bytes || 0) - (previousItem.rx_bytes || 0)
       const txDiff = (currentItem.tx_bytes || 0) - (previousItem.tx_bytes || 0)
-      // 转换为MB并确保非负
-      rxIncrements.push(Math.max(0, rxDiff / 1024 / 1024))
-      txIncrements.push(Math.max(0, txDiff / 1024 / 1024))
+      // 确保非负
+      rxIncrementsBytes.push(Math.max(0, rxDiff))
+      txIncrementsBytes.push(Math.max(0, txDiff))
     } else {
-      rxIncrements.push(0)
-      txIncrements.push(0)
+      rxIncrementsBytes.push(0)
+      txIncrementsBytes.push(0)
     }
   }
+  
+  // 动态确定最佳单位
+  const maxBytes = Math.max(...rxIncrementsBytes, ...txIncrementsBytes)
+  let trafficUnit = 'B'
+  let trafficDivider = 1
+  
+  if (maxBytes >= 1024 * 1024) {
+    trafficUnit = 'MB'
+    trafficDivider = 1024 * 1024
+  } else if (maxBytes >= 1024) {
+    trafficUnit = 'KB'
+    trafficDivider = 1024
+  }
+  
+  // 转换为选定的单位
+  const rxIncrements = rxIncrementsBytes.map(bytes => bytes / trafficDivider)
+  const txIncrements = txIncrementsBytes.map(bytes => bytes / trafficDivider)
   
   const onlineStatus = filledHistory.map(item => item.online ? 1 : 0)
   
@@ -320,7 +351,7 @@ const initCharts = async () => {
         formatter: (params: any) => {
           let result = params[0].axisValue + '<br/>'
           params.forEach((param: any) => {
-            result += `${param.marker}${param.seriesName}: ${param.value.toFixed(2)} MB<br/>`
+            result += `${param.marker}${param.seriesName}: ${param.value.toFixed(2)} ${trafficUnit}<br/>`
           })
           return result
         }
@@ -341,7 +372,7 @@ const initCharts = async () => {
       },
       yAxis: {
         type: 'value',
-        name: '流量增量 (MB)'
+        name: `流量增量 (${trafficUnit})`
       },
       series: [
         {

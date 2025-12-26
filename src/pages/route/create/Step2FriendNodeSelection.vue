@@ -166,13 +166,30 @@
                         {{ $t('routes.create.step2.nodeNotAvailable') }}
                       </div>
                       <div v-else>
-                        <div>{{ $t('routes.create.step2.cannotConnect') }}</div>
+                        <div class="text-weight-medium">{{ $t('routes.create.step2.cannotConnect') }}</div>
                         <div class="text-caption q-mt-xs">
                           {{ $t('routes.create.step2.possibleReasons') }}:
-                          <ul class="q-ma-none q-pl-md">
+                          <ul class="q-ma-none q-pl-md q-mt-xs">
                             <li>{{ $t('routes.create.step2.existingConnection') }}</li>
                             <li>{{ $t('routes.create.step2.pendingRequest') }}</li>
                           </ul>
+                        </div>
+                        <!-- 后端返回的具体原因 -->
+                        <div v-if="node.cannot_connect_reason" class="q-mt-sm text-caption">
+                          <q-icon name="info" size="xs" class="q-mr-xs" />
+                          {{ node.cannot_connect_reason }}
+                        </div>
+                        <!-- 调试信息按钮（仅开发环境） -->
+                        <div v-if="isDevelopment" class="q-mt-sm">
+                          <q-btn
+                            flat
+                            dense
+                            size="xs"
+                            icon="bug_report"
+                            :label="$t('common.viewDetails')"
+                            @click.stop="showNodeDebugInfo(node)"
+                            class="text-white"
+                          />
                         </div>
                       </div>
                     </q-banner>
@@ -207,6 +224,79 @@
           />
         </q-card-actions>
       </q-card>
+
+      <!-- 调试信息对话框 -->
+      <q-dialog v-model="debugDialog.show" v-if="isDevelopment">
+        <q-card style="min-width: 500px">
+          <q-card-section class="row items-center q-pb-none">
+            <div class="text-h6">{{ $t('common.debugInfo') }}</div>
+            <q-space />
+            <q-btn icon="close" flat round dense v-close-popup />
+          </q-card-section>
+
+          <q-card-section v-if="debugDialog.node">
+            <div class="text-subtitle2 q-mb-md">{{ debugDialog.node.name }} (ID: {{ debugDialog.node.id }})</div>
+            
+            <q-list bordered separator>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>{{ $t('routes.create.step2.nodeStatus') }}</q-item-label>
+                  <q-item-label>{{ debugDialog.node.status }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>can_connect</q-item-label>
+                  <q-item-label>
+                    <q-chip :color="debugDialog.node.can_connect ? 'positive' : 'negative'" text-color="white" size="sm">
+                      {{ debugDialog.node.can_connect }}
+                    </q-chip>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+              
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>{{ $t('routes.create.step2.connections') }}</q-item-label>
+                  <q-item-label>{{ debugDialog.node.current_connections }} / {{ debugDialog.node.max_connections }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              
+              <q-item v-if="debugDialog.node.cannot_connect_reason">
+                <q-item-section>
+                  <q-item-label caption>cannot_connect_reason</q-item-label>
+                  <q-item-label class="text-negative">{{ debugDialog.node.cannot_connect_reason }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>owner_id</q-item-label>
+                  <q-item-label>{{ debugDialog.node.owner_id }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>vpn_type</q-item-label>
+                  <q-item-label>{{ debugDialog.node.vpn_type }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+
+            <div class="q-mt-md">
+              <q-expansion-item label="Raw JSON Data" icon="code">
+                <q-card flat bordered class="q-mt-sm">
+                  <q-card-section>
+                    <pre class="text-caption" style="max-height: 300px; overflow-y: auto;">{{ JSON.stringify(debugDialog.node, null, 2) }}</pre>
+                  </q-card-section>
+                </q-card>
+              </q-expansion-item>
+            </div>
+          </q-card-section>
+        </q-card>
+      </q-dialog>
     </div>
   </q-page>
 </template>
@@ -222,18 +312,26 @@ import type { Friend } from '../../../types'
 
 const { t } = useI18n()
 const router = useRouter()
-const notify = useNotify()
-
 const { getFriendNodes } = useSocial()
+const { notify } = useNotify()
 
-// 页面状态
-const currentStep = ref(2)
-const loading = ref(false)
+// 响应式状态
 const selectedFriend = ref<Friend | null>(null)
-const selectedNode = ref<any | null>(null)
+const selectedNode = ref<any>(null)
 const friendNodes = ref<any[]>([])
+const loading = ref(false)
+const debugDialog = ref({
+  show: false,
+  node: null as any
+})
 
-// 方法
+const showNodeDebugInfo = (node: any) => {
+  debugDialog.value = {
+    show: true,
+    node
+  }
+}
+
 const selectNode = (node: any) => {
   if (!node.can_connect) {
     notify.warning(t('routes.create.step2.nodeCannotConnect'))

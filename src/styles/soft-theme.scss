@@ -1,0 +1,562 @@
+/**
+ * 柔和清新主题 - Soft Fresh Theme
+ * 学习自节点卡片的设计精髓
+ * 特点：低对比度、圆润、柔和的色彩、舒适的间距
+ */
+
+/* ========================================
+   1. 颜色变量 - 柔和色调
+   ======================================== */
+
+:root {
+  /* 背景色 - 柔和的灰蓝色调 */
+  --soft-bg-primary: #f5f7fa;         /* 主背景 - 柔和灰蓝 */
+  --soft-bg-secondary: #e8ecf1;       /* 次级背景 - 更深一点的灰蓝 */
+  --soft-bg-card: #f8fafc;            /* 卡片背景 - 接近白但带一点蓝 */
+  --soft-bg-hover: #eef2f7;           /* 悬停背景 */
+  
+  /* 文字颜色 - 降低对比度 */
+  --soft-text-primary: #4a5568;       /* 主文字 - 深灰而非黑 */
+  --soft-text-secondary: #718096;     /* 次要文字 */
+  --soft-text-tertiary: #a0aec0;      /* 辅助文字 */
+  --soft-text-light: #cbd5e0;         /* 浅色文字 */
+  
+  /* 边框颜色 - 极其柔和 */
+  --soft-border-light: #e2e8f0;       /* 浅边框 */
+  --soft-border-medium: #cbd5e0;      /* 中等边框 */
+  
+  /* 阴影 - 轻柔不突兀 */
+  --soft-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --soft-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --soft-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.03);
+  --soft-shadow-hover: 0 12px 20px rgba(0, 0, 0, 0.06), 0 6px 8px rgba(0, 0, 0, 0.04);
+  
+  /* 状态颜色 - 柔和版本 */
+  --soft-success: #48bb78;            /* 柔和的绿色 */
+  --soft-success-bg: #f0fdf4;         /* 成功背景 */
+  --soft-warning: #ed8936;            /* 柔和的橙色 */
+  --soft-warning-bg: #fffaf0;         /* 警告背景 */
+  --soft-error: #f56565;              /* 柔和的红色 */
+  --soft-error-bg: #fff5f5;           /* 错误背景 */
+  --soft-info: #4299e1;               /* 柔和的蓝色 */
+  --soft-info-bg: #ebf8ff;            /* 信息背景 */
+  
+  /* 功能颜色 - 降低饱和度 */
+  --soft-primary: #5a67d8;            /* 主色调 */
+  --soft-primary-light: #edf2f7;      /* 主色调浅色背景 */
+  --soft-secondary: #667eea;          /* 次要色 */
+  --soft-accent: #ed64a6;             /* 强调色 */
+  
+  /* 圆角 - 更圆润 */
+  --soft-radius-sm: 8px;
+  --soft-radius-md: 12px;
+  --soft-radius-lg: 16px;
+  --soft-radius-xl: 20px;
+  --soft-radius-full: 999px;
+  
+  /* 间距 - 舒适不压抑 */
+  --soft-spacing-xs: 0.5rem;   /* 8px */
+  --soft-spacing-sm: 0.75rem;  /* 12px */
+  --soft-spacing-md: 1rem;     /* 16px */
+  --soft-spacing-lg: 1.5rem;   /* 24px */
+  --soft-spacing-xl: 2rem;     /* 32px */
+  --soft-spacing-2xl: 3rem;    /* 48px */
+}
+
+/* 深色模式变量 */
+.body--dark {
+  --soft-bg-primary: #1a202c;
+  --soft-bg-secondary: #2d3748;
+  --soft-bg-card: #1e2530;
+  --soft-bg-hover: #2a3242;
+  
+  --soft-text-primary: #e2e8f0;
+  --soft-text-secondary: #cbd5e0;
+  --soft-text-tertiary: #a0aec0;
+  --soft-text-light: #718096;
+  
+  --soft-border-light: #2d3748;
+  --soft-border-medium: #4a5568;
+  
+  --soft-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --soft-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.15);
+  --soft-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.25), 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* ========================================
+   2. 全局页面样式重置
+   ======================================== */
+
+body {
+  background-color: var(--soft-bg-primary);
+  color: var(--soft-text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ========================================
+   3. Quasar 组件覆盖 - 卡片
+   ======================================== */
+
+.q-card {
+  background-color: var(--soft-bg-card) !important;
+  border-radius: var(--soft-radius-lg) !important;
+  box-shadow: var(--soft-shadow-md) !important;
+  border: 1px solid var(--soft-border-light);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  
+  &:hover {
+    box-shadow: var(--soft-shadow-hover) !important;
+    transform: translateY(-2px);
+    border-color: var(--soft-border-medium);
+  }
+  
+  /* 移除 Quasar 默认的强阴影 */
+  &.q-hoverable {
+    &:hover {
+      box-shadow: var(--soft-shadow-hover) !important;
+    }
+  }
+}
+
+/* 卡片标题区域 */
+.q-card__section--vert {
+  padding: var(--soft-spacing-lg);
+}
+
+.q-card__actions {
+  padding: var(--soft-spacing-md) var(--soft-spacing-lg);
+}
+
+/* ========================================
+   4. Quasar 组件覆盖 - 按钮
+   ======================================== */
+
+.q-btn {
+  border-radius: var(--soft-radius-md) !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em;
+  transition: all 0.25s ease !important;
+  
+  /* 降低按钮阴影 */
+  &.q-btn--unelevated {
+    box-shadow: var(--soft-shadow-sm) !important;
+  }
+  
+  &.q-btn--outline {
+    border-width: 1.5px;
+    border-color: var(--soft-border-medium);
+    
+    &:hover {
+      background-color: var(--soft-bg-hover);
+      border-color: var(--soft-text-secondary);
+    }
+  }
+  
+  /* 扁平按钮柔和悬停效果 */
+  &.q-btn--flat:hover {
+    background-color: var(--soft-bg-hover) !important;
+  }
+}
+
+/* 按钮组 */
+.q-btn-group {
+  border-radius: var(--soft-radius-md);
+  box-shadow: var(--soft-shadow-sm);
+  
+  > .q-btn {
+    &:first-child {
+      border-top-left-radius: var(--soft-radius-md) !important;
+      border-bottom-left-radius: var(--soft-radius-md) !important;
+    }
+    
+    &:last-child {
+      border-top-right-radius: var(--soft-radius-md) !important;
+      border-bottom-right-radius: var(--soft-radius-md) !important;
+    }
+  }
+}
+
+/* ========================================
+   5. Quasar 组件覆盖 - 输入框
+   ======================================== */
+
+.q-field {
+  .q-field__control {
+    border-radius: var(--soft-radius-md) !important;
+    
+    &:before {
+      border-color: var(--soft-border-light);
+    }
+  }
+  
+  /* 聚焦状态 */
+  &.q-field--focused {
+    .q-field__control:before {
+      border-color: var(--soft-primary);
+      border-width: 1.5px;
+    }
+  }
+  
+  /* 填充模式 */
+  &.q-field--filled {
+    .q-field__control {
+      background-color: var(--soft-bg-secondary);
+    }
+  }
+  
+  /* 轮廓模式 */
+  &.q-field--outlined {
+    .q-field__control {
+      &:before {
+        border-color: var(--soft-border-light);
+      }
+      
+      &:hover:before {
+        border-color: var(--soft-border-medium);
+      }
+    }
+  }
+}
+
+/* ========================================
+   6. Quasar 组件覆盖 - Chip/标签
+   ======================================== */
+
+.q-chip {
+  border-radius: var(--soft-radius-full) !important;
+  font-weight: 500;
+  padding: 0.4rem 0.875rem;
+  box-shadow: var(--soft-shadow-sm);
+  
+  /* 降低饱和度 */
+  &.text-positive {
+    background-color: var(--soft-success-bg) !important;
+    color: var(--soft-success) !important;
+  }
+  
+  &.text-negative {
+    background-color: var(--soft-error-bg) !important;
+    color: var(--soft-error) !important;
+  }
+  
+  &.text-warning {
+    background-color: var(--soft-warning-bg) !important;
+    color: var(--soft-warning) !important;
+  }
+  
+  &.text-info {
+    background-color: var(--soft-info-bg) !important;
+    color: var(--soft-info) !important;
+  }
+}
+
+/* ========================================
+   7. Quasar 组件覆盖 - 表格
+   ======================================== */
+
+.q-table {
+  border-radius: var(--soft-radius-lg);
+  box-shadow: var(--soft-shadow-md);
+  border: 1px solid var(--soft-border-light);
+  
+  thead tr {
+    background-color: var(--soft-bg-secondary);
+    
+    th {
+      color: var(--soft-text-primary);
+      font-weight: 600;
+      border-bottom: 1px solid var(--soft-border-light);
+    }
+  }
+  
+  tbody {
+    tr {
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background-color: var(--soft-bg-hover);
+      }
+      
+      td {
+        border-bottom: 1px solid var(--soft-border-light);
+      }
+    }
+  }
+  
+  /* 移除强烈边框 */
+  .q-table__card {
+    box-shadow: none;
+  }
+}
+
+/* ========================================
+   8. Quasar 组件覆盖 - 列表
+   ======================================== */
+
+.q-list {
+  border-radius: var(--soft-radius-md);
+  
+  .q-item {
+    border-radius: var(--soft-radius-sm);
+    margin: 0.25rem 0;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: var(--soft-bg-hover);
+    }
+    
+    &.q-item--active {
+      background-color: var(--soft-primary-light);
+      color: var(--soft-primary);
+    }
+  }
+  
+  /* 分隔符柔和 */
+  .q-separator {
+    background-color: var(--soft-border-light);
+  }
+}
+
+/* ========================================
+   9. Quasar 组件覆盖 - 通知/消息
+   ======================================== */
+
+.q-notification {
+  border-radius: var(--soft-radius-lg) !important;
+  box-shadow: var(--soft-shadow-lg) !important;
+  border: 1px solid var(--soft-border-light);
+  
+  &__message {
+    color: var(--soft-text-primary);
+  }
+}
+
+/* ========================================
+   10. Quasar 组件覆盖 - 对话框
+   ======================================== */
+
+.q-dialog__backdrop {
+  background-color: rgba(0, 0, 0, 0.3) !important; /* 降低蒙层透明度 */
+}
+
+.q-dialog {
+  .q-card {
+    border-radius: var(--soft-radius-xl) !important;
+    box-shadow: var(--soft-shadow-lg) !important;
+  }
+}
+
+/* ========================================
+   11. Quasar 组件覆盖 - 工具提示
+   ======================================== */
+
+.q-tooltip {
+  background-color: var(--soft-text-primary) !important;
+  color: white !important;
+  border-radius: var(--soft-radius-md) !important;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  box-shadow: var(--soft-shadow-md);
+}
+
+/* ========================================
+   12. Quasar 组件覆盖 - 抽屉/侧边栏
+   ======================================== */
+
+.q-drawer {
+  background-color: var(--soft-bg-card) !important;
+  border-right: 1px solid var(--soft-border-light);
+  box-shadow: var(--soft-shadow-lg);
+}
+
+/* ========================================
+   13. 特殊组件样式 - 节点卡片风格
+   ======================================== */
+
+.node-card,
+.device-card,
+.status-card {
+  background: linear-gradient(135deg, var(--soft-bg-card) 0%, var(--soft-bg-secondary) 100%);
+  border-radius: var(--soft-radius-lg);
+  padding: var(--soft-spacing-lg);
+  box-shadow: var(--soft-shadow-md);
+  border: 1px solid var(--soft-border-light);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--soft-shadow-hover);
+  }
+  
+  /* 卡片内的图标 */
+  .q-icon {
+    transition: transform 0.25s ease;
+  }
+  
+  &:hover .q-icon {
+    transform: scale(1.05);
+  }
+}
+
+/* ========================================
+   14. 状态徽章/标签 - 柔和样式
+   ======================================== */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--soft-radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: var(--soft-shadow-sm);
+  transition: all 0.2s ease;
+  
+  &.status-online {
+    background-color: var(--soft-success-bg);
+    color: var(--soft-success);
+    border: 1px solid rgba(72, 187, 120, 0.2);
+  }
+  
+  &.status-offline {
+    background-color: var(--soft-error-bg);
+    color: var(--soft-error);
+    border: 1px solid rgba(245, 101, 101, 0.2);
+  }
+  
+  &.status-pending {
+    background-color: var(--soft-warning-bg);
+    color: var(--soft-warning);
+    border: 1px solid rgba(237, 137, 54, 0.2);
+  }
+}
+
+/* ========================================
+   15. 页面容器和布局
+   ======================================== */
+
+.page-container {
+  padding: var(--soft-spacing-xl);
+  max-width: 1400px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    padding: var(--soft-spacing-md);
+  }
+}
+
+/* 卡片网格布局 */
+.soft-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--soft-spacing-lg);
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: var(--soft-spacing-md);
+  }
+}
+
+/* ========================================
+   16. 动画和过渡
+   ======================================== */
+
+/* 柔和的淡入淡出 */
+.soft-fade-enter-active,
+.soft-fade-leave-active {
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.soft-fade-enter-from,
+.soft-fade-leave-to {
+  opacity: 0;
+}
+
+/* 柔和的滑入 */
+.soft-slide-enter-active,
+.soft-slide-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.soft-slide-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.soft-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* ========================================
+   17. 辅助工具类
+   ======================================== */
+
+/* 文字颜色 */
+.text-soft-primary { color: var(--soft-text-primary) !important; }
+.text-soft-secondary { color: var(--soft-text-secondary) !important; }
+.text-soft-tertiary { color: var(--soft-text-tertiary) !important; }
+
+/* 背景色 */
+.bg-soft-primary { background-color: var(--soft-bg-primary) !important; }
+.bg-soft-secondary { background-color: var(--soft-bg-secondary) !important; }
+.bg-soft-card { background-color: var(--soft-bg-card) !important; }
+
+/* 圆角 */
+.rounded-soft-sm { border-radius: var(--soft-radius-sm) !important; }
+.rounded-soft-md { border-radius: var(--soft-radius-md) !important; }
+.rounded-soft-lg { border-radius: var(--soft-radius-lg) !important; }
+.rounded-soft-xl { border-radius: var(--soft-radius-xl) !important; }
+.rounded-soft-full { border-radius: var(--soft-radius-full) !important; }
+
+/* 阴影 */
+.shadow-soft-sm { box-shadow: var(--soft-shadow-sm) !important; }
+.shadow-soft-md { box-shadow: var(--soft-shadow-md) !important; }
+.shadow-soft-lg { box-shadow: var(--soft-shadow-lg) !important; }
+
+/* ========================================
+   18. 响应式优化
+   ======================================== */
+
+@media (max-width: 768px) {
+  :root {
+    --soft-spacing-xl: 1.5rem;
+    --soft-spacing-2xl: 2rem;
+  }
+  
+  .q-card {
+    border-radius: var(--soft-radius-md) !important;
+  }
+}
+
+/* ========================================
+   19. 打印样式优化
+   ======================================== */
+
+@media print {
+  .q-card {
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0;
+  }
+}
+
+/* ========================================
+   20. 可访问性增强
+   ======================================== */
+
+/* 聚焦状态 - 柔和的轮廓线 */
+*:focus-visible {
+  outline: 2px solid var(--soft-primary);
+  outline-offset: 2px;
+  border-radius: var(--soft-radius-sm);
+}
+
+/* 减弱动画（为有需要的用户） */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
