@@ -38,11 +38,18 @@ export function useRecommendations() {
   })
 
   /**
-   * 推荐的行动
+   * 推荐的行动（已去重和排序）
    */
   const recommendations = computed(() => {
     const analysis = currentState.value
     return RecommendationEngine.generateRecommendations(analysis)
+  })
+
+  /**
+   * 顶部推荐（Dashboard展示，最多3个，已随机）
+   */
+  const topRecommendations = computed(() => {
+    return RecommendationEngine.selectRecommendationsForDisplay(recommendations.value, 3)
   })
 
   /**
@@ -59,13 +66,6 @@ export function useRecommendations() {
   const progressTip = computed(() => {
     const analysis = currentState.value
     return RecommendationEngine.generateProgressTip(analysis)
-  })
-
-  /**
-   * 顶部推荐（最多3个）
-   */
-  const topRecommendations = computed(() => {
-    return recommendations.value.slice(0, 3)
   })
 
   /**
