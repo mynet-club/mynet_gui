@@ -96,21 +96,24 @@
 
           <!-- 分享设置 -->
           <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-sm">分享设置</div>
+            <div class="text-subtitle2 q-mb-sm">{{ $t('zoneServices.form.shareSettings') }}</div>
             <div class="share-options q-gutter-sm">
               <q-checkbox
                 v-model="formData.share_to_friends"
-                label="分享给好友"
+                :label="$t('zoneServices.form.shareToFriends')"
                 color="primary"
               />
+              <!-- 公开分享功能已下线 - 2026-01 -->
+              <!--
               <q-checkbox
                 v-model="formData.share_to_public"
-                label="申请公开分享"
+                :label="$t('zoneServices.form.shareToPublic')"
                 color="primary"
               />
+              -->
             </div>
             <div class="text-caption text-grey-6 q-mt-sm">
-              选择服务的分享范围，公开分享需要管理员审核
+              {{ $t('zoneServices.form.shareScope') }}
             </div>
           </div>
 
@@ -267,12 +270,15 @@ const formData = ref<CreateZoneServiceRequest & {
   share_to_public: false
 })
 
-// 选项
+// 选项 - 过滤掉系统专用服务类型
 const serviceTypeOptions = computed(() => 
-  serviceTypes.value.map(type => ({
-    label: type.label,
-    value: type.key
-  }))
+  serviceTypes.value
+    .filter(type => !type.systemOnly)  // 过滤掉 systemOnly 的类型
+    .map(type => ({
+      label: type.label,
+      value: type.key,
+      disabled: type.systemOnly
+    }))
 )
 
 const protocolOptions = [

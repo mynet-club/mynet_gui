@@ -20,7 +20,8 @@ export function useZoneServices() {
   const loading = ref(false)
   const publicServices = ref<ZoneService[]>([])
   const friendServices = ref<ZoneService[]>([])
-  const anonymousServices = ref<ZoneService[]>([])
+  // 匿名服务已移除 - 简化服务分类
+  // const anonymousServices = ref<ZoneService[]>([])
   const myServices = ref<ZoneService[]>([])
 
   // 服务分类配置
@@ -38,13 +39,14 @@ export function useZoneServices() {
       icon: 'group',
       color: 'positive',
       description: t('zoneServices.categories.friendDesc')
-    },
-    {
-      key: 'anonymous',
-      title: t('zoneServices.categories.anonymous'),
-      icon: 'visibility_off',
-      color: 'warning',
-      description: t('zoneServices.categories.anonymousDesc')
+    // 匿名服务已移除 - 简化服务分类
+    // {
+    //   key: 'anonymous',
+    //   title: t('zoneServices.categories.anonymous'),
+    //   icon: 'visibility_off',
+    //   color: 'warning',
+    //   description: t('zoneServices.categories.anonymousDesc')
+    //   description: t('zoneServices.categories.anonymousDesc')
     },
     {
       key: 'my',
@@ -64,7 +66,8 @@ export function useZoneServices() {
       color: 'primary',
       description: t('zoneServices.types.gnbIndexDesc'),
       defaultPort: 9000,
-      defaultProtocol: 'http'
+      defaultProtocol: 'http',
+      systemOnly: true  // 标记为系统专用类型
     },
     {
       key: 'music',
@@ -100,16 +103,17 @@ export function useZoneServices() {
     loading.value = true
 
     try {
-      const [publicRes, friendRes, anonymousRes, myRes] = await Promise.all([
+      // 匿名服务已移除 - 简化服务分类
+      const [publicRes, friendRes, myRes] = await Promise.all([
         zoneServiceApi.getPublicServices(),
         zoneServiceApi.getFriendServices(),
-        zoneServiceApi.getAnonymousServices(),
+        // zoneServiceApi.getAnonymousServices(), // 已移除
         zoneServiceApi.getMyServices()
       ])
 
       publicServices.value = publicRes.data || []
       friendServices.value = friendRes.data || []
-      anonymousServices.value = anonymousRes.data || []
+      // anonymousServices.value = anonymousRes.data || [] // 已移除
       myServices.value = myRes.data || []
     } catch (error) {
       debug.error('Failed to load services:', error)
@@ -233,7 +237,8 @@ export function useZoneServices() {
     }
   }
 
-  // 申请公开服务
+  // 申请公开服务 - 已移除，后端不再支持用户申请公开服务
+  /*
   const requestApproval = async (serviceId: number, reason?: string): Promise<boolean> => {
     try {
       const approvalData: { approval_reason?: string } = {}
@@ -261,6 +266,7 @@ export function useZoneServices() {
       return false
     }
   }
+  */
 
   // 仅加载我的服务
   const loadMyServices = async () => {
@@ -287,7 +293,7 @@ export function useZoneServices() {
     loading,
     publicServices,
     friendServices,
-    anonymousServices,
+    // anonymousServices, // 已移除
     myServices,
     
     // 配置
@@ -301,7 +307,7 @@ export function useZoneServices() {
     updateService,
     deleteService,
     shareService,
-    requestApproval,
+    // requestApproval, // 已移除 - 不再支持申请公开
     getServiceTypeConfig,
     getCategoryConfig
   }

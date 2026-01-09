@@ -180,9 +180,6 @@ const loadConnectionDetails = async () => {
       if (response.data && response.data.data?.connections?.[0]) {
         const conn = response.data.data.connections[0]
         
-        console.log('🔍 Connection data:', conn)
-        console.log('🔍 Nodes metadata:', response.data.data.nodes_metadata)
-        
         connectionDetails.value = {
           node_id: conn.node_id,
           peer_node_id: conn.peer_node_id,

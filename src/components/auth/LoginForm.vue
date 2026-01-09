@@ -1,5 +1,10 @@
 <template>
   <q-card class="auth-card q-pa-md">
+    <!-- Logo区域 -->
+    <div class="auth-logo">
+      <div class="logo-text">MyNet</div>
+    </div>
+    
     <q-card-section class="auth-header">
       <div class="auth-title">{{ $t('auth.loginTitle') }}</div>
       <div class="auth-subtitle">{{ $t('auth.loginSubtitle') }}</div>

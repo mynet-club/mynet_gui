@@ -1,6 +1,6 @@
 <template>
   <PageLayout
-    :title="$t('navigation.services')"
+    :title="$t('navigation.services.title')"
     :subtitle="$t('zoneServices.subtitle')"
     icon="apps"
   >
@@ -161,6 +161,7 @@
           
           <template #emptyAction>
             <q-btn
+              flat
               color="primary"
               :label="$t('zoneServices.addFirstService')"
               @click="handleAddService"
@@ -201,6 +202,7 @@
         <q-card-actions align="right">
           <q-btn flat :label="$t('common.cancel')" v-close-popup />
           <q-btn
+            flat
             color="primary"
             :label="$t('zoneServices.confirmShare')"
             @click="confirmShare"
@@ -210,7 +212,8 @@
       </q-card>
     </q-dialog>
 
-    <!-- 申请公开对话框 -->
+    <!-- 申请公开对话框 - 已移除，后端不再支持用户申请公开服务 -->
+    <!--
     <q-dialog v-model="showApprovalDialog">
       <q-card style="min-width: 400px">
         <q-card-section>
@@ -270,20 +273,20 @@ const {
   serviceCategories,
   loadAllServices,
   deleteService,
-  shareService,
-  requestApproval
+  shareService
+  // requestApproval // 已移除 - 不再支持申请公开
 } = useZoneServices()
 
 // 状态
 const activeCategory = ref('public')
 const showServiceDialog = ref(false)
 const showShareDialog = ref(false)
-const showApprovalDialog = ref(false)
+// const showApprovalDialog = ref(false) // 已移除 - 不再支持申请公开
 const editingService = ref<ZoneService | null>(null)
 const sharingService = ref<ZoneService | null>(null)
-const approvalService = ref<ZoneService | null>(null)
+// const approvalService = ref<ZoneService | null>(null) // 已移除
 const shareMessage = ref('')
-const approvalReason = ref('')
+// const approvalReason = ref('') // 已移除
 const currentZone = ref<ZoneService | null>(null)
 
 // 计算属性
@@ -359,12 +362,14 @@ const confirmShare = async () => {
   }
 }
 
-// 申请公开
+// 申请公开 - 已移除，不再支持用户申请公开服务
+/*
 const handleRequestApproval = (service: ZoneService) => {
   approvalService.value = service
   approvalReason.value = ''
   showApprovalDialog.value = true
 }
+*/
 
 // 分享给好友
 const handleShareToFriends = (service: ZoneService) => {
@@ -373,7 +378,8 @@ const handleShareToFriends = (service: ZoneService) => {
   showShareDialog.value = true
 }
 
-// 申请公开分享
+// 申请公开分享 - 已移除
+/*
 const handleShareToPublic = (service: ZoneService) => {
   approvalService.value = service
   approvalReason.value = ''
@@ -396,6 +402,7 @@ const confirmApproval = async () => {
     await handleRefresh()
   }
 }
+*/
 
 // 连接服务
 const handleConnect = (service: ZoneService) => {

@@ -1,56 +1,70 @@
 <template>
-  <q-btn-dropdown 
+  <q-btn
     flat 
     dense
-    :icon="'business'"
-    :label="$q.screen.gt.sm ? (currentZone?.zone_name || currentZone?.name || $t('zones.selectZone')) : ''"
-    class="q-mr-sm zone-selector"
-    :color="currentZone ? 'white' : 'orange'"
+    round
+    icon="travel_explore"
+    @click="showDialog = true"
+    class="zone-selector"
   >
-    <q-list>
-      <q-item-label header class="text-weight-bold">
-        {{ $t('zones.switchZone') }}
-      </q-item-label>
-      <q-item 
-        v-for="zone in availableZones" 
-        :key="zone.zone_id"
-        clickable
-        @click="switchZone(zone.zone_id)"
-        :active="zone.zone_id === currentZone?.zone_id"
-      >
-        <q-item-section avatar>
-          <q-icon 
-            name="business" 
-            :color="zone.is_active ? 'positive' : 'grey'" 
-          />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{ zone.zone_name || zone.name }}</q-item-label>
-          <q-item-label caption>{{ zone.zone_remarks || zone.description }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <div class="column items-end">
-            <q-chip 
-              :label="zone.is_active ? $t('common.active') : $t('common.inactive')"
-              :color="zone.is_active ? 'positive' : 'grey'"
-              text-color="white"
-              size="sm"
-            />
-            <q-icon 
-              v-if="zone.zone_id === currentZone?.zone_id"
-              name="check" 
-              color="positive" 
-              class="q-mt-xs"
-            />
-          </div>
-        </q-item-section>
-      </q-item>
-    </q-list>
-  </q-btn-dropdown>
+    <q-tooltip>
+      {{ currentZone?.zone_name || currentZone?.name || $t('zones.selectZone') }}
+    </q-tooltip>
+    
+    <!-- Zone 切换弹窗 -->
+    <q-dialog v-model="showDialog">
+      <q-card style="min-width: 400px">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">{{ $t('zones.switchZone') }}</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-list>
+            <q-item 
+              v-for="zone in availableZones" 
+              :key="zone.zone_id"
+              clickable
+              @click="switchZone(zone.zone_id)"
+              :active="zone.zone_id === currentZone?.zone_id"
+            >
+              <q-item-section avatar>
+                <q-icon 
+                  name="travel_explore" 
+                  :color="zone.is_active ? 'primary' : 'grey'" 
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ zone.zone_name || zone.name }}</q-item-label>
+                <q-item-label caption>{{ zone.zone_remarks || zone.description }}</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <div class="column items-end">
+                  <q-chip 
+                    :label="zone.is_active ? $t('common.active') : $t('common.inactive')"
+                    :color="zone.is_active ? 'positive' : 'grey'"
+                    text-color="white"
+                    size="sm"
+                  />
+                  <q-icon 
+                    v-if="zone.zone_id === currentZone?.zone_id"
+                    name="check" 
+                    color="positive" 
+                    class="q-mt-xs"
+                  />
+                </div>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+  </q-btn>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import debug from "src/utils/debug"
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -60,6 +74,9 @@ import type { Zone } from '../../types'
 const $q = useQuasar()
 const { t } = useI18n()
 const authStore = useAuthStore()
+
+// 对话框显示状态
+const showDialog = ref(false)
 
 // 计算属性
 const currentZone = computed(() => authStore.currentZone)
@@ -85,6 +102,9 @@ const switchZone = async (zoneId: number) => {
       message: t('zones.switchedTo', { zoneName: targetZoneName }),
       timeout: 3000
     })
+    
+    // 切换成功后关闭对话框
+    showDialog.value = false
   } catch (error) {
     debug.error('🔧 [ZoneSelector] Failed to switch zone:', error)
     $q.notify({

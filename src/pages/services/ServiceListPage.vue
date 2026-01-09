@@ -1,18 +1,20 @@
 <template>
   <PageLayout
-    :title="$t('navigation.services')"
+    :title="$t('navigation.services.title')"
     :subtitle="$t('zoneServices.subtitle')"
     icon="apps"
   >
     <template #actions>
       <div class="row q-gutter-sm items-center">
         <q-btn
+          flat
           color="primary"
           icon="add"
           :label="$t('zoneServices.addService')"
           @click="navigateToMyServices"
         />
         <q-btn
+          flat
           color="grey-7"
           icon="refresh"
           :label="$t('common.refresh')"
@@ -24,7 +26,7 @@
 
     <!-- 服务概览统计 -->
     <div class="row q-col-gutter-lg q-mb-xl">
-      <div class="col-12 col-sm-6 col-md-3">
+      <div class="col-12 col-sm-6 col-md-4">
         <q-card class="overview-card">
           <q-card-section class="text-center">
             <q-icon name="public" size="2rem" color="primary" class="q-mb-sm" />
@@ -34,7 +36,7 @@
         </q-card>
       </div>
       
-      <div class="col-12 col-sm-6 col-md-3">
+      <div class="col-12 col-sm-6 col-md-4">
         <q-card class="overview-card">
           <q-card-section class="text-center">
             <q-icon name="group" size="2rem" color="positive" class="q-mb-sm" />
@@ -44,17 +46,9 @@
         </q-card>
       </div>
       
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="overview-card">
-          <q-card-section class="text-center">
-            <q-icon name="visibility_off" size="2rem" color="warning" class="q-mb-sm" />
-            <div class="text-h4 text-weight-bold text-warning">{{ anonymousServices.length }}</div>
-            <div class="text-body2 text-grey-6">{{ $t('zoneServices.categories.anonymous') }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
+      <!-- 匿名服务已移除 - 简化服务分类 -->
       
-      <div class="col-12 col-sm-6 col-md-3">
+      <div class="col-12 col-sm-6 col-md-4">
         <q-card class="overview-card">
           <q-card-section class="text-center">
             <q-icon name="person_add" size="2rem" color="accent" class="q-mb-sm" />
@@ -108,9 +102,9 @@
           
           <q-card-actions class="justify-center q-pb-md">
             <q-btn
+              flat
               :color="item.color"
               :label="$t('common.enter')"
-              flat
               no-caps
             />
           </q-card-actions>
@@ -136,7 +130,7 @@ const {
   loading,
   publicServices,
   friendServices,
-  anonymousServices,
+  // anonymousServices, // 已移除
   myServices,
   loadAllServices
 } = useZoneServices()
@@ -159,14 +153,15 @@ const navigationItems = computed(() => [
     count: friendServices.value.length,
     action: () => router.push('/app/services/friends')
   },
-  {
-    title: t('navigation.services.anonymousServices'),
-    description: t('navigation.services.anonymousServicesDescription'),
-    icon: 'visibility_off',
-    color: 'warning',
-    count: anonymousServices.value.length,
-    action: () => router.push('/app/services/anonymous')
-  },
+  // 匿名服务已移除
+  // {
+  //   title: t('navigation.services.anonymousServices'),
+  //   description: t('navigation.services.anonymousServicesDescription'),
+  //   icon: 'visibility_off',
+  //   color: 'warning',
+  //   count: anonymousServices.value.length,
+  //   action: () => router.push('/app/services/anonymous')
+  // },
   {
     title: t('navigation.services.myServices'),
     description: t('navigation.services.myServicesDescription'),
@@ -196,21 +191,25 @@ const navigateToMyServices = () => {
 <style scoped lang="scss">
 .overview-card {
   min-height: 120px;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: rgba(0,0,0,0.08);
   }
 }
 
 .navigation-card {
   min-height: 200px;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
   
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    border-color: rgba(0,0,0,0.08);
   }
 }
 
@@ -219,6 +218,25 @@ const navigateToMyServices = () => {
     font-size: 1.25rem;
     font-weight: 600;
     line-height: 1.2;
+    color: var(--text-primary);
+  }
+  
+  p {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+}
+
+:root {
+  --text-primary: rgba(0, 0, 0, 0.87);
+}
+
+.body--dark {
+  --text-primary: rgba(255, 255, 255, 0.87);
+  
+  .overview-card:hover,
+  .navigation-card:hover {
+    border-color: rgba(255,255,255,0.08);
   }
 }
 </style>

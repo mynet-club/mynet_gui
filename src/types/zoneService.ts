@@ -117,4 +117,5 @@ export interface ServiceTypeConfig {
   description: string
   defaultPort: number
   defaultProtocol: ServiceProtocol
+  systemOnly?: boolean  // 标记是否仅系统服务可用
 }

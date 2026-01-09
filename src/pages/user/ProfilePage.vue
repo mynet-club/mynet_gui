@@ -114,7 +114,8 @@
                   :hint="$t('user.signatureHint')"
                 />
                 <div class="row q-gutter-sm justify-start">
-                  <q-btn 
+                  <q-btn
+                    flat
                     :label="$t('user.saveChanges')" 
                     color="primary" 
                     @click="updateUserProfile"
@@ -192,16 +193,17 @@
               </div>
 
               <div class="row q-gutter-sm justify-start">
-                <q-btn 
+                <q-btn
+                  flat
                   :label="$t('user.saveChanges')" 
                   color="primary" 
                   @click="savePreferences"
                   :loading="loading.preferences"
                 />
-                <q-btn 
+                <q-btn
+                  flat
                   :label="$t('user.resetToDefault')" 
                   color="grey-6" 
-                  outline
                   @click="resetPreferences"
                 />
               </div>
@@ -262,7 +264,8 @@
             @click="closePasswordDialog"
             :disable="loading.password"
           />
-          <q-btn 
+          <q-btn
+            flat
             :label="$t('user.change')" 
             color="primary" 
             @click="submitPasswordChange"

@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="main-layout theme-transition">
     <!-- Header -->
-    <q-header elevated class="bg-primary text-white">
+    <q-header class="soft-header">
       <q-toolbar>
         <q-btn
           flat
@@ -17,6 +17,9 @@
 
         <!-- 区域切换 -->
         <ZoneSelector />
+
+        <!-- Tips 帮助 -->
+        <TipsHelper class="q-mr-sm" />
 
         <!-- 语言切换 -->
         <q-btn-dropdown 
@@ -132,7 +135,7 @@
                 size="lg"
                 class="q-mr-md"
               />
-              <span v-if="$q.screen.gt.sm" class="text-white">{{ user?.name || 'User' }}</span>
+              <span v-if="$q.screen.gt.sm">{{ user?.name || 'User' }}</span>
             </div>
           </template>
           <q-list>
@@ -384,6 +387,9 @@
 
     <!-- Notification Dialog -->
     <NotificationDialog v-model="showNotificationDialog" />
+    
+    <!-- Tips系统容器 -->
+    <TipsContainer />
   </q-layout>
 </template>
 
@@ -399,9 +405,13 @@ import { useSidebarStats } from '../composables/useSidebarStats'
 import { useNotifications } from '../composables/useNotifications'
 import { useI18n } from 'vue-i18n'
 import ZoneSelector from '../components/common/ZoneSelector.vue'
+import TipsHelper from '../components/tips/TipsHelper.vue'
 import UserAvatar from '../components/avatar/UserAvatar.vue'
 import NotificationDialog from '../components/notification/NotificationDialog.vue'
+import TipsContainer from '../components/tips/TipsContainer.vue'
 import { DEFAULT_GLOBAL_ZONE } from '../config/app'
+import { useOnboardingStore } from '../stores/onboarding'
+import { getTipsEngine } from '../services/tips/TipsEngine'
 
 const $q = useQuasar()
 const router = useRouter()
@@ -547,12 +557,13 @@ const networkNavigationItems = computed((): NavigationItem[] => [
         icon: 'group',
         path: '/app/services/friends'
       },
-      {
-        name: 'services-anonymous',
-        label: 'navigation.services.anonymousServices',
-        icon: 'visibility_off',
-        path: '/app/services/anonymous'
-      },
+      // 匿名服务已移除 - 2026-01 简化服务分类
+      // {
+      //   name: 'services-anonymous',
+      //   label: 'navigation.services.anonymousServices',
+      //   icon: 'visibility_off',
+      //   path: '/app/services/anonymous'
+      // },
       {
         name: 'services-my',
         label: 'navigation.services.myServices',
@@ -800,11 +811,80 @@ onMounted(async () => {
   
   // 初始化边栏统计数据
   await initSidebarStats()
+  
+  // 初始化引导系统
+  if (authStore.isAuthenticated && authStore.user) {
+    debug.log('🎓 [Onboarding] Initializing onboarding system...')
+    const onboardingStore = useOnboardingStore()
+    
+    // 初始化引导状态（使用user_id而不是id）
+    const uniqueUserId = authStore.user.user_id?.toString() || authStore.user.id.toString()
+    onboardingStore.initialize(uniqueUserId)
+    debug.log('🎓 [Onboarding] Initialized with userId:', uniqueUserId)
+    
+    // 启动Tips引擎（开发环境启用调试）
+    const engine = getTipsEngine({
+      enabled: true,
+      autoStart: true,
+      debug: import.meta.env.DEV
+    })
+    
+    debug.log('🎓 [Onboarding] Current status:', {
+      isStarted: onboardingStore.isStarted,
+      completed: onboardingStore.completed,
+      progress: onboardingStore.progress,
+      currentStage: onboardingStore.currentStage
+    })
+    
+    // 首次登录自动开始引导
+    if (!onboardingStore.isStarted && !onboardingStore.completed) {
+      debug.log('🎓 [Onboarding] Starting onboarding for new user')
+      onboardingStore.start()
+      
+      // 导航到Dashboard
+      if (router.currentRoute.value.path !== '/dashboard') {
+        router.push('/dashboard')
+      }
+    }
+  }
 })
 </script>
 
 <style lang="scss" scoped>
 .main-layout {
+  .soft-header {
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--header-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    
+    .q-toolbar {
+      min-height: 64px;
+      color: var(--text-primary);
+      
+      .q-btn-dropdown,
+      .q-btn {
+        color: var(--text-primary);
+        transition: all 0.2s ease;
+        border-radius: 8px;
+        
+        &:hover {
+          background-color: var(--page-bg);
+        }
+        
+        .q-btn__content {
+          gap: 6px;
+          font-weight: 500;
+        }
+      }
+      
+      .user-menu-btn {
+        .text-white {
+          color: var(--text-primary) !important;
+        }
+      }
+    }
+  }
+  
   .q-header {
     .q-toolbar {
       .q-btn-dropdown,
@@ -916,6 +996,31 @@ onMounted(async () => {
 // 深色模式优化
 .body--dark {
   .main-layout {
+    .soft-header {
+      background: var(--soft-bg-primary-dark, #1a1a1a);
+      border-bottom-color: var(--soft-border-dark, rgba(255, 255, 255, 0.08));
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      
+      .q-toolbar {
+        color: var(--soft-text-primary-dark, #e0e0e0);
+        
+        .q-btn-dropdown,
+        .q-btn {
+          color: var(--soft-text-primary-dark, #e0e0e0);
+          
+          &:hover {
+            background-color: var(--soft-bg-secondary-dark, rgba(255, 255, 255, 0.08));
+          }
+        }
+        
+        .user-menu-btn {
+          .text-white {
+            color: var(--soft-text-primary-dark, #e0e0e0) !important;
+          }
+        }
+      }
+    }
+    
     .drawer-header {
       background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-accent) 100%);
     }

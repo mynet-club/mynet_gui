@@ -82,6 +82,14 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
+    // 处理 410 Gone - 普通用户申请公开服务功能已下线
+    if (error.response?.status === 410) {
+      debug.warn('🔧 [API] 410 Gone - 普通用户不可发布公共服务:', originalRequest.url)
+      // 在错误对象中添加友好提示信息
+      error.friendlyMessage = '普通用户不能发布公共服务。公共服务仅限系统提供，已连接设备会自动共享服务。'
+      return Promise.reject(error)
+    }
+
     // 排除登录、注册等不需要token刷新的请求
     const excludePaths = ['/auth/login', '/auth/register', '/auth/refresh-token']
     const shouldExclude = excludePaths.some(path => originalRequest.url?.includes(path))

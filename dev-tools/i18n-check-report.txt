@@ -1,0 +1,355 @@
+🔍 开始检查国际化键值...
+
+📚 中文键数量: 1987
+📚 英文键数量: 1779
+
+📁 扫描文件数: 208
+🔑 使用的键数量: 1063
+
+❌ 中文翻译缺失的键:
+  - auth.resendEmail
+    使用位置: src/components/auth/PasswordResetDialog.vue, src/components/auth/AccountActivationDialog.vue
+  - common.create
+    使用位置: src/components/zone/ServiceEditDialog.vue
+  - common.no
+    使用位置: src/pages/zone/ZoneSharingPage.vue
+  - common.status
+    使用位置: src/layouts/MainLayout.vue
+  - common.yes
+    使用位置: src/pages/zone/ZoneSharingPage.vue
+  - navigation.services.anonymousServices
+    使用位置: src/pages/services/ServiceListPage.vue
+  - navigation.services.anonymousServicesDescription
+    使用位置: src/pages/services/ServiceListPage.vue
+  - nodes.operations.connectFailed
+    使用位置: src/pages/node/NodeListPage.vue
+  - routes.friendNodes.requestError
+    使用位置: src/pages/route/FriendNodesPage.vue
+  - routes.friendNodes.requestSent
+    使用位置: src/pages/route/FriendNodesPage.vue
+  - routes.friendNodes.sendRequest
+    使用位置: src/pages/route/FriendNodesPage.vue
+  - routes.nodeBased.noAvailableNodes
+    使用位置: src/components/route/NodeListView.vue
+  - routes.nodeBased.noAvailableNodesDescription
+    使用位置: src/components/route/NodeListView.vue
+  - routes.nodeSelector.addNodesFirst
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.clearSelection
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.noDescription
+    使用位置: src/components/route/NodeSelectorCard.vue, src/components/route/NodeSelector.vue
+  - routes.nodeSelector.noNodes
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.noSearchResults
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.refresh
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.searchPlaceholder
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.selectedNode
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.status.active
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.status.inactive
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.status.pending
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.statusFilter
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.tryDifferentSearch
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.typeFilter
+    使用位置: src/components/route/NodeSelector.vue
+  - social.fetchAllFriendNodesError
+    使用位置: src/composables/useSocial.ts
+  - social.friendRequestCancelError
+    使用位置: src/composables/useSocial.ts
+  - social.friendRequestCancelled
+    使用位置: src/composables/useSocial.ts
+  - social.friendRequests.status.undefined
+    使用位置: src/composables/useSocial.ts
+  - social.friendRequests.statusError
+    使用位置: src/composables/useSocial.ts
+  - social.friends.mutualFriends
+    使用位置: src/pages/social/InvitationsPage.vue
+  - social.invitations.copyFailed
+    使用位置: src/pages/social/InvitationsPage.vue
+  - social.invitations.linkCopied
+    使用位置: src/pages/social/InvitationsPage.vue
+  - user.2faDisabled
+    使用位置: src/pages/user/ProfilePageNew.vue
+  - user.2faEnabled
+    使用位置: src/pages/user/ProfilePageNew.vue
+  - user.2faUpdateFailed
+    使用位置: src/pages/user/ProfilePageNew.vue
+  - user.validation.currentPasswordRequired
+    使用位置: src/composables/usePasswordManagement.ts
+  - user.validation.fileTooLarge
+    使用位置: src/composables/useAvatarManagement.ts
+  - user.validation.invalidFileType
+    使用位置: src/composables/useAvatarManagement.ts
+  - user.validation.newPasswordRequired
+    使用位置: src/composables/usePasswordManagement.ts
+  - user.validation.passwordMismatch
+    使用位置: src/composables/usePasswordManagement.ts
+  - user.validation.passwordTooShort
+    使用位置: src/composables/usePasswordManagement.ts
+  - websocket.connectionFailed
+    使用位置: src/layouts/MainLayout.vue
+  - zoneServices.empty.anonymousServices
+    使用位置: src/pages/zone/ZoneSharingPage.vue, src/pages/services/AnonymousServicesPage.vue
+  - zoneServices.empty.anonymousServicesDesc
+    使用位置: src/pages/zone/ZoneSharingPage.vue, src/pages/services/AnonymousServicesPage.vue
+  - zoneServices.errors.connectFailed
+    使用位置: src/pages/services/PublicServicesPage.vue, src/pages/services/FriendServicesPage.vue (+1 more)
+  - zoneServices.navigation.anonymousServices
+    使用位置: src/pages/services/AnonymousServicesPage.vue
+  - zoneServices.navigation.anonymousServicesDescription
+    使用位置: src/pages/services/AnonymousServicesPage.vue
+
+❌ 英文翻译缺失的键:
+  - auth.resendEmail
+    使用位置: src/components/auth/PasswordResetDialog.vue, src/components/auth/AccountActivationDialog.vue
+  - common.create
+    使用位置: src/components/zone/ServiceEditDialog.vue
+  - common.enter
+    使用位置: src/pages/services/ServiceListPage.vue
+  - common.no
+    使用位置: src/pages/zone/ZoneSharingPage.vue
+  - common.searchPlaceholder
+    使用位置: src/pages/examples/FormStyleGuidePage.vue
+  - common.status
+    使用位置: src/layouts/MainLayout.vue
+  - common.update
+    使用位置: src/components/zone/ServiceEditDialog.vue
+  - common.yes
+    使用位置: src/pages/zone/ZoneSharingPage.vue
+  - ippools.continuityWarning
+    使用位置: src/composables/useIPPools.ts
+  - ippools.deleteConfirmTitle
+    使用位置: src/components/ippool/IPPoolManager.vue
+  - ippools.selectTargetPoolAdvancedHint
+    使用位置: src/components/ippool/IPPoolCreateDialog.vue
+  - navigation.services.anonymousServices
+    使用位置: src/pages/services/ServiceListPage.vue
+  - navigation.services.anonymousServicesDescription
+    使用位置: src/pages/services/ServiceListPage.vue
+  - nodes.operations.connectFailed
+    使用位置: src/pages/node/NodeListPage.vue
+  - nodes.status.updateFailed
+    使用位置: src/pages/node/NodeListPage.vue
+  - routes.configDownloadError
+    使用位置: src/composables/useRoutes.ts
+  - routes.configDownloaded
+    使用位置: src/composables/useRoutes.ts
+  - routes.configRefreshError
+    使用位置: src/composables/useRoutes.ts
+  - routes.configRefreshed
+    使用位置: src/composables/useRoutes.ts
+  - routes.connectionApproveError
+    使用位置: src/composables/useRoutes.ts
+  - routes.connectionApproved
+    使用位置: src/composables/useRoutes.ts
+  - routes.connectionRejectError
+    使用位置: src/composables/useRoutes.ts
+  - routes.connectionRejected
+    使用位置: src/composables/useRoutes.ts
+  - routes.connectionRequestError
+    使用位置: src/composables/useRoutes.ts
+  - routes.connectionRequestSent
+    使用位置: src/composables/useRoutes.ts
+  - routes.create.requestSubmitted
+    使用位置: src/composables/useRoutes.ts
+  - routes.create.step2.cannotConnect
+    使用位置: src/pages/route/create/Step2FriendNodeSelection.vue
+  - routes.create.step2.existingConnection
+    使用位置: src/pages/route/create/Step2FriendNodeSelection.vue
+  - routes.create.step2.nodeNotAvailable
+    使用位置: src/pages/route/create/Step2FriendNodeSelection.vue
+  - routes.create.step2.pendingRequest
+    使用位置: src/pages/route/create/Step2FriendNodeSelection.vue
+  - routes.create.step2.possibleReasons
+    使用位置: src/pages/route/create/Step2FriendNodeSelection.vue
+  - routes.create.step3.nodeDisabled
+    使用位置: src/pages/route/create/Step3MyNodeSelection.vue
+  - routes.create.step3.nodeMaintenance
+    使用位置: src/pages/route/create/Step3MyNodeSelection.vue
+  - routes.create.step3.nodeUnconfigured
+    使用位置: src/pages/route/create/Step3MyNodeSelection.vue
+  - routes.create.submitError
+    使用位置: src/composables/useRoutes.ts
+  - routes.dialogs.routeDetails.title
+    使用位置: src/pages/route/RouteListPage.vue
+  - routes.fetchAllFriendNodesError
+    使用位置: src/pages/route/FriendNodesPage.vue
+  - routes.fetchConfigError
+    使用位置: src/composables/useRoutes.ts
+  - routes.fetchFriendNodesError
+    使用位置: src/composables/useRoutes.ts
+  - routes.fetchOverviewError
+    使用位置: src/composables/useRoutes.ts
+  - routes.fetchPendingConnectionsError
+    使用位置: src/composables/useRoutes.ts
+  - routes.fetchRouteDetailsError
+    使用位置: src/composables/useRoutes.ts
+  - routes.friendNodes.requestError
+    使用位置: src/pages/route/FriendNodesPage.vue
+  - routes.friendNodes.requestSent
+    使用位置: src/pages/route/FriendNodesPage.vue
+  - routes.index.activeRoutes
+    使用位置: src/pages/route/RouteListPage.vue
+  - routes.index.activeRoutesDescription
+    使用位置: src/pages/route/RouteListPage.vue
+  - routes.index.friendNodes
+    使用位置: src/pages/route/RouteListPage.vue
+  - routes.index.friendNodesDescription
+    使用位置: src/pages/route/RouteListPage.vue
+  - routes.index.pendingConnections
+    使用位置: src/pages/route/RouteListPage.vue
+  - routes.index.pendingConnectionsDescription
+    使用位置: src/pages/route/RouteListPage.vue
+  - routes.nodeBased.noAvailableNodes
+    使用位置: src/components/route/NodeListView.vue
+  - routes.nodeBased.noAvailableNodesDescription
+    使用位置: src/components/route/NodeListView.vue
+  - routes.nodeSelector.addNodesFirst
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.clearSelection
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.noDescription
+    使用位置: src/components/route/NodeSelectorCard.vue, src/components/route/NodeSelector.vue
+  - routes.nodeSelector.noNodes
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.noSearchResults
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.refresh
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.searchPlaceholder
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.selectedNode
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.status.active
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.status.inactive
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.status.pending
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.statusFilter
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.tryDifferentSearch
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.nodeSelector.typeFilter
+    使用位置: src/components/route/NodeSelector.vue
+  - routes.routeDisconnectError
+    使用位置: src/composables/useRoutes.ts
+  - routes.routeDisconnected
+    使用位置: src/composables/useRoutes.ts
+  - social.actions.accept
+    使用位置: src/components/social/SocialCard.vue
+  - social.actions.addFriend
+    使用位置: src/components/social/SocialCard.vue
+  - social.actions.reject
+    使用位置: src/components/social/SocialCard.vue
+  - social.actions.removeFriend
+    使用位置: src/components/social/SocialCard.vue
+  - social.fetchAllFriendNodesError
+    使用位置: src/composables/useSocial.ts
+  - social.friendRequestCancelError
+    使用位置: src/composables/useSocial.ts
+  - social.friendRequestCancelled
+    使用位置: src/composables/useSocial.ts
+  - social.friendRequests.status.undefined
+    使用位置: src/composables/useSocial.ts
+  - social.friendRequests.statusError
+    使用位置: src/composables/useSocial.ts
+  - social.friends.mutualFriends
+    使用位置: src/pages/social/InvitationsPage.vue
+  - social.invitations.copyFailed
+    使用位置: src/pages/social/InvitationsPage.vue
+  - social.invitations.linkCopied
+    使用位置: src/pages/social/InvitationsPage.vue
+  - user.2faDisabled
+    使用位置: src/pages/user/ProfilePageNew.vue
+  - user.2faEnabled
+    使用位置: src/pages/user/ProfilePageNew.vue
+  - user.2faUpdateFailed
+    使用位置: src/pages/user/ProfilePageNew.vue
+  - user.validation.currentPasswordRequired
+    使用位置: src/composables/usePasswordManagement.ts
+  - user.validation.fileTooLarge
+    使用位置: src/composables/useAvatarManagement.ts
+  - user.validation.invalidFileType
+    使用位置: src/composables/useAvatarManagement.ts
+  - user.validation.newPasswordRequired
+    使用位置: src/composables/usePasswordManagement.ts
+  - user.validation.passwordMismatch
+    使用位置: src/composables/usePasswordManagement.ts
+  - user.validation.passwordTooShort
+    使用位置: src/composables/usePasswordManagement.ts
+  - websocket.connectionFailed
+    使用位置: src/layouts/MainLayout.vue
+  - zoneServices.empty.anonymousServices
+    使用位置: src/pages/zone/ZoneSharingPage.vue, src/pages/services/AnonymousServicesPage.vue
+  - zoneServices.empty.anonymousServicesDesc
+    使用位置: src/pages/zone/ZoneSharingPage.vue, src/pages/services/AnonymousServicesPage.vue
+  - zoneServices.errors.connectFailed
+    使用位置: src/pages/services/PublicServicesPage.vue, src/pages/services/FriendServicesPage.vue (+1 more)
+  - zoneServices.navigation.anonymousServices
+    使用位置: src/pages/services/AnonymousServicesPage.vue
+  - zoneServices.navigation.anonymousServicesDescription
+    使用位置: src/pages/services/AnonymousServicesPage.vue
+
+⚠️  中英文不一致的键:
+  - common.enter (有中文, 缺英文)
+  - common.searchPlaceholder (有中文, 缺英文)
+  - common.update (有中文, 缺英文)
+  - ippools.continuityWarning (有中文, 缺英文)
+  - ippools.deleteConfirmTitle (有中文, 缺英文)
+  - ippools.selectTargetPoolAdvancedHint (有中文, 缺英文)
+  - nodes.status.updateFailed (有中文, 缺英文)
+  - routes.configDownloadError (有中文, 缺英文)
+  - routes.configDownloaded (有中文, 缺英文)
+  - routes.configRefreshError (有中文, 缺英文)
+  - routes.configRefreshed (有中文, 缺英文)
+  - routes.connectionApproveError (有中文, 缺英文)
+  - routes.connectionApproved (有中文, 缺英文)
+  - routes.connectionRejectError (有中文, 缺英文)
+  - routes.connectionRejected (有中文, 缺英文)
+  - routes.connectionRequestError (有中文, 缺英文)
+  - routes.connectionRequestSent (有中文, 缺英文)
+  - routes.create.requestSubmitted (有中文, 缺英文)
+  - routes.create.step2.cannotConnect (有中文, 缺英文)
+  - routes.create.step2.existingConnection (有中文, 缺英文)
+  - routes.create.step2.nodeNotAvailable (有中文, 缺英文)
+  - routes.create.step2.pendingRequest (有中文, 缺英文)
+  - routes.create.step2.possibleReasons (有中文, 缺英文)
+  - routes.create.step3.nodeDisabled (有中文, 缺英文)
+  - routes.create.step3.nodeMaintenance (有中文, 缺英文)
+  - routes.create.step3.nodeUnconfigured (有中文, 缺英文)
+  - routes.create.submitError (有中文, 缺英文)
+  - routes.dialogs.routeDetails.title (有中文, 缺英文)
+  - routes.fetchAllFriendNodesError (有中文, 缺英文)
+  - routes.fetchConfigError (有中文, 缺英文)
+  - routes.fetchFriendNodesError (有中文, 缺英文)
+  - routes.fetchOverviewError (有中文, 缺英文)
+  - routes.fetchPendingConnectionsError (有中文, 缺英文)
+  - routes.fetchRouteDetailsError (有中文, 缺英文)
+  - routes.friendNodes.sendRequest (缺中文, 有英文)
+  - routes.index.activeRoutes (有中文, 缺英文)
+  - routes.index.activeRoutesDescription (有中文, 缺英文)
+  - routes.index.friendNodes (有中文, 缺英文)
+  - routes.index.friendNodesDescription (有中文, 缺英文)
+  - routes.index.pendingConnections (有中文, 缺英文)
+  - routes.index.pendingConnectionsDescription (有中文, 缺英文)
+  - routes.routeDisconnectError (有中文, 缺英文)
+  - routes.routeDisconnected (有中文, 缺英文)
+  - social.actions.accept (有中文, 缺英文)
+  - social.actions.addFriend (有中文, 缺英文)
+  - social.actions.reject (有中文, 缺英文)
+  - social.actions.removeFriend (有中文, 缺英文)
+
+
+📊 总计发现 145 个问题
+   - 缺失中文: 50
+   - 缺失英文: 95

@@ -66,6 +66,7 @@
             <div class="col-auto">
               <div v-if="requestType === 'received' && request.status === 'pending'" class="q-gutter-sm">
                 <q-btn
+                  flat
                   @click="acceptRequest(request)"
                   color="positive"
                   :label="$t('social.friendRequests.accept')"
@@ -74,11 +75,11 @@
                   :loading="loading"
                 />
                 <q-btn
+                  flat
                   @click="rejectRequest(request)"
                   color="negative"
                   :label="$t('social.friendRequests.reject')"
                   size="sm"
-                  outline
                   no-caps
                   :loading="loading"
                 />
@@ -93,11 +94,11 @@
                 />
                 <q-btn
                   v-if="request.status === 'pending'"
+                  flat
                   @click="cancelRequest(request)"
                   color="negative"
                   :label="$t('social.friendRequests.cancel')"
                   size="sm"
-                  outline
                   no-caps
                   :loading="loading"
                 />
@@ -150,7 +151,6 @@ const rejectRequest = async (request: FriendRequest) => {
 
 const cancelRequest = async (request: FriendRequest) => {
   // TODO: 实现取消发送的好友请求
-  console.log('Cancel request:', request)
 }
 
 const getStatusColor = (status: string) => {

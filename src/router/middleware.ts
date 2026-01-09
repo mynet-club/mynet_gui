@@ -16,6 +16,12 @@ export function setupRouteGuards(router: Router) {
     // 简化的认证检查，实际应用中应该使用store中的认证状态
     const isAuthenticated = !!localStorage.getItem('auth_token')
     
+    // 如果已登录用户访问登录或注册页，重定向到 dashboard
+    if (isAuthenticated && (to.path === '/auth/login' || to.path === '/auth/register')) {
+      next('/dashboard')
+      return
+    }
+    
     // 检查是否需要认证
     if (to.meta?.requiresAuth && !isAuthenticated) {
       // 保存原始路径用于登录后重定向

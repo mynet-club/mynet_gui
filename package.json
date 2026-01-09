@@ -19,6 +19,7 @@
     "test:unit": "vitest run",
     "lint": "eslint --ext .js,.ts,.vue ./src",
     "lint:fix": "eslint --ext .js,.ts,.vue ./src --fix",
+    "check:i18n": "node dev-tools/check-i18n.js",
     "postinstall": "quasar prepare"
   },
   "dependencies": {

@@ -7,8 +7,8 @@ export default {
     login: '登录',
     logout: '注销',
     dashboard: '仪表板',
-    nodes: '节点',
-    routes: '路由',
+    nodes: '设备',
+    routes: '连接',
     settings: '设置',
     save: '保存',
     cancel: '取消',
@@ -71,6 +71,10 @@ export default {
     browse: '浏览',
     total: '总计',
     available: '可用',
+    create: '创建',
+    yes: '是',
+    no: '否',
+    status: '状态',
     debugInfo: '调试信息',
     viewDetails: '查看详情',
     noData: '—',
@@ -131,10 +135,10 @@ export default {
   auth: {
     login: '登录',
     register: '注册',
-    loginTitle: '欢迎回来',
-    loginSubtitle: '请登录您的账户',
-    registerTitle: '创建账户',
-    registerSubtitle: '请填写以下信息创建账户',
+    loginTitle: '登录 MyNet',
+    loginSubtitle: '安全、稳定的网络连接平台',
+    registerTitle: '创建你的 MyNet 账户',
+    registerSubtitle: '安全、稳定的网络连接平台',
     forgotPasswordTitle: '忘记密码',
     forgotPasswordSubtitle: '请输入您的邮箱地址',
     resetPasswordTitle: '重置密码',
@@ -148,8 +152,8 @@ export default {
     name: '姓名',
     rememberMe: '记住我',
     forgotPassword: '忘记密码？',
-    loginButton: '登录',
-    registerButton: '注册',
+    loginButton: '登录 MyNet',
+    registerButton: '创建账户',
     sendResetLink: '发送重置链接',
     resetPasswordButton: '重置密码',
     verifyEmail: '验证邮箱',
@@ -200,6 +204,16 @@ export default {
     verificationCodePlaceholder: '请输入6位验证码',
     invitationPlaceholder: '请输入邀请码（必需）',
     invitationRequired: '请输入邀请码',
+    noInvitationCode: '没有邀请码？',
+    getInvitationCode: '获取邀请码',
+    invitationCodeHelp: '如何获取邀请码',
+    invitationCodeHelpTitle: '获取邀请码',
+    invitationCodeHelpMessage: 'MyNet 采用邀请注册机制，请加入我们的社区获取邀请码：',
+    joinCommunity: '加入社区',
+    telegramCommunity: 'Telegram 社区',
+    discordCommunity: 'Discord 社区',
+    visitVillage: '访问社区页面',
+    communityLinks: '社区链接',
     
     // 账号激活相关
     accountActivation: '账号激活',
@@ -233,6 +247,7 @@ export default {
     codeLength: '验证码必须是6位',
     codeResent: '验证码已重新发送',
     emailResent: '邮件已重新发送',
+    resendEmail: '重新发送邮件',
     resendFailed: '重新发送失败',
     goToLogin: '前往登录',
     backToRegister: '返回注册',
@@ -294,28 +309,28 @@ export default {
     
     // 健康消息模板
     healthMessages: {
-      allOnline: '网络运行正常（{count} 个节点在线）',
-      someOffline: '检测到 {count} 个离线节点，建议检查',
-      criticalIssues: '检测到 {count} 个异常节点，需要立即处理',
+      allOnline: '网络运行正常（{count} 个设备在线）',
+      someOffline: '检测到 {count} 个离线设备，建议检查',
+      criticalIssues: '检测到 {count} 个异常设备，需要立即处理',
       lowOnlineRate: '网络状态需要关注（在线率 {rate}%）',
-      unconfigured: '有 {count} 个节点未完成配置',
-      noNodes: '暂无节点，请先创建节点'
+      unconfigured: '有 {count} 个设备未完成配置',
+      noNodes: '暂无设备，请先创建设备'
     },
     
     // 待处理任务
     pendingTasks: {
-      offlineNodes: '{count} 个节点离线',
+      offlineNodes: '{count} 个设备离线',
       pendingConnections: '{count} 个待处理连接',
-      unconfiguredNodes: '{count} 个节点未配置',
-      failedRoutes: '{count} 个路由故障'
+      unconfiguredNodes: '{count} 个设备未配置',
+      failedRoutes: '{count} 个连接故障'
     },
     
     // 异常项目
     abnormalItems: {
       title: '需要关注的问题',
       noIssues: '所有系统运行正常，无需处理任何问题',
-      allNormal: '{nodes} 个节点全部在线，{routes} 条路由正常运行',
-      offlineNodes: '离线节点',
+      allNormal: '{nodes} 个设备全部在线，{routes} 条连接正常运行',
+      offlineNodes: '离线设备',
       pendingConnections: '待处理连接',
       unconfiguredNodes: '未完成配置',
       viewAll: '查看全部',
@@ -329,18 +344,18 @@ export default {
     // 快速操作
     quickActions: {
       title: '快速操作',
-      createNode: '创建节点',
-      createRoute: '创建路由',
+      createNode: '创建设备',
+      createRoute: '创建连接',
       handleConnections: '处理连接 ({count})'
     },
     
     // 统计
     stats: {
-      totalNodes: '总节点数',
-      onlineNodes: '在线节点',
-      offlineNodes: '离线节点',
-      totalRoutes: '总路由数',
-      activeRoutes: '活跃路由',
+      totalNodes: '总设备数',
+      onlineNodes: '在线设备',
+      offlineNodes: '离线设备',
+      totalRoutes: '总连接数',
+      activeRoutes: '活跃连接',
       onlineRate: '在线率',
       friendConnections: '好友连接'
     },
@@ -354,40 +369,40 @@ export default {
     noActivities: '暂无活动'
   },
   nodes: {
-    title: '节点管理',
-    subtitle: '管理和监控网络节点',
-    name: '节点名称',
-    type: '节点类型',
+    title: '设备管理',
+    subtitle: '管理和监控网络设备',
+    name: '设备名称',
+    type: '设备类型',
     ipAddress: 'IP地址',
     port: '端口',
-    config: '节点配置',
-    configTitle: '节点配置',
+    config: '设备配置',
+    configTitle: '设备配置',
     saveConfig: '保存配置',
-    saveConfigSuccess: '节点配置保存成功',
-    saveConfigFailed: '保存节点配置失败',
-    loadConfigFailed: '加载节点配置失败',
+    saveConfigSuccess: '设备配置保存成功',
+    saveConfigFailed: '保存设备配置失败',
+    loadConfigFailed: '加载设备配置失败',
     exportConfig: '导出配置',
     resetConfig: '重置',
     versionSelect: '版本选择',
     configMode: '配置模式',
     networkConfig: '网络配置',
     refreshData: '刷新数据',
-    deleteNode: '删除节点',
-    deleteConfirm: '确定要删除节点 "{name}" 吗？',
+    deleteNode: '删除设备',
+    deleteConfirm: '确定要删除设备 "{name}" 吗？',
     dataRefreshed: '数据已刷新',
     refreshFailed: '刷新数据失败',
-    deleteSuccess: '节点删除成功',
-    deleteFailed: '删除节点失败',
+    deleteSuccess: '设备删除成功',
+    deleteFailed: '删除设备失败',
     loadIndexServersFailed: '加载索引服务器失败',
     loadNetworkConfigFailed: '加载网络配置失败',
     loadDeviceInfoFailed: '加载设备信息失败',
-    loadRoutesCountFailed: '加载路由数量失败',
+    loadRoutesCountFailed: '加载连接数量失败',
     
     // 列表页面
-    createNode: '创建节点',
-    noData: '暂无节点',
-    noDataDescription: '还没有创建任何节点',
-    createFirstNode: '创建第一个节点',
+    createNode: '创建设备',
+    noData: '暂无设备',
+    noDataDescription: '还没有创建任何设备',
+    createFirstNode: '创建第一个设备',
     view: '查看',
     enable: '启用',
     disable: '禁用',
@@ -400,7 +415,7 @@ export default {
     deleteCancel: '取消',
     deleteConfirmAction: '删除',
     
-    // 节点操作
+    // 设备操作
     operations: {
       start: '启动',
       stop: '停止',
@@ -420,54 +435,55 @@ export default {
       optimize: '优化',
       
       // 操作确认
-      confirmStart: '确定要启动节点 "{name}" 吗？',
-      confirmStop: '确定要停止节点 "{name}" 吗？',
-      confirmRestart: '确定要重启节点 "{name}" 吗？',
-      confirmPause: '确定要暂停节点 "{name}" 吗？',
-      confirmUpgrade: '确定要升级节点 "{name}" 吗？',
-      confirmMigrate: '确定要迁移节点 "{name}" 吗？',
+      confirmStart: '确定要启动设备 "{name}" 吗？',
+      confirmStop: '确定要停止设备 "{name}" 吗？',
+      confirmRestart: '确定要重启设备 "{name}" 吗？',
+      confirmPause: '确定要暂停设备 "{name}" 吗？',
+      confirmUpgrade: '确定要升级设备 "{name}" 吗？',
+      confirmMigrate: '确定要迁移设备 "{name}" 吗？',
       
       // 操作结果
-      startSuccess: '节点 {name} 启动成功',
-      stopSuccess: '节点 {name} 停止成功',
-      restartSuccess: '节点 {name} 重启成功',
-      commandCreated: '{action}指令已创建，等待节点 {name} 执行',
-      commandCreatedSimple: '{action}指令已创建，等待节点 {name} 执行',
-      actionFailed: '节点{action}失败',
-      pauseSuccess: '节点暂停成功',
-      resumeSuccess: '节点恢复成功',
-      backupSuccess: '节点备份成功',
-      restoreSuccess: '节点恢复成功',
-      upgradeSuccess: '节点升级成功',
-      migrateSuccess: '节点迁移成功',
-      syncSuccess: '节点同步成功',
-      testSuccess: '节点测试成功',
+      startSuccess: '设备 {name} 启动成功',
+      stopSuccess: '设备 {name} 停止成功',
+      restartSuccess: '设备 {name} 重启成功',
+      commandCreated: '{action}指令已创建，等待设备 {name} 执行',
+      commandCreatedSimple: '{action}指令已创建，等待设备 {name} 执行',
+      actionFailed: '设备{action}失败',
+      pauseSuccess: '设备暂停成功',
+      resumeSuccess: '设备恢复成功',
+      backupSuccess: '设备备份成功',
+      restoreSuccess: '设备恢复成功',
+      upgradeSuccess: '设备升级成功',
+      migrateSuccess: '设备迁移成功',
+      syncSuccess: '设备同步成功',
+      testSuccess: '设备测试成功',
       
       // 操作失败
-      startFailed: '节点启动失败',
-      stopFailed: '节点停止失败',
-      restartFailed: '节点重启失败',
-      pauseFailed: '节点暂停失败',
-      resumeFailed: '节点恢复失败',
-      backupFailed: '节点备份失败',
-      restoreFailed: '节点恢复失败',
-      upgradeFailed: '节点升级失败',
-      migrateFailed: '节点迁移失败',
-      syncFailed: '节点同步失败',
-      testFailed: '节点测试失败',
+      startFailed: '设备启动失败',
+      stopFailed: '设备停止失败',
+      restartFailed: '设备重启失败',
+      connectFailed: '设备连接失败',
+      pauseFailed: '设备暂停失败',
+      resumeFailed: '设备恢复失败',
+      backupFailed: '设备备份失败',
+      restoreFailed: '设备恢复失败',
+      upgradeFailed: '设备升级失败',
+      migrateFailed: '设备迁移失败',
+      syncFailed: '设备同步失败',
+      testFailed: '设备测试失败',
       
       // 批量操作
       batchOperations: '批量操作',
-      selectNodes: '选择节点',
+      selectNodes: '选择设备',
       selectAll: '全选',
       unselectAll: '取消全选',
-      selectedCount: '已选择 {count} 个节点',
+      selectedCount: '已选择 {count} 个设备',
       batchStart: '批量启动',
       batchStop: '批量停止',
       batchRestart: '批量重启',
       batchDelete: '批量删除',
       batchUpdate: '批量更新',
-      confirmBatchOperation: '确定要对所选的 {count} 个节点执行 {operation} 操作吗？',
+      confirmBatchOperation: '确定要对所选的 {count} 个设备执行 {operation} 操作吗？',
       batchOperationSuccess: '批量操作完成，成功 {success} 个，失败 {failed} 个',
       batchOperationFailed: '批量操作失败',
       
@@ -480,9 +496,9 @@ export default {
       operationProgress: '操作进度: {percent}%'
     },
     
-    // 节点监控
+    // 设备监控
     monitoring: {
-      title: '节点监控',
+      title: '设备监控',
       realTimeStats: '实时统计',
       performanceMetrics: '性能指标',
       connectionStatus: '连接状态',
@@ -533,9 +549,9 @@ export default {
       }
     },
     
-    // 节点日志
+    // 设备日志
     logs: {
-      title: '节点日志',
+      title: '设备日志',
       viewLogs: '查看日志',
       downloadLogs: '下载日志',
       clearLogs: '清空日志',
@@ -570,7 +586,7 @@ export default {
       followTail: '跟踪尾部'
     },
     
-    // 节点状态
+    // 设备状态
     status: {
       unconfigured: '未完成配置',
       disabled: '已禁用',
@@ -581,11 +597,11 @@ export default {
       active: '在线',
       inactive: '离线',
       pending: '待连接',
-      updateSuccess: '节点状态已更新为: {status}',
-      updateFailed: '更新节点状态失败，请重试'
+      updateSuccess: '设备状态已更新为: {status}',
+      updateFailed: '更新设备状态失败，请重试'
     },
     
-    // 节点信息字段
+    // 设备信息字段
     fields: {
       lastSeen: '最后在线',
       description: '描述',
@@ -603,11 +619,11 @@ export default {
       ipManagement: 'IP管理'
     },
     
-    // 节点详情页
+    // 设备详情页
     detail: {
-      title: '节点详情',
+      title: '设备详情',
       basicInfo: '基本信息',
-      nodeConfig: '节点配置',
+      nodeConfig: '设备配置',
       networkConfig: '网络配置',
       keyManagement: '密钥管理',
       deviceInfo: '设备信息',
@@ -617,13 +633,13 @@ export default {
       quickActions: '快速操作',
       
       // 基本信息字段
-      nodeName: '节点名称',
-      nodeId: '节点ID',
+      nodeName: '设备名称',
+      nodeId: '设备ID',
       status: '状态',
       lastOnline: '最后在线',
       createdAt: '创建时间',
       updatedAt: '更新时间',
-      nodeType: '节点类型',
+      nodeType: '设备类型',
       
       // 应用信息
       appInfo: '应用信息',
@@ -675,7 +691,7 @@ export default {
     
     // 编辑页面
     edit: {
-      title: '编辑节点',
+      title: '编辑设备',
       saveAllChanges: '保存所有更改',
       resetChanges: '重置更改',
       confirmLeave: '确认离开',
@@ -689,37 +705,37 @@ export default {
       tabs: {
         basic: '基础信息',
         network: '网络配置',
-        config: '节点配置',
+        config: '设备配置',
         keys: '密钥管理'
       },
       
       // 基础信息页面
       basic: {
-        nameRequired: '节点名称不能为空',
-        nameMaxLength: '节点名称长度不能超过50个字符',
+        nameRequired: '设备名称不能为空',
+        nameMaxLength: '设备名称长度不能超过50个字符',
         descriptionMaxLength: '描述长度不能超过500个字符',
         versionPlaceholder: '软件版本 (例如: v1.0.0)',
-        nodeTypeMultiSelect: '节点类型 (可多选)',
+        nodeTypeMultiSelect: '设备类型 (可多选)',
         currentSelection: '当前选择值',
         currentStatus: '当前状态: {status}',
         saveBasicInfo: '保存基础信息',
         noSelection: '未选择',
-        loadTypesDefinitionFailed: '加载节点类型定义失败',
+        loadTypesDefinitionFailed: '加载设备类型定义失败',
         formReset: '表单已重置',
         basicInfoSaved: '基础信息保存成功',
         saveFailed: '保存失败，请重试',
-        vpnTypeSwitched: '已切换到 {type}，请到节点配置页面设置相关端口',
+        vpnTypeSwitched: '已切换到 {type}，请到设备配置页面设置相关端口',
         
-        // 节点类型
+        // 设备类型
         nodeTypes: {
-          edge: '边缘节点',
-          relay: '中继节点',
-          gateway: '网关节点',
-          master: '主节点',
-          backup: '备用节点',
-          monitor: '监控节点',
-          proxy: '代理节点',
-          special: '特殊节点'
+          edge: '边缘设备',
+          relay: '中继设备',
+          gateway: '网关设备',
+          master: '主设备',
+          backup: '备用设备',
+          monitor: '监控设备',
+          proxy: '代理设备',
+          special: '特殊设备'
         }
       },
       
@@ -727,23 +743,23 @@ export default {
       network: {
         loadingConfig: '正在加载网络配置...',
         basicConfig: '基础配置',
-        nodeVirtualIP: '节点虚拟IP',
+        nodeVirtualIP: '设备虚拟IP',
         selectIP: '选择IP',
-        selectIPFromPool: '从IP池中选择一个可用的IP地址作为节点的虚拟IP',
+        selectIPFromPool: '从IP池中选择一个可用的IP地址作为设备的虚拟IP',
         ipGroupSequence: '组序号',
         virtualInterface: '虚拟网卡名称',
         interfacePlaceholder: '默认为 gnb0',
         lanIPs: 'LAN IP地址',
         lanIPsDescription: '局域网IP地址，格式：192.168.1.1',
-        lanIPsHint: '配置节点在局域网中的IP地址，用于局域网内的直接连接',
+        lanIPsHint: '配置设备在局域网中的IP地址，用于局域网内的直接连接',
         addLanIP: '添加LAN IP',
         publicIPs: '公网IP地址',
         publicIPsDescription: '公网IP地址，格式：1.2.3.4',
-        publicIPsHint: '配置节点的公网IP地址，用于跨网络连接',
+        publicIPsHint: '配置设备的公网IP地址，用于跨网络连接',
         addPublicIP: '添加公网IP',
         indexServers: '索引服务器',
         indexServersDescription: '索引服务器地址，格式：IP:端口',
-        indexServersHint: '索引服务器用于节点发现和路由，可配置多个提高可用性',
+        indexServersHint: '索引服务器用于设备发现和连接，可配置多个提高可用性',
         addIndexServer: '添加索引服务器',
         manualConfig: '手动配置',
         autoDetect: '自动检测',
@@ -773,14 +789,14 @@ export default {
         // 验证相关
         validation: {
           formErrors: '请检查并修正表单错误',
-          virtualIpRequired: '请选择节点虚拟IP'
+          virtualIpRequired: '请选择设备虚拟IP'
         }
       },
       
-      // 节点配置页面
+      // 设备配置页面
       config: {
-        title: '节点配置',
-        loadingConfig: '正在加载节点配置...',
+        title: '设备配置',
+        loadingConfig: '正在加载设备配置...',
         portConfig: '端口配置',
         listenPort: '监听端口',
         discoveryPort: '发现端口',
@@ -807,9 +823,9 @@ export default {
         exportConfig: '导出配置',
         importConfig: '导入配置',
         previewConfig: '预览配置',
-        saveNodeConfig: '保存节点配置',
+        saveNodeConfig: '保存设备配置',
         resetConfig: '重置配置',
-        confirmResetConfig: '确定要重置节点配置吗？',
+        confirmResetConfig: '确定要重置设备配置吗？',
         saveConfig: '保存配置',
         basicConfig: '基本配置',
         expertConfig: '专家配置',
@@ -822,7 +838,7 @@ export default {
         defaultVersion: '默认版本 (Latest)',
         
         // VPN配置参数翻译
-        nodeId: '节点ID',
+        nodeId: '设备ID',
         networkInterface: '网络接口名称',
         listenPortConfig: '监听端口',
         mtu: 'MTU (最大传输单元)',
@@ -850,7 +866,7 @@ export default {
         allowedIPs: '允许的IP',
         endpoint: '端点地址',
         fwmark: 'FwMark防火墙标记',
-        routeTable: '路由表',
+        routeTable: '连接表',
         saveConfigFile: '保存配置',
         preUpScript: '启动前脚本',
         postUpScript: '启动后脚本',
@@ -861,16 +877,16 @@ export default {
         handshakeTimeout: '握手超时(秒)',
         fullConfigPreview: '基本配置 + 专家配置',
         pleaseConfigureParams: '# 请填写配置参数',
-        gnbConfigFile: '# GNB 节点配置文件 (完整配置)',
-        wireguardConfigFile: '# WireGuard 节点配置文件 (完整配置)',
+        gnbConfigFile: '# GNB 设备配置文件 (完整配置)',
+        wireguardConfigFile: '# WireGuard 设备配置文件 (完整配置)',
         generateTime: '# 生成时间',
         peerConfigNote: '# Peer配置需要根据具体需求设置',
         peerPublicKey: '# PublicKey = <对端公钥>',
         peerEndpoint: '# Endpoint = <对端地址:端口>',
         peerAllowedIPs: '# AllowedIPs = <允许的IP范围>',
         noConfigContent: '# 暂无配置内容',
-        saveSuccess: '节点配置保存成功',
-        saveFailedLog: '保存节点配置失败:',
+        saveSuccess: '设备配置保存成功',
+        saveFailedLog: '保存设备配置失败:',
         saveFailedRetry: '保存失败，请重试',
         saveFailedPrefix: '保存失败',
         
@@ -950,20 +966,20 @@ export default {
   navigation: {
     mainFeatures: '主要功能',
     networkConfig: '网络配置',
-    systemTools: '系统工具',
+    systemTools: '开发设置',
     dashboard: '仪表板',
-    nodes: '节点管理',
+    nodes: '设备管理',
     routes: {
-      title: '路由管理',
-      overview: '路由概览',
-      active: '活跃路由',
+      title: '连接管理',
+      overview: '连接概览',
+      active: '活跃连接',
       pending: '待处理连接',
-      friends: '好友节点'
+      friends: '好友设备'
     },
     // 单独的导航键值，用于页面标题
-    activeRoutes: '活跃路由',
+    activeRoutes: '活跃连接',
     pendingConnections: '待处理连接',
-    friendNodes: '好友节点',
+    friendNodes: '好友设备',
     ippools: 'IP池管理',
     zones: '区域管理',
     zoneSharing: '区域分享',
@@ -974,11 +990,11 @@ export default {
       overview: '服务概览',
       overviewDescription: '查看服务统计和快速导航',
       publicServices: '公共服务',
-      publicServicesDescription: '浏览公开可用的网络服务',
+      publicServicesDescription: '浏览系统提供的公共网络服务（已连接设备自动共享）',
       friendServices: '好友服务',
-      friendServicesDescription: '访问好友分享的服务资源',
-      anonymousServices: '匿名服务',
-      anonymousServicesDescription: '发现匿名共享的服务',
+      friendServicesDescription: '浏览好友分享的网络服务',
+      anonymousServices: '匿名服务（已废弃）', // 功能已移除，保留以避免错误
+      anonymousServicesDescription: '该功能已废弃', // 功能已移除
       myServices: '我的服务',
       myServicesDescription: '管理和分享你创建的服务'
     },
@@ -992,25 +1008,25 @@ export default {
     help: '帮助文档'
   },
   routes: {
-    subtitle: '网络路由管理和配置',
-    title: '路由管理',
-    name: '路由名称',
+    subtitle: '网络连接管理和配置',
+    title: '连接管理',
+    name: '连接名称',
     destination: '目标地址',
     gateway: '网关',
     
     // 概览统计
     overview: {
-      activeRoutes: '活跃路由',
+      activeRoutes: '活跃连接',
       pendingConnections: '待处理连接',
-      connectedNodes: '已连接节点',
+      connectedNodes: '已连接设备',
       totalBandwidth: '总带宽'
     },
     
     // 标签页
     tabs: {
-      activeRoutes: '活跃路由',
+      activeRoutes: '活跃连接',
       pendingConnections: '待处理连接',
-      friendNodes: '好友节点',
+      friendNodes: '好友设备',
       configuration: '配置管理'
     },
     
@@ -1029,7 +1045,27 @@ export default {
       relay: '中继'
     },
     
-    // 节点状态
+    // 设备选择器
+    nodeSelector: {
+      addNodesFirst: '请先添加设备',
+      clearSelection: '清除选择',
+      noDescription: '暂无描述',
+      noNodes: '暂无设备',
+      noSearchResults: '未找到匹配的设备',
+      refresh: '刷新',
+      searchPlaceholder: '搜索设备...',
+      selectedNode: '已选设备',
+      statusFilter: '状态筛选',
+      tryDifferentSearch: '请尝试其他搜索词',
+      typeFilter: '类型筛选',
+      status: {
+        active: '活跃',
+        inactive: '非活跃',
+        pending: '待处理'
+      }
+    },
+    
+    // 设备状态
     nodeStatus: {
       available: '可用',
       connected: '已连接',
@@ -1044,13 +1080,13 @@ export default {
       rejected: '已拒绝'
     },
     
-    // 活跃路由
+    // 活跃连接
     activeRoutes: {
-      subtitle: '管理当前活跃的网络路由连接',
-      searchPlaceholder: '搜索路由...',
+      subtitle: '管理当前活跃的网络连接',
+      searchPlaceholder: '搜索连接...',
       statusFilter: '状态过滤',
-      noRoutes: '暂无活跃路由',
-      noSearchResults: '未找到匹配路由',
+      noRoutes: '暂无活跃连接',
+      noSearchResults: '未找到匹配连接',
       bandwidth: '带宽',
       latency: '延迟',
       packetLoss: '丢包率',
@@ -1065,8 +1101,8 @@ export default {
       priority: '优先级',
       vpnType: 'VPN类型',
       targetUser: '目标用户',
-      sourceNode: '源节点',
-      targetNode: '目标节点',
+      sourceNode: '源设备',
+      targetNode: '目标设备',
       unknownType: '未知类型',
       unknownMode: '未知模式',
       
@@ -1078,13 +1114,13 @@ export default {
       
       // 列表视图
       listView: {
-        title: '节点连接列表',
-        searchPlaceholder: '搜索节点名称、IP...',
+        title: '设备连接列表',
+        searchPlaceholder: '搜索设备名称、IP...',
         totalConnections: '共 {count} 条连接',
         noConnections: '暂无连接数据',
         noSearchResults: '未找到匹配的连接',
         columns: {
-          nodeName: '节点名称',
+          nodeName: '设备名称',
           ipAddress: 'IP地址',
           status: '状态',
           connectionType: '连接类型',
@@ -1098,9 +1134,9 @@ export default {
       // 连接详情
       connectionDetails: {
         title: '连接详情',
-        subtitle: '查看两个节点之间的连接状态和历史数据',
-        sourceNode: '本节点',
-        peerNode: '对端节点',
+        subtitle: '查看两个设备之间的连接状态和历史数据',
+        sourceNode: '本设备',
+        peerNode: '对端设备',
         connectionStatus: '连接状态',
         connectionType: '连接类型',
         latency: '延迟',
@@ -1112,10 +1148,10 @@ export default {
         history: '连接历史',
         loadingDetails: '加载连接详情...',
         nodeInfo: {
-          nodeId: '节点ID',
-          nodeName: '节点名称',
+          nodeId: '设备ID',
+          nodeName: '设备名称',
           owner: '所属用户',
-          status: '节点状态'
+          status: '设备状态'
         },
         timeRange: {
           '1h': '1小时',
@@ -1162,12 +1198,15 @@ export default {
       rejectError: '拒绝连接请求失败'
     },
 
-    // 好友节点
+    // 好友设备
     friendNodes: {
-      subtitle: '浏览和管理好友的网络节点',
+      subtitle: '浏览和管理好友的网络设备',
       goToSocial: '去社交管理',
-      noNodes: '暂无好友节点',
-      noNodesDescription: '您还没有任何好友的节点信息',
+      sendRequest: '发送请求',
+      requestSent: '连接请求已发送',
+      requestError: '发送连接请求失败',
+      noNodes: '暂无好友设备',
+      noNodesDescription: '您还没有任何好友的设备信息',
       noDescription: '暂无描述',
       vpnType: 'VPN类型',
       endpoint: '端点',
@@ -1175,20 +1214,20 @@ export default {
       viewFriend: '查看好友',
       connect: '连接',
       offline: '离线',
-      selectMyNode: '选择我的节点',
-      selectMyNodeHint: '选择用于建立连接的本地节点',
-      noAvailableNodes: '暂无可用节点',
+      selectMyNode: '选择我的设备',
+      selectMyNodeHint: '选择用于建立连接的本地设备',
+      noAvailableNodes: '暂无可用设备',
       sendConnectionRequest: '发送连接请求',
       connectionRequestHint: '向好友发送连接请求以建立路由',
-      friendNode: '好友节点',
-      myNode: '我的节点',
+      friendNode: '好友设备',
+      myNode: '我的设备',
       requestMessage: '请求消息',
       requestMessageHint: '向好友说明连接目的',
       stats: {
         friendsCount: '好友数',
-        totalNodes: '节点总数',
-        onlineNodes: '在线节点',
-        offlineNodes: '离线节点'
+        totalNodes: '设备总数',
+        onlineNodes: '在线设备',
+        offlineNodes: '离线设备'
       }
     },
 
@@ -1200,27 +1239,29 @@ export default {
       hybrid: '混合模式'
     },
     
-    // 基于节点的路由管理
+    // 基于设备的连接管理
     nodeBased: {
-      selectNode: '选择我的节点',
-      selectNodeDescription: '点击您的节点卡片查看该节点的路由信息',
-      viewRoutes: '查看路由',
-      backToNodes: '返回节点列表',
-      noNodes: '暂无节点',
-      noNodesDescription: '您还没有创建任何节点，请先创建节点',
+      selectNode: '选择我的设备',
+      selectNodeDescription: '点击您的设备卡片查看该设备的连接信息',
+      viewRoutes: '查看连接',
+      backToNodes: '返回设备列表',
+      noAvailableNodes: '暂无可用设备',
+      noAvailableNodesDescription: '您还没有创建任何可用的设备',
+      noNodes: '暂无设备',
+      noNodesDescription: '您还没有创建任何设备，请先创建设备',
       noDescription: '暂无描述',
-      nodeId: '节点ID',
-      totalRoutes: '路由总数',
-      totalNodes: '节点总数',
-      routeCount: '路由数',
-      nodeType: '节点类型',
+      nodeId: '设备ID',
+      totalRoutes: '连接总数',
+      totalNodes: '设备总数',
+      routeCount: '连接数',
+      nodeType: '设备类型',
       vpnType: 'VPN类型',
       status: '状态',
       unknown: '未知',
-      routesList: '路由列表',
-      nodesList: '节点列表',
-      noRoutesForNode: '该节点暂无路由',
-      noNodesForNode: '该节点暂无节点',
+      routesList: '连接列表',
+      nodesList: '设备列表',
+      noRoutesForNode: '该设备暂无连接',
+      noNodesForNode: '该设备暂无设备',
       statusLabels: {
         active: '活跃',
         inactive: '非活跃',
@@ -1229,17 +1270,17 @@ export default {
       }
     },
 
-    // 节点路由显示
+    // 设备连接显示
     nodeRoutes: {
-      nodeId: '节点ID',
-      totalRoutes: '路由总数',
+      nodeId: '设备ID',
+      totalRoutes: '连接总数',
       noDescription: '暂无描述',
-      searchPlaceholder: '搜索路由信息...',
+      searchPlaceholder: '搜索连接信息...',
       refresh: '刷新',
-      noRoutes: '该节点暂无路由',
-      noSearchResults: '未找到匹配的路由',
+      noRoutes: '该设备暂无连接',
+      noSearchResults: '未找到匹配的连接',
       tryDifferentSearch: '请尝试其他搜索条件',
-      noRoutesForNode: '该节点还没有建立任何路由连接',
+      noRoutesForNode: '该设备还没有建立任何连接',
       vpnType: 'VPN类型',
       relayMode: '中继模式',
       priority: '优先级',
@@ -1251,14 +1292,14 @@ export default {
       unknownType: '未知类型',
       unknownMode: '未知模式',
       direction: {
-        outgoing: '出站路由',
-        incoming: '入站路由'
+        outgoing: '出站连接',
+        incoming: '入站连接'
       }
     },
     
     // 配置管理
     config: {
-      description: '路由配置文件包含了所有必要的网络路由信息，可以下载并应用到您的网络设备。',
+      description: '连接配置文件包含了所有必要的网络连接信息，可以下载并应用到您的网络设备。',
       configStatus: '配置状态',
       configReady: '配置已就绪',
       configNotReady: '配置尚未生成',
@@ -1273,8 +1314,8 @@ export default {
       copied: '已复制到剪贴板',
       download: '下载配置',
       refresh: '刷新配置',
-      routeEntries: '路由条目',
-      nodeId: '节点ID',
+      routeEntries: '连接条目',
+      nodeId: '设备ID',
       ipAddress: 'IP地址',
       mask: '子网掩码',
       gateway: '网关',
@@ -1283,18 +1324,18 @@ export default {
       entryDetails: '条目详情'
     },
     
-    // 路由详情
+    // 连接详情
     details: {
       basicInfo: '基本信息',
-      routeId: '路由ID',
+      routeId: '连接ID',
       status: '状态',
       connectionType: '连接类型',
       createdAt: '创建时间',
       lastActive: '最后活跃',
-      nodeInfo: '节点信息',
-      sourceNode: '源节点',
-      targetNode: '目标节点',
-      nodeName: '节点名称',
+      nodeInfo: '设备信息',
+      sourceNode: '源设备',
+      targetNode: '目标设备',
+      nodeName: '设备名称',
       ipAddress: 'IP地址',
       mask: '子网掩码',
       friendName: '好友名称',
@@ -1313,8 +1354,8 @@ export default {
     
     // 操作
     actions: {
-      refreshRoutes: '刷新路由',
-      createRoute: '创建路由',
+      refreshRoutes: '刷新连接',
+      createRoute: '创建连接',
       connect: '连接',
       disconnect: '断开连接',
       approve: '批准',
@@ -1322,74 +1363,74 @@ export default {
       viewDetails: '查看详情'
     },
 
-    // 创建路由流程
+    // 创建连接流程
     create: {
       // 步骤名称
       steps: {
         selectFriend: '选择好友',
-        selectFriendNode: '选择好友节点',
-        selectMyNode: '选择我的节点',
+        selectFriendNode: '选择好友设备',
+        selectMyNode: '选择我的设备',
         submitRequest: '提交申请'
       },
       
       // 第一步 - 选择好友
       step1: {
-        title: '创建路由 - 选择好友',
+        title: '创建连接 - 选择好友',
         subtitle: '选择要建立连接的好友',
         selectFriend: '选择好友',
         searchFriends: '搜索好友...',
         noFriends: '暂无好友',
-        friendInfo: '节点: {nodes} | 状态: {status}',
-        availableNodes: '可用节点',
-        totalNodes: '总节点数',
+        friendInfo: '设备: {nodes} | 状态: {status}',
+        availableNodes: '可用设备',
+        totalNodes: '总设备数',
         nextStep: '下一步',
         pleaseSelectFriend: '请选择一个好友'
       },
       
-      // 第二步 - 选择好友节点
+      // 第二步 - 选择好友设备
       step2: {
-        title: '创建路由 - 选择好友节点',
-        subtitle: '选择 {friendName} 的节点进行连接',
+        title: '创建连接 - 选择好友设备',
+        subtitle: '选择 {friendName} 的设备进行连接',
         selectedFriend: '已选择的好友',
         changeFriend: '更换好友',
-        selectFriendNode: '选择好友节点',
-        loadingNodes: '加载节点中...',
-        noNodes: '该好友暂无可用节点',
+        selectFriendNode: '选择好友设备',
+        loadingNodes: '加载设备中...',
+        noNodes: '该好友暂无可用设备',
         unknownLocation: '未知位置',
         nodeStatus: '状态',
         connections: '连接数',
         latency: '延迟',
         connectionsFull: '连接数已满',
-        nodeNotAvailable: '节点不可用',
-        cannotConnect: '无法连接到此节点',
+        nodeNotAvailable: '设备不可用',
+        cannotConnect: '无法连接到此设备',
         possibleReasons: '可能的原因',
-        existingConnection: '已存在路由连接',
+        existingConnection: '已存在连接',
         pendingRequest: '存在待处理的连接请求',
         nextStep: '下一步',
-        pleaseSelectNode: '请选择一个节点',
-        nodeCannotConnect: '该节点暂时无法连接',
-        fetchNodesError: '获取好友节点失败',
+        pleaseSelectNode: '请选择一个设备',
+        nodeCannotConnect: '该设备暂时无法连接',
+        fetchNodesError: '获取好友设备失败',
         noFriendSelected: '未选择好友'
       },
       
-      // 第三步 - 选择我的节点
+      // 第三步 - 选择我的设备
       step3: {
-        title: '创建路由 - 选择我的节点',
-        subtitle: '选择您的节点进行连接',
+        title: '创建连接 - 选择我的设备',
+        subtitle: '选择您的设备进行连接',
         selectionSummary: '选择总结',
         selectedFriend: '选择的好友',
-        selectedFriendNode: '选择的好友节点',
-        selectMyNode: '选择我的节点',
-        searchNodes: '搜索节点...',
+        selectedFriendNode: '选择的好友设备',
+        selectMyNode: '选择我的设备',
+        searchNodes: '搜索设备...',
         filterByStatus: '按状态筛选',
         allStatus: '全部状态',
         onlineOnly: '仅在线',
         availableOnly: '仅可用',
         connectedOnly: '已连接',
         pendingOnly: '待处理',
-        loadingNodes: '加载节点中...',
-        noAvailableNodes: '暂无可用节点',
-        createNodeHint: '您可以先创建节点',
+        loadingNodes: '加载设备中...',
+        noAvailableNodes: '暂无可用设备',
+        createNodeHint: '您可以先创建设备',
         unknownLocation: '未知位置',
         nodeStatus: '状态',
         connections: '连接数',
@@ -1401,15 +1442,15 @@ export default {
         requestRejected: '申请被拒绝',
         connectionsFull: '连接数已满',
         nextStep: '下一步',
-        pleaseSelectNode: '请选择一个节点',
-        nodeAlreadyConnected: '该节点已与目标节点建立连接',
-        requestAlreadySent: '已向该节点发送连接申请',
-        requestAlreadyReceived: '已收到该节点的连接申请',
-        nodeCannotConnect: '该节点暂时无法连接',
-        cannotProceedWithConnection: '该节点存在连接关系，无法继续',
-        fetchNodesError: '获取节点失败',
+        pleaseSelectNode: '请选择一个设备',
+        nodeAlreadyConnected: '该设备已与目标设备建立连接',
+        requestAlreadySent: '已向该设备发送连接申请',
+        requestAlreadyReceived: '已收到该设备的连接申请',
+        nodeCannotConnect: '该设备暂时无法连接',
+        cannotProceedWithConnection: '该设备存在连接关系，无法继续',
+        fetchNodesError: '获取设备失败',
         noFriendSelected: '未选择好友',
-        noFriendNodeSelected: '未选择好友节点',
+        noFriendNodeSelected: '未选择好友设备',
         
         // 连接状态
         connectionStatus: {
@@ -1421,21 +1462,21 @@ export default {
           unknown: '状态未知'
         },
         
-        // 节点不可用原因
-        nodeNotAvailable: '节点暂时不可用',
-        nodeUnconfigured: '节点未配置',
-        nodeDisabled: '节点已禁用',
-        nodeMaintenance: '节点维护中'
+        // 设备不可用原因
+        nodeNotAvailable: '设备暂时不可用',
+        nodeUnconfigured: '设备未配置',
+        nodeDisabled: '设备已禁用',
+        nodeMaintenance: '设备维护中'
       },
       
       // 第四步 - 提交申请
       step4: {
-        title: '创建路由 - 提交申请',
+        title: '创建连接 - 提交申请',
         subtitle: '填写连接申请信息',
         selectionSummary: '选择总结',
         targetFriend: '目标好友',
-        targetNode: '目标节点',
-        sourceNode: '源节点',
+        targetNode: '目标设备',
+        sourceNode: '源设备',
         requestForm: '申请表单',
         requestMessage: '申请消息',
         messagePlaceholder: '请描述您的连接需求和使用场景...',
@@ -1459,9 +1500,9 @@ export default {
         submitError: '提交申请失败',
         requestSubmitted: '申请已提交',
         requestSubmittedMessage: '您的连接申请已成功提交，等待好友审批',
-        viewRoutes: '查看路由',
+        viewRoutes: '查看连接',
         createAnother: '创建另一个',
-        defaultMessage: '您好 {friendName}，我希望将我的节点 {myNode} 与您的节点 {friendNode} 建立连接，用于网络通信。',
+        defaultMessage: '您好 {friendName}，我希望将我的设备 {myNode} 与您的设备 {friendNode} 建立连接，用于网络通信。',
         
         // 优先级选项
         priorities: {
@@ -1493,22 +1534,22 @@ export default {
       },
       
       // 通用消息
-      requestSubmitted: '路由申请已提交',
+      requestSubmitted: '连接申请已提交',
       submitError: '提交申请失败'
     },
     
-    // 路由概览页面导航卡片
+    // 连接概览页面导航卡片
     index: {
-      title: '路由概览',
-      subtitle: '管理和监控网络路由连接',
-      overview: '路由概览',
-      overviewDescription: '查看路由统计和快速操作',
-      activeRoutes: '活跃路由',
-      activeRoutesDescription: '管理当前活跃的网络路由连接',
+      title: '连接概览',
+      subtitle: '管理和监控网络连接',
+      overview: '连接概览',
+      overviewDescription: '查看连接统计和快速操作',
+      activeRoutes: '活跃连接',
+      activeRoutesDescription: '管理当前活跃的网络连接',
       pendingConnections: '待处理连接',
       pendingConnectionsDescription: '处理待批准的连接请求',
-      friendNodes: '好友节点',
-      friendNodesDescription: '浏览和管理好友的网络节点',
+      friendNodes: '好友设备',
+      friendNodesDescription: '浏览和管理好友的网络设备',
       
       // 统计标签
       statistics: {
@@ -1521,7 +1562,7 @@ export default {
       
       // 快速操作
       quickActions: {
-        createRoute: '创建路由',
+        createRoute: '创建连接',
         refreshData: '刷新数据',
         viewAll: '查看全部',
         manage: '管理',
@@ -1532,31 +1573,31 @@ export default {
     // 对话框
     dialogs: {
       routeDetails: {
-        title: '路由详情'
+        title: '连接详情'
       },
       connectNode: {
-        title: '连接节点',
-        message: '您要连接到 {friendName} 的节点 {nodeName}，请输入连接说明：',
+        title: '连接设备',
+        message: '您要连接到 {friendName} 的设备 {nodeName}，请输入连接说明：',
         messagePlaceholder: '请输入连接说明（可选）...'
       }
     },
     
     // 错误消息
-    fetchOverviewError: '获取路由概览失败',
-    fetchActiveRoutesError: '获取活跃路由失败',
+    fetchOverviewError: '获取连接概览失败',
+    fetchActiveRoutesError: '获取活跃连接失败',
     fetchPendingConnectionsError: '获取待处理连接失败',
-    fetchFriendNodesError: '获取好友节点失败',
-    fetchAllFriendNodesError: '获取所有好友节点失败',
+    fetchFriendNodesError: '获取好友设备失败',
+    fetchAllFriendNodesError: '获取所有好友设备失败',
     fetchConfigError: '获取配置失败',
-    fetchRouteDetailsError: '获取路由详情失败',
+    fetchRouteDetailsError: '获取连接详情失败',
     connectionRequestSent: '连接请求已发送',
     connectionRequestError: '发送连接请求失败',
     connectionApproved: '连接已批准',
     connectionApproveError: '批准连接失败',
     connectionRejected: '连接已拒绝',
     connectionRejectError: '拒绝连接失败',
-    routeDisconnected: '路由已断开',
-    routeDisconnectError: '断开路由失败',
+    routeDisconnected: '连接已断开',
+    routeDisconnectError: '断开连接失败',
     configDownloaded: '配置已下载',
     configDownloadError: '下载配置失败',
     configRefreshed: '配置已刷新',
@@ -1582,9 +1623,9 @@ export default {
     
     // 统计信息
     stats: {
-      totalNodes: '总节点数',
-      activeNodes: '活跃节点',
-      routes: '路由数',
+      totalNodes: '总设备数',
+      activeNodes: '活跃设备',
+      routes: '连接数',
       users: '用户数'
     },
     
@@ -1627,6 +1668,12 @@ export default {
   social: {
     subtitle: '社交网络连接和用户管理',
     comingSoonMessage: '社交网络功能正在开发中，敬请期待！',
+    
+    // 错误消息
+    fetchAllFriendNodesError: '获取所有好友设备失败',
+    friendRequestCancelError: '取消好友请求失败',
+    friendRequestCancelled: '好友请求已取消',
+    
     // 操作按钮
     actions: {
       addFriend: '添加好友',
@@ -1639,23 +1686,24 @@ export default {
       title: '社交概览',
       friends: '好友',
       pendingRequests: '待处理请求',
-      connectedNodes: '已连接节点',
-      activeRoutes: '活跃路由'
+      connectedNodes: '已连接设备',
+      activeRoutes: '活跃连接'
     },
     // 好友管理
     friends: {
       title: '好友列表',
       searchPlaceholder: '搜索好友...',
+      mutualFriends: '共同好友',
       noFriends: '暂无好友',
       empty: '还没有好友，去邀请一些朋友加入吧！',
       online: '在线',
       offline: '离线',
-      nodes: '节点',
-      routes: '路由',
+      nodes: '设备',
+      routes: '连接',
       friendshipDate: '成为好友时间',
       removeFriend: '删除好友',
       removed: '好友已删除',
-      viewNodes: '查看节点',
+      viewNodes: '查看设备',
       lastActive: '最后活跃'
     },
     // 好友请求
@@ -1673,8 +1721,10 @@ export default {
       status: {
         pending: '待处理',
         accepted: '已接受',
-        rejected: '已拒绝'
-      }
+        rejected: '已拒绝',
+        undefined: '未定义'
+      },
+      statusError: '请求状态更新失败'
     },
     // 请求结果消息
     requests: {
@@ -1699,6 +1749,8 @@ export default {
       title: '邀请码管理',
       invite: '邀请好友',
       emailLabel: '邮箱地址',
+      copyFailed: '复制失败',
+      linkCopied: '邀请链接已复制',
       empty: '暂无可邀请用户',
       sent: '邀请已发送',
       emailSent: '邀请邮件已发送到 {email}',
@@ -1761,8 +1813,8 @@ export default {
     invitationDeleteError: '删除邀请码失败',
     
     // 新增的错误和成功消息
-    noFriendNodes: '该好友暂无节点',
-    fetchFriendNodesError: '获取好友节点失败'
+    noFriendNodes: '该好友暂无设备',
+    fetchFriendNodesError: '获取好友设备失败'
   },
   ippools: {
     title: 'IP池管理',
@@ -1831,8 +1883,8 @@ export default {
     zoneLabel: '所属Zone',
     zoneHint: '选择IP池所属的Zone',
     // 分配相关
-    nodeLabel: '节点',
-    nodeHint: '选择要分配IP的节点',
+    nodeLabel: '设备',
+    nodeHint: '选择要分配IP的设备',
     ipAddress: 'IP地址',
     allocatedTo: '分配给',
     allocatedAt: '分配时间',
@@ -1952,6 +2004,7 @@ export default {
   websocket: {
     connected: '已连接',
     disconnected: '未连接',
+    connectionFailed: 'WebSocket 连接失败',
     heartbeat: '心跳'
   },
   node: {
@@ -2010,7 +2063,7 @@ export default {
       listenPort: '监听端口',
       
       // VPN配置参数翻译
-      nodeId: '节点ID',
+      nodeId: '设备ID',
       networkInterface: '网络接口名称',
       listenPortConfig: '监听端口',
       mtu: 'MTU (最大传输单元)',
@@ -2053,11 +2106,11 @@ export default {
       handshakeTimeout: '握手超时(秒)'
     },
     detail: {
-      deleteNodeFailed: '删除节点失败，请重试'
+      deleteNodeFailed: '删除设备失败，请重试'
     },
     keyManagement: {
       generateKey: '生成密钥',
-      generateKeyForNode: '为节点 {nodeId} 生成密钥',
+      generateKeyForNode: '为设备 {nodeId} 生成密钥',
       generationMethod: '生成方式',
       publicKeyContent: '公钥内容',
       publicKeyRequired: '公钥内容不能为空',
@@ -2070,8 +2123,34 @@ export default {
   },
   zoneServices: {
     subtitle: '区域服务分享和管理',
+    
+    // 页面标题和描述
+    navigation: {
+      publicServices: '公共服务',
+      publicServicesDescription: '浏览系统提供的公共网络服务（已连接设备自动共享）',
+      friendServices: '好友服务',
+      friendServicesDescription: '浏览好友分享的网络服务',
+      anonymousServices: '匿名服务（已废弃）', // 功能已移除
+      anonymousServicesDescription: '该功能已废弃', // 功能已移除
+      myServices: '我的服务',
+      myServicesDescription: '管理和分享你创建的服务'
+    },
+    
     currentZone: '当前区域',
     servicesCount: '个服务',
+    
+    // 空状态消息
+    empty: {
+      anonymousServices: '该功能已废弃',
+      anonymousServicesDesc: '匿名服务功能已移除，请使用好友服务',
+      publicServices: '暂无公共服务',
+      publicServicesDesc: '暂无系统服务或已连接设备共享的服务',
+      friendServices: '暂无好友分享',
+      friendServicesDesc: '好友还未与你分享任何服务',
+      myServices: '你还没有创建任何服务',
+      myServicesDesc: '点击下方按钮创建你的第一个服务'
+    },
+    
     addService: '添加服务',
     editService: '编辑服务',
     addFirstService: '添加第一个服务',
@@ -2094,7 +2173,7 @@ export default {
     // ServiceCard 相关翻译
     serviceCard: {
       statusLabel: '状态',
-      nodeLabel: '节点',
+      nodeLabel: '设备',
       edit: '编辑',
       delete: '删除',
       connect: '连接',
@@ -2129,7 +2208,7 @@ export default {
     
     types: {
       gnbIndex: 'GNB索引',
-      gnbIndexDesc: 'GNB节点索引服务',
+      gnbIndexDesc: 'GNB设备索引服务',
       music: '音乐服务',
       musicDesc: '音乐流媒体服务',
       video: '视频服务',
@@ -2146,7 +2225,7 @@ export default {
       serviceDescription: '服务描述',
       serviceAddress: '服务地址',
       serviceAddressRequired: '请输入服务地址',
-      associatedNode: '关联节点',
+      associatedNode: '关联设备',
       servicePort: '端口',
       servicePortRequired: '请输入端口',
       servicePortInvalid: '端口范围应为1-65535',
@@ -2158,6 +2237,9 @@ export default {
       authUsername: '用户名',
       authPassword: '密码',
       shareSettings: '分享设置',
+      shareToFriends: '分享给好友',
+      shareToPublic: '申请公开分享',
+      shareScope: '选择服务的分享范围，仅支持好友分享（需要已建立好友关系）',
       shareMode: '分享模式',
       authTypes: {
         none: '无认证',
@@ -2177,17 +2259,6 @@ export default {
       }
     },
     
-    empty: {
-      publicServices: '暂无公共服务',
-      publicServicesDesc: '管理员还未审核通过任何公共服务',
-      friendServices: '暂无好友分享',
-      friendServicesDesc: '好友还未与你分享任何服务',
-      anonymousServices: '暂无匿名共享',
-      anonymousServicesDesc: '暂时没有匿名用户共享的服务',
-      myServices: '你还没有创建任何服务',
-      myServicesDesc: '点击下方按钮创建你的第一个服务'
-    },
-    
     messages: {
       createSuccess: '服务创建成功',
       updateSuccess: '服务更新成功',
@@ -2202,7 +2273,11 @@ export default {
       updateFailed: '更新服务失败',
       deleteFailed: '删除服务失败',
       shareFailed: '分享服务失败',
-      approvalFailed: '申请公开失败'
+      approvalFailed: '申请公开失败',
+      connectFailed: '连接服务失败',
+      featureDeprecated: '功能已下线',
+      publicServiceDeprecated: '普通用户不能发布公共服务，公共服务仅限系统提供。已连接设备会自动共享服务，好友间可使用"好友分享"功能。',
+      requiresFriendship: '分享服务需要先建立好友关系，请先添加对方为好友'
     }
   },
   
@@ -2225,8 +2300,8 @@ export default {
     
     // 统计信息
     statistics: '统计信息',
-    totalNodes: '节点总数',
-    totalRoutes: '路由总数',
+    totalNodes: '设备总数',
+    totalRoutes: '连接总数',
     totalFriends: '好友总数',
     totalLogins: '登录次数',
     
@@ -2322,7 +2397,17 @@ export default {
     preferencesUpdated: '偏好设置已更新',
     preferencesUpdateFailed: '偏好设置更新失败',
     preferencesReset: '偏好设置已重置为默认值',
-    resetToDefault: '重置为默认'
+    resetToDefault: '重置为默认',
+    
+    // 验证消息
+    validation: {
+      currentPasswordRequired: '请输入当前密码',
+      newPasswordRequired: '请输入新密码',
+      passwordMismatch: '两次输入的密码不一致',
+      passwordTooShort: '密码长度至少8位',
+      fileTooLarge: '文件大小超过限制',
+      invalidFileType: '文件类型不支持'
+    }
   },
   
   // VPN配置相关翻译
@@ -2339,7 +2424,7 @@ export default {
       wireGuardBasicDesc: '必需的WireGuard基础参数',
       
       // VPN配置参数翻译
-      nodeId: '节点ID',
+      nodeId: '设备ID',
       networkInterface: '网络接口名称',
       listenPortConfig: '监听端口',
       listenPort: '监听端口',

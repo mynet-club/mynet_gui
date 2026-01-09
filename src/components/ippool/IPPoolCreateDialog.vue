@@ -42,7 +42,17 @@
 
           <!-- 创建数量 -->
           <div class="column q-gutter-sm">
-            <q-item-label class="text-subtitle2">{{ $t('ippools.createCount') }}</q-item-label>
+            <q-item-label class="text-subtitle2">
+              {{ $t('ippools.createCount') }}
+              <ContextHelp
+                tooltip="点击查看创建数量说明"
+                content="<p>一次可以创建多个 IP 资源池</p>
+                         <ul>
+                           <li>每个池独立管理 IP 地址段</li>
+                           <li>建议按用途分别创建（如：办公、家庭、测试）</li>
+                         </ul>"
+              />
+            </q-item-label>
             <q-option-group
               v-model="form.poolsCount"
               :options="poolsCountOptions"
@@ -54,7 +64,26 @@
 
           <!-- 连续性选择 -->
           <div v-if="currentPoolsCount > 0" class="column q-gutter-sm">
-            <q-item-label class="text-subtitle2">{{ $t('ippools.continuous') }}</q-item-label>
+            <q-item-label class="text-subtitle2">
+              {{ $t('ippools.continuous') }}
+              <ContextHelp
+                tooltip="什么是连续性？"
+                title="IP 池连续性"
+                mode="dialog"
+                content="<p><strong>连续性</strong>指相邻的 IP 池使用连续的 IP 地址段</p>
+                         <p><strong>优点：</strong></p>
+                         <ul>
+                           <li>便于统一管理和规划</li>
+                           <li>路由配置更简单</li>
+                           <li>避免地址碎片化</li>
+                         </ul>
+                         <p><strong>示例：</strong></p>
+                         <ul>
+                           <li>池1: 10.0.0.0/24 (10.0.0.1-254)</li>
+                           <li>池2: 10.0.1.0/24 (10.0.1.1-254) ← 连续</li>
+                         </ul>"
+              />
+            </q-item-label>
             <q-option-group
               v-model="form.continuous"
               :options="continuousOptions"
@@ -123,6 +152,7 @@ import debug from "src/utils/debug"
 import { useI18n } from 'vue-i18n'
 import { useIPPools } from '../../composables/useIPPools'
 import type { IPPool } from '../../types/ippool'
+import ContextHelp from '../common/ContextHelp.vue'
 
 // Props
 interface Props {

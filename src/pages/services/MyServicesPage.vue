@@ -45,7 +45,6 @@
           @edit="handleEdit"
           @delete="handleDelete"
           @share="handleShare"
-          @requestPublic="handleRequestPublic"
         />
       </template>
       
@@ -89,6 +88,7 @@
         <q-card-actions align="right">
           <q-btn flat :label="$t('common.cancel')" v-close-popup />
           <q-btn
+            flat
             color="primary"
             :label="$t('zoneServices.confirmShare')"
             @click="confirmShare"
@@ -98,7 +98,8 @@
       </q-card>
     </q-dialog>
 
-    <!-- 申请公开对话框 -->
+    <!-- 申请公开对话框 - 功能已下线 -->
+    <!--
     <q-dialog v-model="showApprovalDialog">
       <q-card style="min-width: 400px">
         <q-card-section>
@@ -130,6 +131,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    -->
   </PageLayout>
 </template>
 
@@ -153,19 +155,19 @@ const {
   myServices,
   loadMyServices,
   deleteService,
-  shareService,
-  requestApproval
+  shareService
+  // requestApproval // 已移除 - 不再支持申请公开
 } = useZoneServices()
 
 // 界面状态
 const showServiceDialog = ref(false)
 const showShareDialog = ref(false)
-const showApprovalDialog = ref(false)
+// const showApprovalDialog = ref(false) // 已移除 - 不再支持申请公开
 const editingService = ref<ZoneService | null>(null)
 const sharingService = ref<ZoneService | null>(null)
-const approvalService = ref<ZoneService | null>(null)
+// const approvalService = ref<ZoneService | null>(null) // 已移除
 const shareMessage = ref('')
-const approvalReason = ref('')
+// const approvalReason = ref('') // 已移除
 
 // 页面初始化
 onMounted(async () => {
@@ -225,11 +227,15 @@ const handleShare = (service: ZoneService) => {
   showShareDialog.value = true
 }
 
-// 申请公开
+// 申请公开 - 功能已下线
 const handleRequestPublic = (service: ZoneService) => {
-  approvalService.value = service
-  approvalReason.value = ''
-  showApprovalDialog.value = true
+  // 功能已下线，显示友好提示
+  $q.notify({
+    type: 'warning',
+    message: t('zoneServices.errors.publicServiceDeprecated'),
+    position: 'top',
+    timeout: 3000
+  })
 }
 
 // 确认分享
@@ -261,7 +267,8 @@ const confirmShare = async () => {
   }
 }
 
-// 确认申请公开
+// 确认申请公开 - 已移除，不再支持用户申请公开服务
+/*
 const confirmApproval = async () => {
   if (!approvalService.value) return
   
@@ -288,6 +295,7 @@ const confirmApproval = async () => {
     })
   }
 }
+*/
 
 // 服务操作成功回调
 const handleServiceSuccess = async () => {

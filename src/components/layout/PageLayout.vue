@@ -40,26 +40,33 @@ defineProps<Props>()
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/design-tokens.scss';
+
 .page-layout {
   .page-header {
     .page-title {
-      font-weight: 600;
-      color: var(--q-primary);
-      font-size: 1.5rem;
+      font-weight: $font-weight-semibold;
+      color: var(--color-text-primary);
+      font-size: $font-size-2xl;
       display: flex;
       align-items: center;
+      
+      .q-icon {
+        color: var(--color-text-secondary);
+        opacity: 0.6;
+      }
     }
     
     .page-subtitle {
-      font-size: 0.875rem;
-      line-height: 1.4;
+      font-size: $font-size-sm;
+      line-height: $line-height-normal;
+      color: var(--color-text-secondary);
     }
     
     .page-actions {
       .q-btn-group {
-        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-        border-radius: 4px;
-        overflow: hidden;
+        box-shadow: none;
+        border-radius: $radius-base;
       }
     }
   }
@@ -74,11 +81,11 @@ defineProps<Props>()
   .page-layout {
     .page-header {
       .page-title {
-        color: var(--q-primary);
+        color: var(--color-text-primary);
       }
       
       .page-subtitle {
-        color: var(--q-grey-5);
+        color: var(--color-text-secondary);
       }
     }
   }
@@ -89,7 +96,7 @@ defineProps<Props>()
   .page-layout {
     .page-header {
       .page-title {
-        font-size: 1.25rem;
+        font-size: $font-size-xl;
       }
       
       .page-actions {

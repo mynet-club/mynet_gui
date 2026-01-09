@@ -1,9 +1,19 @@
 import { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
-  // IndexPage 作为独立路由，不使用 MainLayout
+  // 根路径重定向到认证或应用（根据登录状态）
   {
     path: '/',
+    redirect: () => {
+      // 检查是否已登录
+      const token = localStorage.getItem('auth_token')
+      return token ? '/app/dashboard' : '/auth/login'
+    }
+  },
+  
+  // 官网跳转页面（可选）
+  {
+    path: '/website',
     component: () => import('../pages/IndexPage.vue')
   },
   
@@ -237,12 +247,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/services/FriendServicesPage.vue'),
         meta: { title: '好友服务', requiresAuth: true }
       },
-      {
-        path: 'services/anonymous',
-        name: 'services-anonymous',
-        component: () => import('../pages/services/AnonymousServicesPage.vue'),
-        meta: { title: '匿名服务', requiresAuth: true }
-      },
+      // {
+      //   path: 'services/anonymous',
+      //   name: 'services-anonymous',
+      //   component: () => import('../pages/services/AnonymousServicesPage.vue'),
+      //   meta: { title: '匿名服务', requiresAuth: true }
+      // }, // 已注释 - 移除匿名服务功能
       {
         path: 'services/my',
         name: 'services-my',

@@ -11,6 +11,7 @@
             color="primary"
             icon="add"
             :label="$t('ippools.createPool')"
+            data-tip-target="create-ippool-btn"
             @click="showCreateDialog = true"
           />
           <q-btn

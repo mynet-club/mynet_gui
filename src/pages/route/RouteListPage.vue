@@ -8,13 +8,15 @@
       <div class="row q-gutter-sm items-center">
         <q-btn-group>
           <q-btn
-            color="positive"
+            unelevated
+            color="primary"
             icon="add"
             :label="$t('routes.actions.createRoute')"
             @click="handleCreateRoute"
           />
           <q-btn
-            color="primary"
+            flat
+            color="grey-7"
             icon="sync"
             :label="$t('routes.actions.refreshRoutes')"
             @click="handleRefreshRoutes"
@@ -86,10 +88,10 @@
         
         <q-card-actions align="center">
           <q-btn
+            flat
             :color="item.color"
             :label="item.buttonText"
             :icon="item.buttonIcon"
-            unelevated
           />
         </q-card-actions>
       </template>

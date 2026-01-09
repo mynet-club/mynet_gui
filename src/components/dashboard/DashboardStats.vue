@@ -3,7 +3,7 @@
     <ResponsiveCardGrid
       :items="statsCards"
       variant="compact"
-      spacing="normal"
+      spacing="loose"
       :clickable="true"
     >
       <template #default="{ item }">
@@ -40,14 +40,14 @@ const props = defineProps<Props>()
 const { t } = useI18n()
 const router = useRouter()
 
-// 统计卡片数据
+// 统计卡片数据 - 减少颜色种类
 const statsCards = computed(() => [
   {
     id: 'total_nodes',
     title: t('dashboard.stats.totalNodes'),
     value: props.dashboardData.totalNodes,
     icon: 'dns',
-    color: 'primary',
+    color: 'grey-7',
     link: '/app/nodes'
   },
   {
@@ -63,7 +63,7 @@ const statsCards = computed(() => [
     title: t('dashboard.stats.totalRoutes'),
     value: props.dashboardData.totalRoutes,
     icon: 'router',
-    color: 'secondary',
+    color: 'grey-7',
     link: '/app/routes'
   },
   {
@@ -71,7 +71,7 @@ const statsCards = computed(() => [
     title: t('dashboard.stats.activeRoutes'),
     value: props.dashboardData.activeRoutes,
     icon: 'check_circle',
-    color: 'accent',
+    color: 'grey-7',
     link: '/app/routes?filter=active'
   }
 ])
@@ -84,22 +84,26 @@ const handleCardClick = (item: any) => {
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/design-tokens.scss';
+
 .dashboard-stats {
   .stat-card-content {
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: $spacing-lg;
+    transition: background-color 0.2s ease;
     
     &:hover {
-      background-color: rgba(0, 0, 0, 0.02);
-      
-      .q-icon {
-        transform: scale(1.1);
-        transition: transform 0.3s ease;
-      }
+      background-color: var(--color-bg-primary);
     }
     
-    &:active {
-      transform: scale(0.98);
+    .q-icon {
+      margin-bottom: $spacing-sm;
+    }
+    
+    .text-h4 {
+      font-size: $font-size-3xl;
+      font-weight: $font-weight-semibold;
+      color: var(--color-text-primary);
     }
   }
 }

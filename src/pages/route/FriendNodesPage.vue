@@ -22,6 +22,12 @@
       </div>
     </template>
 
+    <!-- 头像完善提醒 -->
+    <AvatarReminder 
+      :user-avatar="currentUserAvatar"
+      storage-key="friend-nodes-avatar-reminder"
+    />
+
     <!-- 好友节点统计 -->
     <div v-if="friendsData?.data" class="q-mb-lg">
       <ResponsiveCardGrid
@@ -59,77 +65,16 @@
       :empty-description="$t('routes.friendNodes.noNodesDescription')"
       :clickable="false"
     >
-      <template #default="{ item: node, index }">
-        <q-card-section>
-          <!-- 好友信息 -->
-          <div class="row items-center q-mb-md">
-            <q-avatar size="40px" class="q-mr-sm">
-              <img v-if="node.owner_avatar" :src="node.owner_avatar" :alt="node.owner_name" />
-              <q-icon v-else name="person" size="24px" />
-            </q-avatar>
-            <div class="col">
-              <div class="text-subtitle1 text-weight-medium">{{ node.owner_name }}</div>
-              <div v-if="node.friend_alias" class="text-caption text-grey-6">{{ node.friend_alias }}</div>
-              <div v-if="node.friend_remarks" class="text-caption text-grey-7">{{ node.friend_remarks }}</div>
-            </div>
-            <div class="col-auto">
-              <q-chip
-                :color="getStatusColor(node.status)"
-                :text-color="node.status === 'online' ? 'white' : 'dark'"
-                :label="$t(`node.status.${node.status}`)"
-                size="sm"
-              />
-            </div>
-          </div>
-
-          <!-- 节点信息 -->
-          <div class="q-mb-md">
-            <div class="text-h6 text-weight-bold q-mb-xs">{{ node.name }}</div>
-            <div class="text-body2 text-grey-6">{{ node.description || $t('routes.friendNodes.noDescription') }}</div>
-          </div>
-
-          <!-- 技术信息 -->
-          <div class="row q-gutter-md text-center q-mb-md">
-            <div class="col">
-              <div class="text-body2 text-weight-medium">{{ node.vpn_type.toUpperCase() }}</div>
-              <div class="text-caption text-grey-6">{{ $t('routes.friendNodes.vpnType') }}</div>
-            </div>
-            <div class="col">
-              <div class="text-body2 text-weight-medium">{{ node.endpoint || 'N/A' }}</div>
-              <div class="text-caption text-grey-6">{{ $t('routes.friendNodes.endpoint') }}</div>
-            </div>
-            <div class="col">
-              <div class="text-body2 text-weight-medium">{{ formatDate(node.last_seen) }}</div>
-              <div class="text-caption text-grey-6">{{ $t('routes.friendNodes.lastSeen') }}</div>
-            </div>
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn
-            flat
-            :label="$t('routes.friendNodes.viewFriend')"
-            color="primary"
-            @click="handleViewFriend(node.owner_id)"
-            size="sm"
-          />
-          <q-btn
-            v-if="node.status === 'online'"
-            flat
-            :label="$t('routes.friendNodes.connect')"
-            color="positive"
-            @click="handleConnectToNode(node)"
-            size="sm"
-          />
-          <q-btn
-            v-else
-            flat
-            :label="$t('routes.friendNodes.offline')"
-            color="grey"
-            disable
-            size="sm"
-          />
-        </q-card-actions>
+      <template #default="{ item: node }">
+        <FriendNodeCardContent
+          :node="transformNodeData(node)"
+          :friend-name="node.owner_name"
+          :friend-avatar="node.owner_avatar"
+          :friend-id="node.owner_id"
+          :show-avatar-hint="!node.owner_avatar"
+          @connect="handleConnectToNode(node)"
+          @view-details="handleViewDetails(node)"
+        />
       </template>
 
       <template #emptyAction>
@@ -250,18 +195,22 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '../../stores/auth'
 import { useRoutes } from '../../composables/useRoutes'
 import { useNodes } from '../../composables/useNodes'
 import { useSocial } from '../../composables/useSocial'
 import { useNotify } from '../../composables/useNotify'
 import PageLayout from '../../components/layout/PageLayout.vue'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
+import AvatarReminder from '../../components/social/AvatarReminder.vue'
+import FriendNodeCardContent from '../../components/route/FriendNodeCardContent.vue'
 
 interface FriendNodeData {
   id: number
   name: string
   vpn_type: string
-  status: string
+  status: string | number
   endpoint: string
   description: string
   owner_id: number
@@ -272,11 +221,16 @@ interface FriendNodeData {
   friend_remarks: string | undefined
   last_seen: string
   created_at: string
+  vpn_ip?: string
+  endpoint_ip?: string
+  endpoint_port?: number
 }
 
 const { t } = useI18n()
 const router = useRouter()
 const notify = useNotify()
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
 
 const { createRouteRequest } = useRoutes()
 const { nodes, loadNodes } = useNodes()
@@ -285,6 +239,9 @@ const { getAllFriendNodes } = useSocial()
 // 响应式状态
 const loading = ref(false)
 const friendsData = ref<any>(null)
+
+// 当前用户头像
+const currentUserAvatar = computed(() => user.value?.avatar || '')
 
 // 对话框状态
 const nodeSelectionDialog = ref({
@@ -346,19 +303,62 @@ const statsCards = computed(() => {
     {
       id: 'online_nodes',
       title: t('routes.friendNodes.stats.onlineNodes'),
-      value: allNodes.value.filter(n => n.status === 'online').length,
+      value: allNodes.value.filter(n => isNodeOnline(n.status)).length,
       icon: 'wifi',
       color: 'positive'
     },
     {
       id: 'offline_nodes',
       title: t('routes.friendNodes.stats.offlineNodes'),
-      value: allNodes.value.filter(n => n.status !== 'online').length,
+      value: allNodes.value.filter(n => !isNodeOnline(n.status)).length,
       icon: 'wifi_off',
       color: 'grey'
     }
   ]
 })
+
+// 转换节点数据为组件所需格式
+const transformNodeData = (node: FriendNodeData) => {
+  return {
+    node_id: node.id,
+    node_name: node.name,
+    node_status: convertStatus(node.status),
+    vpn_ip: node.vpn_ip || '',
+    endpoint_ip: node.endpoint_ip || node.endpoint?.split(':')[0] || '',
+    endpoint_port: node.endpoint_port || (node.endpoint?.split(':')[1] ? parseInt(node.endpoint.split(':')[1]) : 0),
+    last_seen: node.last_seen,
+    created_at: node.created_at,
+    description: node.description,
+    vpn_type: node.vpn_type,
+    user_name: node.owner_name,
+    user_avatar: node.owner_avatar
+  }
+}
+
+// 转换状态为数字格式
+const convertStatus = (status: string | number): number => {
+  if (typeof status === 'number') return status
+  
+  const statusMap: Record<string, number> = {
+    'online': 2,
+    'active': 2,
+    'enabled': 1,
+    'disabled': 0,
+    'offline': 0,
+    'inactive': 0,
+    'unconfigured': -1
+  }
+  
+  return statusMap[status.toLowerCase()] ?? 0
+}
+
+// 判断节点是否在线
+const isNodeOnline = (status: string | number): boolean => {
+  if (typeof status === 'number') {
+    return status === 2 // ONLINE
+  }
+  return status === 'online' || status === 'active'
+}
 
 // 事件处理
 const handleRefresh = async () => {
@@ -366,7 +366,12 @@ const handleRefresh = async () => {
 }
 
 const handleViewFriend = (friendId: number) => {
-  router.push(`/app/social?friend=${friendId}`)
+  router.push(`/app/social/friends/${friendId}`)
+}
+
+const handleViewDetails = (node: FriendNodeData) => {
+  // TODO: 实现查看好友节点详情
+  notify.info('节点详情功能开发中')
 }
 
 const handleConnectToNode = async (node: FriendNodeData) => {
@@ -449,7 +454,11 @@ const fetchAllFriendNodes = async () => {
 }
 
 // 工具方法
-const getStatusColor = (status: string) => {
+const getStatusColor = (status: string | number) => {
+  if (typeof status === 'number') {
+    return status === 2 ? 'positive' : 'grey'
+  }
+  
   switch (status) {
     case 'online': return 'positive'
     case 'offline': return 'grey'

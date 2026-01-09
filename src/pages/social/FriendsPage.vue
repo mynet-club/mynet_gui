@@ -143,7 +143,6 @@ const removeFriend = async (friendId: string, friendName: string) => {
 }
 
 const viewFriendNodes = (friendId: string) => {
-  console.log('View friend nodes:', friendId)
   // TODO: 实现查看好友节点逻辑
 }
 

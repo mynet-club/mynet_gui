@@ -1,65 +1,53 @@
 <template>
-  <q-card 
-    class="health-summary" 
-    :class="`health-${healthStatus}`"
-  >
-    <q-card-section>
-      <div class="row items-start q-gutter-md">
-        <!-- 健康状态图标 -->
-        <div class="col-auto">
-          <q-avatar 
-            :icon="getHealthIcon()" 
-            :color="getHealthColor()"
-            text-color="white"
-            size="56px"
-          />
-        </div>
-        
-        <!-- 健康摘要信息 -->
-        <div class="col">
-          <div class="text-h6 text-weight-bold">
-            {{ healthMessage }}
-          </div>
-          <div class="text-caption text-grey-6 q-mt-xs">
-            最后更新：{{ formatLastUpdate() }}
-          </div>
-          
-          <!-- 待处理任务列表 -->
-          <div v-if="pendingTasks.length > 0" class="q-mt-md">
-            <div class="text-caption text-grey-7 q-mb-xs">待处理任务：</div>
-            <div class="row q-gutter-xs">
-              <q-chip
-                v-for="task in pendingTasks"
-                :key="task.type"
-                :color="getTaskColor(task.priority)"
-                text-color="white"
-                size="sm"
-                clickable
-                @click="handleTaskClick(task)"
-              >
-                <q-icon 
-                  :name="getTaskIcon(task.type)" 
-                  size="xs" 
-                  class="q-mr-xs"
-                />
-                {{ task.message }}
-                <q-icon name="arrow_forward" size="xs" class="q-ml-xs" />
-              </q-chip>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 快速操作按钮 -->
-        <div class="col-auto">
-          <q-btn
-            v-if="healthStatus !== 'healthy'"
-            color="primary"
-            icon="search"
-            label="查看详情"
-            @click="scrollToAbnormalSection"
-            unelevated
-          />
-        </div>
+  <q-card class="health-summary standard-card">
+    <q-card-section class="card-header">
+      <div class="card-title">
+        <q-icon 
+          :name="getHealthIcon()" 
+          :color="getHealthColor()"
+          size="18px"
+        />
+        系统状态
+      </div>
+      <q-badge 
+        :color="getHealthColor()"
+        :label="healthMessage"
+      />
+    </q-card-section>
+
+    <q-card-section v-if="pendingTasks.length > 0" class="card-body">
+      <q-list dense separator>
+        <q-item
+          v-for="task in pendingTasks"
+          :key="task.type"
+          clickable
+          @click="handleTaskClick(task)"
+          class="task-item"
+        >
+          <q-item-section avatar>
+            <q-icon 
+              :name="getTaskIcon(task.type)" 
+              :color="getTaskColor(task.priority)"
+              size="16px"
+            />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label class="text-body2">{{ task.message }}</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-icon name="arrow_forward" color="grey-6" size="14px" />
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-card-section>
+    
+    <q-card-section v-else class="card-body">
+      <div class="info-line">
+        <q-icon name="check_circle" color="positive" size="18px" />
+        <span class="text-body2 text-grey-7">系统运行正常</span>
+      </div>
+      <div class="text-caption text-grey-6 q-mt-xs">
+        最后更新：{{ formatLastUpdate() }}
       </div>
     </q-card-section>
   </q-card>
@@ -133,29 +121,23 @@ const formatLastUpdate = () => {
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/design-tokens.scss';
+
 .health-summary {
-  transition: all 0.3s ease;
+  height: 100%;
   
-  &.health-healthy {
-    border-left: 4px solid var(--q-positive);
-  }
-  
-  &.health-warning {
-    border-left: 4px solid var(--q-warning);
-    background: linear-gradient(90deg, rgba(255, 193, 7, 0.05) 0%, transparent 100%);
-  }
-  
-  &.health-critical {
-    border-left: 4px solid var(--q-negative);
-    background: linear-gradient(90deg, rgba(244, 67, 54, 0.05) 0%, transparent 100%);
-  }
-  
-  .q-chip {
-    transition: transform 0.2s ease;
+  .task-item {
+    transition: background-color 0.2s ease;
     
     &:hover {
-      transform: translateY(-2px);
+      background-color: var(--color-bg-primary);
     }
+  }
+  
+  .info-line {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
   }
 }
 </style>

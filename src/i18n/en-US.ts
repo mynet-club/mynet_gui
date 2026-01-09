@@ -38,6 +38,13 @@ export default {
     copy: 'Copy',
     copiedToClipboard: 'Copied to clipboard',
     copyFailed: 'Copy failed',
+    create: 'Create',
+    update: 'Update',
+    enter: 'Enter',
+    yes: 'Yes',
+    no: 'No',
+    status: 'Status',
+    searchPlaceholder: 'Search...',
     unknown: 'Unknown',
     unknownUser: 'Unknown User',
     notSet: 'Not Set',
@@ -127,10 +134,10 @@ export default {
   auth: {
     login: 'Login',
     register: 'Register',
-    loginTitle: 'Welcome Back',
-    loginSubtitle: 'Please sign in to your account',
-    registerTitle: 'Create Account',
-    registerSubtitle: 'Please fill in the information below',
+    loginTitle: 'Sign in to MyNet',
+    loginSubtitle: 'Secure and stable network connection platform',
+    registerTitle: 'Create your MyNet account',
+    registerSubtitle: 'Secure and stable network connection platform',
     forgotPasswordTitle: 'Forgot Password',
     forgotPasswordSubtitle: 'Please enter your email address',
     resetPasswordTitle: 'Reset Password',
@@ -144,13 +151,14 @@ export default {
     name: 'Name',
     rememberMe: 'Remember me',
     forgotPassword: 'Forgot password?',
-    loginButton: 'Sign In',
-    registerButton: 'Sign Up',
+    loginButton: 'Sign in to MyNet',
+    registerButton: 'Create account',
     sendResetLink: 'Send Reset Link',
     resetPasswordButton: 'Reset Password',
     verifyEmail: 'Verify Email',
     resendCode: 'Resend Code',
     resendCodeCountdown: 'Resend ({seconds}s)',
+    resendEmail: 'Resend Email',
     verificationCode: 'Verification Code',
     agreeTerms: 'I agree to the terms of service',
     ageVerification: 'I confirm that I am 14 years or older and eligible to access network services',
@@ -196,6 +204,16 @@ export default {
     verificationCodePlaceholder: 'Please enter 6-digit code',
     invitationPlaceholder: 'Please enter invitation code (required)',
     invitationRequired: 'Please enter invitation code',
+    noInvitationCode: "Don't have an invitation code?",
+    getInvitationCode: 'Get Invitation Code',
+    invitationCodeHelp: 'How to get invitation code',
+    invitationCodeHelpTitle: 'Get Invitation Code',
+    invitationCodeHelpMessage: 'MyNet uses an invitation-based registration system. Please join our community to get an invitation code:',
+    joinCommunity: 'Join Community',
+    telegramCommunity: 'Telegram Community',
+    discordCommunity: 'Discord Community',
+    visitVillage: 'Visit Community Page',
+    communityLinks: 'Community Links',
     
     // Account activation related
     accountActivation: 'Account Activation',
@@ -335,7 +353,8 @@ export default {
       maintenance: 'Maintenance Mode',
       active: 'Online',
       inactive: 'Offline',
-      pending: 'Pending'
+      pending: 'Pending',
+      updateFailed: 'Failed to update node status'
     },
     
     // Node information fields
@@ -761,6 +780,7 @@ export default {
       traceroute: 'Traceroute',
       speedTest: 'Speed Test',
       portScan: 'Port Scan',
+      connectFailed: 'Failed to connect to node',
       
       // Batch operations
       selectAll: 'Select All',
@@ -882,7 +902,7 @@ export default {
   navigation: {
     mainFeatures: 'Main Features',
     networkConfig: 'Network Configuration',
-    systemTools: 'System Tools',
+    systemTools: 'Development Settings',
     dashboard: 'Dashboard',
     nodes: 'Node Management',
     routes: {
@@ -906,11 +926,11 @@ export default {
       overview: 'Service Overview',
       overviewDescription: 'View service statistics and quick navigation',
       publicServices: 'Public Services',
-      publicServicesDescription: 'Browse publicly available network services',
+      publicServicesDescription: 'Browse public services provided by system (connected devices share automatically)',
       friendServices: 'Friend Services',
-      friendServicesDescription: 'Access services shared by friends',
-      anonymousServices: 'Anonymous Services',
-      anonymousServicesDescription: 'Discover anonymously shared services',
+      friendServicesDescription: 'Browse services shared by your friends',
+      anonymousServices: 'Anonymous Services (Deprecated)', // Feature removed, kept to avoid errors
+      anonymousServicesDescription: 'This feature has been deprecated', // Feature removed
       myServices: 'My Services',
       myServicesDescription: 'Manage and share services you created'
     },
@@ -929,6 +949,26 @@ export default {
     name: 'Route Name',
     destination: 'Destination',
     gateway: 'Gateway',
+    
+    // Success/error messages
+    configDownloaded: 'Configuration downloaded successfully',
+    configDownloadError: 'Failed to download configuration',
+    configRefreshed: 'Configuration refreshed successfully',
+    configRefreshError: 'Failed to refresh configuration',
+    connectionApproved: 'Connection approved successfully',
+    connectionApproveError: 'Failed to approve connection',
+    connectionRejected: 'Connection rejected successfully',
+    connectionRejectError: 'Failed to reject connection',
+    connectionRequestSent: 'Connection request sent successfully',
+    connectionRequestError: 'Failed to send connection request',
+    routeDisconnected: 'Route disconnected successfully',
+    routeDisconnectError: 'Failed to disconnect route',
+    fetchConfigError: 'Failed to fetch configuration',
+    fetchFriendNodesError: 'Failed to fetch friend nodes',
+    fetchOverviewError: 'Failed to fetch overview data',
+    fetchPendingConnectionsError: 'Failed to fetch pending connections',
+    fetchRouteDetailsError: 'Failed to fetch route details',
+    fetchAllFriendNodesError: 'Failed to fetch all friend nodes',
     
     // Overview statistics
     overview: {
@@ -974,6 +1014,16 @@ export default {
       pending: 'Pending',
       approved: 'Approved',
       rejected: 'Rejected'
+    },
+    
+    // Index/Navigation page
+    index: {
+      activeRoutes: 'Active Routes',
+      activeRoutesDescription: 'View and manage currently active network connections',
+      friendNodes: 'Friend Nodes',
+      friendNodesDescription: 'Browse and connect to friend network nodes',
+      pendingConnections: 'Pending Connections',
+      pendingConnectionsDescription: 'Handle incoming and outgoing connection requests'
     },
     
     // Active routes
@@ -1070,6 +1120,8 @@ export default {
       connectionRequestHint: 'Send a connection request to your friend to establish a route',
       friendNode: 'Friend Node',
       requestMessageHint: 'Explain the purpose of the connection to your friend',
+      requestSent: 'Connection request sent successfully',
+      requestError: 'Failed to send connection request',
       stats: {
         friendsCount: 'Total Friends',
         totalNodes: 'Total Nodes',
@@ -1086,6 +1138,8 @@ export default {
       backToNodes: 'Back to Node List',
       noNodes: 'No Nodes',
       noNodesDescription: 'You haven\'t created any nodes yet, please create a node first',
+      noAvailableNodes: 'No Available Nodes',
+      noAvailableNodesDescription: 'No nodes available for connection at the moment',
       noDescription: 'No Description',
       nodeId: 'Node ID',
       totalRoutes: 'Total Routes',
@@ -1104,6 +1158,26 @@ export default {
         inactive: 'Inactive',
         pending: 'Pending Configuration',
         unknown: 'Unknown'
+      }
+    },
+    
+    // Node selector component
+    nodeSelector: {
+      noNodes: 'No nodes available',
+      noDescription: 'No description',
+      noSearchResults: 'No search results found',
+      tryDifferentSearch: 'Please try different search terms',
+      searchPlaceholder: 'Search node name or IP...',
+      addNodesFirst: 'Please add nodes first',
+      refresh: 'Refresh',
+      statusFilter: 'Status Filter',
+      typeFilter: 'Type Filter',
+      clearSelection: 'Clear Selection',
+      selectedNode: 'Selected Node',
+      status: {
+        active: 'Active',
+        inactive: 'Inactive',
+        pending: 'Pending'
       }
     },
 
@@ -1246,11 +1320,16 @@ export default {
         connections: 'Connections',
         latency: 'Latency',
         connectionsFull: 'Connections Full',
+        nodeNotAvailable: 'Node is not available',
         nextStep: 'Next Step',
         pleaseSelectNode: 'Please select a node',
         nodeCannotConnect: 'This node cannot be connected at the moment',
         fetchNodesError: 'Failed to fetch friend nodes',
-        noFriendSelected: 'No friend selected'
+        noFriendSelected: 'No friend selected',
+        cannotConnect: 'Cannot establish connection at this time',
+        existingConnection: 'Connection already exists',
+        pendingRequest: 'Connection request pending',
+        possibleReasons: 'Possible reasons'
       },
       
       // Step 3 - Select my node
@@ -1291,6 +1370,9 @@ export default {
         fetchNodesError: 'Failed to fetch nodes',
         noFriendSelected: 'No friend selected',
         noFriendNodeSelected: 'No friend node selected',
+        nodeDisabled: 'This node is disabled and cannot be used',
+        nodeMaintenance: 'This node is under maintenance',
+        nodeUnconfigured: 'This node is not configured yet',
         
         // Connection status
         connectionStatus: {
@@ -1360,6 +1442,17 @@ export default {
           openvpn: 'OpenVPN',
           ipsec: 'IPSec'
         }
+      },
+      
+      // Common messages
+      requestSubmitted: 'Connection request submitted successfully',
+      submitError: 'Failed to submit connection request'
+    },
+    
+    // Dialogs
+    dialogs: {
+      routeDetails: {
+        title: 'Route Details'
       }
     },
 
@@ -1431,6 +1524,15 @@ export default {
   social: {
     subtitle: 'Social network connections and user management',
     comingSoonMessage: 'Social network feature is under development, stay tuned!',
+    
+    // Actions
+    actions: {
+      accept: 'Accept',
+      reject: 'Reject',
+      addFriend: 'Add Friend',
+      removeFriend: 'Remove Friend'
+    },
+    
     // Overview stats
     overview: {
       title: 'Social Overview',
@@ -1451,7 +1553,8 @@ export default {
       friendshipDate: 'Friends since',
       removeFriend: 'Remove Friend',
       viewNodes: 'View Nodes',
-      lastActive: 'Last Active'
+      lastActive: 'Last Active',
+      mutualFriends: 'Mutual Friends'
     },
     // Friend requests
     friendRequests: {
@@ -1467,8 +1570,10 @@ export default {
       status: {
         pending: 'Pending',
         accepted: 'Accepted',
-        rejected: 'Rejected'
-      }
+        rejected: 'Rejected',
+        undefined: 'Status Unknown'
+      },
+      statusError: 'Failed to get request status'
     },
     // User search
     search: {
@@ -1497,7 +1602,9 @@ export default {
       active: 'Active',
       used: 'Used',
       expired: 'Expired',
-      noInvitations: 'No invitations yet'
+      noInvitations: 'No invitations yet',
+      linkCopied: 'Invitation link copied to clipboard',
+      copyFailed: 'Failed to copy invitation link'
     },
     // Dialogs
     dialogs: {
@@ -1542,7 +1649,10 @@ export default {
     fetchInvitationsError: 'Failed to fetch invitations',
     invitationCreateError: 'Failed to create invitation',
     invitationDeleteError: 'Failed to delete invitation',
-    fetchFriendNodesError: 'Failed to fetch friend nodes'
+    fetchFriendNodesError: 'Failed to fetch friend nodes',
+    fetchAllFriendNodesError: 'Failed to fetch all friend nodes',
+    friendRequestCancelled: 'Friend request cancelled',
+    friendRequestCancelError: 'Failed to cancel friend request'
   },
   ippools: {
     title: 'IP Pool Management',
@@ -1676,6 +1786,9 @@ export default {
     willCreate: 'Will Create',
     continuousMode: 'Continuous Mode',
     extendFrom: 'Extend From',
+    continuityWarning: 'Warning: Although continuous allocation was requested, the system allocated non-contiguous IP addresses',
+    deleteConfirmTitle: 'Confirm Deletion',
+    selectTargetPoolAdvancedHint: 'The new IP pool will be created before or after the target pool. The system will automatically choose the best position',
     // Hints
     noAllocations: 'No allocations found',
     poolEmpty: 'IP pool is empty',
@@ -1721,7 +1834,8 @@ export default {
   websocket: {
     connected: 'Connected',
     disconnected: 'Disconnected',
-    heartbeat: 'Heartbeat'
+    heartbeat: 'Heartbeat',
+    connectionFailed: 'WebSocket connection failed'
   },
   node: {
     status: {
@@ -1798,6 +1912,19 @@ export default {
   },
   zoneServices: {
     subtitle: 'Zone service sharing and management',
+    
+    // Page titles and descriptions
+    navigation: {
+      publicServices: 'Public Services',
+      publicServicesDescription: 'Browse public services provided by system (connected devices share automatically)',
+      friendServices: 'Friend Services',
+      friendServicesDescription: 'Browse services shared by your friends',
+      anonymousServices: 'Anonymous Services (Deprecated)', // Feature removed
+      anonymousServicesDescription: 'This feature has been deprecated', // Feature removed
+      myServices: 'My Services',
+      myServicesDescription: 'Manage and share services you created'
+    },
+    
     currentZone: 'Current Zone',
     servicesCount: 'services',
     addService: 'Add Service',
@@ -1885,6 +2012,10 @@ export default {
       authToken: 'Auth Token',
       authUsername: 'Username',
       authPassword: 'Password',
+      shareSettings: 'Share Settings',
+      shareToFriends: 'Share to Friends',
+      shareToPublic: 'Request Public Share',
+      shareScope: 'Choose service sharing scope, only friend sharing is supported (requires established friendship)',
       authTypes: {
         none: 'No Auth',
         bearer: 'Bearer Token',
@@ -1894,11 +2025,11 @@ export default {
     
     empty: {
       publicServices: 'No Public Services',
-      publicServicesDesc: 'No public services have been approved by administrators yet',
+      publicServicesDesc: 'No system services or services from connected devices available yet',
       friendServices: 'No Friend Sharing',
       friendServicesDesc: 'No services have been shared by your friends yet',
-      anonymousServices: 'No Anonymous Sharing',
-      anonymousServicesDesc: 'No services have been shared anonymously yet',
+      anonymousServices: 'This feature has been deprecated', // Feature removed
+      anonymousServicesDesc: 'Anonymous services feature has been removed, please use friend services', // Feature removed
       myServices: 'You haven\'t created any services yet',
       myServicesDesc: 'Click the button below to create your first service'
     },
@@ -1917,7 +2048,11 @@ export default {
       updateFailed: 'Failed to update service',
       deleteFailed: 'Failed to delete service',
       shareFailed: 'Failed to share service',
-      approvalFailed: 'Failed to request approval'
+      approvalFailed: 'Failed to request approval',
+      connectFailed: 'Failed to connect to service',
+      featureDeprecated: 'Feature Deprecated',
+      publicServiceDeprecated: 'Regular users cannot publish public services. Public services are system-only. Connected devices share automatically, and you can use "Friend Sharing" for friends.',
+      requiresFriendship: 'Sharing services requires an established friendship. Please add them as a friend first'
     }
   },
   
@@ -2037,7 +2172,17 @@ export default {
     preferencesUpdated: 'Preferences updated',
     preferencesUpdateFailed: 'Failed to update preferences',
     preferencesReset: 'Preferences reset to default values',
-    resetToDefault: 'Reset to Default'
+    resetToDefault: 'Reset to Default',
+    
+    // Validation messages
+    validation: {
+      currentPasswordRequired: 'Current password is required',
+      newPasswordRequired: 'New password is required',
+      passwordTooShort: 'Password must be at least 8 characters',
+      passwordMismatch: 'Passwords do not match',
+      fileTooLarge: 'File size is too large',
+      invalidFileType: 'Invalid file type'
+    }
   },
   
   // VPN configuration related translations

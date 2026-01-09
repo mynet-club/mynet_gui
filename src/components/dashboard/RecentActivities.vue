@@ -125,7 +125,6 @@ const handleActivityClick = (activity: Activity) => {
 // 查看全部活动（将来可以打开一个模态框或新页面）
 const showAllActivities = () => {
   // TODO: 实现全部活动查看功能
-  console.log('查看全部活动')
 }
 </script>
 

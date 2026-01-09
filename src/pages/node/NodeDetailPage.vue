@@ -8,8 +8,8 @@
       <div class="row q-gutter-sm">
         <!-- 编辑下拉菜单 -->
         <q-btn-dropdown
+          flat
           color="primary"
-          outline
           icon="edit"
           :label="$t('common.edit')"
           :disable="!node || isLoading"
@@ -52,8 +52,8 @@
 
         <!-- 删除按钮 -->
         <q-btn
+          flat
           color="negative"
-          outline
           icon="delete"
           :label="$t('common.delete')"
           @click="showDeleteConfirm = true"
@@ -62,8 +62,8 @@
         
         <!-- 返回按钮 -->
         <q-btn
+          flat
           color="grey-7"
-          outline
           icon="arrow_back"
           :label="$t('common.back')"
           @click="$router.push('/app/nodes')"

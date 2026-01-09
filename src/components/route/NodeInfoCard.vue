@@ -141,11 +141,25 @@ const getOsIcon = (os: string) => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: rgba(0,0,0,0.08);
+  }
   
   .q-card__section {
     flex: 1;
     display: flex;
     flex-direction: column;
+  }
+}
+
+.body--dark {
+  .node-info-card:hover {
+    border-color: rgba(255,255,255,0.08);
   }
 }
 

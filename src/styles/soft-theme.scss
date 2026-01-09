@@ -1,66 +1,82 @@
 /**
- * 柔和清新主题 - Soft Fresh Theme
- * 学习自节点卡片的设计精髓
- * 特点：低对比度、圆润、柔和的色彩、舒适的间距
+ * MyNet UI Design Tokens
+ * Light Mode – Stable / Readable
  */
 
 /* ========================================
-   1. 颜色变量 - 柔和色调
+   1. Design Tokens - Light Mode
    ======================================== */
 
 :root {
-  /* 背景色 - 柔和的灰蓝色调 */
-  --soft-bg-primary: #f5f7fa;         /* 主背景 - 柔和灰蓝 */
-  --soft-bg-secondary: #e8ecf1;       /* 次级背景 - 更深一点的灰蓝 */
-  --soft-bg-card: #f8fafc;            /* 卡片背景 - 接近白但带一点蓝 */
-  --soft-bg-hover: #eef2f7;           /* 悬停背景 */
+  /* ===== 页面与结构 ===== */
+  --page-bg: #F3F4F6;          /* 页面整体底色 */
+  --content-bg: #FFFFFF;       /* 主内容区 / 卡片 */
   
-  /* 文字颜色 - 降低对比度 */
-  --soft-text-primary: #4a5568;       /* 主文字 - 深灰而非黑 */
-  --soft-text-secondary: #718096;     /* 次要文字 */
-  --soft-text-tertiary: #a0aec0;      /* 辅助文字 */
-  --soft-text-light: #cbd5e0;         /* 浅色文字 */
+  --header-bg: #F5F7FA;        /* 顶部 Header */
+  --header-border: #E5E7EB;
   
-  /* 边框颜色 - 极其柔和 */
-  --soft-border-light: #e2e8f0;       /* 浅边框 */
-  --soft-border-medium: #cbd5e0;      /* 中等边框 */
+  --sidebar-bg: #F5F7FA;       /* 侧边栏 */
+  --sidebar-border: #E5E7EB;
   
-  /* 阴影 - 轻柔不突兀 */
+  /* ===== 文本颜色 ===== */
+  --text-primary: #374151;     /* 主文本 / 标题 */
+  --text-secondary: #6B7280;   /* 次级说明 */
+  --text-muted: #9CA3AF;       /* 技术字段 / 注释 */
+  --text-disabled: #D1D5DB;    /* 禁用态 */
+  
+  /* ===== 边框 / 分隔 ===== */
+  --border-default: #E5E7EB;
+  --border-light: #EEF2F6;
+  
+  /* ===== 状态语义（统一三态） ===== */
+  --status-available: #10B981;        /* 🟢 可用 */
+  --status-warning: #F59E0B;          /* 🟡 不稳定 */
+  --status-unavailable: #9CA3AF;      /* ⚪ 不可用 */
+  
+  --status-available-bg: #ECFDF5;
+  --status-warning-bg: #FFFBEB;
+  --status-unavailable-bg: #F3F4F6;
+  
+  /* ===== 主色（克制使用） ===== */
+  --primary: #3B82F6;           /* 主按钮 / 主链接 */
+  --primary-hover: #2563EB;
+  --primary-soft: #EFF6FF;
+  
+  /* ===== 图标 ===== */
+  --icon-primary: #374151;
+  --icon-secondary: #6B7280;
+  --icon-muted: #9CA3AF;
+  
+  /* ===== 阴影（保留柔和风格） ===== */
   --soft-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
   --soft-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.03);
   --soft-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.03);
   --soft-shadow-hover: 0 12px 20px rgba(0, 0, 0, 0.06), 0 6px 8px rgba(0, 0, 0, 0.04);
   
-  /* 状态颜色 - 柔和版本 */
-  --soft-success: #48bb78;            /* 柔和的绿色 */
-  --soft-success-bg: #f0fdf4;         /* 成功背景 */
-  --soft-warning: #ed8936;            /* 柔和的橙色 */
-  --soft-warning-bg: #fffaf0;         /* 警告背景 */
-  --soft-error: #f56565;              /* 柔和的红色 */
-  --soft-error-bg: #fff5f5;           /* 错误背景 */
-  --soft-info: #4299e1;               /* 柔和的蓝色 */
-  --soft-info-bg: #ebf8ff;            /* 信息背景 */
-  
-  /* 功能颜色 - 降低饱和度 */
-  --soft-primary: #5a67d8;            /* 主色调 */
-  --soft-primary-light: #edf2f7;      /* 主色调浅色背景 */
-  --soft-secondary: #667eea;          /* 次要色 */
-  --soft-accent: #ed64a6;             /* 强调色 */
-  
-  /* 圆角 - 更圆润 */
+  /* ===== 圆角（保留） ===== */
   --soft-radius-sm: 8px;
   --soft-radius-md: 12px;
   --soft-radius-lg: 16px;
   --soft-radius-xl: 20px;
   --soft-radius-full: 999px;
   
-  /* 间距 - 舒适不压抑 */
+  /* ===== 间距（保留） ===== */
   --soft-spacing-xs: 0.5rem;   /* 8px */
   --soft-spacing-sm: 0.75rem;  /* 12px */
   --soft-spacing-md: 1rem;     /* 16px */
   --soft-spacing-lg: 1.5rem;   /* 24px */
   --soft-spacing-xl: 2rem;     /* 32px */
   --soft-spacing-2xl: 3rem;    /* 48px */
+  
+  /* ===== 兼容旧变量（渐进迁移） ===== */
+  --soft-bg-primary: var(--content-bg);
+  --soft-bg-secondary: var(--page-bg);
+  --soft-text-primary: var(--text-primary);
+  --soft-text-secondary: var(--text-secondary);
+  --soft-text-tertiary: var(--text-muted);
+  --soft-border-light: var(--border-light);
+  --soft-border-medium: var(--border-default);
+  --soft-primary: var(--primary);
 }
 
 /* 深色模式变量 */
@@ -88,8 +104,8 @@
    ======================================== */
 
 body {
-  background-color: var(--soft-bg-primary);
-  color: var(--soft-text-primary);
+  background-color: var(--page-bg);
+  color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -98,16 +114,16 @@ body {
    ======================================== */
 
 .q-card {
-  background-color: var(--soft-bg-card) !important;
+  background-color: var(--content-bg) !important;
   border-radius: var(--soft-radius-lg) !important;
   box-shadow: var(--soft-shadow-md) !important;
-  border: 1px solid var(--soft-border-light);
+  border: 1px solid var(--border-default);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   
   &:hover {
     box-shadow: var(--soft-shadow-hover) !important;
     transform: translateY(-2px);
-    border-color: var(--soft-border-medium);
+    border-color: var(--border-default);
   }
   
   /* 移除 Quasar 默认的强阴影 */
@@ -145,17 +161,17 @@ body {
   
   &.q-btn--outline {
     border-width: 1.5px;
-    border-color: var(--soft-border-medium);
+    border-color: var(--border-default);
     
     &:hover {
-      background-color: var(--soft-bg-hover);
-      border-color: var(--soft-text-secondary);
+      background-color: var(--page-bg);
+      border-color: var(--text-secondary);
     }
   }
   
   /* 扁平按钮柔和悬停效果 */
   &.q-btn--flat:hover {
-    background-color: var(--soft-bg-hover) !important;
+    background-color: var(--page-bg) !important;
   }
 }
 
@@ -186,14 +202,14 @@ body {
     border-radius: var(--soft-radius-md) !important;
     
     &:before {
-      border-color: var(--soft-border-light);
+      border-color: var(--border-light);
     }
   }
   
   /* 聚焦状态 */
   &.q-field--focused {
     .q-field__control:before {
-      border-color: var(--soft-primary);
+      border-color: var(--primary);
       border-width: 1.5px;
     }
   }
@@ -201,7 +217,7 @@ body {
   /* 填充模式 */
   &.q-field--filled {
     .q-field__control {
-      background-color: var(--soft-bg-secondary);
+      background-color: var(--page-bg);
     }
   }
   
@@ -209,11 +225,11 @@ body {
   &.q-field--outlined {
     .q-field__control {
       &:before {
-        border-color: var(--soft-border-light);
+        border-color: var(--border-light);
       }
       
       &:hover:before {
-        border-color: var(--soft-border-medium);
+        border-color: var(--border-default);
       }
     }
   }

@@ -59,29 +59,32 @@
                 <div class="text-subtitle2 q-mb-sm">VPN类型</div>
                 <div class="row q-gutter-md">
                   <q-btn
-                    :class="form.vpn_type === 'gnb' ? 'vpn-btn-selected' : 'vpn-btn-unselected'"
+                    :color="form.vpn_type === 'gnb' ? 'primary' : 'grey-7'"
+                    :outline="form.vpn_type !== 'gnb'"
+                    :unelevated="form.vpn_type === 'gnb'"
                     @click="onVpnTypeChange('gnb')"
                     no-caps
                     rounded
-                    unelevated
                   >
                     GNB
                   </q-btn>
                   <q-btn
-                    :class="form.vpn_type === 'wireguard' ? 'vpn-btn-selected' : 'vpn-btn-unselected'"
+                    :color="form.vpn_type === 'wireguard' ? 'primary' : 'grey-7'"
+                    :outline="form.vpn_type !== 'wireguard'"
+                    :unelevated="form.vpn_type === 'wireguard'"
                     @click="onVpnTypeChange('wireguard')"
                     no-caps
                     rounded
-                    unelevated
                   >
                     WireGuard
                   </q-btn>
                   <q-btn
-                    :class="form.vpn_type === 'openvpn' ? 'vpn-btn-selected' : 'vpn-btn-unselected'"
+                    :color="form.vpn_type === 'openvpn' ? 'primary' : 'grey-7'"
+                    :outline="form.vpn_type !== 'openvpn'"
+                    :unelevated="form.vpn_type === 'openvpn'"
                     @click="onVpnTypeChange('openvpn')"
                     no-caps
                     rounded
-                    unelevated
                   >
                     OpenVPN
                   </q-btn>
@@ -91,6 +94,7 @@
               <!-- 操作按钮 -->
               <div class="row q-gutter-sm q-mt-lg">
                 <q-btn
+                  flat
                   type="submit"
                   color="primary"
                   :loading="isCreating"
@@ -101,8 +105,8 @@
                 </q-btn>
                 
                 <q-btn
+                  flat
                   color="grey-7"
-                  outline
                   @click="onCancel"
                   :disable="isCreating"
                 >

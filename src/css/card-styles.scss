@@ -1,0 +1,136 @@
+/**
+ * 全局卡片样式
+ * 
+ * 设计原则：
+ * - 克制：最小化装饰，信息优先
+ * - 一致：所有卡片遵循统一结构
+ * - 清晰：状态一眼可读
+ * - 参考：UI_DESIGN_SYSTEM.md
+ * 
+ * 使用方式：
+ * 1. 在组件中添加类名：class="standard-card"
+ * 2. 卡片会自动获得统一的悬停效果和边框
+ */
+
+// 引入 Design Tokens
+@import '../styles/design-tokens.scss';
+
+// ========== 标准卡片样式 ==========
+.standard-card,
+.card-standard {
+  background-color: var(--color-bg-tertiary);
+  border: $border-width solid var(--card-border-color);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--card-border-hover);
+  }
+}
+
+// ========== 导航卡片样式 ==========
+.navigation-card,
+.card-navigation {
+  min-height: 200px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+}
+
+// ========== 概览卡片样式 ==========
+.overview-card,
+.card-overview {
+  min-height: 120px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+}
+
+// ========== 信息卡片样式（紧凑）==========
+.info-card,
+.card-info {
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+}
+
+// ========== 统一卡片结构：Header → Body → Footer ==========
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $card-padding - 4px $card-padding;
+  background: var(--color-bg-secondary);
+  border-bottom: $border-width solid var(--color-border);
+  
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: var(--color-text-primary);
+  }
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  padding: $card-padding;
+  background: var(--color-bg-tertiary);
+  
+  .info-line {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm + 2px;
+    min-width: 0;
+    
+    .q-icon {
+      flex-shrink: 0;
+      // 图标颜色通过组件内部定义，不在此强制
+    }
+    
+    .info-value {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
+      font-size: $font-size-base;
+      font-weight: $font-weight-medium;
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $card-padding - 4px $card-padding;
+  background: var(--color-bg-secondary);
+  border-top: $border-width solid var(--color-border);
+}
+
+// ========== 移除旧的深色模式和 CSS 变量定义 ==========
+// 现在统一使用 design-tokens.scss 中的变量

@@ -167,8 +167,6 @@ const fillMissingDataPoints = (history: ConnectionHistoryItem[]) => {
     }
   })
 
-  console.log('检测到的正常时间间隔:', normalInterval / 1000, '秒, 出现次数:', maxCount)
-
   // 填充缺失的数据点
   const filled: ConnectionHistoryItem[] = []
   for (let i = 0; i < history.length; i++) {
@@ -186,7 +184,6 @@ const fillMissingDataPoints = (history: ConnectionHistoryItem[]) => {
       // 如果间隔大于正常间隔的1.5倍，说明有缺失数据
       if (gap > normalInterval * 1.5) {
         const missingCount = Math.floor(gap / normalInterval) - 1
-        console.log(`检测到数据缺失: ${new Date(current).toLocaleString()} - ${new Date(next).toLocaleString()}, 需要填充 ${missingCount} 个点`)
 
         // 插入缺失的数据点
         for (let j = 1; j <= missingCount; j++) {
@@ -213,7 +210,6 @@ const fillMissingDataPoints = (history: ConnectionHistoryItem[]) => {
     }
   }
 
-  console.log('原始数据点数:', history.length, '填充后数据点数:', filled.length)
   return filled
 }
 
@@ -222,23 +218,14 @@ const initCharts = async () => {
   await nextTick()
   
   if (props.connectionHistory.length === 0) {
-    console.warn('ConnectionHistoryCard: 没有历史数据')
     return
   }
-  
-  console.log('ConnectionHistoryCard: 原始历史数据:', props.connectionHistory)
-  console.log('ConnectionHistoryCard: 数据点数量:', props.connectionHistory.length)
   
   // 检查数据是否为实时快照（所有时间相同）
   if (props.connectionHistory.length > 1) {
     const firstTime = new Date(props.connectionHistory[0].snapshot_at).getTime()
     const lastTime = new Date(props.connectionHistory[props.connectionHistory.length - 1].snapshot_at).getTime()
     const timeDiff = Math.abs(lastTime - firstTime) / 1000 / 60 // 分钟
-    console.log('ConnectionHistoryCard: 时间跨度（分钟）:', timeDiff)
-    
-    if (timeDiff < 1) {
-      console.warn('ConnectionHistoryCard: 数据疑似为实时快照（时间跨度小于1分钟），无法绘制历史趋势图')
-    }
   }
   
   // 应用智能填充
@@ -248,8 +235,6 @@ const initCharts = async () => {
   const times = filledHistory.map(item => 
     new Date(item.snapshot_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
   )
-  
-  console.log('ConnectionHistoryCard: x轴时间点:', times)
   
   const latencies = filledHistory.map(item => item.latency || 0)
   

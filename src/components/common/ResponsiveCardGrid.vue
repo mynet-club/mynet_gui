@@ -181,6 +181,8 @@ const handleCardClick = (item: T, index: number) => {
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/design-tokens.scss';
+
 .responsive-card-grid {
   display: grid;
   width: 100%;
@@ -232,21 +234,26 @@ const handleCardClick = (item: T, index: number) => {
     }
   }
   
-  /* 间距变体 */
-  &.gap-tight { gap: 0.5rem; }
-  &.gap-normal { gap: 1rem; }
-  &.gap-loose { gap: 1.5rem; }
-  &.gap-xl { gap: 2rem; }
+  /* 间距变体 - 使用 Design Tokens */
+  &.gap-tight { gap: $spacing-sm; }       // 8px
+  &.gap-normal { gap: $spacing-base; }    // 16px
+  &.gap-loose { gap: $spacing-lg; }       // 20px
+  &.gap-xl { gap: $spacing-xl; }          // 24px
 }
 
 /* 选中状态 */
 .card-selected {
-  border: 2px solid var(--q-primary);
-  box-shadow: 0 4px 12px rgba(var(--q-primary-rgb), 0.3);
+  border: 2px solid var(--color-primary);
+  box-shadow: var(--shadow-md);
 }
 
 /* 可点击状态 */
 .cursor-pointer {
   cursor: pointer;
+  
+  &:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+  }
 }
 </style>
