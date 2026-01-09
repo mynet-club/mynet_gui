@@ -571,18 +571,9 @@ export function useDashboard() {
     await fetchRecentActivities()
 
     // WebSocket连接由boot/websocket.ts统一管理，这里不再重复连接
-    
-    // 设置定时器更新数据（每30秒刷新一次）
-    updateInterval.value = window.setInterval(() => {
-      fetchDashboardData()
-    }, 30000)
   })
 
   onUnmounted(() => {
-    if (updateInterval.value) {
-      clearInterval(updateInterval.value)
-      updateInterval.value = null
-    }
     // WebSocket断开由boot/websocket.ts统一管理，这里不需要手动断开
   })
 
