@@ -3,7 +3,7 @@
     <!-- 顶部：头像 + 名称 + 在线状态（浅灰背景）-->
     <div class="card-header">
       <div class="friend-avatar-wrapper">
-        <q-avatar size="60px" class="friend-avatar">
+        <q-avatar size="48px" class="friend-avatar">
           <img 
             v-if="friend.avatar" 
             :src="friend.avatar" 
@@ -12,7 +12,7 @@
           <q-icon 
             v-else 
             name="account_circle" 
-            size="60px"
+            size="48px"
             color="grey-5"
           />
         </q-avatar>
@@ -37,17 +37,17 @@
     <div class="card-body">
       <!-- 节点统计 -->
       <div class="info-line">
-        <q-icon name="router" size="20px" color="primary" />
-        <span class="info-value">{{ $t('social.nodeCount', { count: nodeCount }) }}</span>
+        <q-icon name="router" size="18px" color="primary" />
+        <span class="info-value">{{ nodeCount }} {{ $t('social.nodes') }}</span>
         <div v-if="hasOnlineNodes" class="online-badge">
-          <q-icon name="wifi" size="16px" />
-          <span>{{ onlineNodeCount }} {{ $t('common.online') }}</span>
+          <q-icon name="wifi" size="12px" />
+          <span>{{ onlineNodeCount }}</span>
         </div>
       </div>
       
       <!-- 标签 -->
       <div v-if="friend.tags && friend.tags.length > 0" class="info-line">
-        <q-icon name="label" size="20px" color="secondary" />
+        <q-icon name="label" size="18px" color="secondary" />
         <div class="friend-tags">
           <q-chip 
             v-for="tag in friend.tags.slice(0, 3)" 
@@ -73,7 +73,7 @@
       
       <!-- 备注 -->
       <div v-if="friend.remark" class="info-line">
-        <q-icon name="sticky_note_2" size="20px" color="orange" />
+        <q-icon name="sticky_note_2" size="18px" color="orange" />
         <span class="info-value remark-text">{{ friend.remark }}</span>
       </div>
     </div>
@@ -275,8 +275,8 @@ const handleRemoveFriend = () => {
   .card-header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
     background: var(--soft-bg-secondary, #f5f7fa);
     border-bottom: 1px solid var(--soft-border-light, #e2e8f0);
     
@@ -285,19 +285,19 @@ const handleRemoveFriend = () => {
       flex-shrink: 0;
       
       .friend-avatar {
-        border: 3px solid var(--soft-bg-card, #ffffff);
+        border: 2px solid var(--soft-bg-card, #ffffff);
         box-shadow: var(--soft-shadow-md, 0 4px 6px rgba(0, 0, 0, 0.05));
       }
       
       // 在线状态指示器
       .online-indicator {
         position: absolute;
-        bottom: 0;
-        right: 0;
-        width: 16px;
-        height: 16px;
+        bottom: -2px;
+        right: -2px;
+        width: 14px;
+        height: 14px;
         background-color: var(--q-positive);
-        border: 3px solid var(--soft-bg-secondary, #f5f7fa);
+        border: 2px solid var(--soft-bg-secondary, #f5f7fa);
         border-radius: 50%;
         
         &.pulse {
@@ -311,17 +311,17 @@ const handleRemoveFriend = () => {
       min-width: 0;
       
       .friend-name {
-        font-size: 1.125rem;
+        font-size: 1rem;
         font-weight: 600;
         color: var(--soft-text-primary, #2d3748);
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.125rem;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
       
       .friend-email {
-        font-size: 0.8125rem;
+        font-size: 0.75rem;
         color: var(--soft-text-tertiary, #a0aec0);
         overflow: hidden;
         text-overflow: ellipsis;
@@ -332,18 +332,16 @@ const handleRemoveFriend = () => {
   
   // 中间：节点信息 + 标签（白色背景）
   .card-body {
-    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 1rem;
     background: var(--soft-bg-card, #ffffff);
     
     .info-line {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem 0;
-      
-      &:not(:last-child) {
-        border-bottom: 1px solid var(--soft-border-light, #e2e8f0);
-      }
+      gap: 0.625rem;
       
       .info-value {
         flex: 1;
@@ -360,11 +358,11 @@ const handleRemoveFriend = () => {
         display: flex;
         align-items: center;
         gap: 0.25rem;
-        padding: 0.25rem 0.75rem;
+        padding: 0.125rem 0.5rem;
         background: var(--q-positive);
         color: white;
-        border-radius: var(--soft-radius-md, 8px);
-        font-size: 0.75rem;
+        border-radius: var(--soft-radius-sm, 6px);
+        font-size: 0.6875rem;
         font-weight: 500;
         white-space: nowrap;
       }
@@ -383,7 +381,7 @@ const handleRemoveFriend = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1rem;
     background: var(--soft-bg-secondary, #f5f7fa);
     border-top: 1px solid var(--soft-border-light, #e2e8f0);
     
