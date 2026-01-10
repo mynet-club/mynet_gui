@@ -1,5 +1,5 @@
 <template>
-  <q-card-section class="friend-card-content">
+  <div class="friend-card-content">
     <!-- 顶部：头像 + 名称 + 在线状态（浅灰背景）-->
     <div class="card-header">
       <div class="friend-avatar-wrapper">
@@ -143,7 +143,7 @@
         </q-btn>
       </div>
     </div>
-  </q-card-section>
+  </div>
 </template>
 
 <script setup lang="ts">

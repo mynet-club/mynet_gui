@@ -1,5 +1,5 @@
 <template>
-  <q-card-section class="node-card-content">
+  <div class="node-card-content">
     <!-- 顶部：名称 + 状态（浅灰背景）-->
     <div class="card-header">
       <div class="node-name">
@@ -145,7 +145,7 @@
         </q-btn>
       </div>
     </div>
-  </q-card-section>
+  </div>
 </template>
 
 <script setup lang="ts">
