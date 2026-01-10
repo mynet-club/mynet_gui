@@ -266,6 +266,8 @@ const handleRemoveFriend = () => {
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/design-tokens.scss';
+
 .friend-card-content {
   background: var(--soft-bg-card, #ffffff);
   overflow: hidden;
@@ -275,8 +277,8 @@ const handleRemoveFriend = () => {
   .card-header {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
+    gap: $spacing-md;
+    padding: $spacing-base - 2px $spacing-base;
     background: var(--soft-bg-secondary, #f5f7fa);
     border-bottom: 1px solid var(--soft-border-light, #e2e8f0);
     
@@ -311,17 +313,17 @@ const handleRemoveFriend = () => {
       min-width: 0;
       
       .friend-name {
-        font-size: 1rem;
-        font-weight: 600;
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
         color: var(--soft-text-primary, #2d3748);
-        margin-bottom: 0.125rem;
+        margin-bottom: $spacing-xs - 2px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
       
       .friend-email {
-        font-size: 0.75rem;
+        font-size: $font-size-sm;
         color: var(--soft-text-tertiary, #a0aec0);
         overflow: hidden;
         text-overflow: ellipsis;
@@ -334,18 +336,18 @@ const handleRemoveFriend = () => {
   .card-body {
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
-    padding: 1rem;
+    gap: $spacing-sm + 2px;
+    padding: $spacing-base;
     background: var(--soft-bg-card, #ffffff);
     
     .info-line {
       display: flex;
       align-items: center;
-      gap: 0.625rem;
+      gap: $spacing-sm + 2px;
       
       .info-value {
         flex: 1;
-        font-size: 0.875rem;
+        font-size: $font-size-base;
         color: var(--soft-text-secondary, #718096);
         
         &.remark-text {
@@ -357,13 +359,13 @@ const handleRemoveFriend = () => {
       .online-badge {
         display: flex;
         align-items: center;
-        gap: 0.25rem;
-        padding: 0.125rem 0.5rem;
+        gap: $spacing-xs;
+        padding: 4px 10px;
         background: var(--q-positive);
         color: white;
-        border-radius: var(--soft-radius-sm, 6px);
-        font-size: 0.6875rem;
-        font-weight: 500;
+        border-radius: $radius-base;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
         white-space: nowrap;
       }
       
@@ -371,7 +373,7 @@ const handleRemoveFriend = () => {
         flex: 1;
         display: flex;
         flex-wrap: wrap;
-        gap: 0.25rem;
+        gap: $spacing-xs;
       }
     }
   }
@@ -381,24 +383,24 @@ const handleRemoveFriend = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: $spacing-base - 4px $spacing-base;
     background: var(--soft-bg-secondary, #f5f7fa);
     border-top: 1px solid var(--soft-border-light, #e2e8f0);
     
     .friend-meta {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: $spacing-sm;
       
       .meta-text {
-        font-size: 0.8125rem;
+        font-size: $font-size-sm;
         color: var(--soft-text-tertiary, #a0aec0);
       }
     }
     
     .actions-wrapper {
       display: flex;
-      gap: 0.5rem;
+      gap: $spacing-sm;
     }
   }
 }
@@ -423,36 +425,47 @@ const handleRemoveFriend = () => {
       box-shadow: var(--soft-shadow-lg-dark, 0 10px 15px rgba(0, 0, 0, 0.3));
     }
     
-    .friend-avatar-section {
-      background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.05) 0%,
-        rgba(255, 255, 255, 0.02) 100%
-      );
+    .card-header {
+      background: var(--soft-bg-secondary-dark, #0f172a);
+      border-color: var(--soft-border-dark, #334155);
       
       .friend-avatar {
         border-color: var(--soft-bg-card-dark, #1e293b);
       }
       
       .online-indicator {
-        border-color: var(--soft-bg-card-dark, #1e293b);
+        border-color: var(--soft-bg-secondary-dark, #0f172a);
+      }
+      
+      .friend-name-section {
+        .friend-name {
+          color: var(--soft-text-primary-dark, #e2e8f0);
+        }
+        
+        .friend-email {
+          color: var(--soft-text-tertiary-dark, #64748b);
+        }
       }
     }
     
-    .friend-info-section {
-      .friend-name {
-        color: var(--soft-text-primary-dark, #e2e8f0);
-      }
+    .card-body {
+      background: var(--soft-bg-card-dark, #1e293b);
       
-      .friend-stats {
-        .stat-item {
-          color: var(--soft-text-secondary-dark, #a0aec0);
+      .info-value {
+        color: var(--soft-text-secondary-dark, #a0aec0);
+        
+        &.remark-text {
+          color: var(--soft-text-tertiary-dark, #64748b);
         }
       }
+    }
+    
+    .card-footer {
+      background: var(--soft-bg-secondary-dark, #0f172a);
+      border-color: var(--soft-border-dark, #334155);
       
-      .friend-remark {
+      .meta-text {
         color: var(--soft-text-tertiary-dark, #64748b);
-        background: var(--soft-bg-secondary-dark, #0f172a);
       }
     }
   }

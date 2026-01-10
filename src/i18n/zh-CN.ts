@@ -1744,6 +1744,15 @@ export default {
       zone: '区域',
       lastActive: '最后活跃'
     },
+    // 好友卡片
+    viewNodes: '查看设备',
+    friendSince: '{date}成为好友',
+    onlineNodes: '{count} 个设备在线',
+    nodes: '设备',
+    editRemark: '编辑备注',
+    editTags: '编辑标签',
+    removeFriend: '删除好友',
+    
     // 邀请码
     invitations: {
       title: '邀请码管理',

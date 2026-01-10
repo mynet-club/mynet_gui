@@ -1586,6 +1586,15 @@ export default {
       zone: 'Zone',
       lastActive: 'Last Active'
     },
+    // Friend card
+    viewNodes: 'View Nodes',
+    friendSince: 'Friends since {date}',
+    onlineNodes: '{count} nodes online',
+    nodes: 'nodes',
+    editRemark: 'Edit Remark',
+    editTags: 'Edit Tags',
+    removeFriend: 'Remove Friend',
+    
     // Invitations
     invitations: {
       title: 'Invitation Management',

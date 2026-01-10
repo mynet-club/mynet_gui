@@ -771,6 +771,118 @@ npm run lint:fix
 
 ---
 
+## ✅ 会话结束检查清单
+
+### 每次会话结束前必须执行
+
+在提交代码并结束会话之前，**必须**通过以下检查：
+
+**1. 代码格式和规范检查**
+```bash
+npm run lint
+```
+- 如果失败，运行 `npm run lint:fix` 自动修复
+- 手动修复无法自动修复的问题
+
+**2. TypeScript 类型检查**
+```bash
+npm run type-check
+```
+- 确保所有类型定义正确
+- 无 `any` 类型（除非特殊情况）
+
+**3. 生产构建测试**
+```bash
+npm run build
+```
+- 确保构建成功
+- 无编译错误
+
+**4. 国际化完整性检查** ⭐️ **强制要求**
+- 所有用户可见文本必须使用 `$t()` 包裹
+- 中文翻译（zh-CN.ts）完整
+- 英文翻译（en-US.ts）完整
+- 参数化文本格式正确：`$t('key', { param: value })`
+
+**5. 代码清理**
+- 移除所有 `console.log` 和调试代码
+- 移除注释掉的废弃代码
+- 移除 TODO 注释（或转移到专门的 TODO 文档）
+
+**6. Git 提交检查**
+```bash
+git status
+```
+- 确保所有修改已添加
+- commit message 清晰描述改动
+- 使用约定式提交格式：`feat:`, `fix:`, `refactor:` 等
+
+### 快速检查脚本
+
+使用项目提供的自动检查脚本：
+
+```bash
+./pre-session-end-check.sh
+```
+
+该脚本会自动执行：
+- ✅ 代码格式检查
+- ✅ TypeScript 类型检查  
+- ✅ 生产构建测试
+- ⚠️  console.log 检测（警告）
+- ⚠️  硬编码文本检测（警告）
+- 📋 未提交文件提示
+
+### 常见问题快速修复
+
+**国际化缺失**：
+```typescript
+// zh-CN.ts
+export default {
+  social: {
+    viewNodes: '查看设备',
+    friendSince: '成为好友于 {date}'
+  }
+}
+
+// en-US.ts
+export default {
+  social: {
+    viewNodes: 'View Nodes',
+    friendSince: 'Friends since {date}'
+  }
+}
+```
+
+**ESLint 错误**：
+```bash
+npm run lint:fix
+```
+
+**TypeScript 错误**：
+- 添加明确类型定义
+- 避免使用 `any`
+- 为 Props/Emits 定义接口
+
+### 阻塞性错误（必须修复）
+
+以下错误**必须修复**才能提交：
+
+1. ❌ 构建失败
+2. ❌ TypeScript 类型错误
+3. ❌ ESLint 错误（error 级别）
+4. ❌ 缺失国际化键值
+
+### 警告性问题（建议修复）
+
+以下问题建议修复，但不阻塞提交：
+
+1. ⚠️  console.log
+2. ⚠️  注释代码
+3. ⚠️  ESLint 警告（warning 级别）
+
+---
+
 ## 🔄 持续更新
 
 本规范会随项目演进持续更新，请定期查看最新版本。
