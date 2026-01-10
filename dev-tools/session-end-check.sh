@@ -36,7 +36,18 @@ echo "🔧 检查 TypeScript 类型（通过构建验证）..."
 echo -e "${GREEN}✓ TypeScript 类型通过构建验证${NC}"
 echo ""
 
-# 3. 构建测试
+# 3. 国际化完整性检查 ⭐ 强制要求
+echo "🌐 检查国际化完整性..."
+if npm run check:i18n --silent; then
+  echo -e "${GREEN}✓ 国际化检查通过${NC}"
+else
+  echo -e "${RED}✗ 国际化检查失败${NC}"
+  echo "  请补充缺失的翻译键值"
+  ERROR_COUNT=$((ERROR_COUNT + 1))
+fi
+echo ""
+
+# 4. 构建测试
 echo "🏗️  测试生产构建..."
 if npm run build --silent > /dev/null 2>&1; then
   echo -e "${GREEN}✓ 生产构建成功${NC}"

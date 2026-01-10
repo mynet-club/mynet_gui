@@ -82,7 +82,8 @@ export default {
     justNow: 'just now',
     minutesAgo: '{n} minutes ago',
     hoursAgo: '{n} hours ago',
-    daysAgo: '{n} days ago'
+    daysAgo: '{n} days ago',
+    featureInDevelopment: 'Feature in development'
   },
   errors: {
     loadFailed: 'Load failed',
