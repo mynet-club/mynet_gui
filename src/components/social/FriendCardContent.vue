@@ -398,8 +398,7 @@ const handleRemoveFriend = () => {
     
     .actions-wrapper {
       display: flex;
-      gap: 0.5remafb);
-      border-radius: var(--soft-radius-md, 8px);
+      gap: 0.5rem;
     }
   }
 }
