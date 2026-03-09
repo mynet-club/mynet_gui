@@ -3,49 +3,49 @@ import debug from "src/utils/debug"
 import { apiService } from '../services/api'
 
 export default boot(({ app }) => {
-  // 配置全局错误处理
+  // Configure global error handling
   const handleApiError = (error: any) => {
     debug.error('API Error:', error)
     
-    // 根据错误类型显示不同的通知
+    // Show different notifications based on error type
     if (error.response) {
       const status = error.response.status
-      const message = error.response.data?.message || '请求失败'
+      const message = error.response.data?.message || 'Request failed'
       
       switch (status) {
         case 401:
-          // 未授权，清除认证信息，但不自动跳转
+          // Unauthorized, clear auth info but don't auto redirect
           localStorage.removeItem('auth_token')
           localStorage.removeItem('user_info')
-          // 移除强制跳转，让路由守卫或组件处理认证失败
+          // Remove forced redirect, let route guard or component handle auth failure
           // window.location.href = '/auth/login'
           debug.warn('🔧 [Axios] 401 Unauthorized - Auth tokens cleared')
           break
         case 403:
-          // 权限不足
-          app.config.globalProperties.$showError('权限不足', '您没有执行此操作的权限')
+          // Insufficient permissions
+          app.config.globalProperties.$showError('Insufficient Permissions', 'You do not have permission to perform this action')
           break
         case 404:
-          // 资源不存在
-          app.config.globalProperties.$showError('资源不存在', '请求的资源不存在')
+          // Resource not found
+          app.config.globalProperties.$showError('Resource Not Found', 'The requested resource does not exist')
           break
         case 500:
-          // 服务器错误
-          app.config.globalProperties.$showError('服务器错误', '服务器内部错误，请稍后重试')
+          // Server error
+          app.config.globalProperties.$showError('Server Error', 'Internal server error, please try again later')
           break
         default:
-          app.config.globalProperties.$showError('请求失败', message)
+          app.config.globalProperties.$showError('Request Failed', message)
       }
     } else if (error.request) {
-      // 网络错误
-      app.config.globalProperties.$showError('网络错误', '无法连接到服务器，请检查网络连接')
+      // Network error
+      app.config.globalProperties.$showError('Network Error', 'Unable to connect to server, please check your network connection')
     } else {
-      // 其他错误
-      app.config.globalProperties.$showError('未知错误', error.message || '发生未知错误')
+      // Other error
+      app.config.globalProperties.$showError('Unknown Error', error.message || 'An unknown error occurred')
     }
   }
   
-  // 挂载到全局属性
+  // Mount to global properties
   app.config.globalProperties.$handleApiError = handleApiError
   
   debug.log('🌐 [Boot] Axios configuration initialized')

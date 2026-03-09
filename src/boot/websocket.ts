@@ -9,7 +9,7 @@ export default boot(({ app }) => {
 
   let isWebSocketInitialized = false
 
-  // WebSocket连接管理
+  // WebSocket connection management
   const initWebSocket = () => {
     if (authStore.isAuthenticated && userZoneId && !isWebSocketInitialized) {
       isWebSocketInitialized = true
@@ -17,12 +17,12 @@ export default boot(({ app }) => {
       const { connect, on, disconnect } = useWebSocket()
       connect(authStore.token || 'mock_token', userZoneId.toString())
 
-      // 监听时间更新事件 - 新格式
+      // Listen for time update events - new format
       on('time_update', (data: { timestamp: number, formatted_time: string, zone_id: number }) => {
-        debug.log(`[时间更新] 当前时间: ${data.formatted_time}, Unix时间戳: ${data.timestamp}, Zone ID: ${data.zone_id}`)
+        debug.log(`[Time Update] Current time: ${data.formatted_time}, Unix timestamp: ${data.timestamp}, Zone ID: ${data.zone_id}`)
       })
 
-      // 监听连接和断开事件
+      // Listen for connection and disconnect events
       on('connected', (data) => {
         debug.log('🔌 [WebSocket] 已连接', data)
       })
@@ -32,19 +32,19 @@ export default boot(({ app }) => {
         isWebSocketInitialized = false
       })
 
-      debug.log('🔌 [WebSocket] 尝试连接...')
+      debug.log('🔌 [WebSocket] Attempting to connect...')
     }
   }
 
-  // 断开WebSocket连接
+  // Disconnect WebSocket connection
   const closeWebSocket = () => {
     const { disconnect } = useWebSocket()
     disconnect()
     isWebSocketInitialized = false
-    debug.log('🔌 [Boot] WebSocket 主动断开连接')
+    debug.log('🔌 [Boot] WebSocket actively disconnected')
   }
 
-  // 监听认证状态变化
+  // Listen for authentication state changes
   const handleAuthChange = () => {
     if (authStore.isAuthenticated) {
       initWebSocket()
@@ -53,13 +53,13 @@ export default boot(({ app }) => {
     }
   }
   
-  // 添加认证状态变化的监听器
+  // Add authentication state change listener
   let previousAuthState = authStore.isAuthenticated;
   authStore.$subscribe((mutation, state) => {
-    // 仅在认证状态真正发生变化时才处理
+    // Only handle when authentication state actually changes
     if (previousAuthState !== authStore.isAuthenticated) {
-      debug.log('🔌 [WebSocket] 认证状态变化', 
-        previousAuthState ? '已登出' : '已登录', 
+      debug.log('🔌 [WebSocket] Auth state changed', 
+        previousAuthState ? 'Logged out' : 'Logged in', 
         authStore.isAuthenticated
       )
       previousAuthState = authStore.isAuthenticated;
@@ -67,16 +67,16 @@ export default boot(({ app }) => {
     }
   })
 
-  // 如果用户已登录，立即连接WebSocket
+  // If user is logged in, connect WebSocket immediately
   if (authStore.isAuthenticated && authStore.user?.zone_id) {
-    debug.log('🔌 [Boot] 用户已登录，初始化WebSocket')
-    // 延迟初始化，确保其他系统已加载
+    debug.log('🔌 [Boot] User logged in, initializing WebSocket')
+    // Delay initialization to ensure other systems are loaded
     setTimeout(() => {
       initWebSocket()
     }, 500)
   }
 
-  // 挂载到全局属性
+  // Mount to global properties
   app.config.globalProperties.$initWebSocket = initWebSocket
   app.config.globalProperties.$closeWebSocket = closeWebSocket
 

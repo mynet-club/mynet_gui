@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import debug from "src/utils/debug"
 import type { KeyType, LocalKeyPair, KeyValidationResult } from '../types/nodeKeys'
 import { 
@@ -18,6 +19,9 @@ import { useNotify } from './useNotify'
  * 本地密钥生成组合式函数
  */
 export function useKeyGeneration() {
+  // i18n
+  const { t } = useI18n()
+  
   // 临时通知函数
   const { success: notifySuccess, error: notifyError, warning: notifyWarning } = useNotify()
 
@@ -91,7 +95,7 @@ export function useKeyGeneration() {
 
       generatedKeyPair.value = keyPair
       showPrivateKey.value = true
-      notifySuccess('密钥对生成成功')
+      notifySuccess(t('nodes.keys.keyPairGenerated'))
       
       return keyPair
     } catch (err) {
@@ -122,9 +126,9 @@ export function useKeyGeneration() {
 
     const success = await copyKeyToClipboard(generatedKeyPair.value.public_key)
     if (success) {
-      notifySuccess('公钥已复制到剪贴板')
+      notifySuccess(t('nodes.keys.publicKeyCopied'))
     } else {
-      notifyError('复制公钥失败')
+      notifyError(t('nodes.keys.keyCopyFailed'))
     }
     return success
   }
@@ -140,9 +144,9 @@ export function useKeyGeneration() {
 
     const success = await copyKeyToClipboard(generatedKeyPair.value.private_key)
     if (success) {
-      notifySuccess('私钥已复制到剪贴板')
+      notifySuccess(t('nodes.keys.privateKeyCopied'))
     } else {
-      notifyError('复制私钥失败')
+      notifyError(t('nodes.keys.keyCopyFailed'))
     }
     return success
   }
@@ -159,10 +163,10 @@ export function useKeyGeneration() {
     try {
       const filename = `node_public_key_${keyType.value}_${Date.now()}.key`
       downloadKeyToFile(generatedKeyPair.value.public_key, filename, 'public')
-      notifySuccess('公钥下载成功')
+      notifySuccess(t('nodes.keys.downloadSuccess'))
     } catch (err) {
       debug.error('下载公钥失败:', err)
-      notifyError('下载公钥失败')
+      notifyError(t('nodes.keys.downloadFailed'))
     }
   }
 
@@ -178,10 +182,10 @@ export function useKeyGeneration() {
     try {
       const filename = `node_private_key_${keyType.value}_${Date.now()}.key`
       downloadKeyToFile(generatedKeyPair.value.private_key, filename, 'private')
-      notifySuccess('私钥下载成功')
+      notifySuccess(t('nodes.keys.privateKeyDownloadSuccess'))
     } catch (err) {
       debug.error('下载私钥失败:', err)
-      notifyError('下载私钥失败')
+      notifyError(t('nodes.keys.privateKeyDownloadFailed'))
     }
   }
 
@@ -201,10 +205,10 @@ export function useKeyGeneration() {
       uploadValidation.value = validation
       
       if (validation.valid) {
-        notifySuccess('公钥上传成功')
+        notifySuccess(t('nodes.keys.uploadSuccess'))
         return true
       } else {
-        notifyError(`公钥验证失败: ${validation.errors.join(', ')}`)
+        notifyError(`${t('nodes.keys.uploadFailed')}: ${validation.errors.join(', ')}`)
         return false
       }
     } catch (err) {
@@ -228,9 +232,9 @@ export function useKeyGeneration() {
     uploadValidation.value = validation
     
     if (validation.valid) {
-      notifySuccess('公钥验证成功')
+      notifySuccess(t('nodes.keys.validationSuccess'))
     } else {
-      notifyWarning(`公钥验证失败: ${validation.errors.join(', ')}`)
+      notifyWarning(`${t('nodes.keys.uploadFailed')}: ${validation.errors.join(', ')}`)
     }
     
     return validation
@@ -242,7 +246,7 @@ export function useKeyGeneration() {
   const confirmPrivateKeySaved = (): void => {
     privateKeyConfirmed.value = true
     showPrivateKey.value = false
-    notifySuccess('私钥保存确认完成')
+    notifySuccess(t('nodes.keys.privateKeySaved'))
   }
 
   /**

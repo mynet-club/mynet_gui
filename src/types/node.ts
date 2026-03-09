@@ -377,6 +377,30 @@ export interface NodeOperationResult {
   node?: Node
 }
 
+// 快速创建节点响应接口 (对应 POST /api/v1/nodes/quick-create)
+export interface QuickCreateNodeResponse {
+  node: {
+    node_id: number | string
+    node_name: string
+    vpn_type: string
+    node_ip: string | null   // 已转为点分十进制，如 "10.1.0.5"
+    node_type: number
+    created_at: string
+  }
+  config: {
+    nodeid: number | string
+    ifname: string
+    listen: number
+    mtu: number
+    multi_socket: string
+    direct_forwarding: string
+    unified_forwarding: string
+    standard_forwarding: string
+    address_secure: string
+  }
+  next_steps: Record<string, string>
+}
+
 // 节点状态信息接口 (对应 /api/v1/nodes/{id}/status-info)
 export interface NodeStatusInfo {
   node_id: number

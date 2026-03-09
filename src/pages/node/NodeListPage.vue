@@ -16,6 +16,14 @@
           :disable="loading"
         />
         <q-btn
+          unelevated
+          color="teal"
+          icon="bolt"
+          :label="$t('nodes.quickCreate.btn')"
+          @click="showQuickCreate = true"
+          :disable="loading"
+        />
+        <q-btn
           flat
           color="grey-7"
           icon="refresh"
@@ -65,6 +73,12 @@
       </template>
     </ResponsiveCardGrid>
 
+    <!-- 快速创建对话框 -->
+    <QuickCreateDialog
+      v-model="showQuickCreate"
+      @created="handleQuickCreated"
+    />
+
     <!-- 删除确认对话框 -->
     <q-dialog v-model="showDeleteDialog" persistent>
       <q-card>
@@ -98,6 +112,7 @@ import { useI18n } from 'vue-i18n'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import NodeCardContent from '../../components/node/NodeCardContent.vue'
 import PageLayout from '../../components/layout/PageLayout.vue'
+import QuickCreateDialog from '../../components/node/QuickCreateDialog.vue'
 import { useNodes, useNotify } from '../../composables'
 import { Node, NodeStatus, NODE_STATUS, NodeStatusInfo, NodeDeviceInfo } from '../../types/node'
 import { nodeService } from '../../services/node/nodeService'
@@ -110,6 +125,14 @@ const { success: notifySuccess, error: notifyError } = useNotify()
 
 // 使用组合式函数
 const { nodes, loading, loadNodes, deleteNode: removeNode } = useNodes()
+
+// 快速创建
+const showQuickCreate = ref(false)
+
+const handleQuickCreated = () => {
+  showQuickCreate.value = false
+  loadNodes()
+}
 
 // 删除确认
 const showDeleteDialog = ref(false)

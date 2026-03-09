@@ -106,7 +106,7 @@
                 class="node-card cursor-pointer"
                 :class="{ 
                   'selected': selectedNode?.id === node.id,
-                  'disabled': !node.can_connect 
+                  'disabled': !node.ui_can_select
                 }"
                 @click="selectNode(node)"
                 bordered
@@ -123,7 +123,7 @@
                     <div>
                       <q-avatar 
                         size="40px" 
-                        :color="node.can_connect ? 'positive' : 'grey'"
+                        :color="node.ui_can_select ? 'positive' : 'grey'"
                       >
                         <q-icon name="device_hub" color="white" />
                       </q-avatar>
@@ -152,8 +152,8 @@
                     </div>
                   </div>
 
-                  <!-- 连接限制警告 -->
-                  <div v-if="!node.can_connect" class="q-mt-md">
+                  <!-- 节点不可用警告 -->
+                  <div v-if="!node.ui_can_select" class="q-mt-md">
                     <q-banner class="bg-warning text-white" rounded dense>
                       <template v-slot:avatar>
                         <q-icon name="warning" />
@@ -166,31 +166,7 @@
                         {{ $t('routes.create.step2.nodeNotAvailable') }}
                       </div>
                       <div v-else>
-                        <div class="text-weight-medium">{{ $t('routes.create.step2.cannotConnect') }}</div>
-                        <div class="text-caption q-mt-xs">
-                          {{ $t('routes.create.step2.possibleReasons') }}:
-                          <ul class="q-ma-none q-pl-md q-mt-xs">
-                            <li>{{ $t('routes.create.step2.existingConnection') }}</li>
-                            <li>{{ $t('routes.create.step2.pendingRequest') }}</li>
-                          </ul>
-                        </div>
-                        <!-- 后端返回的具体原因 -->
-                        <div v-if="node.cannot_connect_reason" class="q-mt-sm text-caption">
-                          <q-icon name="info" size="xs" class="q-mr-xs" />
-                          {{ node.cannot_connect_reason }}
-                        </div>
-                        <!-- 调试信息按钮（仅开发环境） -->
-                        <div v-if="isDevelopment" class="q-mt-sm">
-                          <q-btn
-                            flat
-                            dense
-                            size="xs"
-                            icon="bug_report"
-                            :label="$t('common.viewDetails')"
-                            @click.stop="showNodeDebugInfo(node)"
-                            class="text-white"
-                          />
-                        </div>
+                        {{ $t('routes.create.step2.nodeNotAvailable') }}
                       </div>
                     </q-banner>
                   </div>
@@ -218,7 +194,7 @@
           <q-btn
             color="primary"
             :label="$t('routes.create.step2.nextStep')"
-            :disable="!selectedNode || !selectedNode.can_connect"
+            :disable="!selectedNode || !selectedNode.ui_can_select"
             @click="goToNextStep"
             icon-right="arrow_forward"
           />
@@ -333,7 +309,7 @@ const showNodeDebugInfo = (node: any) => {
 }
 
 const selectNode = (node: any) => {
-  if (!node.can_connect) {
+  if (!node.ui_can_select) {
     notify.warning(t('routes.create.step2.nodeCannotConnect'))
     return
   }
@@ -360,7 +336,7 @@ const goBack = () => {
 }
 
 const goToNextStep = () => {
-  if (!selectedNode.value || !selectedNode.value.can_connect) {
+  if (!selectedNode.value || !selectedNode.value.ui_can_select) {
     notify.error(t('routes.create.step2.pleaseSelectNode'))
     return
   }
@@ -379,7 +355,8 @@ const fetchFriendNodes = async () => {
     loading.value = true
     const nodes = await getFriendNodes(selectedFriend.value.id)
     
-    // 为每个节点添加连接能力判断
+    // 为每个节点添加UI可选状态判断
+    // 注意：此时还未选择源节点，不能使用后端的 can_connect 字段（它可能基于某个特定源节点判断）
     friendNodes.value = nodes.map((node: any) => {
       // 检查连接数是否已满
       const currentConnections = node.current_connections || 0
@@ -389,29 +366,30 @@ const fetchFriendNodes = async () => {
       // 检查节点状态（enabled 或 online 都认为可用）
       const isAvailable = node.status === 'enabled' || node.status === 'online'
       
-      // 优先使用后端返回的 can_connect，如果没有则根据连接数和状态判断
-      const backendCanConnect = node.can_connect !== undefined ? node.can_connect : true
+      // UI层面的可选状态：只基于节点自身状态和连接数，忽略后端的 can_connect
+      // 真正的连接性检查会在 Step3（选择源节点）时进行
+      const uiCanSelect = hasAvailableConnections && isAvailable
       
       // 详细的调试日志
       debug.log(`好友节点 ${node.name} (${node.id}):`, {
-        raw_data: node,
         current_connections: currentConnections,
         max_connections: maxConnections,
         hasAvailableConnections,
         status: node.status,
         isAvailable,
         backend_can_connect: node.can_connect,
-        final_can_connect: backendCanConnect && hasAvailableConnections && isAvailable,
-        reason: !backendCanConnect ? '后端判断不可连接' : 
-                !hasAvailableConnections ? '连接数已满' : 
-                !isAvailable ? '节点不可用' : '可以连接'
+        ui_can_select: uiCanSelect,
+        reason: !hasAvailableConnections ? '连接数已满' : 
+                !isAvailable ? '节点不可用' : '可以选择',
+        note: '后端的 can_connect 字段已被忽略，将在 Step3 重新检查'
       })
       
       return {
         ...node,
         current_connections: currentConnections,
         max_connections: maxConnections,
-        can_connect: backendCanConnect && hasAvailableConnections && isAvailable
+        ui_can_select: uiCanSelect,  // UI 层面是否可选
+        backend_can_connect: node.can_connect  // 保留原始值供调试
       }
     })
   } catch (error) {

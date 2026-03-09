@@ -123,6 +123,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import debug from "src/utils/debug"
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -133,6 +134,7 @@ import PageLayout from '../../components/layout/PageLayout.vue'
 const router = useRouter()
 const route = useRoute()
 const $q = useQuasar()
+const { t } = useI18n()
 const { createNode } = useNodes()
 const { success: notifySuccess, error: notifyError } = useNotify()
 
@@ -196,7 +198,7 @@ const onSubmit = async () => {
     
     if (newNode) {
       debug.log('创建的节点数据:', newNode)
-      notifySuccess('节点创建成功')
+      notifySuccess(t('nodes.operations.createSuccess'))
       // 跳转到节点编辑页面 - 使用node_id或id字段
       const nodeId = newNode.node_id || newNode.id
       debug.log('节点ID:', nodeId, '(node_id:', newNode.node_id, ', id:', newNode.id, ')')
@@ -210,7 +212,7 @@ const onSubmit = async () => {
     
   } catch (error) {
     debug.error('创建节点失败:', error)
-    notifyError('创建节点失败，请重试')
+    notifyError(t('nodes.operations.createFailed'))
   } finally {
     isCreating.value = false
   }

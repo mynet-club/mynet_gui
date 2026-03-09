@@ -5,6 +5,7 @@ export type ServiceStatus = 'active' | 'inactive' | 'pending'
 export type ServiceProtocol = 'http' | 'https' | 'tcp' | 'udp'
 export type AuthType = 'bearer' | 'basic' | 'none'
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
+export type BindMode = 'direct' | 'dnat' | 'lan' | 'public' | 'proxy'
 
 export interface ServiceAuthConfig {
   type: AuthType
@@ -61,6 +62,7 @@ export interface CreateZoneServiceRequest {
   service_auth_required: boolean
   service_auth_type: AuthType
   service_auth_token?: string
+  service_bind_mode?: BindMode
 }
 
 export interface UpdateZoneServiceRequest {
@@ -72,6 +74,7 @@ export interface UpdateZoneServiceRequest {
   service_auth_required?: boolean
   service_auth_type?: AuthType
   service_auth_token?: string
+  service_bind_mode?: BindMode
 }
 
 export interface ShareZoneServiceRequest {

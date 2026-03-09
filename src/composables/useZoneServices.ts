@@ -65,9 +65,9 @@ export function useZoneServices() {
       icon: 'hub',
       color: 'primary',
       description: t('zoneServices.types.gnbIndexDesc'),
-      defaultPort: 9000,
-      defaultProtocol: 'http',
-      systemOnly: true  // 标记为系统专用类型
+      defaultPort: 9016,
+      defaultProtocol: 'udp',
+      systemOnly: false  // 修改为可选
     },
     {
       key: 'music',

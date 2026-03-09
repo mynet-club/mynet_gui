@@ -456,7 +456,7 @@ const createKey = async () => {
       const result = await generateKeyPair(params)
       
       if (result) {
-        notifySuccess(isUpdateMode.value ? '密钥更新成功' : '密钥对生成成功')
+        notifySuccess(isUpdateMode.value ? t('nodes.keys.keyUpdated') : t('nodes.keys.keyPairGenerated'))
         // 如果有私钥，显示私钥保存提示
         if (result.private_key) {
           let downloadClicked = false
@@ -477,7 +477,7 @@ const createKey = async () => {
               }
             }).onOk(() => {
               // 用户确认已保存
-              notifySuccess('私钥保存确认完成')
+              notifySuccess(t('nodes.keys.privateKeySaved'))
             }).onCancel(() => {
               // 下载私钥
               const filename = `node_${nodeId.value}_private_key.pem`
@@ -490,7 +490,7 @@ const createKey = async () => {
               URL.revokeObjectURL(url)
               
               downloadClicked = true
-              notifySuccess('私钥已下载，请妥善保管')
+              notifySuccess(t('nodes.keys.privateKeyDownloaded'))
               
               // 重新显示对话框，这次"我已保存"按钮可用
               setTimeout(() => {
@@ -505,12 +505,12 @@ const createKey = async () => {
     } else if (newKey.value.generation_method === 'upload') {
       // 上传公钥 - 如果是更新模式，也传递 force_regenerate 参数
       // TODO: 实现上传公钥功能，需要传递 force_regenerate 参数
-      notifyError('上传公钥功能暂未实现')
+      notifyError(t('nodes.keys.uploadNotImplemented'))
       return
     } else {
       // 本地生成
       // TODO: 实现本地生成功能
-      notifyError('本地生成功能暂未实现')
+      notifyError(t('nodes.keys.localGenerateNotImplemented'))
       return
     }
     
@@ -550,7 +550,7 @@ const deleteKey = async () => {
     // 调用实际的删除API
     await deleteNodeKey(selectedKey.value.id)
     
-    notifySuccess('密钥删除成功')
+    notifySuccess(t('nodes.keys.keyDeleted'))
     showDeleteDialog.value = false
     selectedKey.value = null
     
@@ -559,7 +559,7 @@ const deleteKey = async () => {
     
   } catch (error: any) {
     debug.error('删除密钥失败:', error)
-    const errorMsg = error?.response?.data?.message || error?.message || '删除密钥失败，请重试'
+    const errorMsg = error?.response?.data?.message || error?.message || t('nodes.keys.deleteFailed')
     notifyError(errorMsg)
   } finally {
     deleting.value = false
@@ -597,9 +597,9 @@ const copyPrivateKey = async () => {
   
   try {
     await navigator.clipboard.writeText(selectedKey.value.private_key)
-    notifySuccess('私钥已复制到剪贴板')
+    notifySuccess(t('nodes.keys.copySuccess'))
   } catch (error) {
-    notifyError('复制失败，请手动复制')
+    notifyError(t('nodes.keys.copyFailed'))
   }
 }
 

@@ -18,7 +18,8 @@ import type {
   NodeStatusInfo,
   NodeDeviceInfo,
   NodeDeviceInfoResponse,
-  BatchNodeDeviceInfoResponse
+  BatchNodeDeviceInfoResponse,
+  QuickCreateNodeResponse
 } from '../../types/node'
 import type { 
   ApiResponse, 
@@ -59,6 +60,20 @@ export class NodeService {
    */
   async createNode(data: CreateNodeRequest): Promise<ApiResponse<Node>> {
     const response = await api.post('/nodes/create', data)
+    return response.data
+  }
+
+  /**
+   * 一键快速创建节点（使用默认配置，自动分配IP）
+   * POST /api/v1/nodes/quick-create
+   * @param nodeName 节点名称（3-255字符）
+   * @param zoneId   所属Zone ID
+   */
+  async quickCreateNode(nodeName: string, zoneId: number): Promise<ApiResponse<QuickCreateNodeResponse>> {
+    const response = await api.post('/nodes/quick-create', {
+      node_name: nodeName,
+      zone_id: zoneId,
+    })
     return response.data
   }
 

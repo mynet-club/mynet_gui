@@ -10,20 +10,20 @@ import { useOnboardingStore } from './stores/onboarding'
 import { resetTipsEngine, getTipsEngine } from './services/tips/TipsEngine'
 import { OnboardingStage } from './types/tips'
 
-// 开发环境添加调试工具
+// Add debug tools in development environment
 if (import.meta.env.DEV) {
   onMounted(() => {
-    // 将调试工具挂载到window对象
+    // Mount debug tools to window object
     (window as any).$tips = {
-      // 重置引导（清空localStorage）
+      // Reset onboarding (clear localStorage)
       reset: () => {
-        console.log('🔄 开始重置...')
+        console.log('🔄 Starting reset...')
         
-        // 1. 停止当前引擎
-        console.log('🛑 停止Tips引擎...')
+        // 1. Stop current engine
+        console.log('🛑 Stopping Tips engine...')
         resetTipsEngine()
         
-        // 2. 清除所有onboarding相关的localStorage
+        // 2. Clear all onboarding-related localStorage
         const keysToRemove = []
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i)
@@ -32,28 +32,28 @@ if (import.meta.env.DEV) {
           }
         }
         keysToRemove.forEach(key => {
-          console.log('🗑️ 删除:', key)
+          console.log('🗑️ Removing:', key)
           localStorage.removeItem(key)
         })
         
-        console.log('✅ localStorage已清理')
-        console.log('🔄 3秒后刷新页面...')
+        console.log('✅ localStorage cleaned')
+        console.log('🔄 Refreshing page in 3 seconds...')
         setTimeout(() => {
           location.reload()
         }, 3000)
       },
       
-      // 查看状态
+      // View status
       status: () => {
         const store = useOnboardingStore()
         console.table({
-          '用户ID': store.userId,
-          '是否完成': store.completed,
-          '当前阶段': store.currentStage,
-          '进度': `${store.progress}%`,
-          '选择路径': store.selectedPath
+          'User ID': store.userId,
+          'Completed': store.completed,
+          'Current Stage': store.currentStage,
+          'Progress': `${store.progress}%`,
+          'Selected Path': store.selectedPath
         })
-        console.log('阶段详情:', store.stages)
+        console.log('Stage Details:', store.stages)
         return {
           userId: store.userId,
           completed: store.completed,
@@ -64,7 +64,7 @@ if (import.meta.env.DEV) {
         }
       },
       
-      // 导出状态
+      // Export state
       export: () => {
         const store = useOnboardingStore()
         const state = store.exportState()
@@ -72,35 +72,35 @@ if (import.meta.env.DEV) {
         return state
       },
       
-      // 跳过所有
+      // Skip all
       skipAll: () => {
         const store = useOnboardingStore()
         store.skipAll()
-        console.log('✅ 已跳过所有引导')
+        console.log('✅ All onboarding skipped')
       },
       
-      // 完成指定阶段（用于测试）
+      // Complete specific stage (for testing)
       completeStage: (stage: number) => {
         const store = useOnboardingStore()
         store.completeStage(stage)
-        console.log(`✅ 已完成阶段 ${stage}`)
+        console.log(`✅ Stage ${stage} completed`)
       },
       
-      // 选择路径（用于测试）
+      // Select path (for testing)
       selectPath: (path: 'device-first' | 'friend-first') => {
         const store = useOnboardingStore()
         store.selectPath(path as any)
-        console.log(`✅ 已选择路径: ${path}`)
+        console.log(`✅ Path selected: ${path}`)
       },
       
-      // 强制显示欢迎弹窗
+      // Force show welcome dialog
       welcome: () => {
-        console.log('🎯 [Test] 开始强制显示欢迎弹窗...')
+        console.log('🎯 [Test] Forcing welcome dialog display...')
         
         const store = useOnboardingStore()
         const engine = getTipsEngine()
         
-        console.log('📊 [Test] 当前状态:', {
+        console.log('📊 [Test] Current state:', {
           userId: store.userId,
           isStarted: store.isStarted,
           completed: store.completed,
@@ -110,57 +110,57 @@ if (import.meta.env.DEV) {
           skipAll: store.preferences.skipAll
         })
         
-        console.log('📍 [Test] 当前路由:', window.location.pathname)
+        console.log('📍 [Test] Current route:', window.location.pathname)
         
-        // 1. 重置欢迎阶段状态
-        console.log('🔄 [Test] 重置欢迎阶段状态...')
+        // 1. Reset welcome stage state
+        console.log('🔄 [Test] Resetting welcome stage state...')
         store.stages.welcome_shown = false
         store.currentStage = OnboardingStage.Welcome
         store.preferences.skipAll = false
         store.save()
         
-        // 2. 确保引导已开始
+        // 2. Ensure onboarding is started
         if (!store.isStarted) {
-          console.log('▶️ [Test] 启动引导...')
+          console.log('▶️ [Test] Starting onboarding...')
           store.start()
         }
         
-        // 3. 清除引擎状态
-        console.log('🧹 [Test] 清除引擎状态...')
+        // 3. Clear engine state
+        console.log('🧹 [Test] Clearing engine state...')
         engine.hideAll()
         engine.clearShownTips('welcome')
         
-        // 4. 延迟触发检查
-        console.log('⏰ [Test] 500ms后触发检查...')
+        // 4. Delay trigger check
+        console.log('⏰ [Test] Triggering check in 500ms...')
         setTimeout(() => {
-          console.log('🔍 [Test] 触发检查...')
+          console.log('🔍 [Test] Triggering check...')
           engine.triggerCheck()
           
-          // 5. 再次检查活跃的tips
+          // 5. Check active tips again
           setTimeout(() => {
             const activeTips = engine.getActiveTips()
-            console.log('📋 [Test] 活跃的Tips数量:', activeTips.length)
+            console.log('📋 [Test] Active Tips count:', activeTips.length)
             activeTips.forEach(tip => {
-              console.log('  📌', tip.config.id, '类型:', tip.config.type, '可见:', tip.visible)
+              console.log('  📌', tip.config.id, 'Type:', tip.config.type, 'Visible:', tip.visible)
             })
             
             if (activeTips.length === 0) {
-              console.error('❌ [Test] 没有活跃的Tips！')
-              console.error('  可能的原因：路由不匹配、条件不满足、TipsContainer未渲染')
+              console.error('❌ [Test] No active Tips!')
+              console.error('  Possible reasons: Route mismatch, condition not met, TipsContainer not rendered')
             } else {
-              console.log('✅ [Test] 找到活跃的Tips')
+              console.log('✅ [Test] Found active Tips')
             }
           }, 100)
         }, 500)
       },
       
-      // 测试Spotlight高亮引导（带箭头）
+      // Test Spotlight highlighting guide (with arrow)
       spotlight: () => {
         const engine = getTipsEngine()
-        console.log('🎯 测试Spotlight引导 - 请先导航到IP资源池页面 (/app/ippools)')
-        console.log('提示：IP资源池页面的"创建"按钮会被高亮显示')
+        console.log('🎯 Test Spotlight guide - Please navigate to IP Pools page (/app/ippools) first')
+        console.log('Tip: The "Create" button on IP Pools page will be highlighted')
         
-        // 手动创建一个测试Spotlight
+        // Manually create a test Spotlight
         const testTip = {
           id: 'test-spotlight',
           type: 'spotlight' as any,
@@ -172,13 +172,13 @@ if (import.meta.env.DEV) {
             once: false
           },
           display: {
-            title: '📍 创建IP资源池',
-            content: '点击此按钮创建你的第一个IP资源池',
+            title: '📍 Create IP Pool',
+            content: 'Click this button to create your first IP pool',
             placement: 'bottom' as any
           },
           actions: [
             {
-              label: '知道了',
+              label: 'Got it',
               type: 'primary' as any,
               closeOnClick: true
             }
@@ -188,40 +188,40 @@ if (import.meta.env.DEV) {
           closable: true
         }
         
-        console.log('✅ Spotlight测试Tip已创建，请访问 /app/ippools 查看效果')
+        console.log('✅ Spotlight test Tip created, visit /app/ippools to see the effect')
       },
       
-      // 查看当前活跃的Tips
+      // View currently active Tips
       active: () => {
         const engine = getTipsEngine()
         const active = engine.getActiveTips()
-        console.log('📋 当前活跃Tips:', active.length)
+        console.log('📋 Currently active Tips:', active.length)
         active.forEach(tip => {
-          console.log(`  - ${tip.config.id} (${tip.config.type})`, tip.visible ? '可见' : '隐藏')
+          console.log(`  - ${tip.config.id} (${tip.config.type})`, tip.visible ? 'Visible' : 'Hidden')
         })
         return active
       },
       
-      // 检查 TipsContainer 是否存在
+      // Check if TipsContainer exists
       checkContainer: () => {
         const container = document.querySelector('.tips-container')
-        console.log('📦 TipsContainer 元素:', container ? '✅ 存在' : '❌ 不存在')
+        console.log('📦 TipsContainer element:', container ? '✅ Exists' : '❌ Not found')
         if (container) {
-          console.log('   子元素数量:', container.children.length)
-          console.log('   子元素:', Array.from(container.children).map(el => el.tagName))
+          console.log('   Child element count:', container.children.length)
+          console.log('   Child elements:', Array.from(container.children).map(el => el.tagName))
         }
         return container
       }
     }
     
-    console.log('%c💡 开发者工具已加载', 'color: #42b983; font-size: 14px; font-weight: bold;')
-    console.log('%c使用 $tips 访问引导系统调试工具：', 'color: #666; font-size: 12px;')
-    console.log('%c  $tips.reset()          - 重置引导', 'color: #999; font-size: 11px;')
-    console.log('%c  $tips.welcome()        - 显示欢迎弹窗', 'color: #999; font-size: 11px;')
-    console.log('%c  $tips.active()         - 查看活跃Tips', 'color: #999; font-size: 11px;')
-    console.log('%c  $tips.checkContainer() - 检查容器是否存在', 'color: #999; font-size: 11px;')
-    console.log('%c  $tips.status()         - 查看状态', 'color: #999; font-size: 11px;')
-    console.log('%c  $tips.export()         - 导出状态', 'color: #999; font-size: 11px;')
+    console.log('%c💡 Developer tools loaded', 'color: #42b983; font-size: 14px; font-weight: bold;')
+    console.log('%c Use $tips to access onboarding system debug tools:', 'color: #666; font-size: 12px;')
+    console.log('%c  $tips.reset()          - Reset onboarding', 'color: #999; font-size: 11px;')
+    console.log('%c  $tips.welcome()        - Show welcome dialog', 'color: #999; font-size: 11px;')
+    console.log('%c  $tips.active()         - View active Tips', 'color: #999; font-size: 11px;')
+    console.log('%c  $tips.checkContainer() - Check if container exists', 'color: #999; font-size: 11px;')
+    console.log('%c  $tips.status()         - View status', 'color: #999; font-size: 11px;')
+    console.log('%c  $tips.export()         - Export state', 'color: #999; font-size: 11px;')
   })
 }
 </script>

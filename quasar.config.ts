@@ -65,30 +65,17 @@ export default defineConfig((/* ctx */) => {
       minify: 'terser',
       terserOptions: {
         compress: {
-          // 根据环境变量决定是否移除 console
-          drop_console: process.env.VITE_ENABLE_CONSOLE_LOG !== 'true',
+          // 生产环境默认移除 console.log
+          drop_console: true,
           // 移除所有 debugger 语句
           drop_debugger: true,
-          // 根据日志级别移除特定的console调用
-          pure_funcs: process.env.VITE_LOG_LEVEL === 'error' 
-            ? ['console.log', 'console.info', 'console.debug', 'console.warn']
-            : process.env.VITE_LOG_LEVEL === 'warn'
-            ? ['console.log', 'console.info', 'console.debug']
-            : ['console.log', 'console.info', 'console.debug']
+          // 移除特定的调试函数
+          pure_funcs: ['console.log', 'console.info', 'console.debug']
         }
       },
       
       // 扩展 Vite 配置以支持更精细的控制
       extendViteConf(viteConf, { isClient, isServer }) {
-        // 只在生产环境客户端构建时应用
-        if (isClient && process.env.NODE_ENV === 'production') {
-          viteConf.esbuild = {
-            ...viteConf.esbuild,
-            // 移除 console 和 debugger (ESBuild 方式)
-            drop: ['console', 'debugger']
-          }
-        }
-        
         // 开发环境优化配置
         if (process.env.NODE_ENV === 'development') {
           // 确保路径解析正确

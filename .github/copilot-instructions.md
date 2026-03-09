@@ -1,143 +1,145 @@
-# GitHub Copilot 使用规范 - MyNet 项目
+# MyNet Frontend - AI Coding Instructions
 
-> 项目：MyNet Frontend - 网络管理系统前端应用  
-> 技术栈：Vue 3 + TypeScript + Quasar Framework  
-> 更新日期：2026-01-10
-
----
-
-## 📋 项目概述
-
-MyNet 是一个基于 Vue 3 + Quasar Framework 的现代化网络管理系统前端应用，提供节点管理、路由配置、好友社交、服务管理等功能。
-
-### 核心特性
-- 🎨 **柔和清新主题**：低对比度、大圆角、柔和色彩
-- 🌐 **多语言支持**：中英文国际化 (vue-i18n)
-- 🔐 **JWT 认证**：Token 自动刷新机制
-- 📱 **响应式设计**：桌面 + 移动端适配
-- 🎯 **智能推荐**：基于用户状态的智能引导系统
-- 🌓 **主题切换**：亮色/暗色模式
+> Vue 3 + TypeScript + Quasar Framework  
+> Last Updated: 2026-01-14
 
 ---
 
-## 🏗️ 技术架构
+## 🚨 CRITICAL RULES - Read First (Prevent 80% of Errors)
 
-### 技术栈版本
+**违反以下规则将导致构建失败或运行时错误，必须严格遵守：**
+
+### 1. 🔧 Use `debug` Tool, NOT `console` ⚠️ MANDATORY
+```typescript
+// ❌ WRONG - Will be stripped in production incorrectly
+console.log('User data:', user)
+
+// ✅ CORRECT - Auto-optimized by debug tool
+import debug from 'src/utils/debug'
+debug.log('User data:', user)
+```
+- **Why**: `debug` tool handles dev/prod environments automatically
+- **File**: `src/utils/debug.ts`
+
+### 2. 🌐 All User-Visible Text MUST Use `$t()` ⚠️ MANDATORY
+```vue
+<!-- ❌ WRONG - Hardcoded text -->
+<q-btn label="删除" />
+
+<!-- ✅ CORRECT - i18n -->
+<q-btn :label="$t('common.delete')" />
+```
+- **Why**: Multi-language support (zh-CN/en-US)
+- **Check**: Run `npm run check:i18n` before commit
+
+### 3. 🏢 Zone Architecture - X-Zone-ID Auto-Injection ⚠️ CRITICAL
+```typescript
+// Zone-based multi-tenant isolation
+// X-Zone-ID is AUTO-INJECTED in all API requests via interceptor
+// src/services/api.ts handles this automatically
+
+// ❌ NEVER manually add X-Zone-ID
+// ✅ Just use apiService - it's automatic
+```
+- **Why**: Data isolation between tenants
+- **File**: `src/services/api.ts` (request interceptor)
+
+### 4. 📦 Use `apiService`, NOT Direct `api` Instance
+```typescript
+// ❌ WRONG
+import { api } from '../boot/axios'
+api.get('/api/v1/nodes')
+
+// ✅ CORRECT
+import { apiService } from '../services/api'
+apiService.get('/nodes')  // /api/v1 prefix auto-added
+```
+- **Why**: `apiService` handles Zone ID, token refresh, base path
+
+### 5. ✅ Run Session-End-Check Before Commit ⚠️ MANDATORY
+```bash
+./dev-tools/session-end-check.sh
+```
+- Lint check
+- TypeScript check (via build)
+- i18n completeness check
+- Production build test
+
+---
+
+## 🏗️ Architecture Essentials
+
+### Tech Stack Versions
 ```json
 {
   "vue": "^3.4.0",
   "quasar": "^2.14.0",
-  "typescript": "^5.0.0",
+  "typescript": "^5.3.0",
   "pinia": "^2.1.0",
-  "vue-router": "^4.2.0",
-  "vue-i18n": "^12.0.0",
   "axios": "^1.6.0",
-  "date-fns": "^4.1.0",
-  "echarts": "^6.0.0",
-  "laravel-echo": "^2.1.6",
-  "pusher-js": "^8.4.0"
+  "vue-i18n": "^12.0.0"
 }
 ```
 
-### 核心依赖说明
-- **Vue 3 Composition API**：所有组件使用 `<script setup>` 语法
-- **TypeScript**：严格模式，需要明确类型定义
-- **Quasar Framework**：UI 组件库，使用 Quasar CLI
-- **Pinia**：状态管理，替代 Vuex
-- **Vue I18n**：国际化，所有文本必须使用 `$t()` 包裹
-- **Axios**：HTTP 客户端，已配置拦截器
-- **date-fns**：日期格式化，使用 `zhCN` locale
+### Boot File Initialization Order ⚠️ CRITICAL
+
+Quasar boot files execute in this order (defined in `quasar.config.ts`):
+
+```typescript
+boot: [
+  'i18n',       // 1️⃣ i18n MUST be first (other boots need $t())
+  'init',       // 2️⃣ Global initialization
+  'pinia',      // 3️⃣ State management
+  'notify',     // 4️⃣ Notification system
+  'axios',      // 5️⃣ HTTP client + interceptors (Zone ID injection)
+  'theme',      // 6️⃣ Theme system
+  'auth',       // 7️⃣ Auth guards
+  'websocket'   // 8️⃣ WebSocket connection
+]
+```
+
+**Key Details**:
+- `axios` configures token auto-refresh (401 → refresh → retry)
+- `axios` auto-injects X-Zone-ID from localStorage user_info
+- `auth` sets route guards (redirect to /auth/login if not authenticated)
+
+### Zone Isolation Architecture ⚠️ CORE CONCEPT
+
+**Zone Concept**:
+- Each user belongs to a Zone (tenant)
+- Data is fully isolated between Zones
+- API requests MUST carry `X-Zone-ID` header
+
+**Implementation** (in `src/services/api.ts`):
+```typescript
+// Request interceptor automatically injects X-Zone-ID
+api.interceptors.request.use((config) => {
+  const userInfo = LocalStorage.getItem('user_info')
+  if (userInfo) {
+    const user = JSON.parse(userInfo)
+    if (user.zone_id) {
+      config.headers['X-Zone-ID'] = user.zone_id
+    }
+  }
+  return config
+})
+```
+
+**Important Rules**:
+- ✅ X-Zone-ID is AUTO-INJECTED in all API requests
+- ✅ zone_id stored in localStorage user_info after login
+- ❌ FORBIDDEN to perform cross-Zone operations
+- ⚠️ All data lists are pre-filtered by Zone on backend
 
 ---
 
-## 📁 目录结构
+## 📋 Development Patterns
 
-```
-src/
-├── boot/                    # 启动文件 (axios, i18n, router guards 等)
-├── components/              # 可复用组件
-│   ├── common/             # 通用组件 (StatusDisplay, ContextHelp 等)
-│   ├── dashboard/          # Dashboard 组件
-│   ├── node/               # 节点相关组件
-│   ├── route/              # 路由相关组件
-│   ├── social/             # 社交相关组件
-│   ├── service/            # 服务相关组件
-│   ├── tips/               # Tips 引导系统组件
-│   └── zone/               # Zone 区域组件
-├── composables/             # 组合式函数 (useNodes, useRoutes 等)
-├── layouts/                 # 布局组件
-├── pages/                   # 页面组件
-├── router/                  # 路由配置
-├── services/                # API 服务和业务逻辑
-│   ├── api/                # API 调用封装
-│   ├── recommendations/    # 智能推荐引擎
-│   └── tips/               # Tips 系统核心
-├── stores/                  # Pinia 状态管理
-├── types/                   # TypeScript 类型定义
-├── utils/                   # 工具函数
-├── i18n/                    # 国际化资源文件
-└── styles/                  # 全局样式
-```
-
----
-
-## 🎨 设计系统
-
-### 柔和清新主题规范
-
-**核心原则**：
-1. **低对比度**：避免纯黑纯白，使用柔和灰色调
-2. **大圆角**：12-20px，营造柔和感
-3. **柔和阴影**：透明度 0.03-0.08，避免生硬
-4. **充足间距**：padding/margin 充足，呼吸感强
-
-**CSS 变量**（定义在 `src/css/soft-theme.scss`）：
-```scss
-// 背景色
---soft-bg-primary: #f5f7fa;      // 主背景
---soft-bg-secondary: #e8ecf1;    // 次级背景
---soft-bg-card: #f8fafc;         // 卡片背景
---soft-bg-hover: #eef2f7;        // 悬停背景
-
-// 文字颜色
---soft-text-primary: #2d3748;    // 主文字 (替代纯黑)
---soft-text-secondary: #718096;  // 次要文字
---soft-text-tertiary: #a0aec0;   // 辅助文字
-
-// 边框
---soft-border-light: #e2e8f0;    // 浅色边框
---soft-border-medium: #cbd5e0;   // 中度边框
-
-// 圆角
---soft-radius-sm: 8px;           // 小圆角
---soft-radius-md: 12px;          // 中等圆角
---soft-radius-lg: 16px;          // 大圆角
---soft-radius-xl: 20px;          // 超大圆角
-
-// 阴影
---soft-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.03);
---soft-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05);
---soft-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08);
-```
-
-**深色模式变量**：
-```scss
---soft-bg-card-dark: #1e293b;
---soft-border-dark: #334155;
---soft-text-primary-dark: #e2e8f0;
---soft-shadow-lg-dark: 0 10px 15px rgba(0, 0, 0, 0.3);
-```
-
----
-
-## 🧩 组件开发规范
-
-### 1. 组件结构模板
-
+### Component Structure Template
 ```vue
 <template>
   <q-card class="component-name" flat bordered>
-    <!-- 内容区域 -->
+    <!-- Content -->
   </q-card>
 </template>
 
@@ -145,19 +147,15 @@ src/
 import { computed, ref } from 'vue'
 
 /**
- * 组件名称
+ * Component Name
  * 
- * 职责：
- * 1. 功能描述 1
- * 2. 功能描述 2
- * 
- * 使用场景：
- * - 场景 1
- * - 场景 2
+ * Responsibilities:
+ * 1. Feature description 1
+ * 2. Feature description 2
  */
 
 interface Props {
-  /** 属性说明 */
+  /** Property description */
   propName: string
 }
 
@@ -167,58 +165,181 @@ interface Emits {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
-
-// 状态
-const localState = ref('')
-
-// 计算属性
-const computedValue = computed(() => {
-  return props.propName.toUpperCase()
-})
-
-// 方法
-const handleAction = () => {
-  emit('event-name', localState.value)
-}
 </script>
 
 <style lang="scss" scoped>
 .component-name {
   background: var(--soft-bg-card);
   border-radius: var(--soft-radius-lg);
-  border: 1px solid var(--soft-border-light);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  &:hover {
-    box-shadow: var(--soft-shadow-lg);
-    transform: translateY(-2px);
-  }
-}
-
-// 深色模式
-.body--dark {
-  .component-name {
-    background: var(--soft-bg-card-dark);
-    border-color: var(--soft-border-dark);
-  }
 }
 </style>
 ```
 
-### 2. 卡片组件规范
+### Composable Pattern (API Calls)
+```typescript
+// composables/useNodes.ts
+import { ref, reactive } from 'vue'
+import debug from 'src/utils/debug'
+import { nodeService } from '../services/node/nodeService'
 
-**参考标准**：`src/components/node/NodeCardContent.vue`
+export function useNodes() {
+  const nodes = ref<Node[]>([])
+  const loading = ref(false)
+  
+  const pagination = reactive({
+    page: 1,
+    rowsPerPage: 20,
+    rowsNumber: 0
+  })
+  
+  const loadNodes = async () => {
+    loading.value = true
+    try {
+      const response = await nodeService.getNodesList({ 
+        page: pagination.page,
+        per_page: pagination.rowsPerPage 
+      })
+      nodes.value = response.data
+      pagination.rowsNumber = response.total
+    } catch (error: any) {
+      debug.error('Failed to load nodes:', error)
+      throw error  // Let component handle notification
+    } finally {
+      loading.value = false
+    }
+  }
+  
+  return { nodes, loading, pagination, loadNodes }
+}
+```
 
-**结构要求**：
+### API Service Encapsulation
+```typescript
+// services/api/nodeApi.ts
+import { apiService } from '../api'  // Use unified apiService
+import type { Node, CreateNodeDto } from '../../types/node'
+
+export const nodeApi = {
+  async getNodes(): Promise<{ data: Node[] }> {
+    return apiService.get('/nodes')  // apiService includes /api/v1 prefix
+  },
+  
+  async createNode(data: CreateNodeDto): Promise<{ data: Node }> {
+    return apiService.post('/nodes', data)
+  },
+  
+  async updateNode(id: number, data: Partial<Node>): Promise<{ data: Node }> {
+    return apiService.put(`/nodes/${id}`, data)
+  },
+  
+  async deleteNode(id: number): Promise<void> {
+    return apiService.delete(`/nodes/${id}`)
+  }
+}
+```
+
+**Key Details**:
+- ✅ Use `apiService` instead of direct `api` instance
+- ✅ `apiService` has `/api/v1` base path configured
+- ✅ `apiService` auto-injects `X-Zone-ID` header
+- ✅ `apiService` supports token auto-refresh (401 auto-retry)
+
+### TypeScript Standards
+```typescript
+// ✅ CORRECT - Explicit types
+interface Node {
+  id: number
+  name: string
+  status: NodeStatus
+}
+
+// ❌ WRONG - Avoid any
+const data: any = response.data
+
+// ✅ CORRECT - Typed Props/Emits
+interface Props {
+  /** Node ID */
+  nodeId: number
+}
+
+interface Emits {
+  (e: 'update', node: Node): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
+```
+
+### i18n Pattern
+```vue
+<!-- ❌ WRONG - Hardcoded -->
+<q-btn label="删除" />
+
+<!-- ✅ CORRECT - i18n -->
+<q-btn :label="$t('common.delete')" />
+
+<!-- With parameters -->
+<span>{{ $t('node.summary', { count: nodeCount }) }}</span>
+
+<!-- Pluralization -->
+{{ $tc('node.count', nodeCount, { count: nodeCount }) }}
+```
+
+**i18n File Structure**:
+```
+i18n/
+├── zh-CN/
+│   ├── index.ts
+│   ├── common.ts
+│   ├── auth.ts
+│   ├── node.ts
+│   └── ...
+└── en-US/
+    └── ...
+```
+
+---
+
+## 🎨 Design System
+
+### Soft Theme CSS Variables
+```scss
+// Backgrounds
+--soft-bg-primary: #f5f7fa;
+--soft-bg-card: #f8fafc;
+--soft-bg-hover: #eef2f7;
+
+// Text Colors
+--soft-text-primary: #2d3748;      // Replace pure black
+--soft-text-secondary: #718096;
+--soft-text-tertiary: #a0aec0;
+
+// Borders & Radius
+--soft-border-light: #e2e8f0;
+--soft-radius-sm: 8px;
+--soft-radius-md: 12px;
+--soft-radius-lg: 16px;
+--soft-radius-xl: 20px;
+
+// Shadows
+--soft-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.03);
+--soft-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05);
+--soft-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08);
+```
+
+### Card Component Standard
+**Reference**: `src/components/node/NodeCardContent.vue`
+
 ```vue
 <q-card-section class="card-content">
-  <!-- 1. 顶部：标题 + 状态（浅灰背景）-->
+  <!-- 1. Header: Title + Status (light gray bg) -->
   <div class="card-header">
     <div class="title">{{ title }}</div>
     <StatusDisplay :status="status" />
   </div>
   
-  <!-- 2. 中间：主要信息（白色背景）-->
+  <!-- 2. Body: Main info (white bg) -->
   <div class="card-body">
     <div class="info-line">
       <q-icon name="icon" size="20px" />
@@ -226,7 +347,7 @@ const handleAction = () => {
     </div>
   </div>
   
-  <!-- 3. 底部：辅助信息 + 操作（浅灰背景）-->
+  <!-- 3. Footer: Meta + Actions (light gray bg) -->
   <div class="card-footer">
     <div class="meta-info">...</div>
     <div class="actions">...</div>
@@ -234,60 +355,14 @@ const handleAction = () => {
 </q-card-section>
 ```
 
-**样式模板**：
-```scss
-.card-content {
-  background: var(--soft-bg-card);
-  border-radius: var(--soft-radius-lg);
-  overflow: hidden;
-  
-  .card-header {
-    padding: 1rem 1.5rem;
-    background: var(--soft-bg-secondary);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .card-body {
-    padding: 1.5rem;
-    background: var(--soft-bg-card);
-    
-    .info-line {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem 0;
-      
-      .info-value {
-        font-size: 0.875rem;
-        color: var(--soft-text-secondary);
-      }
-    }
-  }
-  
-  .card-footer {
-    padding: 1rem 1.5rem;
-    background: var(--soft-bg-secondary);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-}
-```
-
-### 3. 表单组件规范
-
-**参考**：`FORM_STYLE_GUIDE.md`
-
-**认证表单**（纯 Placeholder）：
+### Form Patterns
+**Auth Forms** (Placeholder only):
 ```vue
 <q-input
   v-model="form.email"
   :placeholder="$t('auth.email')"
   type="email"
   outlined
-  class="form-field"
 >
   <template v-slot:prepend>
     <q-icon name="email" />
@@ -295,23 +370,19 @@ const handleAction = () => {
 </q-input>
 ```
 
-**管理表单**（Label + Placeholder）：
+**Management Forms** (Label + Placeholder):
 ```vue
 <q-input
   v-model="form.nodeName"
   :label="$t('node.name')"
   :placeholder="$t('node.namePlaceholder')"
   outlined
-  class="form-field"
 />
 ```
 
-**必填字段标识**：
+**Required Fields**:
 ```vue
 <q-input
-  v-model="form.required"
-  :label="$t('field.label')"
-  outlined
   :rules="[val => !!val || $t('validation.required')]"
 >
   <template v-slot:label>
@@ -322,584 +393,123 @@ const handleAction = () => {
 
 ---
 
-## 🔧 开发规范
+## ✅ Session-End Checklist
 
-### 1. TypeScript 规范
+### MANDATORY Before Commit
 
-**必须明确类型**：
-```typescript
-// ✅ 正确
-interface Node {
-  id: number
-  name: string
-  status: NodeStatus
-}
-
-const node: Node = { id: 1, name: 'Node1', status: 'online' }
-
-// ❌ 错误
-const node = { id: 1, name: 'Node1' }  // 缺少类型
-```
-
-**Props 和 Emits 类型化**：
-```typescript
-interface Props {
-  /** 节点 ID */
-  nodeId: number
-  /** 是否只读 */
-  readonly?: boolean
-}
-
-interface Emits {
-  (e: 'update', node: Node): void
-  (e: 'delete', id: number): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
-```
-
-**避免 `any`**：
-```typescript
-// ❌ 错误
-const data: any = response.data
-
-// ✅ 正确
-interface ApiResponse {
-  data: Node[]
-  total: number
-}
-const response: ApiResponse = await api.getNodes()
-```
-
-### 2. 国际化规范
-
-**所有文本必须使用 `$t()`**：
-```vue
-<!-- ❌ 错误 -->
-<q-btn label="删除" />
-
-<!-- ✅ 正确 -->
-<q-btn :label="$t('common.delete')" />
-```
-
-**动态参数**：
-```vue
-<span>{{ $t('node.summary', { count: nodeCount }) }}</span>
-```
-
-**复数形式**：
-```vue
-{{ $tc('node.count', nodeCount, { count: nodeCount }) }}
-```
-
-**i18n 文件结构**：
-```
-i18n/
-├── zh-CN/
-│   ├── index.ts           # 总入口
-│   ├── common.ts          # 通用词汇
-│   ├── auth.ts            # 认证相关
-│   ├── node.ts            # 节点相关
-│   ├── route.ts           # 路由相关
-│   ├── social.ts          # 社交相关
-│   └── service.ts         # 服务相关
-└── en-US/
-    └── ... (同上)
-```
-
-### 3. 状态管理规范
-
-**使用 Pinia Store**：
-```typescript
-// stores/nodeStore.ts
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { Node } from '../types/node'
-
-export const useNodeStore = defineStore('node', () => {
-  // 状态
-  const nodes = ref<Node[]>([])
-  const loading = ref(false)
-  
-  // 计算属性
-  const onlineNodes = computed(() => {
-    return nodes.value.filter(n => n.status === 'online')
-  })
-  
-  // 方法
-  const fetchNodes = async () => {
-    loading.value = true
-    try {
-      const response = await api.getNodes()
-      nodes.value = response.data
-    } finally {
-      loading.value = false
-    }
-  }
-  
-  return {
-    nodes,
-    loading,
-    onlineNodes,
-    fetchNodes
-  }
-})
-```
-
-### 4. API 调用规范
-
-**使用 Composables**：
-```typescript
-// composables/useNodes.ts
-import { ref } from 'vue'
-import type { Node } from '../types/node'
-import { nodeApi } from '../services/api/nodeApi'
-
-export function useNodes() {
-  const nodes = ref<Node[]>([])
-  const loading = ref(false)
-  const error = ref<string | null>(null)
-  
-  const loadNodes = async () => {
-    loading.value = true
-    error.value = null
-    try {
-      const response = await nodeApi.getNodes()
-      nodes.value = response.data
-    } catch (e: any) {
-      error.value = e.message
-    } finally {
-      loading.value = false
-    }
-  }
-  
-  return {
-    nodes,
-    loading,
-    error,
-    loadNodes
-  }
-}
-```
-
-**API 服务封装**：
-```typescript
-// services/api/nodeApi.ts
-import { api } from '../../boot/axios'
-import type { Node, CreateNodeDto } from '../../types/node'
-
-export const nodeApi = {
-  async getNodes(): Promise<{ data: Node[] }> {
-    return api.get('/api/v1/nodes')
-  },
-  
-  async createNode(data: CreateNodeDto): Promise<{ data: Node }> {
-    return api.post('/api/v1/nodes', data)
-  },
-  
-  async updateNode(id: number, data: Partial<Node>): Promise<{ data: Node }> {
-    return api.put(`/api/v1/nodes/${id}`, data)
-  },
-  
-  async deleteNode(id: number): Promise<void> {
-    return api.delete(`/api/v1/nodes/${id}`)
-  }
-}
-```
-
-### 5. 路由规范
-
-**路由定义**：
-```typescript
-// router/routes.ts
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/app',
-    component: () => import('layouts/MainLayout.vue'),
-    meta: { requiresAuth: true },
-    children: [
-      {
-        path: 'dashboard',
-        name: 'dashboard',
-        component: () => import('pages/DashboardPage.vue'),
-        meta: { 
-          title: 'Dashboard',
-          icon: 'dashboard'
-        }
-      }
-    ]
-  }
-]
-```
-
-**路由导航**：
-```typescript
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-
-// ✅ 使用命名路由
-router.push({ name: 'node-detail', params: { id: 123 } })
-
-// ✅ 带查询参数
-router.push({ name: 'nodes', query: { status: 'online' } })
-```
-
----
-
-## 🎯 智能推荐系统
-
-### 推荐优先级体系
-
-**0 级 - 紧急处理**：
-- 处理好友请求
-- 完成未配置节点
-- IP 池满载警告
-
-**1 级 - 新手引导**：
-- 创建首个 IP 池
-- 添加首个节点
-- 创建首个服务
-
-**2 级 - 功能扩展**：
-- 添加更多节点
-- 建立跨用户连接
-- 创建服务
-
-**3 级 - 社交增强**：
-- 邀请好友
-- 与好友建立连接
-
-**4 级 - 优化建议**：
-- 路由健康检查
-- 服务质量监控
-
-### 用户状态定义
-
-```typescript
-enum UserState {
-  NewUser = 'new_user',                    // 无IP池且无设备
-  HasIPPool = 'has_ippool',                // 有IP池但无设备
-  SingleDevice = 'single_device',          // 1个设备
-  MultipleDevices = 'multiple_devices',    // 多设备且已连接
-  HasFriendsNoConnections = 'has_friends_no_connections',  // 有好友但未连接
-  HasCrossUserConnections = 'has_cross_user_connections',  // 有跨用户连接
-  HasServices = 'has_services',            // 已创建服务
-  FullyActive = 'fully_active'             // 完全活跃用户
-}
-```
-
----
-
-## 📝 代码注释规范
-
-### 组件注释
-```typescript
-/**
- * 节点卡片内容组件
- * 
- * 职责：
- * 1. 显示节点基本信息（名称、状态、IP）
- * 2. 显示系统信息和网络延迟
- * 3. 提供快捷操作（启用、禁用、启动、停止、重启）
- * 
- * 使用场景：
- * - 节点列表页
- * - Dashboard 节点卡片
- */
-```
-
-### 函数注释
-```typescript
-/**
- * 分析用户状态并生成推荐
- * @param data - 用户数据（IP池、节点、好友等）
- * @returns 用户状态分析结果
- */
-function analyzeUserState(data: UserData): UserStateAnalysis {
-  // ...
-}
-```
-
-### TODO 注释
-```typescript
-// TODO: 实现消息功能后，可以直接跳转到聊天页面
-// router.push(`/app/messages/${friendId}`)
-```
-
----
-
-## ⚠️ 常见问题和注意事项
-
-### 1. 避免使用的模式
-
-❌ **直接修改 Props**：
-```typescript
-// 错误
-props.node.name = 'New Name'
-
-// 正确
-const localNode = ref({ ...props.node })
-localNode.value.name = 'New Name'
-emit('update', localNode.value)
-```
-
-❌ **未处理异步错误**：
-```typescript
-// 错误
-const data = await api.getData()
-
-// 正确
-try {
-  const data = await api.getData()
-} catch (error) {
-  console.error('Failed to fetch data:', error)
-  Notify.create({ type: 'negative', message: '加载失败' })
-}
-```
-
-❌ **硬编码文本**：
-```typescript
-// 错误
-const message = '操作成功'
-
-// 正确
-const { t } = useI18n()
-const message = t('common.success')
-```
-
-### 2. 性能优化建议
-
-**使用 computed 而非 watch**：
-```typescript
-// ✅ 推荐
-const filteredNodes = computed(() => {
-  return nodes.value.filter(n => n.status === 'online')
-})
-
-// ❌ 避免
-watch(() => nodes.value, (newNodes) => {
-  filteredNodes.value = newNodes.filter(n => n.status === 'online')
-})
-```
-
-**大列表虚拟滚动**：
-```vue
-<q-virtual-scroll
-  :items="largeList"
-  virtual-scroll-item-size="80"
->
-  <template v-slot="{ item }">
-    <NodeCard :node="item" />
-  </template>
-</q-virtual-scroll>
-```
-
-### 3. 响应式设计
-
-**使用 Quasar 断点**：
-```vue
-<div class="row q-col-gutter-md">
-  <div class="col-12 col-md-6 col-lg-4">
-    <NodeCard />
-  </div>
-</div>
-```
-
-**条件渲染（移动端）**：
-```vue
-<q-btn 
-  :label="$q.screen.lt.sm ? '' : $t('common.save')"
-  :icon="$q.screen.lt.sm ? 'save' : undefined"
-/>
-```
-
----
-
-## 🚀 部署相关
-
-### 环境变量
-
-```bash
-# .env.development
-VITE_API_BASE_URL=http://localhost:8000
-VITE_PUSHER_KEY=your_pusher_key
-VITE_PUSHER_CLUSTER=ap3
-
-# .env.production
-VITE_API_BASE_URL=https://api.mynet.com
-VITE_PUSHER_KEY=production_key
-VITE_PUSHER_CLUSTER=ap3
-```
-
-### 构建命令
-
-```bash
-# 开发环境
-npm run dev
-
-# 生产构建
-npm run build
-
-# 类型检查
-npm run type-check
-
-# 代码检查
-npm run lint
-
-# 代码修复
-npm run lint:fix
-```
-
----
-
-## 📚 参考文档
-
-### 项目内部文档
-- [柔和主题指南](./SOFT_THEME_GUIDE.md)
-- [表单样式指南](./FORM_STYLE_GUIDE.md)
-- [智能推荐逻辑](./TIPS_SMART_LOGIC_TODO.md)
-- [术语迁移](./TERMINOLOGY_MIGRATION_ASSESSMENT.md)
-
-### 外部文档
-- [Vue 3 文档](https://vuejs.org/)
-- [Quasar 文档](https://quasar.dev/)
-- [TypeScript 文档](https://www.typescriptlang.org/)
-- [Pinia 文档](https://pinia.vuejs.org/)
-- [Vue I18n 文档](https://vue-i18n.intlify.dev/)
-
----
-
-## ✅ 会话结束检查清单
-
-### 每次会话结束前必须执行
-
-在提交代码并结束会话之前，**必须**通过以下检查：
-
-**1. 代码格式和规范检查** ❌ **阻塞性**
+**1. Lint Check** ❌ BLOCKING
 ```bash
 npm run lint
+# If fails: npm run lint:fix
 ```
-- ❌ 如果失败，**必须**运行 `npm run lint:fix` 自动修复
-- ❌ **必须**手动修复无法自动修复的问题
-- ✅ 通过后才能继续
 
-**2. TypeScript 类型检查** ❌ **阻塞性**
+**2. TypeScript Check** ❌ BLOCKING
 ```bash
-# Quasar 项目通过构建验证类型
-npm run build
+npm run build  # Quasar validates types via build
 ```
-- ❌ **必须**确保构建成功
-- ❌ **必须**修复所有 TypeScript 类型错误
-- ❌ 避免使用 `any` 类型（除非特殊情况且有注释说明）
-- ✅ 通过后才能继续
 
-**3. 国际化完整性检查** ⭐️ **强制要求** ❌ **阻塞性**
+**3. i18n Completeness** ⭐️ MANDATORY ❌ BLOCKING
 ```bash
 npm run check:i18n
 ```
-- ❌ **必须**补充所有缺失的翻译键值（中英文）
-- ❌ 所有用户可见文本**必须**使用 `$t()` 包裹
-- ❌ 参数化文本格式必须正确：`$t('key', { param: value })`
-- ✅ 通过后才能继续
+- Add missing translation keys (zh-CN & en-US)
+- All user-visible text must use `$t()`
 
-**4. 生产构建测试** ❌ **阻塞性**
+**4. Production Build** ❌ BLOCKING
 ```bash
 npm run build
 ```
-- ❌ **必须**确保构建成功
-- ❌ **必须**修复所有编译错误
-- ✅ 通过后才能继续
 
-**5. 代码清理**
-- 移除所有 `console.log` 和调试代码
-- 移除注释掉的废弃代码
-- 移除 TODO 注释（或转移到专门的 TODO 文档）
-
-**6. Git 提交检查**
-```bash
-git status
-```
-- 确保所有修改已添加
-- commit message 清晰描述改动
-- 使用约定式提交格式：`feat:`, `fix:`, `refactor:` 等
-
-### 快速检查脚本
-
-使用项目提供的自动检查脚本：
-
+**5. Quick Check Script**
 ```bash
 ./dev-tools/session-end-check.sh
 ```
+- Runs all above checks
+- Detects console.log (warning only - auto-removed in production)
+- Detects debug calls (info only - auto-optimized in production)
 
-该脚本会自动执行：
-- ✅ 代码格式检查 (npm run lint)
-- ✅ TypeScript 类型检查（通过构建验证）
-- ⭐ 国际化完整性检查 (npm run check:i18n) **强制要求**
-- ✅ 生产构建测试 (npm run build)
-- ⚠️  console.log 检测（警告，不阻止提交）
-- ⚠️  硬编码文本检测（警告，不阻止提交）
-- 📋 未提交文件提示
+### ❌ Blocking Errors (MUST Fix)
+1. Build failure
+2. TypeScript errors
+3. ESLint errors (error level)
+4. Missing i18n keys
 
-### 常见问题快速修复
-
-**国际化缺失**：
-```typescript
-// zh-CN.ts
-export default {
-  social: {
-    viewNodes: '查看设备',
-    friendSince: '成为好友于 {date}'
-  }
-}
-
-// en-US.ts
-export default {
-  social: {
-    viewNodes: 'View Nodes',
-    friendSince: 'Friends since {date}'
-  }
-}
-```
-
-**ESLint 错误**：
-```bash
-npm run lint:fix
-```
-
-**TypeScript 错误**：
-- 添加明确类型定义
-- 避免使用 `any`
-- 为 Props/Emits 定义接口
-
-### ❌ 阻塞性错误（必须修复才能结束会话）
-
-以下错误**必须修复**才能提交代码和结束会话：
-
-1. ❌ **构建失败** - 运行 `npm run build` 必须成功
-2. ❌ **TypeScript 类型错误** - 必须修复所有类型错误
-3. ❌ **ESLint 错误**（error 级别）- 运行 `npm run lint:fix` 修复
-4. ❌ **缺失国际化键值** - 必须补充所有缺失的翻译（中英文）
-
-**重要规则**：
-- 🚫 未通过阻塞性检查的代码**禁止提交**
-- 🚫 必须运行 `./dev-tools/session-end-check.sh` 并通过所有检查
-- ✅ 所有 ❌ 标记的检查项都是阻塞性的，必须修复
-
-### 警告性问题（建议修复）
-
-以下问题建议修复，但不阻塞提交：
-
-1. ⚠️  console.log
-2. ⚠️  注释代码
-3. ⚠️  ESLint 警告（warning 级别）
+### ⚠️ Warnings (Recommended)
+1. console.log usage (auto-removed in production)
+2. Commented code
+3. ESLint warnings
 
 ---
 
-## 🔄 持续更新
+## 📂 Key Files & Commands
 
-本规范会随项目演进持续更新，请定期查看最新版本。
+### Critical Files
+- `quasar.config.ts` - Boot order, build settings
+- `src/boot/axios.ts` - HTTP client config
+- `src/services/api.ts` - Zone ID injection, token refresh
+- `src/utils/debug.ts` - Debug tool implementation
+- `dev-tools/session-end-check.sh` - Pre-commit validation
+- `dev-tools/check-i18n.js` - i18n completeness checker
 
-最后更新：2026-01-10  
-维护者：MyNet Team
+### Development Commands
+```bash
+npm run dev              # Development server (hot reload)
+npm run build            # Production build
+npm run lint             # Code check
+npm run lint:fix         # Auto-fix lint errors
+npm run check:i18n       # i18n completeness check
+./dev-tools/session-end-check.sh  # Full pre-commit check
+```
+
+### Directory Structure
+```
+src/
+├── boot/           # Boot files (initialization order)
+├── components/     # Reusable components
+├── composables/    # Composition functions (useNodes, etc.)
+├── layouts/        # Layout components
+├── pages/          # Page components
+├── router/         # Route configuration
+├── services/       # API services & business logic
+├── stores/         # Pinia state management
+├── types/          # TypeScript type definitions
+├── utils/          # Utility functions
+├── i18n/           # i18n resource files
+└── styles/         # Global styles
+```
+
+---
+
+## 📚 Additional References
+
+### Internal Documentation
+- [SOFT_THEME_GUIDE.md](./SOFT_THEME_GUIDE.md) - Soft theme system
+- [FORM_STYLE_GUIDE.md](./FORM_STYLE_GUIDE.md) - Form style guide
+- [TIPS_SMART_LOGIC_TODO.md](./TIPS_SMART_LOGIC_TODO.md) - Smart recommendation logic
+- [SESSION_END_CHECKLIST.md](./SESSION_END_CHECKLIST.md) - Detailed checklist
+
+### External Documentation
+- [Vue 3](https://vuejs.org/)
+- [Quasar](https://quasar.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Pinia](https://pinia.vuejs.org/)
+- [Vue I18n](https://vue-i18n.intlify.dev/)
+
+---
+
+## 🔄 Update History
+
+**2026-01-14**: Compressed version created
+- Focused on "Critical Rules First" approach
+- Removed verbose component templates (reference project files)
+- Maintained all essential architecture patterns
+- Target: Prevent 80% of errors with minimal token consumption
+
+**Previous**: Detailed version (1176 lines)
+- Available in `.github/copilot-instructions-详细版.md`
+- Contains comprehensive component examples and detailed explanations
+
+---
+
+**Last Updated**: 2026-01-14  
+**Maintainer**: MyNet Team

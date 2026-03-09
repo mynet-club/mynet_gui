@@ -200,7 +200,7 @@ const handleDelete = async (service: ZoneService) => {
     persistent: true
   }).onOk(async () => {
     try {
-      const success = await deleteService(service.id)
+      const success = await deleteService(parseInt(service.service_id))
       if (success) {
         $q.notify({
           type: 'positive',

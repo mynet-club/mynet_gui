@@ -71,12 +71,13 @@ else
 fi
 echo ""
 
-# 5. 检查 console.log（警告但不阻止）
-echo "🔍 检查调试代码..."
-CONSOLE_COUNT=$(git grep -n "console\\.log" -- "*.vue" "*.ts" "*.js" 2>/dev/null | grep -v "node_modules" | wc -l)
+# 6. 检查 console.log（仅提示，生产构建时自动移除）
+echo "💡 检查调试代码..."
+CONSOLE_COUNT=$(git grep -n "console\.log" -- "*.vue" "*.ts" "*.js" 2>/dev/null | grep -v "node_modules" | wc -l)
 if [ "$CONSOLE_COUNT" -gt 0 ]; then
-  echo -e "${YELLOW}⚠ 发现 $CONSOLE_COUNT 处 console.log${NC}"
-  echo "  建议在提交前移除调试代码"
+  echo -e "${YELLOW}💡 发现 $CONSOLE_COUNT 处 console.log${NC}"
+  echo "  🔧 生产构建时会自动移除（Terser 配置）"
+  echo "  ✅ 开发环境可以保留用于调试"
 else
   echo -e "${GREEN}✓ 无调试代码${NC}"
 fi
@@ -90,10 +91,20 @@ if [ -n "$RECENT_FILES" ]; then
   HARDCODED_COUNT=0
   for file in $RECENT_FILES; do
     if [ -f "$file" ]; then
-      # 简单检查文件中是否有中文（使用 LC_ALL=C 避免 locale 问题）
-      if LC_ALL=C grep -q '[\x80-\xff]' "$file" 2>/dev/null; then
+      # 检查文件中是否有硬编码中文，完全排除注释
+      # 使用 perl 移除所有注释，然后检查中文字符（CJK统一表意文字）
+      HAS_CHINESE=$(perl -0777 -pe '
+        s/<!--.*?-->//gs;           # 移除 HTML 注释
+        s|//[^\n]*||gm;             # 移除单行注释
+        s|/\*.*?\*/||gs;            # 移除多行注释
+      ' "$file" | \
+      grep -v 'zhCN\|zh-CN\|zh_CN' | \
+      perl -ne 'print if /[\x{4e00}-\x{9fff}]/')
+      
+      if [ -n "$HAS_CHINESE" ]; then
         HARDCODED_COUNT=$((HARDCODED_COUNT + 1))
         echo -e "${YELLOW}  ⚠ $file 可能包含硬编码中文${NC}"
+        echo -e "${YELLOW}     💡 提示：用户可见文本请使用 \$t() 国际化，注释请使用英文${NC}"
       fi
     fi
   done
@@ -101,7 +112,7 @@ if [ -n "$RECENT_FILES" ]; then
   if [ "$HARDCODED_COUNT" -eq 0 ]; then
     echo -e "${GREEN}✓ 未发现明显的硬编码文本${NC}"
   else
-    echo -e "${YELLOW}⚠ 建议检查国际化是否完整${NC}"
+    echo -e "${YELLOW}⚠ 建议使用国际化或英文注释${NC}"
   fi
 else
   echo -e "${GREEN}✓ 无最近修改的 .vue 文件${NC}"
