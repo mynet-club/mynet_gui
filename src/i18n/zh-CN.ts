@@ -374,6 +374,8 @@ export default {
     title: '设备管理',
     subtitle: '管理和监控网络设备',
     name: '设备名称',
+    namePlaceholder: '请输入设备名称',
+    nameMinLength: '设备名称至少3个字符',
     type: '设备类型',
     ipAddress: 'IP地址',
     port: '端口',
@@ -402,6 +404,14 @@ export default {
     
     // 列表页面
     createNode: '创建设备',
+    quickCreate: '一键快速创建',
+    quickCreateTitle: '一键快速创建设备',
+    quickCreateDesc: '只需输入设备名称，系统将自动应用默认配置（GNB、端口9016、MTU 1450）并自动分配 IP 地址。',
+    quickCreateSuccess: '设备一键创建成功',
+    quickCreateNextStep: '设备已创建，请前往设备详情页生成密鑰以完成配置。',
+    quickCreateIpPoolEmpty: 'IP池中没有可用的IP地址，请联系管理员分配 IP 池。',
+    quickCreateFailed: '快速创建失败',
+    goToKeys: '去生成密鑰',
     noData: '暂无设备',
     noDataDescription: '还没有创建任何设备',
     createFirstNode: '创建第一个设备',

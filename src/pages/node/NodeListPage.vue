@@ -17,10 +17,10 @@
         />
         <q-btn
           unelevated
-          color="teal"
+          color="secondary"
           icon="bolt"
-          :label="$t('nodes.quickCreate.btn')"
-          @click="showQuickCreate = true"
+          :label="$t('nodes.quickCreate')"
+          @click="showQuickCreateDialog = true"
           :disable="loading"
         />
         <q-btn
@@ -73,12 +73,6 @@
       </template>
     </ResponsiveCardGrid>
 
-    <!-- 快速创建对话框 -->
-    <QuickCreateDialog
-      v-model="showQuickCreate"
-      @created="handleQuickCreated"
-    />
-
     <!-- 删除确认对话框 -->
     <q-dialog v-model="showDeleteDialog" persistent>
       <q-card>
@@ -100,6 +94,42 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <!-- 一键快速创建对话框 -->
+    <q-dialog v-model="showQuickCreateDialog" persistent>
+      <q-card style="min-width: 400px">
+        <q-card-section>
+          <div class="text-h6">
+            <q-icon name="bolt" class="q-mr-sm" color="secondary" />
+            {{ $t('nodes.quickCreateTitle') }}
+          </div>
+          <div class="text-caption text-grey q-mt-sm">{{ $t('nodes.quickCreateDesc') }}</div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          <q-input
+            v-model="quickCreateName"
+            :label="$t('nodes.name')"
+            :placeholder="$t('nodes.namePlaceholder')"
+            outlined
+            autofocus
+            :rules="[val => (!!val && val.trim().length >= 3) || $t('nodes.nameMinLength')]"
+            @keyup.enter="handleQuickCreate"
+          />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat :label="$t('common.cancel')" v-close-popup :disable="quickCreating" />
+          <q-btn
+            unelevated
+            color="secondary"
+            icon="bolt"
+            :label="$t('nodes.quickCreate')"
+            @click="handleQuickCreate"
+            :loading="quickCreating"
+            :disable="!quickCreateName || quickCreateName.trim().length < 3"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </PageLayout>
 </template>
 
@@ -112,7 +142,6 @@ import { useI18n } from 'vue-i18n'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import NodeCardContent from '../../components/node/NodeCardContent.vue'
 import PageLayout from '../../components/layout/PageLayout.vue'
-import QuickCreateDialog from '../../components/node/QuickCreateDialog.vue'
 import { useNodes, useNotify } from '../../composables'
 import { Node, NodeStatus, NODE_STATUS, NodeStatusInfo, NodeDeviceInfo } from '../../types/node'
 import { nodeService } from '../../services/node/nodeService'
@@ -126,18 +155,15 @@ const { success: notifySuccess, error: notifyError } = useNotify()
 // 使用组合式函数
 const { nodes, loading, loadNodes, deleteNode: removeNode } = useNodes()
 
-// 快速创建
-const showQuickCreate = ref(false)
-
-const handleQuickCreated = () => {
-  showQuickCreate.value = false
-  loadNodes()
-}
-
 // 删除确认
 const showDeleteDialog = ref(false)
 const nodeToDelete = ref<Node | null>(null)
 const deleting = ref(false)
+
+// 一键快速创建
+const showQuickCreateDialog = ref(false)
+const quickCreateName = ref('')
+const quickCreating = ref(false)
 
 // 状态切换
 const statusChanging = ref<Record<string | number, boolean>>({})
@@ -358,6 +384,50 @@ const handleNodeAction = async (node: Node, action: 'start' | 'stop' | 'restart'
 // 操作方法
 const goToCreate = () => {
   router.push('/app/nodes/create')
+}
+
+// 一键快速创建节点
+const handleQuickCreate = async () => {
+  const name = quickCreateName.value.trim()
+  if (!name || name.length < 3) return
+
+  try {
+    quickCreating.value = true
+    const result = await nodeService.quickCreateNode(name)
+    showQuickCreateDialog.value = false
+    quickCreateName.value = ''
+
+    // 刷新节点列表
+    await refreshNodes()
+
+    const nodeId = result.data.node.node_id
+    // 提示用户下一步操作
+    $q.notify({
+      type: 'positive',
+      message: t('nodes.quickCreateSuccess'),
+      caption: t('nodes.quickCreateNextStep'),
+      timeout: 8000,
+      actions: [
+        {
+          label: t('nodes.goToKeys'),
+          color: 'white',
+          handler: () => {
+            router.push(`/app/nodes/${nodeId}/edit/config`)
+          }
+        }
+      ]
+    })
+  } catch (error: any) {
+    debug.error('一键快速创建节点失败:', error)
+    const msg = error?.response?.data?.message || error?.message || ''
+    if (msg.includes('IP') || msg.includes('ip')) {
+      notifyError(t('nodes.quickCreateIpPoolEmpty'))
+    } else {
+      notifyError(t('nodes.quickCreateFailed'))
+    }
+  } finally {
+    quickCreating.value = false
+  }
 }
 
 const goToDetail = (nodeId: string | number) => {

@@ -377,28 +377,35 @@ export interface NodeOperationResult {
   node?: Node
 }
 
-// 快速创建节点响应接口 (对应 POST /api/v1/nodes/quick-create)
+// 一键快速创建节点请求接口
+export interface QuickCreateNodeRequest {
+  node_name: string                   // 节点名称 (必填, 3-255字符)
+}
+
+// 一键快速创建节点响应接口
 export interface QuickCreateNodeResponse {
-  node: {
-    node_id: number | string
-    node_name: string
-    vpn_type: string
-    node_ip: string | null   // 已转为点分十进制，如 "10.1.0.5"
-    node_type: number
-    created_at: string
+  code: number
+  message: string
+  data: {
+    node: {
+      node_id: number                 // 16位安全整数
+      node_name: string
+      vpn_type: 'gnb'
+      node_ip: string | null
+      node_type: number               // 1 = 边缘节点
+      created_at: string              // ISO 8601
+    }
+    config: {
+      nodeid: number
+      ifname: string                  // 'gnb_tun'
+      listen: number                  // 9016
+      mtu: number                     // 1450
+      multi_socket: 'on' | 'off'
+    }
+    next_steps: {
+      [key: string]: string           // 操作提示文本
+    }
   }
-  config: {
-    nodeid: number | string
-    ifname: string
-    listen: number
-    mtu: number
-    multi_socket: string
-    direct_forwarding: string
-    unified_forwarding: string
-    standard_forwarding: string
-    address_secure: string
-  }
-  next_steps: Record<string, string>
 }
 
 // 节点状态信息接口 (对应 /api/v1/nodes/{id}/status-info)

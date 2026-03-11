@@ -1,6 +1,6 @@
 <template>
   <div class="friend-card-content">
-    <!-- Header: Avatar + Name + Online Status (light gray background) -->
+    <!-- 顶部：头像 + 名称 + 在线状态（浅灰背景）-->
     <div class="card-header">
       <div class="friend-avatar-wrapper">
         <q-avatar size="48px" class="friend-avatar">
@@ -17,21 +17,77 @@
           />
         </q-avatar>
         
-        <!-- Online status indicator -->
+        <!-- 在线状态指示器 -->
         <div 
-          v-if="isOnline" 
+          v-if="hasOnlineNodes" 
           class="online-indicator"
-          :class="{ 'pulse': isOnline }"
+          :class="{ 'pulse': hasOnlineNodes }"
         >
-          <q-tooltip>{{ $t('social.online') }}</q-tooltip>
+          <q-tooltip>{{ $t('social.onlineNodes', { count: onlineNodeCount }) }}</q-tooltip>
         </div>
       </div>
       
       <div class="friend-name-section">
         <div class="friend-name">{{ displayName }}</div>
+        <div v-if="friend.email" class="friend-email">{{ friend.email }}</div>
+      </div>
+    </div>
+    
+    <!-- 中间：节点信息 + 标签（白色背景）-->
+    <div class="card-body">
+      <!-- 节点统计 -->
+      <div class="info-line">
+        <q-icon name="router" size="18px" color="primary" />
+        <span class="info-value">{{ nodeCount }} {{ $t('social.nodes') }}</span>
+        <div v-if="hasOnlineNodes" class="online-badge">
+          <q-icon name="wifi" size="12px" />
+          <span>{{ onlineNodeCount }}</span>
+        </div>
       </div>
       
-      <!-- Action buttons (moved to right side) -->
+      <!-- 标签 -->
+      <div v-if="friend.tags && friend.tags.length > 0" class="info-line">
+        <q-icon name="label" size="18px" color="secondary" />
+        <div class="friend-tags">
+          <q-chip 
+            v-for="tag in friend.tags.slice(0, 3)" 
+            :key="tag"
+            dense
+            size="sm"
+            outline
+            color="primary"
+          >
+            {{ tag }}
+          </q-chip>
+          <q-chip 
+            v-if="friend.tags.length > 3"
+            dense
+            size="sm"
+            outline
+            color="grey-6"
+          >
+            +{{ friend.tags.length - 3 }}
+          </q-chip>
+        </div>
+      </div>
+      
+      <!-- 备注 -->
+      <div v-if="friend.remark" class="info-line">
+        <q-icon name="sticky_note_2" size="18px" color="orange" />
+        <span class="info-value remark-text">{{ friend.remark }}</span>
+      </div>
+    </div>
+    
+    <!-- 底部：成为好友时间 + 操作（浅灰背景）-->
+    <div class="card-footer">
+      <div class="friend-meta">
+        <q-icon name="schedule" size="16px" color="grey-6" />
+        <span class="meta-text">
+          {{ $t('social.friendSince', { date: friendSince }) }}
+        </span>
+      </div>
+      
+      <!-- 操作按钮 -->
       <div class="actions-wrapper">
         <q-btn
           flat
@@ -87,77 +143,6 @@
         </q-btn>
       </div>
     </div>
-    
-    <!-- Middle: Connection stats + Remark + Tags + Email (white background) -->
-    <div class="card-body">
-      <!-- Connection count statistics -->
-      <div class="info-line">
-        <q-icon name="link" size="18px" color="primary" />
-        <span class="info-value">{{ routeCount }} {{ $t('social.connections') }}</span>
-        <div v-if="routeCount > 0" class="active-badge">
-          <q-icon name="check_circle" size="12px" />
-          <span>{{ $t('social.active') }}</span>
-        </div>
-      </div>
-      
-      <!-- Device count statistics -->
-      <div class="info-line">
-        <q-icon name="router" size="18px" color="secondary" />
-        <span class="info-value">{{ nodeCount }} {{ $t('social.nodes') }}</span>
-        <div v-if="connectedNodeCount > 0" class="online-badge">
-          <q-icon name="wifi" size="12px" />
-          <span>{{ connectedNodeCount }}</span>
-        </div>
-      </div>
-      
-      <!-- Remark -->
-      <div v-if="friend.remark" class="info-line">
-        <q-icon name="sticky_note_2" size="18px" color="orange" />
-        <span class="info-value remark-text">{{ friend.remark }}</span>
-      </div>
-      
-      <!-- Email -->
-      <div v-if="friend.email" class="info-line">
-        <q-icon name="email" size="18px" color="blue-grey-6" />
-        <span class="info-value email-text">{{ friend.email }}</span>
-      </div>
-      
-      <!-- Tags -->
-      <div v-if="friend.tags && friend.tags.length > 0" class="info-line">
-        <q-icon name="label" size="18px" color="purple" />
-        <div class="friend-tags">
-          <q-chip 
-            v-for="tag in friend.tags.slice(0, 3)" 
-            :key="tag"
-            dense
-            size="sm"
-            outline
-            color="primary"
-          >
-            {{ tag }}
-          </q-chip>
-          <q-chip 
-            v-if="friend.tags.length > 3"
-            dense
-            size="sm"
-            outline
-            color="grey-6"
-          >
-            +{{ friend.tags.length - 3 }}
-          </q-chip>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Footer: Friends since date (light gray background) -->
-    <div class="card-footer">
-      <div class="friend-meta">
-        <q-icon name="schedule" size="16px" color="grey-6" />
-        <span class="meta-text">
-          {{ $t('social.friendSince', { date: friendSince }) }}
-        </span>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -166,67 +151,73 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import type { Friend } from '../../types'
 
 /**
- * Friend Card Content Component
+ * 好友卡片内容组件
  * 
- * Responsibilities:
- * 1. Display friend basic information (avatar, name)
- * 2. Display connection count and device count statistics
- * 3. Display online status indicator
- * 4. Display remark, email, tags and other details
- * 5. Provide action menu (view, edit, delete)
+ * 职责：
+ * 1. 显示好友基本信息（头像、名称、备注）
+ * 2. 显示好友节点统计（总数、在线数）
+ * 3. 显示在线状态指示器
+ * 4. 提供快捷操作（发消息、查看详情、查看节点）
+ * 5. 提供更多操作（编辑备注、编辑标签、删除好友）
  * 
- * Usage:
- * - Friends list page
- * - Dashboard friend cards
+ * 使用场景：
+ * - 好友列表页
+ * - Dashboard 好友卡片
  */
 
+interface Friend {
+  id: number | string
+  name: string
+  email?: string
+  avatar?: string
+  remark?: string
+  tags?: string[]
+  created_at?: string
+  node_count?: number
+  online_node_count?: number
+}
+
 interface Props {
-  /** Friend data */
+  /** 好友数据 */
   friend: Friend
 }
 
 interface Emits {
-  (e: 'send-message', friendId: string): void
-  (e: 'view-details', friendId: string): void
-  (e: 'view-nodes', friendId: string): void
-  (e: 'edit-remark', friendId: string): void
-  (e: 'edit-tags', friendId: string): void
-  (e: 'remove-friend', friendId: string): void
+  (e: 'send-message', friendId: number | string): void
+  (e: 'view-details', friendId: number | string): void
+  (e: 'view-nodes', friendId: number | string): void
+  (e: 'edit-remark', friendId: number | string): void
+  (e: 'edit-tags', friendId: number | string): void
+  (e: 'remove-friend', friendId: number | string): void
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 const router = useRouter()
 
-// Display name (use friend name)
+// 显示名称（优先使用备注，否则使用用户名）
 const displayName = computed(() => {
-  return props.friend.name
+  return props.friend.remark || props.friend.name
 })
 
-// Connection count (priority display)
-const routeCount = computed(() => {
-  return props.friend.active_route_count || 0
-})
-
-// Device count
+// 节点数量
 const nodeCount = computed(() => {
   return props.friend.node_count || 0
 })
 
-// Connected device count
-const connectedNodeCount = computed(() => {
-  return props.friend.connected_node_count || 0
+// 在线节点数量
+const onlineNodeCount = computed(() => {
+  return props.friend.online_node_count || 0
 })
 
-// Is online
-const isOnline = computed(() => {
-  return props.friend.status === 'online'
+// 是否有在线节点
+const hasOnlineNodes = computed(() => {
+  return onlineNodeCount.value > 0
 })
 
-// Friends since date (formatted)
+// 成为好友的时间（格式化）
 const friendSince = computed(() => {
   if (!props.friend.created_at) return '-'
   try {
@@ -239,53 +230,53 @@ const friendSince = computed(() => {
   }
 })
 
-// Send message
+// 发送消息
 const handleSendMessage = () => {
   emit('send-message', props.friend.id)
+  // TODO: 实现消息功能后，可以直接跳转到聊天页面
+  // router.push(`/app/messages/${props.friend.id}`)
 }
 
-// View details
+// 查看详情
 const handleViewDetails = () => {
   emit('view-details', props.friend.id)
   router.push(`/app/social/friends/${props.friend.id}`)
 }
 
-// View nodes
+// 查看节点
 const handleViewNodes = () => {
   emit('view-nodes', props.friend.id)
   router.push(`/app/routes/friend-nodes?friend_id=${props.friend.id}`)
 }
 
-// Edit remark
+// 编辑备注
 const handleEditRemark = () => {
   emit('edit-remark', props.friend.id)
 }
 
-// Edit tags
+// 编辑标签
 const handleEditTags = () => {
   emit('edit-tags', props.friend.id)
 }
 
-// Remove friend
+// 删除好友
 const handleRemoveFriend = () => {
   emit('remove-friend', props.friend.id)
 }
 </script>
 
 <style lang="scss" scoped>
-@import '../../styles/design-tokens.scss';
-
 .friend-card-content {
   background: var(--soft-bg-card, #ffffff);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
-  // Header: Avatar + Name + Actions (light gray background, single line)
+  // 顶部：头像 + 名称（浅灰背景）
   .card-header {
     display: flex;
     align-items: center;
-    gap: $spacing-md;
-    padding: $spacing-base - 2px $spacing-base;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
     background: var(--soft-bg-secondary, #f5f7fa);
     border-bottom: 1px solid var(--soft-border-light, #e2e8f0);
     
@@ -298,7 +289,7 @@ const handleRemoveFriend = () => {
         box-shadow: var(--soft-shadow-md, 0 4px 6px rgba(0, 0, 0, 0.05));
       }
       
-      // Online status indicator
+      // 在线状态指示器
       .online-indicator {
         position: absolute;
         bottom: -2px;
@@ -320,75 +311,59 @@ const handleRemoveFriend = () => {
       min-width: 0;
       
       .friend-name {
-        font-size: $font-size-lg;
-        font-weight: $font-weight-semibold;
+        font-size: 1rem;
+        font-weight: 600;
         color: var(--soft-text-primary, #2d3748);
+        margin-bottom: 0.125rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      
+      .friend-email {
+        font-size: 0.75rem;
+        color: var(--soft-text-tertiary, #a0aec0);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
     }
-    
-    .actions-wrapper {
-      flex-shrink: 0;
-    }
   }
   
-  // Middle: Node info + Tags (white background)
+  // 中间：节点信息 + 标签（白色背景）
   .card-body {
     display: flex;
     flex-direction: column;
-    gap: $spacing-sm + 2px;
-    padding: $spacing-base;
+    gap: 0.625rem;
+    padding: 1rem;
     background: var(--soft-bg-card, #ffffff);
     
     .info-line {
       display: flex;
       align-items: center;
-      gap: $spacing-sm + 2px;
+      gap: 0.625rem;
       
       .info-value {
         flex: 1;
-        font-size: $font-size-base;
+        font-size: 0.875rem;
         color: var(--soft-text-secondary, #718096);
         
         &.remark-text {
           font-style: italic;
           color: var(--soft-text-tertiary, #a0aec0);
         }
-        
-        &.email-text {
-          font-size: $font-size-sm;
-          color: var(--soft-text-tertiary, #a0aec0);
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-      }
-      
-      .active-badge {
-        display: flex;
-        align-items: center;
-        gap: $spacing-xs;
-        padding: 4px 10px;
-        background: var(--q-primary);
-        color: white;
-        border-radius: $radius-base;
-        font-size: $font-size-sm;
-        font-weight: $font-weight-medium;
-        white-space: nowrap;
       }
       
       .online-badge {
         display: flex;
         align-items: center;
-        gap: $spacing-xs;
-        padding: 4px 10px;
+        gap: 0.25rem;
+        padding: 0.125rem 0.5rem;
         background: var(--q-positive);
         color: white;
-        border-radius: $radius-base;
-        font-size: $font-size-sm;
-        font-weight: $font-weight-medium;
+        border-radius: var(--soft-radius-sm, 6px);
+        font-size: 0.6875rem;
+        font-weight: 500;
         white-space: nowrap;
       }
       
@@ -396,34 +371,40 @@ const handleRemoveFriend = () => {
         flex: 1;
         display: flex;
         flex-wrap: wrap;
-        gap: $spacing-xs;
+        gap: 0.25rem;
       }
     }
   }
   
-  // Footer: Friends since date (light gray background, single line)
+  // 底部：元信息 + 操作（浅灰背景）
   .card-footer {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    padding: $spacing-base - 4px $spacing-base;
+    padding: 0.75rem 1rem;
     background: var(--soft-bg-secondary, #f5f7fa);
     border-top: 1px solid var(--soft-border-light, #e2e8f0);
     
     .friend-meta {
       display: flex;
       align-items: center;
-      gap: $spacing-sm;
+      gap: 0.5rem;
       
       .meta-text {
-        font-size: $font-size-sm;
+        font-size: 0.8125rem;
         color: var(--soft-text-tertiary, #a0aec0);
       }
+    }
+    
+    .actions-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      border-radius: var(--soft-radius-md, 8px);
     }
   }
 }
 
-// Pulse animation
+// 脉动动画
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -433,7 +414,7 @@ const handleRemoveFriend = () => {
   }
 }
 
-// Dark mode adaptation
+// 深色模式适配
 .body--dark {
   .friend-card-content {
     background: var(--soft-bg-card-dark, #1e293b);
@@ -443,47 +424,36 @@ const handleRemoveFriend = () => {
       box-shadow: var(--soft-shadow-lg-dark, 0 10px 15px rgba(0, 0, 0, 0.3));
     }
     
-    .card-header {
-      background: var(--soft-bg-secondary-dark, #0f172a);
-      border-color: var(--soft-border-dark, #334155);
+    .friend-avatar-section {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        rgba(255, 255, 255, 0.02) 100%
+      );
       
       .friend-avatar {
         border-color: var(--soft-bg-card-dark, #1e293b);
       }
       
       .online-indicator {
-        border-color: var(--soft-bg-secondary-dark, #0f172a);
-      }
-      
-      .friend-name-section {
-        .friend-name {
-          color: var(--soft-text-primary-dark, #e2e8f0);
-        }
-        
-        .friend-email {
-          color: var(--soft-text-tertiary-dark, #64748b);
-        }
+        border-color: var(--soft-bg-card-dark, #1e293b);
       }
     }
     
-    .card-body {
-      background: var(--soft-bg-card-dark, #1e293b);
+    .friend-info-section {
+      .friend-name {
+        color: var(--soft-text-primary-dark, #e2e8f0);
+      }
       
-      .info-value {
-        color: var(--soft-text-secondary-dark, #a0aec0);
-        
-        &.remark-text {
-          color: var(--soft-text-tertiary-dark, #64748b);
+      .friend-stats {
+        .stat-item {
+          color: var(--soft-text-secondary-dark, #a0aec0);
         }
       }
-    }
-    
-    .card-footer {
-      background: var(--soft-bg-secondary-dark, #0f172a);
-      border-color: var(--soft-border-dark, #334155);
       
-      .meta-text {
+      .friend-remark {
         color: var(--soft-text-tertiary-dark, #64748b);
+        background: var(--soft-bg-secondary-dark, #0f172a);
       }
     }
   }

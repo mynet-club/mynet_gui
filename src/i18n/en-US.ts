@@ -319,6 +319,8 @@ export default {
   nodes: {
     title: 'Node Management',
     name: 'Node Name',
+    namePlaceholder: 'Enter node name',
+    nameMinLength: 'Node name must be at least 3 characters',
     type: 'Node Type',
     ipAddress: 'IP Address',
     port: 'Port',
@@ -450,6 +452,14 @@ export default {
     // List page
     subtitle: 'Manage and monitor network nodes',
     createNode: 'Create Node',
+    quickCreate: 'Quick Create',
+    quickCreateTitle: 'Quick Create Node',
+    quickCreateDesc: 'Enter a node name and the system will automatically apply default settings (GNB, port 9016, MTU 1450) and assign an IP address.',
+    quickCreateSuccess: 'Node created successfully',
+    quickCreateNextStep: 'Node created. Visit the node detail page to generate keys and complete configuration.',
+    quickCreateIpPoolEmpty: 'No available IPs in the IP pool. Please contact the administrator to allocate an IP pool.',
+    quickCreateFailed: 'Quick create failed',
+    goToKeys: 'Go to Keys',
     noData: 'No Nodes',
     noDataDescription: 'No nodes have been created yet',
     createFirstNode: 'Create First Node',

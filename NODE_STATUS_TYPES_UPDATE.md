@@ -32,7 +32,7 @@ export const NODE_TYPE = {
   MONITOR: 32,  // 0010 0000 监控节点
   PROXY: 64,    // 0100 0000 代理节点
   SPECIAL: 128  // 1000 0000 特殊节点
-} as const
+} as const 
 
 // 节点类型名称映射
 export const NODE_TYPE_NAMES = {

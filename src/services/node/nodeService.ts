@@ -64,16 +64,12 @@ export class NodeService {
   }
 
   /**
-   * 一键快速创建节点（使用默认配置，自动分配IP）
-   * POST /api/v1/nodes/quick-create
-   * @param nodeName 节点名称（3-255字符）
-   * @param zoneId   所属Zone ID
+   * 一键快速创建节点（自动使用默认配置并分配 IP）
+   * @param nodeName 节点名称 (3-255字符)
+   * @returns 创建结果，含节点信息、配置和下一步操作提示
    */
-  async quickCreateNode(nodeName: string, zoneId: number): Promise<ApiResponse<QuickCreateNodeResponse>> {
-    const response = await api.post('/nodes/quick-create', {
-      node_name: nodeName,
-      zone_id: zoneId,
-    })
+  async quickCreateNode(nodeName: string): Promise<QuickCreateNodeResponse> {
+    const response = await api.post('/nodes/quick-create', { node_name: nodeName })
     return response.data
   }
 
