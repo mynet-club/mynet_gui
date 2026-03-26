@@ -190,7 +190,7 @@
             <div class="text-caption text-grey-6">{{ $t('app.tagline') }}</div>
           </div>
           <div class="col-auto">
-            <q-icon name="hub" size="lg" class="text-white" />
+            <img src="/icons/icon.png" alt="MyNet" style="width: 40px; height: 40px; border-radius: 8px;" />
           </div>
         </div>
       </div>
@@ -819,7 +819,7 @@ onMounted(async () => {
     
     // 初始化引导状态（使用user_id而不是id）
     const uniqueUserId = authStore.user.user_id?.toString() || authStore.user.id.toString()
-    onboardingStore.initialize(uniqueUserId)
+    await onboardingStore.initialize(uniqueUserId)
     debug.log('🎓 [Onboarding] Initialized with userId:', uniqueUserId)
     
     // 启动Tips引擎（开发环境启用调试）

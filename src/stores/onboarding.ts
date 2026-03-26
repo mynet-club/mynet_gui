@@ -11,6 +11,7 @@ import type {
   OnboardingPreferences
 } from '../types/tips'
 import { OnboardingStage, OnboardingPath } from '../types/tips'
+import { api } from '../services/api'
 
 const STORAGE_KEY = 'mynet_onboarding_state'
 const STATE_VERSION = '1.0.0'
@@ -90,6 +91,10 @@ export const useOnboardingStore = defineStore('onboarding', () => {
   const startedAt = ref<string | undefined>()
   const completedAt = ref<string | undefined>()
   const updatedAt = ref<string>(new Date().toISOString())
+
+  // 后端同步状态
+  let syncTimer: ReturnType<typeof setTimeout> | null = null
+  const SYNC_DEBOUNCE_MS = 2000
 
   // ========== 计算属性 ==========
 
@@ -185,11 +190,13 @@ export const useOnboardingStore = defineStore('onboarding', () => {
   /**
    * 初始化状态
    */
-  const initialize = (uid: string) => {
+  const initialize = async (uid: string) => {
     userId.value = uid
 
-    // 尝试从LocalStorage加载
-    const stored = loadStateFromStorage(uid)
+    // 优先从后端加载，回退到 localStorage
+    const remote = await fetchFromBackend()
+    const stored = remote || loadStateFromStorage(uid)
+
     if (stored) {
       version.value = stored.version || STATE_VERSION
       completed.value = stored.completed || false
@@ -201,7 +208,13 @@ export const useOnboardingStore = defineStore('onboarding', () => {
       completedAt.value = stored.completedAt
       updatedAt.value = stored.updatedAt || new Date().toISOString()
 
-      console.log('[Onboarding] State loaded from storage:', {
+      // 如果是从后端恢复，同步到 localStorage
+      if (remote) {
+        saveStateToStorage(uid, exportState())
+      }
+
+      console.log('[Onboarding] State loaded:', {
+        source: remote ? 'backend' : 'localStorage',
         progress: progress.value,
         currentStage: currentStage.value,
         selectedPath: selectedPath.value
@@ -398,6 +411,54 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     }
 
     saveStateToStorage(userId.value, state)
+    scheduleSyncToBackend(state)
+  }
+
+  /**
+   * 防抖同步到后端
+   */
+  const scheduleSyncToBackend = (state: OnboardingState) => {
+    if (syncTimer) clearTimeout(syncTimer)
+    syncTimer = setTimeout(() => {
+      syncToBackend(state)
+    }, SYNC_DEBOUNCE_MS)
+  }
+
+  /**
+   * 同步状态到后端
+   */
+  const syncToBackend = async (state: OnboardingState) => {
+    try {
+      await api.put('/users/onboarding', {
+        completed: state.completed,
+        currentStage: state.currentStage,
+        selectedPath: state.selectedPath,
+        stages: state.stages,
+        preferences: state.preferences,
+        startedAt: state.startedAt,
+        completedAt: state.completedAt,
+      })
+      console.log('[Onboarding] Synced to backend')
+    } catch (error) {
+      // 后端同步失败不影响本地使用
+      console.warn('[Onboarding] Backend sync failed:', error)
+    }
+  }
+
+  /**
+   * 从后端获取状态
+   */
+  const fetchFromBackend = async (): Promise<Partial<OnboardingState> | null> => {
+    try {
+      const { data } = await api.get('/users/onboarding')
+      if (data?.data) {
+        return data.data as Partial<OnboardingState>
+      }
+      return null
+    } catch {
+      console.warn('[Onboarding] Failed to fetch from backend')
+      return null
+    }
   }
 
   /**

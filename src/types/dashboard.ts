@@ -76,7 +76,7 @@ export interface DashboardData {
   // 待处理任务
   pendingTasks: PendingTask[]
   
-  // 社交统计（可选）
+  // 组网统计（可选）
   friendConnections?: number
 }
 

@@ -2,7 +2,9 @@
   <q-card class="auth-card q-pa-md">
     <!-- Logo区域 -->
     <div class="auth-logo">
+      <img src="/icons/icon.png" alt="MyNet" class="logo-icon" />
       <div class="logo-text">MyNet</div>
+      <div class="logo-tagline">Self-sovereign Networking</div>
     </div>
     
     <q-card-section class="auth-header">

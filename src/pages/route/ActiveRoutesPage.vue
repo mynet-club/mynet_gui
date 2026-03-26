@@ -128,6 +128,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
 import { useNodes } from '../../composables/useNodes'
 import { useNotify } from '../../composables/useNotify'
+import { useOnboardingActions } from '../../composables/useOnboardingActions'
 import { extractNodeSummaries, type NodeSummary } from '../../models/nodeSummary'
 import PageLayout from '../../components/layout/PageLayout.vue'
 import NodeListView from '../../components/route/NodeListView.vue'
@@ -493,7 +494,9 @@ watch(
 )
 
 // 初始化
+const { onConnectionManagementViewed } = useOnboardingActions()
 onMounted(async () => {
+  onConnectionManagementViewed()
   // 只在节点列表视图时加载节点数据
   if (!currentNodeId.value) {
     await loadNodes()

@@ -10,7 +10,7 @@ import type {
 } from '../../types'
 
 export const socialService = {
-  // 获取社交数据概览
+  // 获取组网数据概览
   async getOverview(): Promise<SocialDataResponse> {
     const response = await api.get('/social/data')
     return response.data.data

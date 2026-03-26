@@ -154,43 +154,6 @@ if (import.meta.env.DEV) {
         }, 500)
       },
       
-      // Test Spotlight highlighting guide (with arrow)
-      spotlight: () => {
-        const engine = getTipsEngine()
-        console.log('🎯 Test Spotlight guide - Please navigate to IP Pools page (/app/ippools) first')
-        console.log('Tip: The "Create" button on IP Pools page will be highlighted')
-        
-        // Manually create a test Spotlight
-        const testTip = {
-          id: 'test-spotlight',
-          type: 'spotlight' as any,
-          stage: 1,
-          trigger: {
-            route: '/app/ippools',
-            element: '[data-tip-target="create-ippool-btn"]',
-            condition: () => true,
-            once: false
-          },
-          display: {
-            title: '📍 Create IP Pool',
-            content: 'Click this button to create your first IP pool',
-            placement: 'bottom' as any
-          },
-          actions: [
-            {
-              label: 'Got it',
-              type: 'primary' as any,
-              closeOnClick: true
-            }
-          ],
-          priority: 10,
-          skippable: true,
-          closable: true
-        }
-        
-        console.log('✅ Spotlight test Tip created, visit /app/ippools to see the effect')
-      },
-      
       // View currently active Tips
       active: () => {
         const engine = getTipsEngine()

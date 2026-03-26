@@ -12,6 +12,7 @@
             color="primary"
             icon="add"
             :label="$t('routes.actions.createRoute')"
+            data-tip-target="add-route-btn"
             @click="handleCreateRoute"
           />
           <q-btn

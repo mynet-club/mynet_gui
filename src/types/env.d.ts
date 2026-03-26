@@ -3,6 +3,7 @@
 interface ImportMetaEnv {
   readonly VITE_API_BASE_URL: string
   readonly VITE_WS_URL: string
+  readonly VITE_WWW_URL: string
   readonly VITE_PUSHER_APP_KEY: string
   readonly VITE_REVERB_APP_ID: string
   readonly VITE_REVERB_HOST: string

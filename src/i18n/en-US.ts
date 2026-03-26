@@ -1,7 +1,7 @@
 export default {
   app: {
     name: 'MyNet',
-    tagline: 'Social-Based Network Management System'
+    tagline: 'Self-sovereign Networking Platform'
   },
   common: {
     login: 'Login',
@@ -118,7 +118,7 @@ export default {
   },
   welcome: {
     title: 'Welcome to MyNet',
-    subtitle: 'Social-Based Network Management System'
+    subtitle: 'Self-sovereign Networking Platform'
   },
   settings: {
     language: 'Language Settings',
@@ -1588,8 +1588,8 @@ export default {
     deleteError: 'Failed to delete zone'
   },
   social: {
-    subtitle: 'Social network connections and user management',
-    comingSoonMessage: 'Social network feature is under development, stay tuned!',
+    subtitle: 'Network connections and user management',
+    comingSoonMessage: 'Networking management feature is under development, stay tuned!',
     
     // Actions
     actions: {
@@ -2352,6 +2352,98 @@ export default {
       presharedKey: 'Preshared Key',
       roaming: 'Roaming Support',
       handshakeTimeout: 'Handshake Timeout (seconds)'
+    }
+  },
+  tips: {
+    welcome: {
+      title: '👋 Welcome to MyNet',
+      content: '<p>MyNet helps you build secure virtual networks quickly.</p><p>We will guide you through the basic setup. You can skip at any time.</p>'
+    },
+    createIpPool: {
+      title: '💡 Create IP Pool',
+      content: '<p>Click "Create IP Pool" to start. IP pools assign virtual addresses to your devices.</p>'
+    },
+    addFirstDevice: {
+      title: '📱 Add Your First Device',
+      content: '<p>Click "Add Device" to connect your first device to the network.</p>'
+    },
+    choosePath: {
+      title: '🎯 Choose Your Learning Path'
+    },
+    addSecondDevice: {
+      title: '📱 Add a Second Device',
+      content: '<p>Add another device to experience automatic connections between devices.</p>'
+    },
+    autoConnection: {
+      title: '✨ Auto-Connection Established'
+    },
+    inviterFriend: {
+      title: '👥 You Are Now Friends with Your Inviter'
+    },
+    inviteFriend: {
+      title: '📨 Invite a Friend'
+    },
+    friendDevices: {
+      title: '📱 Friend\'s Devices',
+      content: '<p>Browse your friend\'s device list and select nodes to connect.</p>'
+    },
+    createRoute: {
+      title: '➕ Create a Connection'
+    },
+    crossUserConnection: {
+      title: '🎉 Cross-User Connection Established'
+    },
+    connectionManagement: {
+      title: '🔗 Connection Management'
+    },
+    onboardingComplete: {
+      title: '🎊 Onboarding Complete!'
+    },
+    dashboardOverview: {
+      title: '📊 Dashboard Overview',
+      content: '<p>The dashboard shows your network overview: node status, active connections and resource usage. Access all features from the sidebar.</p>'
+    },
+    ippoolManagement: {
+      title: '🌐 IP Pool Management',
+      content: '<p>IP pools assign virtual IP addresses to devices. Use private subnets (e.g. <code>10.0.0.0/24</code>), create multiple pools for different purposes, and avoid conflicts with local networks.</p>'
+    },
+    nodeManagement: {
+      title: '📱 Device Management',
+      content: '<p>Devices (nodes) are the basic units of your network. Each device binds to an IP pool, supports GNB/WireGuard/OpenVPN protocols, and config files can be downloaded from the detail page.</p>'
+    },
+    routeManagement: {
+      title: '🔗 Connection Management',
+      content: '<p>Routes define connections between devices. Devices of the same user connect automatically; cross-user connections require sending a request and waiting for confirmation.</p>'
+    },
+    socialManagement: {
+      title: '👥 Friends Management',
+      content: '<p>Add other users through the friends system. Cross-user connections require mutual friendship. Search by username or email to send friend requests.</p>'
+    },
+    connectionDetails: {
+      title: '🔗 Connection Details',
+      content: '<p>Connection details show both endpoint nodes, network parameters and real-time status. Use the topology view to see your full network structure and troubleshoot issues.</p>'
+    },
+    zoneManagement: {
+      title: '🌍 Zone Management',
+      content: '<p>Zones provide resource isolation — each has independent IP pools, nodes and connections. Contact an admin to request new Zones for multi-environment management.</p>'
+    },
+    settingsCenter: {
+      title: '⚙️ Settings',
+      content: '<p>Manage your profile, notification preferences and security options in settings. Supports theme, language and timezone switching.</p>'
+    },
+    actions: {
+      gotIt: 'Got it',
+      skip: 'Skip onboarding',
+      startSetup: 'Start setup',
+      addDevice: 'Add device',
+      addAnotherDevice: 'Add another device',
+      exploreSelf: 'Explore on my own',
+      browseFriendDevices: 'Browse friend\'s devices',
+      createConnection: 'Create connection',
+      manageConnections: 'Manage connections',
+      startUsing: 'Start using',
+      deviceExperience: 'Device experience path',
+      friendConnection: 'Friend connection path'
     }
   }
 }

@@ -1,7 +1,14 @@
 # MyNet Frontend - AI Coding Instructions
 
 > Vue 3 + TypeScript + Quasar Framework  
-> Last Updated: 2026-01-14
+> Last Updated: 2026-03-26
+
+## 📚 MyNet 生态系统知识库
+
+> **SSOT 知识库**位于 `mynet_ctl/docs/knowledge-base/`。开发前请查阅：
+> - [ecosystem.md](../../mynet_ctl/docs/knowledge-base/ecosystem.md) — 项目全景与关系图
+> - [architecture.md](../../mynet_ctl/docs/knowledge-base/architecture.md) — 系统架构、认证链
+> - [projects/mynet_gui.md](../../mynet_ctl/docs/knowledge-base/projects/mynet_gui.md) — 本项目速查卡
 
 ---
 

@@ -25,6 +25,7 @@
 
     <!-- 好友列表 -->
     <ResponsiveCardGrid
+      data-tip-target="friends-list"
       :items="friends"
       :loading="loading"
       :loading-count="12"

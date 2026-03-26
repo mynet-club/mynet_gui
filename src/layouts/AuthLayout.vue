@@ -148,7 +148,7 @@ watch(locale, (newLocale) => {
 
 <style lang="scss" scoped>
 .auth-layout {
-  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 50%, #c7d2fe 100%);
   min-height: 100vh;
   position: relative;
   
@@ -161,12 +161,13 @@ watch(locale, (newLocale) => {
     gap: 8px;
     
     .q-btn {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      color: #4f46e5 !important;
       
       &:hover {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.85);
       }
     }
   }
@@ -183,7 +184,13 @@ watch(locale, (newLocale) => {
 // 深色模式优化
 .body--dark {
   .auth-layout {
-    background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-accent) 100%);
+    background: linear-gradient(135deg, #1e1b4b 0%, #1e1b4b 50%, #0f172a 100%);
+    
+    &::before {
+      background: 
+        radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(79, 70, 229, 0.06) 0%, transparent 50%);
+    }
   }
 }
 

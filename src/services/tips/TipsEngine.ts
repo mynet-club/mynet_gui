@@ -11,7 +11,7 @@ import type {
   TipsEngineOptions,
   OnboardingPath
 } from '../../types/tips'
-import { OnboardingStage } from '../../types/tips'
+import { OnboardingStage, TipType } from '../../types/tips'
 import { useOnboardingStore } from '../../stores/onboarding'
 import { tipsRegistry, getTipsByRoute, getTipsByStage, setRouter } from './TipsRegistry'
 import { TipsStorage } from '../../utils/tipsStorage'
@@ -26,6 +26,19 @@ export class TipsEngine {
   public activeTips: Map<string, TipInstance> = reactive(new Map())  // 改为 public 和 reactive
   private shownTips: Set<string> = new Set()
   private listeners: Map<string, Function[]> = new Map()
+  
+  // Smart Timing 状态
+  private lastActivityTimestamp: number = Date.now()
+  private routeVisitCounts: Map<string, number> = new Map()
+  private isUserInteracting: boolean = false
+  private interactionTimer: ReturnType<typeof setTimeout> | null = null
+  private activityListenersAttached: boolean = false
+  private onActivityHandler: (() => void) | null = null
+  
+  // 清理引用
+  private unregisterRouteGuard: (() => void) | null = null
+  private stopWatchers: (() => void)[] = []
+  private pendingTips: Set<string> = new Set()  // 防止 delay 期间重复调度
   
   constructor(options: TipsEngineOptions = {}) {
     this.router = useRouter()
@@ -60,25 +73,30 @@ export class TipsEngine {
     this.log('Starting engine')
 
     // 监听路由变化
-    this.router.beforeEach((to, from, next) => {
+    this.unregisterRouteGuard = this.router.beforeEach((to, from, next) => {
       this.onRouteChange(to.path)
       next()
     })
 
+    // 启动用户活动追踪
+    this.startActivityTracking()
+
     // 监听引导状态变化
-    watch(
+    const stopStageWatch = watch(
       () => this.onboardingStore.currentStage,
       (newStage) => {
         this.onStageChange(newStage)
       }
     )
 
-    watch(
+    const stopPathWatch = watch(
       () => this.onboardingStore.selectedPath,
       (newPath) => {
         this.onPathChange(newPath)
       }
     )
+    
+    this.stopWatchers = [stopStageWatch, stopPathWatch]
 
     // 初始检查
     this.checkTriggers()
@@ -92,8 +110,107 @@ export class TipsEngine {
     this.hideAll()
     this.activeTips.clear()
     this.shownTips.clear()
+    this.pendingTips.clear()
     this.listeners.clear()
+    this.stopActivityTracking()
+    
+    // 清理路由守卫
+    if (this.unregisterRouteGuard) {
+      this.unregisterRouteGuard()
+      this.unregisterRouteGuard = null
+    }
+    
+    // 清理 watchers
+    this.stopWatchers.forEach(stop => stop())
+    this.stopWatchers = []
+    
     this.log('✅ Engine stopped')
+  }
+
+  /**
+   * 启动用户活动追踪（用于 Smart Timing）
+   */
+  private startActivityTracking() {
+    if (this.activityListenersAttached) return
+    this.activityListenersAttached = true
+
+    this.onActivityHandler = () => {
+      this.lastActivityTimestamp = Date.now()
+      this.isUserInteracting = true
+
+      if (this.interactionTimer) clearTimeout(this.interactionTimer)
+      this.interactionTimer = setTimeout(() => {
+        this.isUserInteracting = false
+        // 空闲后重新检查需要 idle 触发的 tips
+        this.checkTriggers()
+      }, 3000)
+    }
+
+    const events = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'] as const
+    events.forEach(e => document.addEventListener(e, this.onActivityHandler!, { passive: true }))
+  }
+
+  /**
+   * 停止活动追踪
+   */
+  private stopActivityTracking() {
+    if (this.onActivityHandler) {
+      const events = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'] as const
+      events.forEach(e => document.removeEventListener(e, this.onActivityHandler!))
+      this.onActivityHandler = null
+    }
+    this.activityListenersAttached = false
+    if (this.interactionTimer) {
+      clearTimeout(this.interactionTimer)
+      this.interactionTimer = null
+    }
+  }
+
+  /**
+   * 获取用户空闲秒数
+   */
+  private getIdleSeconds(): number {
+    return (Date.now() - this.lastActivityTimestamp) / 1000
+  }
+
+  /**
+   * 获取当前路由的访问次数
+   */
+  private getRouteVisitCount(route: string): number {
+    return this.routeVisitCounts.get(route) || 0
+  }
+
+  /**
+   * 评估 Smart Timing 条件
+   */
+  private evaluateSmartTiming(tip: TipConfig): boolean {
+    const timing = tip.trigger.timing
+    if (!timing) return true // 没有 timing 配置则直接通过
+
+    // 检查空闲时间
+    if (timing.idleAfterSeconds != null) {
+      if (this.getIdleSeconds() < timing.idleAfterSeconds) {
+        this.log(`⏳ Tip ${tip.id}: waiting for ${timing.idleAfterSeconds}s idle (current: ${this.getIdleSeconds().toFixed(1)}s)`)
+        return false
+      }
+    }
+
+    // 检查是否在交互中
+    if (timing.notDuringInteraction && this.isUserInteracting) {
+      this.log(`⏳ Tip ${tip.id}: waiting for interaction to stop`)
+      return false
+    }
+
+    // 检查路由访问次数
+    if (timing.afterVisitCount != null && tip.trigger.route) {
+      const route = typeof tip.trigger.route === 'string' ? tip.trigger.route : ''
+      if (route && this.getRouteVisitCount(route) < timing.afterVisitCount) {
+        this.log(`⏳ Tip ${tip.id}: waiting for ${timing.afterVisitCount} visits (current: ${this.getRouteVisitCount(route)})`)
+        return false
+      }
+    }
+
+    return true
   }
 
   /**
@@ -101,6 +218,23 @@ export class TipsEngine {
    */
   private onRouteChange(path: string) {
     this.log('🚦 Route changed:', path)
+    
+    // 隐藏与新路由不匹配的 tips
+    for (const [id, instance] of this.activeTips) {
+      const tipRoute = instance.config.trigger.route
+      if (!tipRoute) continue
+      const isMatch = typeof tipRoute === 'string'
+        ? (path === tipRoute || path.includes(tipRoute))
+        : tipRoute.test(path)
+      if (!isMatch) {
+        this.log('🧹 Hiding tip from previous route:', id)
+        instance.hide()
+      }
+    }
+    
+    // 记录路由访问次数
+    const count = this.routeVisitCounts.get(path) || 0
+    this.routeVisitCounts.set(path, count + 1)
     
     // 延迟一下，等待页面元素渲染
     setTimeout(() => {
@@ -204,18 +338,25 @@ export class TipsEngine {
    * 智能选择要显示的 Tips
    * 策略：
    * 1. 同一分组只显示最高优先级的一个
-   * 2. 总数不超过 maxConcurrent
-   * 3. 优先显示 Modal/Spotlight，其次 Card
+   * 2. 总数不超过 maxConcurrent（所有类型统一计数）
    */
   private selectTipsToShow(sortedTips: TipConfig[]): TipConfig[] {
     const selected: TipConfig[] = []
     const groupsShown = new Set<string>()
+    let totalCount = this.activeTips.size
+
+    // 已激活的 tip 的分组也纳入互斥判断
+    for (const [, instance] of this.activeTips) {
+      if (instance.config.group) {
+        groupsShown.add(instance.config.group)
+      }
+    }
     
     for (const tip of sortedTips) {
-      // 已达到最大并发数
-      if (selected.length >= this.options.maxConcurrent) {
-        this.log('⛔ Reached max concurrent, stopping selection')
-        break
+      // 所有类型统一遵守并发上限（优先级高的先入选）
+      if (totalCount >= this.options.maxConcurrent) {
+        this.log('⛔ Reached max concurrent, skipping:', tip.id)
+        continue
       }
       
       // 检查分组冲突
@@ -228,6 +369,7 @@ export class TipsEngine {
       }
       
       selected.push(tip)
+      totalCount++
       this.log(`✅ Selected ${tip.id} for display`)
     }
     
@@ -248,8 +390,8 @@ export class TipsEngine {
     this.log('✅ Tip not hidden by user')
     
     // 检查是否已经在显示中
-    if (this.activeTips.has(tip.id)) {
-      this.log('❌ Tip already active:', tip.id)
+    if (this.activeTips.has(tip.id) || this.pendingTips.has(tip.id)) {
+      this.log('❌ Tip already active or pending:', tip.id)
       return false
     }
     this.log('✅ Tip not currently active')
@@ -313,7 +455,12 @@ export class TipsEngine {
       this.log('✅ Required stages completed')
     }
 
-    // 检查并发数量
+    // Smart Timing 检查
+    if (!this.evaluateSmartTiming(tip)) {
+      return false
+    }
+
+    // 检查并发数量（所有类型统一计数，优先级高的先显示）
     if (this.activeTips.size >= this.options.maxConcurrent) {
       this.log('❌ Max concurrent tips reached:', this.options.maxConcurrent)
       return false
@@ -323,7 +470,9 @@ export class TipsEngine {
     // 延迟触发
     if (tip.trigger.delay) {
       this.log('⏱️ Scheduling tip with delay:', tip.trigger.delay)
+      this.pendingTips.add(tip.id)
       setTimeout(() => {
+        this.pendingTips.delete(tip.id)
         this.showTip(tip)
       }, tip.trigger.delay)
       return true
@@ -413,12 +562,14 @@ export class TipsEngine {
   async completeTip(tip: TipConfig) {
     this.log('✅ Completing tip:', tip.id)
     
-    // 只有 once=true 的教程流程 tips 才会影响 stage 进度
-    // once=false 的帮助提示只是提供信息，不影响流程
-    if (tip.trigger.once) {
-      // 标记对应阶段为完成
+    // Welcome 阶段比较特殊：关闭弹窗即表示完成
+    // 其他 once=true 的流程 tips 不再自动推进 stage
+    // 引导阶段由实际用户操作（通过 useOnboardingActions）驱动
+    if (tip.trigger.once && tip.stage === OnboardingStage.Welcome) {
       this.onboardingStore.completeStage(tip.stage)
-      this.log('📊 Stage completed:', tip.stage)
+      this.log('📊 Welcome stage completed')
+    } else if (tip.trigger.once) {
+      this.log('ℹ️ Flow tip dismissed (stage driven by actual operations)')
     } else {
       this.log('ℹ️ Help tip completed (no stage progress)')
     }
@@ -429,9 +580,8 @@ export class TipsEngine {
     // 发送事件
     this.emit('tip:complete', tip)
 
-    // 只有流程 tips 才检查下一个阶段
+    // 检查下一个阶段（适用于所有 once tips）
     if (tip.trigger.once) {
-      // 检查下一个阶段
       const nextStage = this.onboardingStore.nextStage
       if (nextStage !== null) {
         this.log('⏭️ Next stage available:', nextStage)
@@ -445,6 +595,9 @@ export class TipsEngine {
         this.log('🎉 All stages completed!')
         this.emit('onboarding:complete')
       }
+    } else {
+      // 非 once tip 关闭后也重新检查，让次优先的 tip 有机会显示
+      setTimeout(() => this.checkTriggers(), 300)
     }
   }
 
@@ -464,6 +617,9 @@ export class TipsEngine {
     
     // 发送事件
     this.emit('tip:skip', tip)
+
+    // 重新检查触发器，让次优先的 tip 有机会显示
+    setTimeout(() => this.checkTriggers(), 300)
   }
 
   /**

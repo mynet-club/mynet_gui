@@ -14,7 +14,7 @@ const getCurrentLanguage = () => {
 const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_BASE_URL
   const baseUrl = envUrl || 'http://localhost:8000'
-  return `${baseUrl}/api/v1`
+  return `${baseUrl}/api/v2`
 }
 
 export const api = axios.create({

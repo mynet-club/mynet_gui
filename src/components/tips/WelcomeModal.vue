@@ -110,7 +110,8 @@ watch(
  */
 watch(visible, (newValue) => {
   if (!newValue && props.tip.visible) {
-    // 对话框被关闭，隐藏tip
+    // 对话框被外部关闭（点击遮罩等），触发跳过/完成事件
+    emit(props.tip.config.skippable ? 'skip' : 'complete', props.tip.config)
     props.tip.hide()
   }
 })

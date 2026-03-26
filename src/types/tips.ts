@@ -9,12 +9,10 @@
 export enum TipType {
   /** 模态弹窗 - 全屏居中显示，需要用户交互 */
   Modal = 'modal',
-  /** 高亮引导 - 突出显示特定元素，遮罩其他区域 */
-  Spotlight = 'spotlight',
-  /** 工具提示 - 小型气泡提示，附着在目标元素 */
-  Tooltip = 'tooltip',
-  /** 卡片提示 - 页面内嵌入式卡片 */
-  Card = 'card'
+  /** 非阻断气泡引导 - 附着在目标元素旁，不阻止页面操作 */
+  Popover = 'popover',
+  /** 可折叠横幅 - 页面顶部内嵌横幅，默认收起 */
+  Banner = 'banner'
 }
 
 /**
@@ -80,6 +78,24 @@ export interface TipTrigger {
   delay?: number
   /** 依赖的前置阶段 */
   requiredStages?: OnboardingStage[]
+  /** 智能时机控制 */
+  timing?: SmartTiming
+}
+
+/**
+ * 智能时机控制
+ */
+export interface SmartTiming {
+  /** 用户在当前页面空闲超过 N 秒后才显示 */
+  idleAfterSeconds?: number
+  /** 用户完成了某个操作后才显示（事件名） */
+  afterAction?: string
+  /** 用户 N 次访问同一页面后才显示 */
+  afterVisitCount?: number
+  /** 用户正在输入/操作时不显示 */
+  notDuringInteraction?: boolean
+  /** 自动缩小为脉冲圆点的延迟（秒），0 表示不缩小 */
+  autoMinimizeAfterSeconds?: number
 }
 
 /**
@@ -142,7 +158,7 @@ export interface TipConfig {
   actions?: TipAction[]
   /** 
    * 优先级（数字越大优先级越高）
-   * Modal: 100, Spotlight: 50, Card: 10, Tooltip: 1
+   * Modal: 100, Popover: 50, Banner: 10
    */
   priority?: number
   /** Tips 分组（同一分组内只显示一个） */

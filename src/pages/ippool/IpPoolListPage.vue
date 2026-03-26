@@ -45,9 +45,11 @@ import PageLayout from '../../components/layout/PageLayout.vue'
 import IPPoolManager from '../../components/ippool/IPPoolManager.vue'
 import IPPoolCreateDialog from '../../components/ippool/IPPoolCreateDialog.vue'
 import { useIPPools } from '../../composables'
+import { useOnboardingActions } from '../../composables/useOnboardingActions'
 
 const { t } = useI18n()
 const { pools, loading, fetchPools } = useIPPools()
+const { onIpPoolCreated } = useOnboardingActions()
 
 const showCreateDialog = ref(false)
 
@@ -57,6 +59,7 @@ const handleRefresh = async () => {
 
 const handlePoolCreated = async () => {
   showCreateDialog.value = false
+  onIpPoolCreated()
   await handleRefresh()
 }
 </script>

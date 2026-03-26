@@ -53,7 +53,7 @@ export function useSocial() {
     return currentRequestType.value === 'received' ? friendRequests.value : sentRequests.value
   })
 
-  // 获取社交概览数据
+  // 获取组网概览数据
   const fetchOverview = async () => {
     try {
       loading.value = true
@@ -130,7 +130,7 @@ export function useSocial() {
         invitations.value = response.invitations
       }
     } catch (error) {
-      debug.error('获取社交概览失败:', error)
+      debug.error('获取组网概览失败:', error)
       notify.error(t('social.fetchOverviewError'))
     } finally {
       loading.value = false

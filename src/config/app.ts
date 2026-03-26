@@ -33,6 +33,11 @@ export const APP_CONFIG = {
     baseUrl: import.meta.env.VITE_API_BASE_URL,
     timeout: 30000
   },
+
+  // 外部链接
+  urls: {
+    www: import.meta.env.VITE_WWW_URL || 'https://mynet.club'
+  },
   
   // WebSocket相关配置
   websocket: {

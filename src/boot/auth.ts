@@ -71,7 +71,7 @@ export default boot(async ({ router, app }) => {
       if (user.avatar && user.avatar.startsWith('blob:')) {
         debug.log('🔐 [Boot] Blob avatar URL detected, replacing with backend URL')
         const apiBaseUrl = APP_CONFIG.api.baseUrl.replace('/api', '')
-        user.avatar = `${apiBaseUrl}/api/v1/assets/avatar`
+        user.avatar = `${apiBaseUrl}/api/v2/assets/avatar`
         // 更新LocalStorage
         LocalStorage.set('user_info', JSON.stringify(user))
       }

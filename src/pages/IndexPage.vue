@@ -9,10 +9,11 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { APP_CONFIG } from '../config/app'
 
 // 组件挂载时立即跳转
 onMounted(() => {
-  window.location.href = 'https://mynet.club/'
+  window.location.href = `${APP_CONFIG.urls.www}/`
 })
 </script>
 

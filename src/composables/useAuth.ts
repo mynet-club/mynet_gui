@@ -1,6 +1,6 @@
 import { ref, reactive } from 'vue'
 import debug from "src/utils/debug"
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
@@ -8,6 +8,7 @@ import { apiService } from '../services/api' // 修复导入路径
 
 export function useAuth() {
   const router = useRouter()
+  const route = useRoute()
   const $q = useQuasar()
   const { t } = useI18n()
   const authStore = useAuthStore()
@@ -155,6 +156,15 @@ export function useAuth() {
       
       // 确保认证状态已经更新
       if (authStore.isAuthenticated) {
+        // 检查是否有外部回调（如 CTL setup 跳转登录）
+        const callback = route.query.callback as string
+        if (callback) {
+          debug.log('[useAuth] OAuth callback detected, redirecting to:', callback)
+          const sep = callback.includes('?') ? '&' : '?'
+          window.location.href = callback + sep + 'token=' + encodeURIComponent(authStore.token!)
+          return
+        }
+
         debug.log('🔧 [useAuth] Navigating to dashboard...')
         await router.push('/app/dashboard')
         debug.log('🔧 [useAuth] Navigation to dashboard completed')

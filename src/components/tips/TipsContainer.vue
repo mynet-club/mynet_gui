@@ -1,5 +1,14 @@
 <template>
   <Teleport to="body">
+    <!-- 背景遮罩：区分 tips 和内容 -->
+    <Transition name="mask-fade">
+      <div
+        v-if="activeTips.length > 0"
+        class="tips-backdrop"
+        @click.self="handleBackdropClick"
+      />
+    </Transition>
+
     <div class="tips-container">
       <!-- 遍历所有活跃的Tips -->
       <template v-for="tip in activeTips" :key="tip.config.id">
@@ -9,32 +18,20 @@
           @complete="handleComplete"
           @skip="handleSkip"
         />
-        
-        <SpotlightGuide
-          v-else-if="tip.config.type === 'spotlight'"
+
+        <PopoverTip
+          v-else-if="tip.config.type === 'popover'"
           :tip="tip"
           @complete="handleComplete"
           @skip="handleSkip"
         />
         
-        <TooltipTip
-          v-else-if="tip.config.type === 'tooltip'"
+        <BannerTip
+          v-else-if="tip.config.type === 'banner'"
           :tip="tip"
           @complete="handleComplete"
           @skip="handleSkip"
         />
-        
-        <CardTip
-          v-else-if="tip.config.type === 'card'"
-          :tip="tip"
-          @complete="handleComplete"
-          @skip="handleSkip"
-        />
-        
-        <!-- 调试：未匹配的类型 -->
-        <div v-else style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: red; color: white; padding: 20px; z-index: 99999;">
-          未知的 Tip 类型: {{ tip.config.type }} ({{ tip.config.id }})
-        </div>
       </template>
     </div>
   </Teleport>
@@ -46,9 +43,8 @@ import { useTips } from '../../composables/useTips'
 import { TipType } from '../../types/tips'
 import type { TipInstance, TipConfig } from '../../types/tips'
 import WelcomeModal from './WelcomeModal.vue'
-import SpotlightGuide from './SpotlightGuide.vue'
-import TooltipTip from './TooltipTip.vue'
-import CardTip from './CardTip.vue'
+import PopoverTip from './PopoverTip.vue'
+import BannerTip from './BannerTip.vue'
 
 const { getActiveTips, completeTip, skipTip } = useTips()
 
@@ -70,9 +66,30 @@ const handleComplete = (tip: TipConfig) => {
 const handleSkip = (tip: TipConfig) => {
   skipTip(tip)
 }
+
+/**
+ * 点击遮罩：关闭当前可跳过的 tip
+ */
+const handleBackdropClick = () => {
+  const tips = activeTips.value
+  if (tips.length > 0) {
+    const tip = tips[0]
+    if (tip.config.skippable) {
+      skipTip(tip.config)
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>
+.tips-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  z-index: 9990;
+  pointer-events: auto;
+}
+
 .tips-container {
   position: fixed;
   top: 0;
@@ -85,5 +102,16 @@ const handleSkip = (tip: TipConfig) => {
   > * {
     pointer-events: auto;
   }
+}
+
+.mask-fade-enter-active {
+  transition: opacity 0.25s ease;
+}
+.mask-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.mask-fade-enter-from,
+.mask-fade-leave-to {
+  opacity: 0;
 }
 </style>

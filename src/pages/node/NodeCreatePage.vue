@@ -128,6 +128,7 @@ import debug from "src/utils/debug"
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useNodes, useNotify } from '../../composables'
+import { useOnboardingActions } from '../../composables/useOnboardingActions'
 import { CreateNodeRequest, VpnType } from '../../types/node'
 import PageLayout from '../../components/layout/PageLayout.vue'
 
@@ -137,6 +138,7 @@ const $q = useQuasar()
 const { t } = useI18n()
 const { createNode } = useNodes()
 const { success: notifySuccess, error: notifyError } = useNotify()
+const { onNodeCreated } = useOnboardingActions()
 
 // 表单数据接口
 interface CreateNodeForm {
@@ -199,6 +201,7 @@ const onSubmit = async () => {
     if (newNode) {
       debug.log('创建的节点数据:', newNode)
       notifySuccess(t('nodes.operations.createSuccess'))
+      onNodeCreated()
       // 跳转到节点编辑页面 - 使用node_id或id字段
       const nodeId = newNode.node_id || newNode.id
       debug.log('节点ID:', nodeId, '(node_id:', newNode.node_id, ', id:', newNode.id, ')')

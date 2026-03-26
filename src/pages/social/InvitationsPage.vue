@@ -15,7 +15,7 @@
         indicator-color="primary"
         align="left"
       >
-        <q-tab name="search" :label="$t('social.search.title')" icon="search" />
+        <q-tab name="search" :label="$t('social.search.title')" icon="search" data-tip-target="invite-friend-btn" />
         <q-tab name="invitations" :label="$t('social.invitations.title')" icon="card_giftcard" />
       </q-tabs>
     </div>

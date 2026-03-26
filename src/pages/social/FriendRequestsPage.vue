@@ -116,6 +116,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import { useSocial } from '../../composables/useSocial'
+import { useOnboardingActions } from '../../composables/useOnboardingActions'
 import type { FriendRequest } from '../../types'
 
 const { t } = useI18n()
@@ -128,6 +129,7 @@ const {
   currentRequestType,
   handleRequestTypeChange: handleTypeChange
 } = useSocial()
+const { onFriendAdded } = useOnboardingActions()
 
 const requestType = ref<'received' | 'sent'>('received')
 
@@ -143,6 +145,7 @@ const handleRequestTypeChange = (type: 'received' | 'sent') => {
 
 const acceptRequest = async (request: FriendRequest) => {
   await acceptFriendRequest(request.request_id.toString())
+  onFriendAdded()
 }
 
 const rejectRequest = async (request: FriendRequest) => {

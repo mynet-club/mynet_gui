@@ -260,13 +260,13 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '我的服务', requiresAuth: true }
       },
       
-      // 社交网络基础路由重定向
+      // 组网基础路由重定向
       { 
         path: 'social', 
         redirect: '/app/social/friends'
       },
       
-      // 社交网络子路由
+      // 组网子路由
       { 
         path: 'social/friends', 
         name: 'social-friends',

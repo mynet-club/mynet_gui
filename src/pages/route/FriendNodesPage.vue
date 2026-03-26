@@ -201,6 +201,7 @@ import { useRoutes } from '../../composables/useRoutes'
 import { useNodes } from '../../composables/useNodes'
 import { useSocial } from '../../composables/useSocial'
 import { useNotify } from '../../composables/useNotify'
+import { useOnboardingActions } from '../../composables/useOnboardingActions'
 import PageLayout from '../../components/layout/PageLayout.vue'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import AvatarReminder from '../../components/social/AvatarReminder.vue'
@@ -495,7 +496,9 @@ const formatDate = (dateString: string) => {
 }
 
 // 初始化
+const { onInviterDevicesViewed } = useOnboardingActions()
 onMounted(async () => {
+  onInviterDevicesViewed()
   await fetchAllFriendNodes()
 })
 </script>

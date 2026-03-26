@@ -1,7 +1,7 @@
 export default {
   app: {
     name: 'MyNet',
-    tagline: '基于社交的组网管理系统'
+    tagline: '自主组网平台'
   },
   common: {
     login: '登录',
@@ -119,7 +119,7 @@ export default {
   },
   welcome: {
     title: '欢迎使用 MyNet',
-    subtitle: '基于社交的组网管理系统'
+    subtitle: '自主组网平台'
   },
   settings: {
     language: '语言设置',
@@ -137,10 +137,10 @@ export default {
   auth: {
     login: '登录',
     register: '注册',
-    loginTitle: '登录 MyNet',
-    loginSubtitle: '安全、稳定的网络连接平台',
-    registerTitle: '创建你的 MyNet 账户',
-    registerSubtitle: '安全、稳定的网络连接平台',
+    loginTitle: '欢迎回来',
+    loginSubtitle: '登录你的 MyNet 账户',
+    registerTitle: '创建账户',
+    registerSubtitle: '加入 MyNet 自主组网平台',
     forgotPasswordTitle: '忘记密码',
     forgotPasswordSubtitle: '请输入您的邮箱地址',
     resetPasswordTitle: '重置密码',
@@ -154,7 +154,7 @@ export default {
     name: '姓名',
     rememberMe: '记住我',
     forgotPassword: '忘记密码？',
-    loginButton: '登录 MyNet',
+    loginButton: '登录',
     registerButton: '创建账户',
     sendResetLink: '发送重置链接',
     resetPasswordButton: '重置密码',
@@ -1063,7 +1063,7 @@ export default {
       myServicesDescription: '管理和分享你创建的服务'
     },
     social: {
-      title: '社交网络',
+      title: '组网管理',
       friends: '好友列表',
       requests: '好友请求',
       invitations: '邀请管理'
@@ -1265,7 +1265,7 @@ export default {
     // 好友设备
     friendNodes: {
       subtitle: '浏览和管理好友的网络设备',
-      goToSocial: '去社交管理',
+      goToSocial: '去组网管理',
       sendRequest: '发送请求',
       requestSent: '连接请求已发送',
       requestError: '发送连接请求失败',
@@ -1730,8 +1730,8 @@ export default {
     deleteError: '删除区域失败'
   },
   social: {
-    subtitle: '社交网络连接和用户管理',
-    comingSoonMessage: '社交网络功能正在开发中，敬请期待！',
+    subtitle: '组网连接和用户管理',
+    comingSoonMessage: '组网管理功能正在开发中，敬请期待！',
     
     // 错误消息
     fetchAllFriendNodesError: '获取所有好友设备失败',
@@ -1747,7 +1747,7 @@ export default {
     },
     // 概览统计
     overview: {
-      title: '社交概览',
+      title: '组网概览',
       friends: '好友',
       pendingRequests: '待处理请求',
       connectedNodes: '已连接设备',
@@ -1876,7 +1876,7 @@ export default {
     invitationCopied: '邀请码已复制到剪贴板',
     confirmDeleteInvitation: '确定要删除邀请码 "{code}" 吗？',
     // 错误消息
-    fetchOverviewError: '获取社交概览失败',
+    fetchOverviewError: '获取组网概览失败',
     fetchFriendsError: '获取好友列表失败',
     searchUsersError: '搜索用户失败',
     fetchRequestsError: '获取好友请求失败',
@@ -2575,6 +2575,98 @@ export default {
       presharedKey: '预共享密钥',
       roaming: '漫游支持',
       handshakeTimeout: '握手超时(秒)'
+    }
+  },
+  tips: {
+    welcome: {
+      title: '👋 欢迎来到 MyNet',
+      content: '<p>MyNet 帮助你快速组建安全的虚拟网络。</p><p>接下来我们会引导你完成基础设置，随时可以跳过。</p>'
+    },
+    createIpPool: {
+      title: '💡 创建 IP 资源池',
+      content: '<p>点击「创建 IP 池」开始。IP 池为你的设备分配虚拟地址。</p>'
+    },
+    addFirstDevice: {
+      title: '📱 添加第一个设备',
+      content: '<p>点击「添加设备」将你的第一台设备加入网络。</p>'
+    },
+    choosePath: {
+      title: '🎯 选择你的学习路径'
+    },
+    addSecondDevice: {
+      title: '📱 添加第二个设备',
+      content: '<p>再添加一个设备，体验设备间自动连接。</p>'
+    },
+    autoConnection: {
+      title: '✨ 自动连接已建立'
+    },
+    inviterFriend: {
+      title: '👥 你已经和邀请人成为好友'
+    },
+    inviteFriend: {
+      title: '📨 邀请好友加入'
+    },
+    friendDevices: {
+      title: '📱 好友的设备',
+      content: '<p>浏览好友的设备列表，选择要连接的节点。</p>'
+    },
+    createRoute: {
+      title: '➕ 添加新连接'
+    },
+    crossUserConnection: {
+      title: '🎉 跨用户连接已建立'
+    },
+    connectionManagement: {
+      title: '🔗 连接管理'
+    },
+    onboardingComplete: {
+      title: '🎊 完成引导！'
+    },
+    dashboardOverview: {
+      title: '📊 Dashboard 概览',
+      content: '<p>仪表板展示网络概况：节点状态、活跃连接和资源使用情况，可从侧边栏随时访问各功能模块。</p>'
+    },
+    ippoolManagement: {
+      title: '🌐 IP 资源池管理',
+      content: '<p>IP 资源池为设备分配虚拟 IP 地址。建议使用私有网段（如 <code>10.0.0.0/24</code>），可为不同用途创建多个池，避免与本地网络冲突。</p>'
+    },
+    nodeManagement: {
+      title: '📱 设备管理',
+      content: '<p>设备（节点）是网络的基本单元。每个设备需绑定 IP 池，支持 GNB/WireGuard/OpenVPN 等协议，可在详情页下载配置文件。</p>'
+    },
+    routeManagement: {
+      title: '🔗 连接管理',
+      content: '<p>路由定义了设备间的连接关系。同一用户的设备自动连接，跨用户需发送请求并等待对方确认。</p>'
+    },
+    socialManagement: {
+      title: '👥 好友管理',
+      content: '<p>通过好友系统添加其他用户，互为好友后才能建立跨用户连接。可搜索用户名或邮箱发送好友请求。</p>'
+    },
+    connectionDetails: {
+      title: '🔗 连接详解',
+      content: '<p>连接详情展示两端节点、网络参数和实时状态。通过拓扑图全局查看网络结构，排查连接问题。</p>'
+    },
+    zoneManagement: {
+      title: '🌍 时空（Zone）管理',
+      content: '<p>Zone 实现资源隔离，每个 Zone 有独立的 IP 池、节点和连接。如需多环境管理可向管理员申请新的 Zone。</p>'
+    },
+    settingsCenter: {
+      title: '⚙️ 设置中心',
+      content: '<p>在设置中管理个人资料、通知偏好和安全选项。支持切换主题、语言和时区。</p>'
+    },
+    actions: {
+      gotIt: '知道了',
+      skip: '跳过引导',
+      startSetup: '开始设置',
+      addDevice: '添加设备',
+      addAnotherDevice: '再添加一个设备',
+      exploreSelf: '自己探索',
+      browseFriendDevices: '浏览好友设备',
+      createConnection: '创建连接',
+      manageConnections: '管理连接',
+      startUsing: '开始使用',
+      deviceExperience: '设备体验路线',
+      friendConnection: '好友连接路线'
     }
   }
 }

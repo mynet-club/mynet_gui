@@ -2,7 +2,9 @@
   <q-card class="auth-card q-pa-md">
     <!-- Logo区域 -->
     <div class="auth-logo">
+      <img src="/icons/icon.png" alt="MyNet" class="logo-icon" />
       <div class="logo-text">MyNet</div>
+      <div class="logo-tagline">Self-sovereign Networking</div>
     </div>
     
     <q-card-section class="auth-header">
@@ -156,6 +158,7 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '../../composables/useAuth'
+import { APP_CONFIG } from '../../config/app'
 
 const router = useRouter()
 const $q = useQuasar()
@@ -203,7 +206,7 @@ const openDiscord = () => {
 
 // 打开社区主页
 const openVillage = () => {
-  window.open('https://mynet.club/village', '_blank')
+  window.open(`${APP_CONFIG.urls.www}/village`, '_blank')
   showInvitationHelp.value = false
 }
 

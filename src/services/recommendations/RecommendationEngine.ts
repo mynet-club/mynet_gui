@@ -218,7 +218,7 @@ export class RecommendationEngine {
         category: 'network'
       },
 
-      // ========== 优先级3 - 社交增强类 ==========
+      // ========== 优先级3 - 组网增强类 ==========
       
       invite_friend: {
         id: 'invite_friend',
