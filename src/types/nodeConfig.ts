@@ -12,6 +12,55 @@ export type ConfigMode = 'base' | 'expert'
 // 配置参数类型
 export type ConfigParameterType = 'string' | 'integer' | 'boolean' | 'select' | 'text' | 'ip' | 'port' | 'switch' | 'multi-button'
 
+// Config Bundle API 响应接口 (v2.2.0)
+export interface ConfigBundleResponse {
+  node_id: string
+  zone_id: string
+  version: string
+  files: {
+    'node.conf': string
+    'address.conf': string
+    'route.conf': string
+  }
+  keys: {
+    ed25519: Record<string, string>
+    security: {
+      private: string
+      public: string
+    }
+  }
+  warnings?: ConfigBundleWarning[]  // v2.2.0 新增
+}
+
+// Config Bundle 警告信息
+export interface ConfigBundleWarning {
+  type: 'missing_peer_key' | 'config_error' | 'network_issue'
+  node_id?: string
+  message: string
+}
+
+// 心跳上报接口 (v2.2.0 标准化)
+export interface HeartbeatRequest {
+  status: 'online' | 'offline' | 'connecting'
+  uptime: number
+  vpn_interfaces: VpnInterface[]  // 标准化为复数形式
+  system_info?: {
+    cpu_usage?: number
+    memory_usage?: number
+    disk_usage?: number
+  }
+}
+
+// VPN 接口信息
+export interface VpnInterface {
+  name: string
+  type: 'gnb' | 'wireguard' | 'openvpn'
+  status: 'up' | 'down' | 'connecting'
+  ip_address?: string
+  rx_bytes?: number
+  tx_bytes?: number
+}
+
 // 实际API响应的节点配置结构
 export interface NodeConfigApiResponse {
   node_info: {

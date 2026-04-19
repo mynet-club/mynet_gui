@@ -618,6 +618,8 @@ const safeOverrideWithServerData = (serverData: Record<string, any>) => {
     return
   }
   
+  debug.log('当前版本配置模式:', Object.keys(versionConfig.modes))
+  
   // 收集所有有效的参数键和配置（来自所有模式）
   const validParams = new Map<string, any>()
   Object.values(versionConfig.modes).forEach(modeConfig => {
@@ -625,6 +627,8 @@ const safeOverrideWithServerData = (serverData: Record<string, any>) => {
       validParams.set(key, param)
     })
   })
+  
+  debug.log('有效参数列表:', Array.from(validParams.keys()))
   
   // 只覆盖有效的参数，并进行类型转换
   Object.entries(serverData).forEach(([key, value]) => {
@@ -645,11 +649,13 @@ const safeOverrideWithServerData = (serverData: Record<string, any>) => {
       }
       
       formData.value[key] = convertedValue
-      debug.log(`覆盖参数 ${key}:`, value, '->', convertedValue)
+      debug.log(`✅ 覆盖参数 ${key}:`, value, '->', convertedValue)
     } else {
-      debug.log(`跳过无效参数 ${key}:`, value)
+      debug.log(`❌ 跳过无效参数 ${key}:`, value, '(param存在:', !!param, ')')
     }
   })
+  
+  debug.log('覆盖后的表单数据:', formData.value)
 }
 
 // 简化的模式切换（不需要保存和加载数据，因为使用统一的数据结构）
@@ -801,8 +807,31 @@ onMounted(async () => {
           // 先初始化完整的默认数据结构
           initializeFormData()
           
-          // 直接使用返回的数据覆盖表单
-          safeOverrideWithServerData(configResponse.data)
+          // API 返回 { vpn: {...}, network: {...} } 结构，合并两个子对象的参数
+          const apiData = configResponse.data as any
+          const vpnData = apiData.vpn ?? {}
+          const networkData = apiData.network ?? {}
+          // 合并 vpn 和 network，vpn 优先（防止重复key时 network 覆盖 vpn）
+          const rawMerged = Object.keys(vpnData).length > 0 || Object.keys(networkData).length > 0
+            ? { ...networkData, ...vpnData }
+            : apiData
+          debug.log('提取 VPN 配置数据:', vpnData)
+          debug.log('提取 Network 配置数据:', networkData)
+          debug.log('合并后原始数据:', rawMerged)
+          
+          // API key → 配置架构 key 映射（处理命名不一致问题）
+          const keyMap: Record<string, string> = {
+            listen_port: 'listen',          // API 用 listen_port, 架构用 listen
+            interface_name: 'ifname',       // API 用 interface_name, 架构用 ifname
+          }
+          const mergedData: Record<string, any> = {}
+          Object.entries(rawMerged).forEach(([k, v]) => {
+            const mappedKey = keyMap[k] ?? k
+            mergedData[mappedKey] = v
+          })
+          debug.log('key映射后数据:', mergedData)
+          
+          safeOverrideWithServerData(mergedData)
           
           // 保存为原始数据
           originalFormData.value = { ...formData.value }

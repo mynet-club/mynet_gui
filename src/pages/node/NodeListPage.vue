@@ -184,7 +184,15 @@ const loadNodeStatusInfo = async (nodeId: string | number) => {
 
   try {
     loadingStatusInfo.value[nodeId] = true
+  try {
     const response = await nodeService.getNodeStatusInfo(String(nodeId))
+    debug.log('节点状态信息获取成功:', response)
+  } catch (error: any) {
+    // status-info API 可能不存在，静默处理404错误
+    if (error?.response?.status !== 404) {
+      debug.error('获取节点状态信息失败:', error)
+    }
+  }
     nodeStatusInfo.value[nodeId] = response.data
   } catch (error) {
     debug.error(`获取节点 ${nodeId} 状态信息失败:`, error)

@@ -10,7 +10,7 @@ const getCurrentLanguage = () => {
   return LocalStorage.getItem('app-locale') || 'en-US'
 }
 
-// 配置 API 基础URL
+// 配置 API 基础URL - 保持原有域名，仅升级API版本
 const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_BASE_URL
   const baseUrl = envUrl || 'http://localhost:8000'

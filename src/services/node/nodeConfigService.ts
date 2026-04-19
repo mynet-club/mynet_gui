@@ -4,6 +4,9 @@
  */
 
 import { api } from '../api'
+import { configBundleService } from './configBundleService'
+import { apiVersionService } from '../apiVersionService'
+import debug from 'src/utils/debug'
 import type {
   NodeConfig,
   ConfigUpdateRequest,
@@ -17,7 +20,8 @@ import type {
   ConfigHistory,
   ConfigDiff,
   VPNType,
-  ConfigMode
+  ConfigMode,
+  ConfigBundleResponse
 } from '../../types/nodeConfig'
 import type {
   ApiResponse,
@@ -29,17 +33,115 @@ import type {
  * 提供配置的管理、验证、预览等功能
  */
 export class NodeConfigService {
+  
+  /**
+   * 获取节点配置 - 直接使用传统 API
+   * @param nodeId 节点ID
+   * @returns 节点配置
+   */
+  async getNodeConfig(nodeId: string): Promise<ApiResponse<NodeConfig>> {
+    debug.log(`🔧 [NodeConfig] 获取节点 ${nodeId} 配置`)
+    
+    try {
+      const response = await api.get(`/nodes/${nodeId}/config`)
+      debug.log(`🔧 [NodeConfig] 节点 ${nodeId} 配置获取成功:`, response.data)
+      return response.data
+    } catch (error: any) {
+      debug.error(`🔧 [NodeConfig] 获取节点 ${nodeId} 配置失败:`, error)
+      throw error
+    }
+  }
+  
+  /**
+   * 通过 config-bundle API 获取节点配置 (v2.1.0+)
+   * @param nodeId 节点ID
+   */
+  private async getNodeConfigViaBundle(nodeId: string): Promise<ApiResponse<NodeConfig>> {
+    const bundleResponse = await configBundleService.getConfigBundle(nodeId)
+    const bundle = bundleResponse.data
+    
+    // 将 config-bundle 格式转换为标准 NodeConfig 格式
+    const nodeConfig: NodeConfig = {
+      node_id: bundle.node_id,
+      vpn_type: 'gnb', // 从配置文件中解析
+      vpn_version: 'default',
+      config_mode: 'base',
+      config_version: bundle.version,
+      
+      network: {
+        interface_name: this.parseConfigValue(bundle.files['node.conf'], 'ifname') || 'gnb_tun',
+        listen_address: '0.0.0.0',
+        listen_port: parseInt(this.parseConfigValue(bundle.files['node.conf'], 'listen') || '9001'),
+        mtu: parseInt(this.parseConfigValue(bundle.files['node.conf'], 'mtu') || '1450')
+      },
+      
+      basic_config: this.parseGnbConfigFile(bundle.files['node.conf']),
+      advanced_config: {}
+    }
+    
+    return {
+      success: true,
+      code: 200,
+      message: '节点配置获取成功',
+      data: nodeConfig,
+      request_id: bundleResponse.request_id || '',
+      timestamp: bundleResponse.timestamp || new Date().toISOString()
+    }
+  }
+  
+  /**
+   * 传统方式获取节点配置（向后兼容）
+   * @param nodeId 节点ID
+   */
+  private async getNodeConfigTraditional(nodeId: string): Promise<ApiResponse<NodeConfig>> {
+    const response = await api.get(`/nodes/${nodeId}/config`)
+    return response.data
+  }
+  
+  /**
+   * 解析 GNB 配置文件
+   * @param configContent 配置文件内容
+   */
+  private parseGnbConfigFile(configContent: string): Record<string, any> {
+    const config: Record<string, any> = {}
+    
+    const lines = configContent.split('\n')
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (trimmed && !trimmed.startsWith('#')) {
+        const [key, value] = trimmed.split('=', 2)
+        if (key && value) {
+          // 尝试转换数值
+          const numValue = Number(value)
+          config[key.trim()] = isNaN(numValue) ? value.trim() : numValue
+        }
+      }
+    }
+    
+    return config
+  }
+  
+  /**
+   * 从配置内容中解析特定配置值
+   * @param configContent 配置内容
+   * @param key 配置键
+   */
+  private parseConfigValue(configContent: string, key: string): string | null {
+    const lines = configContent.split('\n')
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (trimmed.startsWith(`${key}=`)) {
+        return trimmed.substring(key.length + 1).trim()
+      }
+    }
+    return null
+  }
 
   /**
    * 获取节点配置
    * @param nodeId 节点ID
    * @returns 节点配置
    */
-  async getNodeConfig(nodeId: string): Promise<ApiResponse<NodeConfig>> {
-    const response = await api.get(`/nodes/${nodeId}/config`)
-    return response.data
-  }
-
   /**
    * 更新节点配置
    * @param nodeId 节点ID

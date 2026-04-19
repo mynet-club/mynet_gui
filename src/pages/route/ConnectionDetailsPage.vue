@@ -368,8 +368,13 @@ const loadDeviceInfo = async () => {
     
     // 并行加载两个节点的设备信息
     const [sourceResponse, peerResponse] = await Promise.allSettled([
-      nodeService.getNodeDeviceInfo(nodeId.value),
-      nodeService.getNodeDeviceInfo(peerId.value)
+      // 尝试获取设备信息，如果API不存在则跳过
+      Promise.allSettled([
+        nodeService.getNodeDeviceInfo(nodeId.value).catch(() => null),
+        nodeService.getNodeDeviceInfo(peerId.value).catch(() => null)
+      ]).then(results => {
+        debug.log('设备信息获取结果:', results)
+      })
     ])
     
     if (sourceResponse.status === 'fulfilled' && sourceResponse.value.success && sourceResponse.value.data.exists) {

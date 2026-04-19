@@ -85,7 +85,47 @@ export default {
     minutesAgo: '{n}分钟前',
     hoursAgo: '{n}小时前',
     daysAgo: '{n}天前',
-    featureInDevelopment: '功能开发中'
+    featureInDevelopment: '功能开发中',
+    
+    // Config Bundle 相关
+    configBundle: {
+      title: '配置包',
+      loading: '正在获取配置包...',
+      loadSuccess: '配置包获取成功',
+      loadFailed: '配置包获取失败',
+      warnings: '配置警告',
+      missingPeerKey: '缺失对等节点密钥',
+      configError: '配置错误',
+      networkIssue: '网络问题',
+      invalidBundle: '配置包数据无效'
+    },
+    
+    // API 版本兼容性
+    version: {
+      title: 'API 版本',
+      checking: '正在检查版本兼容性...',
+      compatible: '版本兼容',
+      incompatible: '版本不兼容',
+      upgradeRequired: '需要升级',
+      backApiTooOld: '后端 API 版本过低',
+      ctlApiTooOld: '控制中心 API 版本过低',
+      clientNeedsUpgrade: '客户端需要升级',
+      versionCheckFailed: '版本检查失败',
+      usingDefaultMode: '使用默认兼容模式'
+    },
+    
+    // VPN 接口监控
+    vpnInterface: {
+      title: 'VPN 接口',
+      status: '状态',
+      type: '类型',
+      ipAddress: 'IP 地址',
+      rxBytes: '接收字节',
+      txBytes: '发送字节',
+      up: '启动',
+      down: '停止',
+      connecting: '连接中'
+    }
   },
   errors: {
     loadFailed: '加载失败',
@@ -2080,8 +2120,7 @@ export default {
   websocket: {
     connected: '已连接',
     disconnected: '未连接',
-    connectionFailed: 'WebSocket 连接失败',
-    heartbeat: '心跳'
+    connectionFailed: 'WebSocket 连接失败'
   },
   node: {
     status: {

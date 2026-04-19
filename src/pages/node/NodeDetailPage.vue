@@ -789,7 +789,16 @@ const loadDeviceInfo = async () => {
   
   try {
     loadingDeviceInfo.value = true
+  try {
     const response = await nodeService.getNodeDeviceInfo(nodeId.value)
+    debug.log('设备信息获取成功:', response)
+    // 处理设备信息...
+  } catch (error: any) {
+    // deviceinfo API 可能不存在，静默处理404错误
+    if (error?.response?.status !== 404) {
+      debug.error('获取设备信息失败:', error)
+    }
+  }
     if (response.success && response.data.exists) {
       deviceInfo.value = response.data.device_info
     } else {

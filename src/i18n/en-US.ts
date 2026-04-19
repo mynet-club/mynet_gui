@@ -84,7 +84,47 @@ export default {
     minutesAgo: '{n} minutes ago',
     hoursAgo: '{n} hours ago',
     daysAgo: '{n} days ago',
-    featureInDevelopment: 'Feature in development'
+    featureInDevelopment: 'Feature in development',
+    
+    // Config Bundle related
+    configBundle: {
+      title: 'Config Bundle',
+      loading: 'Loading config bundle...',
+      loadSuccess: 'Config bundle loaded successfully',
+      loadFailed: 'Failed to load config bundle',
+      warnings: 'Configuration Warnings',
+      missingPeerKey: 'Missing peer node key',
+      configError: 'Configuration error',
+      networkIssue: 'Network issue',
+      invalidBundle: 'Invalid config bundle data'
+    },
+    
+    // API version compatibility
+    version: {
+      title: 'API Version',
+      checking: 'Checking version compatibility...',
+      compatible: 'Version compatible',
+      incompatible: 'Version incompatible',
+      upgradeRequired: 'Upgrade required',
+      backApiTooOld: 'Backend API version too old',
+      ctlApiTooOld: 'Control center API version too old',
+      clientNeedsUpgrade: 'Client needs upgrade',
+      versionCheckFailed: 'Version check failed',
+      usingDefaultMode: 'Using default compatible mode'
+    },
+    
+    // VPN interface monitoring
+    vpnInterface: {
+      title: 'VPN Interface',
+      status: 'Status',
+      type: 'Type',
+      ipAddress: 'IP Address',
+      rxBytes: 'RX Bytes',
+      txBytes: 'TX Bytes',
+      up: 'Up',
+      down: 'Down',
+      connecting: 'Connecting'
+    }
   },
   errors: {
     loadFailed: 'Load failed',
@@ -1912,7 +1952,6 @@ export default {
   websocket: {
     connected: 'Connected',
     disconnected: 'Disconnected',
-    heartbeat: 'Heartbeat',
     connectionFailed: 'WebSocket connection failed'
   },
   node: {
