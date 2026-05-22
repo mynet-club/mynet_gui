@@ -293,7 +293,7 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .zones-page {
   .current-zone-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
     color: white;
     
     .q-chip {

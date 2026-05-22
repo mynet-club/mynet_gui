@@ -10,12 +10,12 @@ import { useAuth } from '../composables/useAuth'
  * 设置路由守卫
  */
 export function setupRouteGuards(router: Router) {
-  
+
   // 全局前置守卫 - 认证检查
   router.beforeEach(async (to, from, next) => {
     // 简化的认证检查，实际应用中应该使用store中的认证状态
     const isAuthenticated = !!localStorage.getItem('auth_token')
-    
+
     // 如果已登录用户访问登录或注册页
     if (isAuthenticated && (to.path === '/auth/login' || to.path === '/auth/register')) {
       // 如果带 callback 参数（外部 OAuth 回调），直接带 token 跳回去
@@ -31,7 +31,7 @@ export function setupRouteGuards(router: Router) {
       next('/dashboard')
       return
     }
-    
+
     // 检查是否需要认证
     if (to.meta?.requiresAuth && !isAuthenticated) {
       // 保存原始路径用于登录后重定向
@@ -45,7 +45,7 @@ export function setupRouteGuards(router: Router) {
     // 节点路由特殊处理
     if (to.path.includes('/nodes/')) {
       const nodeId = to.params.id as string
-      
+
       // 验证节点ID格式（如果存在）
       if (nodeId && !isValidNodeId(nodeId)) {
         next('/nodes')
@@ -73,7 +73,7 @@ export function setupRouteGuards(router: Router) {
 
     // 添加页面加载完成的类名（用于CSS动画）
     document.body.classList.add('page-loaded')
-    
+
     // 滚动到顶部
     window.scrollTo(0, 0)
   })
@@ -81,7 +81,7 @@ export function setupRouteGuards(router: Router) {
   // 路由错误处理
   router.onError((error) => {
     debug.error('路由错误:', error)
-    
+
     // 处理动态导入失败
     if (error.message?.includes('Loading chunk')) {
       // 只在加载失败时刷新页面，不在认证错误时刷新
@@ -123,7 +123,7 @@ export class RouteWatcher {
     this.router.afterEach((to, from) => {
       // 触发路由变化监听器
       this.emit('route:change', { to, from })
-      
+
       // 触发特定路由的监听器
       if (to.name) {
         this.emit(`route:${String(to.name)}`, { to, from })
@@ -224,7 +224,7 @@ export class BreadcrumbGenerator {
 
     // 构建路径
     let to = routeRecord.path
-    
+
     // 替换动态参数
     Object.keys(currentRoute.params).forEach(key => {
       to = to.replace(`:${key}`, currentRoute.params[key])
@@ -249,7 +249,7 @@ export class PageProgressBar {
    */
   start() {
     if (this.isLoading) return
-    
+
     this.isLoading = true
     // 这里可以集成进度条组件，如nprogress
     document.body.classList.add('page-loading')
@@ -260,10 +260,10 @@ export class PageProgressBar {
    */
   finish() {
     if (!this.isLoading) return
-    
+
     this.isLoading = false
     document.body.classList.remove('page-loading')
-    
+
     // 短暂延迟后添加完成类
     setTimeout(() => {
       document.body.classList.add('page-loaded')

@@ -2,7 +2,7 @@
 .auth-layout {
   background: #f9fafb;
   min-height: 100vh;
-  
+
   .q-page-container {
     display: flex;
     align-items: center;
@@ -19,11 +19,11 @@
   box-shadow: 0 8px 32px rgba(79, 70, 229, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
   background: #ffffff;
   border: 1px solid rgba(79, 70, 229, 0.08);
-  
+
   .auth-logo {
     text-align: center;
     padding: 2.5rem 0 0.5rem;
-    
+
     .logo-icon {
       width: 56px;
       height: 56px;
@@ -31,14 +31,14 @@
       margin-bottom: 0.75rem;
       box-shadow: 0 2px 8px rgba(79, 70, 229, 0.15);
     }
-    
+
     .logo-text {
       font-size: 1.625rem;
       font-weight: 700;
       color: #1f2937;
       letter-spacing: -0.03em;
     }
-    
+
     .logo-tagline {
       font-size: 0.8125rem;
       color: #9ca3af;
@@ -47,11 +47,11 @@
       font-weight: 400;
     }
   }
-  
+
   .auth-header {
     text-align: center;
     padding-bottom: 0.5rem;
-    
+
     .auth-title {
       font-size: 1.5rem;
       font-weight: 600;
@@ -59,25 +59,25 @@
       color: #111827;
       letter-spacing: -0.02em;
     }
-    
+
     .auth-subtitle {
       font-size: 0.875rem;
       color: #6b7280;
       font-weight: 400;
     }
   }
-  
+
   .auth-form {
     padding-top: 1rem;
-    
+
     .form-field {
       margin-bottom: 1rem;
-      
+
       // 隐藏内部label，使用placeholder
       &.q-field--outlined .q-field__label {
         display: none;
       }
-      
+
       // 确保输入框有明显的边框和背景
       :deep(.q-field__control) {
         background: #f9fafb;
@@ -85,49 +85,49 @@
         border-radius: 10px;
         transition: all 0.2s ease;
         min-height: 48px;
-        
+
         &:before {
           border-color: #e5e7eb !important;
         }
       }
-      
+
       // 悬停状态
       &:hover :deep(.q-field__control) {
         border-color: #d1d5db;
         background: #ffffff;
       }
-      
+
       // 聚焦状态
       &.q-field--focused :deep(.q-field__control) {
         background: #ffffff;
         border-color: var(--primary);
         box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        
+
         &:before {
           border-color: var(--primary) !important;
           border-width: 2px !important;
         }
       }
-      
+
       // 输入框文字颜色
       :deep(.q-field__native) {
         color: #111827;
         font-size: 0.9375rem;
       }
-      
+
       // Placeholder颜色
       :deep(.q-field__native::placeholder) {
         color: #9ca3af;
       }
     }
-    
+
     .form-actions {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 1.5rem;
     }
-    
+
     .submit-btn {
       width: 100%;
       height: 48px;
@@ -139,38 +139,38 @@
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%) !important;
       box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
       transition: all 0.2s ease;
-      
+
       &:hover {
         box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         transform: translateY(-1px);
       }
-      
+
       &:active {
         transform: translateY(0);
         box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2);
       }
     }
-    
+
     .q-checkbox {
       margin-bottom: 1rem;
-      
+
       :deep(.q-checkbox__label) {
         color: #374151;
         font-size: 0.875rem;
       }
     }
   }
-  
+
   .auth-footer {
     text-align: center;
     padding-top: 1rem;
     border-top: 1px solid var(--q-grey-3);
-    
+
     .footer-link {
       color: var(--q-primary);
       text-decoration: none;
       font-weight: 500;
-      
+
       &:hover {
         text-decoration: underline;
       }
@@ -184,42 +184,42 @@
     font-size: 4rem;
     margin-bottom: 1rem;
   }
-  
+
   .verification-form {
     margin-top: 1.5rem;
   }
-  
+
   .resend-section {
     text-align: center;
     margin-top: 1rem;
-    
+
     .resend-btn {
       color: var(--q-secondary);
     }
-    
+
     .cooldown-text {
       color: var(--q-grey-6);
       font-size: 0.75rem;
       margin-top: 0.5rem;
     }
   }
-  
+
   .success-section {
     text-align: center;
-    
+
     .success-icon {
       font-size: 4rem;
       color: var(--q-positive);
       margin-bottom: 1rem;
     }
-    
+
     .success-title {
       color: var(--q-positive);
       font-size: 1.5rem;
       font-weight: 600;
       margin-bottom: 0.5rem;
     }
-    
+
     .success-subtitle {
       color: var(--q-grey-6);
       font-size: 0.875rem;
@@ -233,102 +233,102 @@
   .auth-layout {
     background: #111827;
   }
-  
+
   .auth-card {
     background: #1f2937 !important;
     border: 1px solid #374151;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
-    
+
     .auth-logo {
       .logo-icon {
         box-shadow: 0 2px 8px rgba(129, 140, 248, 0.2);
       }
-      
+
       .logo-text {
         color: #f9fafb;
       }
-      
+
       .logo-tagline {
         color: #6b7280;
       }
     }
-    
+
     .auth-header {
       .auth-title {
         color: #f9fafb;
       }
-      
+
       .auth-subtitle {
         color: #9ca3af;
       }
     }
-    
+
     .auth-footer {
       border-top-color: #374151;
       color: #9ca3af;
     }
-    
+
     // 输入框样式
     .form-field {
       :deep(.q-field__control) {
         background: #1a2332;
         border-color: #374151;
-        
+
         &:before {
           border-color: #374151 !important;
         }
       }
-      
+
       // 悬停状态
       &:hover :deep(.q-field__control) {
         background: #1e293b;
         border-color: #4b5563;
-        
+
         &:before {
           border-color: #4b5563 !important;
         }
       }
-      
+
       // 聚焦状态
       &.q-field--focused :deep(.q-field__control) {
         background: #1e293b;
         border-color: var(--brand-400);
         box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
-        
+
         &:before {
           border-color: var(--brand-400) !important;
           border-width: 2px !important;
         }
       }
-      
+
       // 输入文字颜色
       :deep(.q-field__native) {
         color: #f9fafb;
       }
-      
+
       // Placeholder颜色 - 提高对比度
       :deep(.q-field__native::placeholder) {
         color: #9ca3af;
         opacity: 1;
       }
-      
+
       // 图标颜色
       :deep(.q-icon) {
         color: #9ca3af;
       }
     }
-    
+
     // 复选框
     .q-checkbox {
       :deep(.q-checkbox__label) {
         color: #e5e7eb;
       }
-      
+
       :deep(.q-checkbox__bg) {
         border-color: #6b7280;
       }
     }
-    
+
     // 按钮优化
     .submit-btn {
       background: var(--primary) !important;
@@ -357,23 +357,23 @@
   .auth-card {
     max-width: 440px;
     padding: 1.5rem;
-    
+
     .auth-form {
       .form-field {
         margin-bottom: 1.25rem;
       }
-      
+
       .submit-btn {
         height: 50px;
         font-size: 1rem;
       }
     }
-    
+
     .auth-header {
       .auth-title {
         font-size: 1.5rem;
       }
-      
+
       .auth-subtitle {
         font-size: 0.875rem;
       }
@@ -387,7 +387,7 @@
     margin: 0 16px;
     max-width: none;
   }
-  
+
   .auth-layout .q-page-container {
     padding: 16px;
   }

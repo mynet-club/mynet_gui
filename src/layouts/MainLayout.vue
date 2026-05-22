@@ -186,11 +186,11 @@
       <div class="drawer-header q-pa-md">
         <div class="row items-center no-wrap">
           <div class="col">
-            <div class="text-h6 text-weight-bold">{{ $t('app.name') }}</div>
-            <div class="text-caption text-grey-6">{{ $t('app.tagline') }}</div>
+            <div class="text-h6 text-weight-bold brand-title">{{ $t('app.name') }}</div>
+            <div class="text-caption brand-tagline">{{ $t('app.tagline') }}</div>
           </div>
           <div class="col-auto">
-            <img src="/icons/icon.png" alt="MyNet" style="width: 40px; height: 40px; border-radius: 8px;" />
+            <img src="/icons/icon.png" alt="MyNet" class="brand-logo" />
           </div>
         </div>
       </div>
@@ -905,8 +905,27 @@ onMounted(async () => {
   }
   
   .drawer-header {
-    background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
-    color: white;
+    background: var(--sidebar-bg, #FFFFFF);
+    border-bottom: 1px solid var(--sidebar-border, #E2E8F0);
+    color: var(--text-primary, #0F172A);
+
+    .brand-title {
+      color: var(--text-primary, #0F172A);
+      letter-spacing: 0.2px;
+    }
+
+    .brand-tagline {
+      color: var(--text-muted, #94A3B8);
+      font-size: 0.75rem;
+      margin-top: 2px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.18);
+    }
   }
   
   // 侧边栏菜单容器
@@ -1022,7 +1041,11 @@ onMounted(async () => {
     }
     
     .drawer-header {
-      background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-accent) 100%);
+      background: #0F172A;
+      border-bottom-color: #1E293B;
+
+      .brand-title { color: #F8FAFC; }
+      .brand-tagline { color: #64748B; }
     }
     
     .nav-item:hover {

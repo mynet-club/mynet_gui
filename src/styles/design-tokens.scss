@@ -10,35 +10,35 @@
 // ============================================================
 
 // 1.1 灰阶系统 - Light Mode
-$gray-50: #f9fafb;    // 背景 - 浅
-$gray-100: #f3f4f6;   // 背景 - Header/Footer
-$gray-200: #e5e7eb;   // 边框
-$gray-300: #d1d5db;   // 分割线
-$gray-400: #9ca3af;   // 禁用文字
-$gray-500: #6b7280;   // 占位文字
-$gray-600: #4b5563;   // 次要文字
-$gray-700: #374151;   // -
-$gray-800: #1f2937;   // -
-$gray-900: #111827;   // 主要文字
+$gray-50: #f9fafb; // 背景 - 浅
+$gray-100: #f3f4f6; // 背景 - Header/Footer
+$gray-200: #e5e7eb; // 边框
+$gray-300: #d1d5db; // 分割线
+$gray-400: #9ca3af; // 禁用文字
+$gray-500: #6b7280; // 占位文字
+$gray-600: #4b5563; // 次要文字
+$gray-700: #374151; // -
+$gray-800: #1f2937; // -
+$gray-900: #111827; // 主要文字
 
 // 1.2 灰阶系统 - Dark Mode
-$gray-dark-50: #f9fafb;   // 主要文字
-$gray-dark-100: #f3f4f6;  // -
-$gray-dark-200: #e5e7eb;  // -
-$gray-dark-300: #d1d5db;  // -
-$gray-dark-400: #9ca3af;  // 次要文字
-$gray-dark-500: #6b7280;  // 占位文字
-$gray-dark-600: #4b5563;  // 边框
-$gray-dark-700: #374151;  // Header/Footer 背景
-$gray-dark-800: #1f2937;  // 主背景
-$gray-dark-900: #111827;  // 深背景
+$gray-dark-50: #f9fafb; // 主要文字
+$gray-dark-100: #f3f4f6; // -
+$gray-dark-200: #e5e7eb; // -
+$gray-dark-300: #d1d5db; // -
+$gray-dark-400: #9ca3af; // 次要文字
+$gray-dark-500: #6b7280; // 占位文字
+$gray-dark-600: #4b5563; // 边框
+$gray-dark-700: #374151; // Header/Footer 背景
+$gray-dark-800: #1f2937; // 主背景
+$gray-dark-900: #111827; // 深背景
 
 // 1.3 状态色 - Light Mode（仅用于图标、Badge、文字，不要大色块）
-$color-success: #16A34A;      // 正常、在线、成功（偏草绿，更专业）
-$color-warning: #F59E0B;      // 警告、待处理
-$color-error: #DC2626;        // 异常、离线、错误
-$color-disabled: #94A3B8;     // 不可用、N/A、未配置
-$color-info: #2563EB;         // 信息、提示（同品牌色）
+$color-success: #16A34A; // 正常、在线、成功（偏草绿，更专业）
+$color-warning: #F59E0B; // 警告、待处理
+$color-error: #DC2626; // 异常、离线、错误
+$color-disabled: #94A3B8; // 不可用、N/A、未配置
+$color-info: #2563EB; // 信息、提示（同品牌色）
 
 // 1.4 状态色 - Dark Mode（降饱和）
 $color-success-dark: #15803D;
@@ -48,13 +48,13 @@ $color-disabled-dark: #64748B;
 $color-info-dark: #1D4ED8;
 
 // 1.5 品牌色（基于 MyNet logo 亮蓝）
-$brand-50:  #EFF6FF;
+$brand-50: #EFF6FF;
 $brand-100: #DBEAFE;
 $brand-200: #BFDBFE;
 $brand-300: #93C5FD;
 $brand-400: #60A5FA;
 $brand-500: #3B82F6;
-$brand-600: #2563EB;          // 主色（logo 你色）
+$brand-600: #2563EB; // 主色（logo 你色）
 $brand-700: #1D4ED8;
 $brand-800: #1E40AF;
 $brand-900: #1E3A8A;
@@ -72,37 +72,37 @@ $color-primary-soft: $brand-50;
 $spacing-unit: 8px;
 
 // 标准间距
-$spacing-xs: $spacing-unit * 0.5;      // 4px
-$spacing-sm: $spacing-unit;            // 8px
-$spacing-md: $spacing-unit * 1.5;      // 12px
-$spacing-base: $spacing-unit * 2;      // 16px
-$spacing-lg: $spacing-unit * 2.5;      // 20px
-$spacing-xl: $spacing-unit * 3;        // 24px
-$spacing-2xl: $spacing-unit * 4;       // 32px
-$spacing-3xl: $spacing-unit * 5;       // 40px
+$spacing-xs: $spacing-unit * 0.5; // 4px
+$spacing-sm: $spacing-unit; // 8px
+$spacing-md: $spacing-unit * 1.5; // 12px
+$spacing-base: $spacing-unit * 2; // 16px
+$spacing-lg: $spacing-unit * 2.5; // 20px
+$spacing-xl: $spacing-unit * 3; // 24px
+$spacing-2xl: $spacing-unit * 4; // 32px
+$spacing-3xl: $spacing-unit * 5; // 40px
 
 // 卡片专用间距
-$card-padding: $spacing-base;          // 16px - 卡片内边距
-$card-padding-lg: $spacing-lg;         // 20px - 大卡片内边距
-$card-gap: $spacing-lg;                // 20px - 卡片间距
-$card-gap-lg: $spacing-xl;             // 24px - 大卡片间距
+$card-padding: $spacing-base; // 16px - 卡片内边距
+$card-padding-lg: $spacing-lg; // 20px - 大卡片内边距
+$card-gap: $spacing-lg; // 20px - 卡片间距
+$card-gap-lg: $spacing-xl; // 24px - 大卡片间距
 
 // 模块间距
-$module-gap: $spacing-2xl;             // 32px - 模块之间的间距
+$module-gap: $spacing-2xl; // 32px - 模块之间的间距
 
 // ============================================================
 // 三、字体系统 (Typography System)
 // ============================================================
 
 // 3.1 字体大小
-$font-size-xs: 12px;      // 辅助信息
-$font-size-sm: 13px;      // 次要文字
-$font-size-base: 14px;    // 主要数值
-$font-size-md: 15px;      // -
-$font-size-lg: 16px;      // 卡片标题
-$font-size-xl: 18px;      // -
-$font-size-2xl: 20px;     // 页面标题
-$font-size-3xl: 22px;     // 大标题
+$font-size-xs: 12px; // 辅助信息
+$font-size-sm: 13px; // 次要文字
+$font-size-base: 14px; // 主要数值
+$font-size-md: 15px; // -
+$font-size-lg: 16px; // 卡片标题
+$font-size-xl: 18px; // -
+$font-size-2xl: 20px; // 页面标题
+$font-size-3xl: 22px; // 大标题
 
 // 3.2 字重
 $font-weight-normal: 400;
@@ -166,20 +166,20 @@ $shadow-dark-xl: 0 12px 24px rgba(0, 0, 0, 0.7);
   --color-text-tertiary: #{$gray-500};
   --color-border: #{$gray-200};
   --color-divider: #{$gray-300};
-  
+
   // 状态色
   --color-success: #{$color-success};
   --color-warning: #{$color-warning};
   --color-error: #{$color-error};
   --color-disabled: #{$color-disabled};
   --color-info: #{$color-info};
-  
+
   // 品牌色
   --color-primary: #{$color-primary};
   --color-primary-hover: #{$color-primary-hover};
   --color-primary-active: #{$color-primary-active};
   --color-primary-soft: #{$color-primary-soft};
-  --brand-50:  #{$brand-50};
+  --brand-50: #{$brand-50};
   --brand-100: #{$brand-100};
   --brand-200: #{$brand-200};
   --brand-300: #{$brand-300};
@@ -189,13 +189,13 @@ $shadow-dark-xl: 0 12px 24px rgba(0, 0, 0, 0.7);
   --brand-700: #{$brand-700};
   --brand-800: #{$brand-800};
   --brand-900: #{$brand-900};
-  
+
   // 阴影
   --shadow-sm: #{$shadow-sm};
   --shadow-base: #{$shadow-base};
   --shadow-md: #{$shadow-md};
   --shadow-lg: #{$shadow-lg};
-  
+
   // 卡片
   --card-padding: #{$card-padding};
   --card-gap: #{$card-gap};
@@ -215,20 +215,20 @@ body.body--dark {
   --color-text-tertiary: #{$gray-dark-500};
   --color-border: #{$gray-dark-600};
   --color-divider: #{$gray-dark-600};
-  
+
   // 状态色（降饱和）
   --color-success: #{$color-success-dark};
   --color-warning: #{$color-warning-dark};
   --color-error: #{$color-error-dark};
   --color-disabled: #{$color-disabled-dark};
   --color-info: #{$color-info-dark};
-  
+
   // 阴影
   --shadow-sm: #{$shadow-dark-sm};
   --shadow-base: #{$shadow-dark-base};
   --shadow-md: #{$shadow-dark-md};
   --shadow-lg: #{$shadow-dark-lg};
-  
+
   // 卡片
   --card-border-hover: #{$gray-dark-600};
 }
@@ -238,61 +238,174 @@ body.body--dark {
 // ============================================================
 
 // 文字颜色
-.text-primary { color: var(--color-text-primary); }
-.text-secondary { color: var(--color-text-secondary); }
-.text-tertiary { color: var(--color-text-tertiary); }
+.text-primary {
+  color: var(--color-text-primary);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-tertiary {
+  color: var(--color-text-tertiary);
+}
 
 // 状态色文字
-.text-success { color: var(--color-success); }
-.text-warning { color: var(--color-warning); }
-.text-error { color: var(--color-error); }
-.text-disabled { color: var(--color-disabled); }
-.text-info { color: var(--color-info); }
+.text-success {
+  color: var(--color-success);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+.text-error {
+  color: var(--color-error);
+}
+
+.text-disabled {
+  color: var(--color-disabled);
+}
+
+.text-info {
+  color: var(--color-info);
+}
 
 // 背景色
-.bg-primary { background-color: var(--color-bg-primary); }
-.bg-secondary { background-color: var(--color-bg-secondary); }
-.bg-tertiary { background-color: var(--color-bg-tertiary); }
+.bg-primary {
+  background-color: var(--color-bg-primary);
+}
+
+.bg-secondary {
+  background-color: var(--color-bg-secondary);
+}
+
+.bg-tertiary {
+  background-color: var(--color-bg-tertiary);
+}
 
 // 间距工具类
-.p-0 { padding: 0; }
-.p-sm { padding: $spacing-sm; }
-.p-base { padding: $spacing-base; }
-.p-lg { padding: $spacing-lg; }
-.p-xl { padding: $spacing-xl; }
+.p-0 {
+  padding: 0;
+}
 
-.m-0 { margin: 0; }
-.m-sm { margin: $spacing-sm; }
-.m-base { margin: $spacing-base; }
-.m-lg { margin: $spacing-lg; }
-.m-xl { margin: $spacing-xl; }
+.p-sm {
+  padding: $spacing-sm;
+}
+
+.p-base {
+  padding: $spacing-base;
+}
+
+.p-lg {
+  padding: $spacing-lg;
+}
+
+.p-xl {
+  padding: $spacing-xl;
+}
+
+.m-0 {
+  margin: 0;
+}
+
+.m-sm {
+  margin: $spacing-sm;
+}
+
+.m-base {
+  margin: $spacing-base;
+}
+
+.m-lg {
+  margin: $spacing-lg;
+}
+
+.m-xl {
+  margin: $spacing-xl;
+}
 
 // 间距 - 仅上下左右
-.mt-sm { margin-top: $spacing-sm; }
-.mb-sm { margin-bottom: $spacing-sm; }
-.ml-sm { margin-left: $spacing-sm; }
-.mr-sm { margin-right: $spacing-sm; }
+.mt-sm {
+  margin-top: $spacing-sm;
+}
 
-.mt-base { margin-top: $spacing-base; }
-.mb-base { margin-bottom: $spacing-base; }
-.ml-base { margin-left: $spacing-base; }
-.mr-base { margin-right: $spacing-base; }
+.mb-sm {
+  margin-bottom: $spacing-sm;
+}
 
-.mt-lg { margin-top: $spacing-lg; }
-.mb-lg { margin-bottom: $spacing-lg; }
-.ml-lg { margin-left: $spacing-lg; }
-.mr-lg { margin-right: $spacing-lg; }
+.ml-sm {
+  margin-left: $spacing-sm;
+}
 
-.mt-xl { margin-top: $spacing-xl; }
-.mb-xl { margin-bottom: $spacing-xl; }
-.ml-xl { margin-left: $spacing-xl; }
-.mr-xl { margin-right: $spacing-xl; }
+.mr-sm {
+  margin-right: $spacing-sm;
+}
+
+.mt-base {
+  margin-top: $spacing-base;
+}
+
+.mb-base {
+  margin-bottom: $spacing-base;
+}
+
+.ml-base {
+  margin-left: $spacing-base;
+}
+
+.mr-base {
+  margin-right: $spacing-base;
+}
+
+.mt-lg {
+  margin-top: $spacing-lg;
+}
+
+.mb-lg {
+  margin-bottom: $spacing-lg;
+}
+
+.ml-lg {
+  margin-left: $spacing-lg;
+}
+
+.mr-lg {
+  margin-right: $spacing-lg;
+}
+
+.mt-xl {
+  margin-top: $spacing-xl;
+}
+
+.mb-xl {
+  margin-bottom: $spacing-xl;
+}
+
+.ml-xl {
+  margin-left: $spacing-xl;
+}
+
+.mr-xl {
+  margin-right: $spacing-xl;
+}
 
 // Gap
-.gap-sm { gap: $spacing-sm; }
-.gap-base { gap: $spacing-base; }
-.gap-lg { gap: $spacing-lg; }
-.gap-xl { gap: $spacing-xl; }
+.gap-sm {
+  gap: $spacing-sm;
+}
+
+.gap-base {
+  gap: $spacing-base;
+}
+
+.gap-lg {
+  gap: $spacing-lg;
+}
+
+.gap-xl {
+  gap: $spacing-xl;
+}
 
 // ============================================================
 // 八、约束规则（强制）

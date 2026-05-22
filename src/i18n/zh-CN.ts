@@ -86,7 +86,7 @@ export default {
     hoursAgo: '{n}小时前',
     daysAgo: '{n}天前',
     featureInDevelopment: '功能开发中',
-    
+
     // Config Bundle 相关
     configBundle: {
       title: '配置包',
@@ -99,7 +99,7 @@ export default {
       networkIssue: '网络问题',
       invalidBundle: '配置包数据无效'
     },
-    
+
     // API 版本兼容性
     version: {
       title: 'API 版本',
@@ -113,7 +113,7 @@ export default {
       versionCheckFailed: '版本检查失败',
       usingDefaultMode: '使用默认兼容模式'
     },
-    
+
     // VPN 接口监控
     vpnInterface: {
       title: 'VPN 接口',
@@ -256,7 +256,7 @@ export default {
     discordCommunity: 'Discord 社区',
     visitVillage: '访问社区页面',
     communityLinks: '社区链接',
-    
+
     // 账号激活相关
     accountActivation: '账号激活',
     accountNeedsActivation: '账户需要激活',
@@ -295,7 +295,7 @@ export default {
     backToRegister: '返回注册',
     missingParameters: '缺少必要参数',
     registrationComplete: '注册完成！请登录您的账户',
-    
+
     // 密码重置相关
     resetPassword: '重置密码',
     resetPasswordInstruction: '请设置您的新密码',
@@ -320,7 +320,7 @@ export default {
     resetFailed: '重置失败',
     sendFailed: '发送失败',
     send: '发送',
-    
+
     // 密码强度等级
     strength: {
       weak: '弱',
@@ -328,11 +328,11 @@ export default {
       good: '良好',
       strong: '强'
     },
-    
+
     // 新增字段
     confirmNewPassword: '确认新密码',
     passwordWeak: '弱',
-    passwordFair: '一般', 
+    passwordFair: '一般',
     passwordGood: '良好',
     passwordStrong: '强'
   },
@@ -341,14 +341,14 @@ export default {
     subtitle: '网络系统概览',
     connected: '已连接',
     disconnected: '未连接',
-    
+
     // 健康状态
     health: {
       healthy: '健康',
       warning: '警告',
       critical: '严重'
     },
-    
+
     // 健康消息模板
     healthMessages: {
       allOnline: '网络运行正常（{count} 个设备在线）',
@@ -358,7 +358,7 @@ export default {
       unconfigured: '有 {count} 个设备未完成配置',
       noNodes: '暂无设备，请先创建设备'
     },
-    
+
     // 待处理任务
     pendingTasks: {
       offlineNodes: '{count} 个设备离线',
@@ -366,7 +366,7 @@ export default {
       unconfiguredNodes: '{count} 个设备未配置',
       failedRoutes: '{count} 个连接故障'
     },
-    
+
     // 异常项目
     abnormalItems: {
       title: '需要关注的问题',
@@ -382,7 +382,7 @@ export default {
       neverOnline: '从未在线',
       morePending: '还有 {count} 个待处理项'
     },
-    
+
     // 快速操作
     quickActions: {
       title: '快速操作',
@@ -390,7 +390,7 @@ export default {
       createRoute: '创建连接',
       handleConnections: '处理连接 ({count})'
     },
-    
+
     // 统计
     stats: {
       totalNodes: '总设备数',
@@ -401,7 +401,7 @@ export default {
       onlineRate: '在线率',
       friendConnections: '好友连接'
     },
-    
+
     realtimeMetrics: '实时指标',
     cpuUsage: 'CPU使用率',
     memoryUsage: '内存使用率',
@@ -441,7 +441,7 @@ export default {
     loadNetworkConfigFailed: '加载网络配置失败',
     loadDeviceInfoFailed: '加载设备信息失败',
     loadRoutesCountFailed: '加载连接数量失败',
-    
+
     // 列表页面
     createNode: '创建设备',
     quickCreateTitle: '一键快速创建设备',
@@ -491,12 +491,12 @@ export default {
     createdAt: '创建于',
     gettingConfigSuggestions: '获取配置建议...',
     nextStepSuggestion: '下一步建议',
-    
+
     // 删除确认对话框
     deleteConfirmTitle: '确认删除',
     deleteCancel: '取消',
     deleteConfirmAction: '删除',
-    
+
     // 设备操作
     operations: {
       start: '启动',
@@ -515,7 +515,7 @@ export default {
       monitor: '监控',
       diagnose: '诊断',
       optimize: '优化',
-      
+
       // 操作确认
       confirmStart: '确定要启动设备 "{name}" 吗？',
       confirmStop: '确定要停止设备 "{name}" 吗？',
@@ -523,7 +523,7 @@ export default {
       confirmPause: '确定要暂停设备 "{name}" 吗？',
       confirmUpgrade: '确定要升级设备 "{name}" 吗？',
       confirmMigrate: '确定要迁移设备 "{name}" 吗？',
-      
+
       // 操作结果
       startSuccess: '设备 {name} 启动成功',
       stopSuccess: '设备 {name} 停止成功',
@@ -541,7 +541,7 @@ export default {
       migrateSuccess: '设备迁移成功',
       syncSuccess: '设备同步成功',
       testSuccess: '设备测试成功',
-      
+
       // 操作失败
       startFailed: '设备启动失败',
       stopFailed: '设备停止失败',
@@ -555,7 +555,7 @@ export default {
       migrateFailed: '设备迁移失败',
       syncFailed: '设备同步失败',
       testFailed: '设备测试失败',
-      
+
       // 批量操作
       batchOperations: '批量操作',
       selectNodes: '选择设备',
@@ -570,7 +570,7 @@ export default {
       confirmBatchOperation: '确定要对所选的 {count} 个设备执行 {operation} 操作吗？',
       batchOperationSuccess: '批量操作完成，成功 {success} 个，失败 {failed} 个',
       batchOperationFailed: '批量操作失败',
-      
+
       // 操作进度
       operationInProgress: '操作进行中...',
       operationCompleted: '操作已完成',
@@ -579,7 +579,7 @@ export default {
       cancelOperation: '取消操作',
       operationProgress: '操作进度: {percent}%'
     },
-    
+
     // 设备监控
     monitoring: {
       title: '设备监控',
@@ -590,7 +590,7 @@ export default {
       resourceUsage: '资源使用',
       healthCheck: '健康检查',
       alertsWarnings: '警报和警告',
-      
+
       // 性能指标
       cpuUsage: 'CPU使用率',
       memoryUsage: '内存使用率',
@@ -602,14 +602,14 @@ export default {
       throughput: '吞吐量',
       errorRate: '错误率',
       connectionCount: '连接数',
-      
+
       // 健康状态
       healthy: '健康',
       warning: '警告',
       critical: '严重',
       unknown: '未知',
       degraded: '降级',
-      
+
       // 警报类型
       alerts: {
         highCPU: 'CPU使用率过高',
@@ -621,7 +621,7 @@ export default {
         securityAlert: '安全警报',
         performanceDrop: '性能下降'
       },
-      
+
       // 时间范围
       timeRange: {
         last1Hour: '最近1小时',
@@ -632,7 +632,7 @@ export default {
         custom: '自定义'
       }
     },
-    
+
     // 设备日志
     logs: {
       title: '设备日志',
@@ -646,14 +646,14 @@ export default {
       logTime: '日志时间',
       logMessage: '日志消息',
       logSource: '日志来源',
-      
+
       // 日志级别过滤
       showAll: '显示全部',
       showErrors: '仅显示错误',
       showWarnings: '显示警告及以上',
       showInfo: '显示信息及以上',
       showDebug: '显示调试及以上',
-      
+
       // 日志操作
       logsCleared: '日志已清空',
       logsClearFailed: '清空日志失败',
@@ -661,7 +661,7 @@ export default {
       logsDownloadFailed: '下载日志失败',
       noLogsFound: '未找到日志',
       logsTooLarge: '日志文件过大，建议下载查看',
-      
+
       // 实时日志
       realTimeMode: '实时模式',
       pauseRealTime: '暂停实时',
@@ -669,7 +669,7 @@ export default {
       autoScroll: '自动滚动',
       followTail: '跟踪尾部'
     },
-    
+
     // 设备状态
     status: {
       unconfigured: '未完成配置',
@@ -684,7 +684,7 @@ export default {
       updateSuccess: '设备状态已更新为: {status}',
       updateFailed: '更新设备状态失败，请重试'
     },
-    
+
     // 设备信息字段
     fields: {
       lastSeen: '最后在线',
@@ -702,7 +702,7 @@ export default {
       ipGroupSequence: 'IP组序号',
       ipManagement: 'IP管理'
     },
-    
+
     // 设备详情页
     detail: {
       title: '设备详情',
@@ -715,7 +715,7 @@ export default {
       ipGrouping: 'IP分组',
       statistics: '统计信息',
       quickActions: '快速操作',
-      
+
       // 基本信息字段
       nodeName: '设备名称',
       nodeId: '设备ID',
@@ -724,13 +724,13 @@ export default {
       createdAt: '创建时间',
       updatedAt: '更新时间',
       nodeType: '设备类型',
-      
+
       // 应用信息
       appInfo: '应用信息',
       vpnType: 'VPN类型',
       appVersion: '应用版本',
       listenPort: '监听端口',
-      
+
       // 硬件信息
       hardwareInfo: '硬件信息',
       cpuModel: 'CPU型号',
@@ -740,7 +740,7 @@ export default {
       totalMemory: '内存总量',
       availableMemory: '可用内存',
       virtualization: '虚拟化',
-      
+
       // 系统信息
       systemInfo: '系统信息',
       operatingSystem: '操作系统',
@@ -749,14 +749,14 @@ export default {
       cLibrary: 'C库',
       containerType: '容器类型',
       infoCollectedAt: '信息采集时间',
-      
+
       // 网络设备信息
       networkDevice: '网络设备',
       nicCount: '网卡数量',
       firewall: '防火墙',
       ipForwarding: 'IP转发',
       units: '个',
-      
+
       // 网络字段
       virtualInterface: '虚拟网卡名',
       virtualIpAddress: '虚拟IP地址',
@@ -764,7 +764,7 @@ export default {
       ipGroupSequence: 'IP组序号',
       lanIpAddress: 'LAN IP地址',
       publicIpAddress: '公网IP地址',
-      
+
       // 消息
       noDeviceInfo: '暂无设备信息',
       deviceInfoNote: '设备信息需要客户端上报',
@@ -772,7 +772,7 @@ export default {
       defaultGroup: '默认',
       ipv6Address: 'IPv6 地址'
     },
-    
+
     // 编辑页面
     edit: {
       title: '编辑设备',
@@ -784,7 +784,7 @@ export default {
       saveFailed: '保存失败，请重试',
       confirmReset: '确认重置',
       resetChangesMessage: '确定要重置所有更改吗？',
-      
+
       // 标签页
       tabs: {
         basic: '基础信息',
@@ -792,7 +792,7 @@ export default {
         config: '设备配置',
         keys: '密钥管理'
       },
-      
+
       // 基础信息页面
       basic: {
         nameRequired: '设备名称不能为空',
@@ -809,7 +809,7 @@ export default {
         basicInfoSaved: '基础信息保存成功',
         saveFailed: '保存失败，请重试',
         vpnTypeSwitched: '已切换到 {type}，请到设备配置页面设置相关端口',
-        
+
         // 设备类型
         nodeTypes: {
           edge: '边缘设备',
@@ -822,7 +822,7 @@ export default {
           special: '特殊设备'
         }
       },
-      
+
       // 网络配置页面
       network: {
         loadingConfig: '正在加载网络配置...',
@@ -859,7 +859,7 @@ export default {
         resetNetwork: '重置网络配置',
         advancedConfig: '高级配置',
         confirmResetNetwork: '确定要重置网络配置吗？',
-        
+
         // 保存相关
         save: {
           noChanges: '没有任何变化，无需保存',
@@ -869,14 +869,14 @@ export default {
           defaultError: '保存失败，请重试',
           errorPrefix: '保存失败'
         },
-        
+
         // 验证相关
         validation: {
           formErrors: '请检查并修正表单错误',
           virtualIpRequired: '请选择设备虚拟IP'
         }
       },
-      
+
       // 设备配置页面
       config: {
         title: '设备配置',
@@ -914,13 +914,13 @@ export default {
         basicConfig: '基本配置',
         expertConfig: '专家配置',
         copyConfig: '复制配置',
-        
+
         // VPN类型和版本
         gnbVirtualNetwork: 'GNB虚拟网络',
         wireGuard: 'WireGuard',
         openVPN: 'OpenVPN',
         defaultVersion: '默认版本 (Latest)',
-        
+
         // VPN配置参数翻译
         nodeId: '设备ID',
         networkInterface: '网络接口名称',
@@ -940,7 +940,7 @@ export default {
         compressionLevel: '压缩等级',
         memory: '内存刻度',
         esArgs: 'ES参数',
-        
+
         // WireGuard参数
         interfaceAddress: '接口地址',
         multiConnection: '多连接支持',
@@ -973,7 +973,7 @@ export default {
         saveFailedLog: '保存设备配置失败:',
         saveFailedRetry: '保存失败，请重试',
         saveFailedPrefix: '保存失败',
-        
+
         // 日志级别
         logLevels: {
           trace: '追踪',
@@ -984,7 +984,7 @@ export default {
           fatal: '致命'
         }
       },
-      
+
       // 密钥管理页面
       keys: {
         title: '密钥管理',
@@ -1028,7 +1028,7 @@ export default {
         dragDropKey: '拖拽密钥文件到此处或点击选择',
         saveKeyConfig: '保存密钥配置',
         resetKeys: '重置密钥',
-        
+
         // 密钥操作消息
         keyPairGenerated: '密钥对生成成功',
         keyUpdated: '密钥更新成功',
@@ -1047,7 +1047,7 @@ export default {
         privateKeyDownloadSuccess: '私钥下载成功',
         downloadFailed: '下载公钥失败',
         privateKeyDownloadFailed: '下载私钥失败',
-        
+
         // 密钥格式
         formats: {
           pem: 'PEM格式',
@@ -1055,7 +1055,7 @@ export default {
           p12: 'PKCS#12格式',
           jks: 'Java KeyStore格式'
         },
-        
+
         // 密钥算法
         algorithms: {
           rsa: 'RSA',
@@ -1116,7 +1116,7 @@ export default {
     name: '连接名称',
     destination: '目标地址',
     gateway: '网关',
-    
+
     // 概览统计
     overview: {
       activeRoutes: '活跃连接',
@@ -1124,7 +1124,7 @@ export default {
       connectedNodes: '已连接设备',
       totalBandwidth: '总带宽'
     },
-    
+
     // 标签页
     tabs: {
       activeRoutes: '活跃连接',
@@ -1132,7 +1132,7 @@ export default {
       friendNodes: '好友设备',
       configuration: '配置管理'
     },
-    
+
     // 路由状态
     status: {
       active: '活跃',
@@ -1141,13 +1141,13 @@ export default {
       error: '错误',
       unknown: '未知'
     },
-    
+
     // 连接类型
     connectionType: {
       direct: '直连',
       relay: '中继'
     },
-    
+
     // 设备选择器
     nodeSelector: {
       addNodesFirst: '请先添加设备',
@@ -1167,7 +1167,7 @@ export default {
         pending: '待处理'
       }
     },
-    
+
     // 设备状态
     nodeStatus: {
       available: '可用',
@@ -1175,14 +1175,14 @@ export default {
       pending: '待处理',
       unavailable: '不可用'
     },
-    
+
     // 连接状态
     connectionStatus: {
       pending: '待处理',
       approved: '已批准',
       rejected: '已拒绝'
     },
-    
+
     // 活跃连接
     activeRoutes: {
       subtitle: '管理当前活跃的网络连接',
@@ -1208,13 +1208,13 @@ export default {
       targetNode: '目标设备',
       unknownType: '未知类型',
       unknownMode: '未知模式',
-      
+
       // 视图模式
       viewMode: {
         card: '卡片模式',
         list: '列表模式'
       },
-      
+
       // 列表视图
       listView: {
         title: '设备连接列表',
@@ -1233,7 +1233,7 @@ export default {
           actions: '操作'
         }
       },
-      
+
       // 连接详情
       connectionDetails: {
         title: '连接详情',
@@ -1263,7 +1263,7 @@ export default {
           '7d': '7天'
         }
       },
-      
+
       // 连接类型
       connectionTypes: {
         direct_ipv4: '直连 IPv4',
@@ -1271,7 +1271,7 @@ export default {
         relay: '中继',
         derp: 'DERP 中继'
       },
-      
+
       // 状态
       status: {
         online: '在线',
@@ -1341,7 +1341,7 @@ export default {
       p2p: '点对点',
       hybrid: '混合模式'
     },
-    
+
     // 基于设备的连接管理
     nodeBased: {
       selectNode: '选择我的设备',
@@ -1399,7 +1399,7 @@ export default {
         incoming: '入站连接'
       }
     },
-    
+
     // 配置管理
     config: {
       description: '连接配置文件包含了所有必要的网络连接信息，可以下载并应用到您的网络设备。',
@@ -1426,7 +1426,7 @@ export default {
       actions: '操作',
       entryDetails: '条目详情'
     },
-    
+
     // 连接详情
     details: {
       basicInfo: '基本信息',
@@ -1454,7 +1454,7 @@ export default {
       bytesReceived: '接收字节',
       disconnect: '断开连接'
     },
-    
+
     // 操作
     actions: {
       refreshRoutes: '刷新连接',
@@ -1475,7 +1475,7 @@ export default {
         selectMyNode: '选择我的设备',
         submitRequest: '提交申请'
       },
-      
+
       // 第一步 - 选择好友
       step1: {
         title: '创建连接 - 选择好友',
@@ -1489,7 +1489,7 @@ export default {
         nextStep: '下一步',
         pleaseSelectFriend: '请选择一个好友'
       },
-      
+
       // 第二步 - 选择好友设备
       step2: {
         title: '创建连接 - 选择好友设备',
@@ -1515,7 +1515,7 @@ export default {
         fetchNodesError: '获取好友设备失败',
         noFriendSelected: '未选择好友'
       },
-      
+
       // 第三步 - 选择我的设备
       step3: {
         title: '创建连接 - 选择我的设备',
@@ -1554,7 +1554,7 @@ export default {
         fetchNodesError: '获取设备失败',
         noFriendSelected: '未选择好友',
         noFriendNodeSelected: '未选择好友设备',
-        
+
         // 连接状态
         connectionStatus: {
           connected: '已连接',
@@ -1564,14 +1564,14 @@ export default {
           none: '无连接',
           unknown: '状态未知'
         },
-        
+
         // 设备不可用原因
         nodeNotAvailable: '设备暂时不可用',
         nodeUnconfigured: '设备未配置',
         nodeDisabled: '设备已禁用',
         nodeMaintenance: '设备维护中'
       },
-      
+
       // 第四步 - 提交申请
       step4: {
         title: '创建连接 - 提交申请',
@@ -1606,7 +1606,7 @@ export default {
         viewRoutes: '查看连接',
         createAnother: '创建另一个',
         defaultMessage: '您好 {friendName}，我希望将我的设备 {myNode} 与您的设备 {friendNode} 建立连接，用于网络通信。',
-        
+
         // 优先级选项
         priorities: {
           low: '低优先级',
@@ -1614,7 +1614,7 @@ export default {
           high: '高优先级',
           urgent: '紧急'
         },
-        
+
         // 持续时间选项
         durations: {
           '1hour': '1小时',
@@ -1625,7 +1625,7 @@ export default {
           '30days': '30天',
           permanent: '永久'
         },
-        
+
         // 协议选项
         protocols: {
           auto: '自动选择',
@@ -1635,12 +1635,12 @@ export default {
           openvpn: 'OpenVPN'
         }
       },
-      
+
       // 通用消息
       requestSubmitted: '连接申请已提交',
       submitError: '提交申请失败'
     },
-    
+
     // 连接概览页面导航卡片
     index: {
       title: '连接概览',
@@ -1653,7 +1653,7 @@ export default {
       pendingConnectionsDescription: '处理待批准的连接请求',
       friendNodes: '好友设备',
       friendNodesDescription: '浏览和管理好友的网络设备',
-      
+
       // 统计标签
       statistics: {
         total: '总计',
@@ -1662,7 +1662,7 @@ export default {
         available: '可用',
         connected: '已连接'
       },
-      
+
       // 快速操作
       quickActions: {
         createRoute: '创建连接',
@@ -1672,7 +1672,7 @@ export default {
         browse: '浏览'
       }
     },
-    
+
     // 对话框
     dialogs: {
       routeDetails: {
@@ -1684,7 +1684,7 @@ export default {
         messagePlaceholder: '请输入连接说明（可选）...'
       }
     },
-    
+
     // 错误消息
     fetchOverviewError: '获取连接概览失败',
     fetchActiveRoutesError: '获取活跃连接失败',
@@ -1713,7 +1713,7 @@ export default {
     switchedTo: '已切换到 {zoneName}',
     switchFailed: '切换区域失败',
     comingSoonMessage: '区域管理功能正在开发中，敬请期待！',
-    
+
     // 扩展的zone管理功能
     currentZone: '当前区域',
     availableZones: '可用区域',
@@ -1723,7 +1723,7 @@ export default {
     domain: '域名',
     admin: '管理员',
     switchToZone: '切换到此区域',
-    
+
     // 统计信息
     stats: {
       totalNodes: '总设备数',
@@ -1731,7 +1731,7 @@ export default {
       routes: '连接数',
       users: '用户数'
     },
-    
+
     // 操作
     actions: {
       switch: '切换',
@@ -1740,7 +1740,7 @@ export default {
       delete: '删除',
       refresh: '刷新'
     },
-    
+
     // 对话框
     dialogs: {
       switchZone: {
@@ -1755,7 +1755,7 @@ export default {
         create: '创建'
       }
     },
-    
+
     // 错误信息
     fetchOverviewError: '获取区域概览失败',
     fetchAvailableZonesError: '获取可用区域失败',
@@ -1771,12 +1771,12 @@ export default {
   social: {
     subtitle: '组网连接和用户管理',
     comingSoonMessage: '组网管理功能正在开发中，敬请期待！',
-    
+
     // 错误消息
     fetchAllFriendNodesError: '获取所有好友设备失败',
     friendRequestCancelError: '取消好友请求失败',
     friendRequestCancelled: '好友请求已取消',
-    
+
     // 操作按钮
     actions: {
       addFriend: '添加好友',
@@ -1858,7 +1858,7 @@ export default {
     editRemark: '编辑备注',
     editTags: '编辑标签',
     removeFriend: '删除好友',
-    
+
     // 邀请码
     invitations: {
       title: '邀请码管理',
@@ -1926,7 +1926,7 @@ export default {
     fetchInvitationsError: '获取邀请码列表失败',
     invitationCreateError: '创建邀请码失败',
     invitationDeleteError: '删除邀请码失败',
-    
+
     // 新增的错误和成功消息
     noFriendNodes: '该好友暂无设备',
     fetchFriendNodesError: '获取好友设备失败'
@@ -2176,7 +2176,7 @@ export default {
       basicConfigDesc: '必需的基础参数配置',
       wireGuardBasicDesc: '必需的WireGuard基础参数',
       listenPort: '监听端口',
-      
+
       // VPN配置参数翻译
       nodeId: '设备ID',
       networkInterface: '网络接口名称',
@@ -2200,7 +2200,7 @@ export default {
       wireGuard: 'WireGuard',
       openVPN: 'OpenVPN',
       defaultVersion: '默认版本 (Latest)',
-      
+
       // WireGuard参数
       interfaceAddress: '接口地址',
       multiConnection: '多连接支持',
@@ -2238,7 +2238,7 @@ export default {
   },
   zoneServices: {
     subtitle: '区域服务分享和管理',
-    
+
     // 页面标题和描述
     navigation: {
       publicServices: '公共服务',
@@ -2250,10 +2250,10 @@ export default {
       myServices: '我的服务',
       myServicesDescription: '管理和分享你创建的服务'
     },
-    
+
     currentZone: '当前区域',
     servicesCount: '个服务',
-    
+
     // 空状态消息
     empty: {
       anonymousServices: '该功能已废弃',
@@ -2265,7 +2265,7 @@ export default {
       myServices: '你还没有创建任何服务',
       myServicesDesc: '点击下方按钮创建你的第一个服务'
     },
-    
+
     addService: '添加服务',
     editService: '编辑服务',
     addFirstService: '添加第一个服务',
@@ -2285,7 +2285,7 @@ export default {
     connect: '连接',
     authRequired: '需要认证',
     noAuth: '无需认证',
-    
+
     // ServiceCard 相关翻译
     serviceCard: {
       statusLabel: '状态',
@@ -2294,7 +2294,7 @@ export default {
       delete: '删除',
       connect: '连接',
       details: '详情',
-      
+
       // 状态标签
       status: {
         running: '运行中',
@@ -2303,14 +2303,14 @@ export default {
         error: '错误',
         unknown: '未知'
       },
-      
+
       // 认证状态
       auth: {
         required: '需要认证',
         notRequired: '无需认证'
       }
     },
-    
+
     categories: {
       public: '公共服务',
       publicDesc: '由管理员审核通过的公共服务',
@@ -2321,7 +2321,7 @@ export default {
       my: '我的服务',
       myDesc: '你创建和管理的服务'
     },
-    
+
     types: {
       gnbIndex: '节点发现',
       gnbIndexDesc: 'GNB节点发现服务',
@@ -2332,7 +2332,7 @@ export default {
       netbridge: 'NetBridge',
       netbridgeDesc: '网络桥接服务'
     },
-    
+
     form: {
       serviceName: '服务名称',
       serviceNameRequired: '请输入服务名称',
@@ -2410,7 +2410,7 @@ export default {
         public: '公开'
       }
     },
-    
+
     messages: {
       createSuccess: '服务创建成功',
       updateSuccess: '服务更新成功',
@@ -2418,7 +2418,7 @@ export default {
       shareSuccess: '服务分享成功',
       approvalRequested: '公开申请已提交'
     },
-    
+
     errors: {
       loadFailed: '加载服务列表失败',
       createFailed: '创建服务失败',
@@ -2432,14 +2432,14 @@ export default {
       requiresFriendship: '分享服务需要先建立好友关系，请先添加对方为好友'
     }
   },
-  
+
   user: {
     overview: '概览',
     editProfile: '编辑资料',
     security: '安全设置',
     preferences: '偏好设置',
     activity: '活动记录',
-    
+
     // 基本信息
     basicInfo: '基本信息',
     userId: '用户ID',
@@ -2449,18 +2449,18 @@ export default {
     bio: '个人简介',
     role: '角色',
     joinDate: '加入时间',
-    
+
     // 统计信息
     statistics: '统计信息',
     totalNodes: '设备总数',
     totalRoutes: '连接总数',
     totalFriends: '好友总数',
     totalLogins: '登录次数',
-    
+
     // 权限
     permissions: '权限',
     noPermissions: '暂无特殊权限',
-    
+
     // 表单相关
     nameRequired: '请输入姓名',
     emailRequired: '请输入邮箱',
@@ -2472,7 +2472,7 @@ export default {
     bioHint: '简单介绍一下自己',
     saveChanges: '保存更改',
     cancel: '取消',
-    
+
     // 头像
     changeAvatar: '更换头像',
     avatarUrl: '头像链接',
@@ -2482,7 +2482,7 @@ export default {
     avatarUpdateFailed: '头像更新失败',
     avatarSizeLimit: '头像文件大小不能超过1MB',
     avatarTypeLimit: '请选择图片文件（支持jpeg、png、jpg、gif格式）',
-    
+
     // 密码安全
     passwordSecurity: '密码安全',
     changePassword: '修改密码',
@@ -2500,7 +2500,7 @@ export default {
     never: '从未',
     passwordChanged: '密码修改成功',
     passwordChangeFailed: '密码修改失败',
-    
+
     // 两步验证
     twoFactorAuth: '两步验证',
     enable2FA: '启用两步验证',
@@ -2511,7 +2511,7 @@ export default {
     '2faEnabled': '两步验证已启用',
     '2faDisabled': '两步验证已禁用',
     '2faUpdateFailed': '两步验证设置失败',
-    
+
     // 会话管理
     activeSessions: '活跃会话',
     currentSession: '当前会话',
@@ -2519,7 +2519,7 @@ export default {
     revokeSession: '撤销会话',
     sessionRevoked: '会话已撤销',
     sessionRevokeFailed: '撤销会话失败',
-    
+
     // 外观设置
     appearance: '外观设置',
     theme: '主题',
@@ -2529,7 +2529,7 @@ export default {
     themeDark: '深色主题',
     language: '语言',
     languageDesc: '选择界面显示语言',
-    
+
     // 通知设置
     notifications: '通知设置',
     emailNotifications: '邮件通知',
@@ -2538,11 +2538,11 @@ export default {
     pushNotificationsDesc: '接收浏览器推送通知',
     systemAlerts: '系统警报',
     systemAlertsDesc: '接收系统状态和安全警报',
-    
+
     // 活动记录
     recentActivity: '最近活动',
     noActivity: '暂无活动记录',
-    
+
     // 消息提示
     profileUpdated: '资料更新成功',
     profileUpdateFailed: '资料更新失败',
@@ -2550,7 +2550,7 @@ export default {
     preferencesUpdateFailed: '偏好设置更新失败',
     preferencesReset: '偏好设置已重置为默认值',
     resetToDefault: '重置为默认',
-    
+
     // 验证消息
     validation: {
       currentPasswordRequired: '请输入当前密码',
@@ -2561,7 +2561,7 @@ export default {
       invalidFileType: '文件类型不支持'
     }
   },
-  
+
   // VPN配置相关翻译
   vpn: {
     config: {
@@ -2574,7 +2574,7 @@ export default {
       basicConfigDesc: '必需的基础参数配置',
       expertConfig: '专家配置',
       wireGuardBasicDesc: '必需的WireGuard基础参数',
-      
+
       // VPN配置参数翻译
       nodeId: '设备ID',
       networkInterface: '网络接口名称',
@@ -2595,7 +2595,7 @@ export default {
       compressionLevel: '压缩等级',
       memory: '内存刻度',
       esArgs: 'ES参数',
-      
+
       // WireGuard参数
       interfaceAddress: '接口地址',
       multiConnection: '多连接支持',

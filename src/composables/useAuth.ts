@@ -113,14 +113,14 @@ export function useAuth() {
   const resendActivationEmail = async (email: string) => {
     try {
       const response = await apiService.resendActivationEmail({ email })
-      
+
       if (response.data.success) {
         $q.notify({
           type: 'positive',
           message: t('auth.activationEmailResent'),
           timeout: 3000
         })
-        
+
         // 跳转到激活页面
         router.push(`/auth/activate?email=${encodeURIComponent(email)}&resent=1`)
       } else {
@@ -140,11 +140,11 @@ export function useAuth() {
     isLoading.value = true
     loginError.value = null // 清除之前的错误
     try {
-      await authStore.login({ 
-        email: loginForm.email, 
-        password: loginForm.password 
+      await authStore.login({
+        email: loginForm.email,
+        password: loginForm.password
       })
-      
+
       debug.log('🔧 [useAuth] Login successful, checking auth state:', {
         isAuthenticated: authStore.isAuthenticated,
         hasUser: !!authStore.user,
@@ -153,7 +153,7 @@ export function useAuth() {
         currentTime: Date.now(),
         tokenExpired: authStore.tokenExpiry <= Date.now()
       })
-      
+
       // 确保认证状态已经更新
       if (authStore.isAuthenticated) {
         // 检查是否有外部回调（如 CTL setup 跳转登录）
@@ -173,14 +173,14 @@ export function useAuth() {
       }
     } catch (error: any) {
       debug.error('Login failed:', error)
-      
+
       // 根据不同的错误类型显示不同的错误信息
       let errorMessage = 'Login failed. Please try again.'
-      
+
       if (error.response) {
         // 服务器响应了错误状态码
         const { status, data } = error.response
-        
+
         switch (status) {
           case 401:
             errorMessage = data?.message || 'Invalid email or password. Please check your credentials.'
@@ -222,10 +222,10 @@ export function useAuth() {
         // 其他错误
         errorMessage = error.message || 'An unexpected error occurred. Please try again.'
       }
-      
+
       // 设置错误状态供组件显示
       loginError.value = errorMessage
-      
+
       // 也保留通知，但缩短显示时间
       $q.notify({
         type: 'negative',
@@ -233,7 +233,7 @@ export function useAuth() {
         timeout: 3000, // 缩短通知时间
         position: 'top'
       })
-      
+
       // 不刷新页面，让用户有机会重新尝试或查看错误信息
     } finally {
       isLoading.value = false
@@ -252,13 +252,13 @@ export function useAuth() {
         device_name: 'Web Browser',
         activation_url: `${window.location.origin}/auth/activate`
       });
-      
+
       $q.notify({
         type: 'positive',
         message: response.data.message || 'Registration successful! Please check your email or enter the activation code.',
         timeout: 5000
       });
-      
+
       // 不再自动跳转，而是由调用组件处理后续逻辑
     } catch (error: any) {
       debug.error('Registration failed:', error);
@@ -274,7 +274,7 @@ export function useAuth() {
     }
   }
 
-    // 忘记密码
+  // 忘记密码
   const forgotPassword = async (data?: { email: string; redirect_url?: string }) => {
     isLoading.value = true
     try {
@@ -283,7 +283,7 @@ export function useAuth() {
         email,
         redirect_url: data?.redirect_url || `${window.location.origin}/auth/reset-password`
       })
-      
+
       if (response.data.success) {
         return response.data
       } else {
@@ -305,19 +305,19 @@ export function useAuth() {
       if (!emailToVerify) {
         throw new Error('邮箱地址不能为空')
       }
-      
+
       const response = await apiService.activateAccount({
         email: emailToVerify,
         token: emailVerificationForm.verificationCode
       })
-      
+
       if (response.data.success) {
         $q.notify({
           type: 'positive',
           message: response.data.message || '邮箱验证成功！',
           timeout: 3000
         })
-        
+
         return true
       } else {
         throw new Error(response.data.message || '邮箱验证失败')
@@ -342,19 +342,19 @@ export function useAuth() {
       if (!emailToSend) {
         throw new Error('邮箱地址不能为空')
       }
-      
-      const response = await apiService.resendActivationEmail({ 
+
+      const response = await apiService.resendActivationEmail({
         email: emailToSend,
         activation_url: `${window.location.origin}/auth/activate`
       })
-      
+
       if (response.data.success) {
         $q.notify({
           type: 'positive',
           message: response.data.message || '验证码已重新发送',
           timeout: 3000
         })
-        
+
         // 返回冷却时间（秒）
         return response.data.cooldown_seconds || 60
       } else {
@@ -381,14 +381,14 @@ export function useAuth() {
         password: resetPasswordForm.password,
         password_confirmation: resetPasswordForm.confirmPassword
       })
-      
+
       if (response.data.success) {
         $q.notify({
           type: 'positive',
           message: response.data.message || '密码重置成功！',
           timeout: 3000
         })
-        
+
         router.push('/auth/login')
       } else {
         throw new Error(response.data.message || '密码重置失败')
@@ -414,7 +414,7 @@ export function useAuth() {
     forgotPasswordForm,
     emailVerificationForm,
     resetPasswordForm,
-    
+
     // 方法
     validateEmail,
     clearError,

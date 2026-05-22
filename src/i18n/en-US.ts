@@ -85,7 +85,7 @@ export default {
     hoursAgo: '{n} hours ago',
     daysAgo: '{n} days ago',
     featureInDevelopment: 'Feature in development',
-    
+
     // Config Bundle related
     configBundle: {
       title: 'Config Bundle',
@@ -98,7 +98,7 @@ export default {
       networkIssue: 'Network issue',
       invalidBundle: 'Invalid config bundle data'
     },
-    
+
     // API version compatibility
     version: {
       title: 'API Version',
@@ -112,7 +112,7 @@ export default {
       versionCheckFailed: 'Version check failed',
       usingDefaultMode: 'Using default compatible mode'
     },
-    
+
     // VPN interface monitoring
     vpnInterface: {
       title: 'VPN Interface',
@@ -256,7 +256,7 @@ export default {
     discordCommunity: 'Discord Community',
     visitVillage: 'Visit Community Page',
     communityLinks: 'Community Links',
-    
+
     // Account activation related
     accountActivation: 'Account Activation',
     accountNeedsActivation: 'Account Needs Activation',
@@ -294,7 +294,7 @@ export default {
     backToRegister: 'Back to Register',
     missingParameters: 'Missing required parameters',
     registrationComplete: 'Registration complete! Please login to your account',
-    
+
     // Password reset related
     resetPassword: 'Reset Password',
     resetPasswordInstruction: 'Please set your new password',
@@ -319,7 +319,7 @@ export default {
     resetFailed: 'Reset failed',
     sendFailed: 'Send failed',
     send: 'Send',
-    
+
     // Password strength levels
     strength: {
       weak: 'Weak',
@@ -327,7 +327,7 @@ export default {
       good: 'Good',
       strong: 'Strong'
     },
-    
+
     // Additional fields
     confirmNewPassword: 'Confirm New Password',
     passwordWeak: 'Weak',
@@ -386,7 +386,7 @@ export default {
     loadNetworkConfigFailed: 'Failed to load network configuration',
     loadDeviceInfoFailed: 'Failed to load device information',
     loadRoutesCountFailed: 'Failed to load routes count',
-    
+
     // Node status
     status: {
       unconfigured: 'Unconfigured',
@@ -400,7 +400,7 @@ export default {
       pending: 'Pending',
       updateFailed: 'Failed to update node status'
     },
-    
+
     // Node information fields
     fields: {
       lastSeen: 'Last Seen',
@@ -418,7 +418,7 @@ export default {
       ipGroupSequence: 'IP Group Sequence',
       ipManagement: 'IP Management'
     },
-    
+
     // Node detail page
     detail: {
       title: 'Node Details',
@@ -431,7 +431,7 @@ export default {
       ipGrouping: 'IP Grouping',
       statistics: 'Statistics',
       quickActions: 'Quick Actions',
-      
+
       // Basic info fields
       nodeName: 'Node Name',
       nodeId: 'Node ID',
@@ -440,13 +440,13 @@ export default {
       createdAt: 'Created At',
       updatedAt: 'Updated At',
       nodeType: 'Node Type',
-      
+
       // Application info
       appInfo: 'Application Information',
       vpnType: 'VPN Type',
       appVersion: 'App Version',
       listenPort: 'Listen Port',
-      
+
       // Hardware info
       hardwareInfo: 'Hardware Information',
       cpuModel: 'CPU Model',
@@ -456,7 +456,7 @@ export default {
       totalMemory: 'Total Memory',
       availableMemory: 'Available Memory',
       virtualization: 'Virtualization',
-      
+
       // System info
       systemInfo: 'System Information',
       operatingSystem: 'Operating System',
@@ -465,14 +465,14 @@ export default {
       cLibrary: 'C Library',
       containerType: 'Container Type',
       infoCollectedAt: 'Information Collected At',
-      
+
       // Network device info
       networkDevice: 'Network Device',
       nicCount: 'Network Cards',
       firewall: 'Firewall',
       ipForwarding: 'IP Forwarding',
       units: 'units',
-      
+
       // Network fields
       virtualInterface: 'Virtual Interface',
       virtualIpAddress: 'Virtual IP Address',
@@ -480,7 +480,7 @@ export default {
       ipGroupSequence: 'IP Group Sequence',
       lanIpAddress: 'LAN IP Address',
       publicIpAddress: 'Public IP Address',
-      
+
       // Messages
       noDeviceInfo: 'No device information available',
       deviceInfoNote: 'Device information needs to be reported by the client',
@@ -488,7 +488,7 @@ export default {
       defaultGroup: 'Default',
       ipv6Address: 'IPv6 Address'
     },
-    
+
     // List page
     subtitle: 'Manage and monitor network nodes',
     createNode: 'Create Node',
@@ -539,12 +539,12 @@ export default {
     createdAt: 'Created at',
     gettingConfigSuggestions: 'Getting config suggestions...',
     nextStepSuggestion: 'Next Step Suggestion',
-    
+
     // Delete confirmation dialog
     deleteConfirmTitle: 'Confirm Delete',
     deleteCancel: 'Cancel',
     deleteConfirmAction: 'Delete',
-    
+
     // Edit page
     edit: {
       title: 'Edit Node',
@@ -556,7 +556,7 @@ export default {
       saveFailed: 'Save failed, please try again',
       confirmReset: 'Confirm Reset',
       resetChangesMessage: 'Are you sure you want to reset all changes?',
-      
+
       // Tabs
       tabs: {
         basic: 'Basic Information',
@@ -564,7 +564,7 @@ export default {
         config: 'Node Configuration',
         keys: 'Key Management'
       },
-      
+
       // Basic information page
       basic: {
         nameRequired: 'Node name is required',
@@ -581,7 +581,7 @@ export default {
         basicInfoSaved: 'Basic information saved successfully',
         saveFailed: 'Save failed, please try again',
         vpnTypeSwitched: 'Switched to {type}, please set relevant ports in node configuration page',
-        
+
         // Node types
         nodeTypes: {
           edge: 'Edge Node',
@@ -594,7 +594,7 @@ export default {
           special: 'Special Node'
         }
       },
-      
+
       // Network configuration page
       network: {
         loadingConfig: 'Loading network configuration...',
@@ -631,7 +631,7 @@ export default {
         resetNetwork: 'Reset network configuration',
         advancedConfig: 'Advanced Configuration',
         confirmResetNetwork: 'Are you sure you want to reset network configuration?',
-        
+
         // Save related
         save: {
           noChanges: 'No changes to save',
@@ -641,14 +641,14 @@ export default {
           defaultError: 'Save failed, please try again',
           errorPrefix: 'Save failed'
         },
-        
+
         // Validation related
         validation: {
           formErrors: 'Please check and fix form errors',
           virtualIpRequired: 'Please select node virtual IP'
         }
       },
-      
+
       // Node configuration page
       config: {
         title: 'Node Configuration',
@@ -686,13 +686,13 @@ export default {
         basicConfig: 'Basic Configuration',
         expertConfig: 'Expert Configuration',
         copyConfig: 'Copy Configuration',
-        
+
         // VPN types and versions
         gnbVirtualNetwork: 'GNB Virtual Network',
         wireGuard: 'WireGuard',
         openVPN: 'OpenVPN',
         defaultVersion: 'Default Version (Latest)',
-        
+
         // VPN configuration parameter translations
         nodeId: 'Node ID',
         networkInterface: 'Network Interface Name',
@@ -712,7 +712,7 @@ export default {
         compressionLevel: 'Compression Level',
         memory: 'Memory Scale',
         esArgs: 'ES Arguments',
-        
+
         // WireGuard parameters
         interfaceAddress: 'Interface Address',
         multiConnection: 'Multi Connection Support',
@@ -745,7 +745,7 @@ export default {
         saveFailedLog: 'Failed to save node configuration:',
         saveFailedRetry: 'Save failed, please try again',
         saveFailedPrefix: 'Save failed',
-        
+
         // Log levels
         logLevels: {
           trace: 'Trace',
@@ -756,7 +756,7 @@ export default {
           fatal: 'Fatal'
         }
       },
-      
+
       // Key management page
       keys: {
         title: 'Key Management',
@@ -800,7 +800,7 @@ export default {
         dragDropKey: 'Drag and drop key file here or click to select',
         saveKeyConfig: 'Save Key Configuration',
         resetKeys: 'Reset Keys',
-        
+
         // Key operation messages
         keyPairGenerated: 'Key pair generated successfully',
         keyUpdated: 'Key updated successfully',
@@ -819,7 +819,7 @@ export default {
         privateKeyDownloadSuccess: 'Private key download successful',
         downloadFailed: 'Failed to download public key',
         privateKeyDownloadFailed: 'Failed to download private key',
-        
+
         // Key formats
         formats: {
           pem: 'PEM format',
@@ -827,7 +827,7 @@ export default {
           p12: 'PKCS#12 format',
           jks: 'Java KeyStore format'
         },
-        
+
         // Key algorithms
         algorithms: {
           rsa: 'RSA',
@@ -837,13 +837,13 @@ export default {
         }
       }
     },
-    
+
     // Node operations
     operations: {
       title: 'Node Operations',
       quickActions: 'Quick Actions',
       batchOperations: 'Batch Operations',
-      
+
       // Basic operations
       start: 'Start',
       stop: 'Stop',
@@ -857,7 +857,7 @@ export default {
       upgrade: 'Upgrade',
       downgrade: 'Downgrade',
       reset: 'Reset',
-      
+
       // Status operations
       enable: 'Enable',
       disable: 'Disable',
@@ -865,7 +865,7 @@ export default {
       deactivate: 'Deactivate',
       maintenance: 'Enter Maintenance',
       exitMaintenance: 'Exit Maintenance',
-      
+
       // Configuration operations
       reloadConfig: 'Reload Configuration',
       validateConfig: 'Validate Configuration',
@@ -873,7 +873,7 @@ export default {
       importConfig: 'Import Configuration',
       resetConfig: 'Reset Configuration',
       backupConfig: 'Backup Configuration',
-      
+
       // Network operations
       reconnect: 'Reconnect',
       disconnect: 'Disconnect',
@@ -882,7 +882,7 @@ export default {
       speedTest: 'Speed Test',
       portScan: 'Port Scan',
       connectFailed: 'Failed to connect to node',
-      
+
       // Batch operations
       selectAll: 'Select All',
       deselectAll: 'Deselect All',
@@ -892,18 +892,18 @@ export default {
       batchUpgrade: 'Batch Upgrade',
       batchBackup: 'Batch Backup',
       batchDelete: 'Batch Delete',
-      
+
       // Operation results
       createSuccess: 'Node created successfully',
       createFailed: 'Failed to create node, please try again',
-      
+
       // Operation confirmations
       confirmStart: 'Are you sure you want to start node "{name}"?',
       confirmStop: 'Are you sure you want to stop node "{name}"?',
       confirmRestart: 'Are you sure you want to restart node "{name}"?',
       confirmReset: 'Are you sure you want to reset node "{name}"? This action cannot be undone.',
       confirmBatchOperation: 'Are you sure you want to perform "{operation}" on {count} selected nodes?',
-      
+
       // Operation results
       operationSuccess: '{operation} operation completed successfully',
       operationFailed: '{operation} operation failed: {error}',
@@ -913,7 +913,7 @@ export default {
       cancelOperation: 'Cancel Operation',
       operationProgress: 'Operation progress: {percent}%'
     },
-    
+
     // Node monitoring
     monitoring: {
       title: 'Node Monitoring',
@@ -924,7 +924,7 @@ export default {
       resourceUsage: 'Resource Usage',
       healthCheck: 'Health Check',
       alertsWarnings: 'Alerts and Warnings',
-      
+
       // Performance metrics
       cpuUsage: 'CPU Usage',
       memoryUsage: 'Memory Usage',
@@ -936,14 +936,14 @@ export default {
       throughput: 'Throughput',
       errorRate: 'Error Rate',
       connectionCount: 'Connection Count',
-      
+
       // Health status
       healthy: 'Healthy',
       warning: 'Warning',
       critical: 'Critical',
       unknown: 'Unknown',
       degraded: 'Degraded',
-      
+
       // Alert types
       alerts: {
         highCPU: 'High CPU Usage',
@@ -955,7 +955,7 @@ export default {
         securityAlert: 'Security Alert',
         performanceDrop: 'Performance Drop'
       },
-      
+
       // Time ranges
       timeRange: {
         last1Hour: 'Last 1 Hour',
@@ -966,7 +966,7 @@ export default {
         custom: 'Custom'
       }
     },
-    
+
     // Node logs
     logs: {
       title: 'Node Logs',
@@ -980,14 +980,14 @@ export default {
       logTime: 'Log Time',
       logMessage: 'Log Message',
       logSource: 'Log Source',
-      
+
       // Log level filters
       showAll: 'Show All',
       showErrors: 'Show Errors Only',
       showWarnings: 'Show Warnings and Above',
       showInfo: 'Show Info and Above',
       showDebug: 'Show Debug and Above',
-      
+
       // Log operations
       logsCleared: 'Logs cleared',
       logsClearFailed: 'Failed to clear logs',
@@ -995,7 +995,7 @@ export default {
       logsDownloadFailed: 'Failed to download logs',
       noLogsFound: 'No logs found',
       logsTooLarge: 'Log file is too large, please download to view',
-      
+
       // Real-time logs
       realTimeMode: 'Real-time Mode',
       pauseRealTime: 'Pause Real-time',
@@ -1054,7 +1054,7 @@ export default {
     name: 'Route Name',
     destination: 'Destination',
     gateway: 'Gateway',
-    
+
     // Success/error messages
     configDownloaded: 'Configuration downloaded successfully',
     configDownloadError: 'Failed to download configuration',
@@ -1074,7 +1074,7 @@ export default {
     fetchPendingConnectionsError: 'Failed to fetch pending connections',
     fetchRouteDetailsError: 'Failed to fetch route details',
     fetchAllFriendNodesError: 'Failed to fetch all friend nodes',
-    
+
     // Overview statistics
     overview: {
       activeRoutes: 'Active Routes',
@@ -1082,7 +1082,7 @@ export default {
       connectedNodes: 'Connected Nodes',
       totalBandwidth: 'Total Bandwidth'
     },
-    
+
     // Tabs
     tabs: {
       activeRoutes: 'Active Routes',
@@ -1090,7 +1090,7 @@ export default {
       friendNodes: 'Friend Nodes',
       configuration: 'Configuration'
     },
-    
+
     // Route status
     status: {
       active: 'Active',
@@ -1099,13 +1099,13 @@ export default {
       error: 'Error',
       unknown: 'Unknown'
     },
-    
+
     // Connection types
     connectionType: {
       direct: 'Direct',
       relay: 'Relay'
     },
-    
+
     // Node status
     nodeStatus: {
       available: 'Available',
@@ -1113,14 +1113,14 @@ export default {
       pending: 'Pending',
       unavailable: 'Unavailable'
     },
-    
+
     // Connection status
     connectionStatus: {
       pending: 'Pending',
       approved: 'Approved',
       rejected: 'Rejected'
     },
-    
+
     // Index/Navigation page
     index: {
       activeRoutes: 'Active Routes',
@@ -1130,7 +1130,7 @@ export default {
       pendingConnections: 'Pending Connections',
       pendingConnectionsDescription: 'Handle incoming and outgoing connection requests'
     },
-    
+
     // Active routes
     activeRoutes: {
       subtitle: 'Manage currently active network route connections',
@@ -1157,7 +1157,7 @@ export default {
       unknownType: 'Unknown Type',
       unknownMode: 'Unknown Mode'
     },
-    
+
     // Pending connections
     pendingConnections: {
       subtitle: 'Handle pending connection requests',
@@ -1177,7 +1177,7 @@ export default {
       rejectSuccess: 'Connection request rejected',
       rejectError: 'Failed to reject connection request'
     },
-    
+
     // Friend nodes
     friendNodes: {
       subtitle: 'Browse and manage friend network nodes',
@@ -1265,7 +1265,7 @@ export default {
         unknown: 'Unknown'
       }
     },
-    
+
     // Node selector component
     nodeSelector: {
       noNodes: 'No nodes available',
@@ -1396,7 +1396,7 @@ export default {
         selectMyNode: 'Select My Node',
         submitRequest: 'Submit Request'
       },
-      
+
       // Step 1 - Select friend
       step1: {
         title: 'Create Route - Select Friend',
@@ -1410,7 +1410,7 @@ export default {
         nextStep: 'Next Step',
         pleaseSelectFriend: 'Please select a friend'
       },
-      
+
       // Step 2 - Select friend node
       step2: {
         title: 'Create Route - Select Friend Node',
@@ -1436,7 +1436,7 @@ export default {
         pendingRequest: 'Connection request pending',
         possibleReasons: 'Possible reasons'
       },
-      
+
       // Step 3 - Select my node
       step3: {
         title: 'Create Route - Select My Node',
@@ -1478,7 +1478,7 @@ export default {
         nodeDisabled: 'This node is disabled and cannot be used',
         nodeMaintenance: 'This node is under maintenance',
         nodeUnconfigured: 'This node is not configured yet',
-        
+
         // Connection status
         connectionStatus: {
           connected: 'Connected',
@@ -1488,11 +1488,11 @@ export default {
           none: 'No Connection',
           unknown: 'Status Unknown'
         },
-        
+
         // Node not available reason
         nodeNotAvailable: 'Node temporarily unavailable'
       },
-      
+
       // Step 4 - Submit request
       step4: {
         title: 'Create Route - Submit Request',
@@ -1548,12 +1548,12 @@ export default {
           ipsec: 'IPSec'
         }
       },
-      
+
       // Common messages
       requestSubmitted: 'Connection request submitted successfully',
       submitError: 'Failed to submit connection request'
     },
-    
+
     // Dialogs
     dialogs: {
       routeDetails: {
@@ -1571,7 +1571,7 @@ export default {
     switchedTo: 'Switched to {zoneName}',
     switchFailed: 'Failed to switch zone',
     comingSoonMessage: 'Zone management feature is under development, stay tuned!',
-    
+
     // Extended zone management features
     currentZone: 'Current Zone',
     availableZones: 'Available Zones',
@@ -1581,7 +1581,7 @@ export default {
     domain: 'Domain',
     admin: 'Administrator',
     switchToZone: 'Switch to this zone',
-    
+
     // Statistics
     stats: {
       totalNodes: 'Total Nodes',
@@ -1589,7 +1589,7 @@ export default {
       routes: 'Routes',
       users: 'Users'
     },
-    
+
     // Actions
     actions: {
       switch: 'Switch',
@@ -1598,7 +1598,7 @@ export default {
       delete: 'Delete',
       refresh: 'Refresh'
     },
-    
+
     // Dialogs
     dialogs: {
       switchZone: {
@@ -1613,7 +1613,7 @@ export default {
         create: 'Create'
       }
     },
-    
+
     // Error messages
     fetchOverviewError: 'Failed to fetch zone overview',
     fetchAvailableZonesError: 'Failed to fetch available zones',
@@ -1629,7 +1629,7 @@ export default {
   social: {
     subtitle: 'Network connections and user management',
     comingSoonMessage: 'Networking management feature is under development, stay tuned!',
-    
+
     // Actions
     actions: {
       accept: 'Accept',
@@ -1637,7 +1637,7 @@ export default {
       addFriend: 'Add Friend',
       removeFriend: 'Remove Friend'
     },
-    
+
     // Overview stats
     overview: {
       title: 'Social Overview',
@@ -1702,7 +1702,7 @@ export default {
     editRemark: 'Edit Remark',
     editTags: 'Edit Tags',
     removeFriend: 'Remove Friend',
-    
+
     // Invitations
     invitations: {
       title: 'Invitation Management',
@@ -2029,7 +2029,7 @@ export default {
   },
   zoneServices: {
     subtitle: 'Zone service sharing and management',
-    
+
     // Page titles and descriptions
     navigation: {
       publicServices: 'Public Services',
@@ -2041,7 +2041,7 @@ export default {
       myServices: 'My Services',
       myServicesDescription: 'Manage and share services you created'
     },
-    
+
     currentZone: 'Current Zone',
     servicesCount: 'services',
     addService: 'Add Service',
@@ -2063,7 +2063,7 @@ export default {
     connect: 'Connect',
     authRequired: 'Auth Required',
     noAuth: 'No Auth',
-    
+
     // ServiceCard related translations
     serviceCard: {
       statusLabel: 'Status',
@@ -2072,7 +2072,7 @@ export default {
       delete: 'Delete',
       connect: 'Connect',
       details: 'Details',
-      
+
       // Status labels
       status: {
         running: 'Running',
@@ -2081,14 +2081,14 @@ export default {
         error: 'Error',
         unknown: 'Unknown'
       },
-      
+
       // Auth status
       auth: {
         required: 'Auth Required',
         notRequired: 'No Auth Required'
       }
     },
-    
+
     categories: {
       public: 'Public Services',
       publicDesc: 'Public services approved by administrators',
@@ -2099,7 +2099,7 @@ export default {
       my: 'My Services',
       myDesc: 'Services you created and manage'
     },
-    
+
     types: {
       gnbIndex: 'Node Discovery',
       gnbIndexDesc: 'GNB node discovery service',
@@ -2110,7 +2110,7 @@ export default {
       netbridge: 'NetBridge',
       netbridgeDesc: 'Network bridge service'
     },
-    
+
     form: {
       serviceName: 'Service Name',
       serviceNameRequired: 'Please enter service name',
@@ -2176,7 +2176,7 @@ export default {
         password: 'Password Auth'
       }
     },
-    
+
     empty: {
       publicServices: 'No Public Services',
       publicServicesDesc: 'No system services or services from connected devices available yet',
@@ -2187,7 +2187,7 @@ export default {
       myServices: 'You haven\'t created any services yet',
       myServicesDesc: 'Click the button below to create your first service'
     },
-    
+
     messages: {
       createSuccess: 'Service created successfully',
       updateSuccess: 'Service updated successfully',
@@ -2195,7 +2195,7 @@ export default {
       shareSuccess: 'Service shared successfully',
       approvalRequested: 'Public approval request submitted'
     },
-    
+
     errors: {
       loadFailed: 'Failed to load service list',
       createFailed: 'Failed to create service',
@@ -2209,14 +2209,14 @@ export default {
       requiresFriendship: 'Sharing services requires an established friendship. Please add them as a friend first'
     }
   },
-  
+
   user: {
     overview: 'Overview',
     editProfile: 'Edit Profile',
     security: 'Security Settings',
     preferences: 'Preferences',
     activity: 'Activity Log',
-    
+
     // Basic information
     basicInfo: 'Basic Information',
     userId: 'User ID',
@@ -2226,18 +2226,18 @@ export default {
     bio: 'Bio',
     role: 'Role',
     joinDate: 'Join Date',
-    
+
     // Statistics
     statistics: 'Statistics',
     totalNodes: 'Total Nodes',
     totalRoutes: 'Total Routes',
     totalFriends: 'Total Friends',
     totalLogins: 'Total Logins',
-    
+
     // Permissions
     permissions: 'Permissions',
     noPermissions: 'No special permissions',
-    
+
     // Form related
     nameRequired: 'Please enter name',
     emailRequired: 'Please enter email',
@@ -2249,7 +2249,7 @@ export default {
     bioHint: 'Tell us a little about yourself',
     saveChanges: 'Save Changes',
     cancel: 'Cancel',
-    
+
     // Avatar
     changeAvatar: 'Change Avatar',
     avatarUrl: 'Avatar URL',
@@ -2259,7 +2259,7 @@ export default {
     avatarUpdateFailed: 'Failed to update avatar',
     avatarSizeLimit: 'Avatar file size cannot exceed 1MB',
     avatarTypeLimit: 'Please select an image file (supports jpeg, png, jpg, gif formats)',
-    
+
     // Password security
     passwordSecurity: 'Password Security',
     changePassword: 'Change Password',
@@ -2277,7 +2277,7 @@ export default {
     never: 'Never',
     passwordChanged: 'Password changed successfully',
     passwordChangeFailed: 'Failed to change password',
-    
+
     // Two-factor authentication
     twoFactorAuth: 'Two-Factor Authentication',
     enable2FA: 'Enable Two-Factor Authentication',
@@ -2288,7 +2288,7 @@ export default {
     '2faEnabled': 'Two-factor authentication enabled',
     '2faDisabled': 'Two-factor authentication disabled',
     '2faUpdateFailed': 'Failed to update two-factor authentication settings',
-    
+
     // Session management
     activeSessions: 'Active Sessions',
     currentSession: 'Current Session',
@@ -2296,7 +2296,7 @@ export default {
     revokeSession: 'Revoke Session',
     sessionRevoked: 'Session revoked',
     sessionRevokeFailed: 'Failed to revoke session',
-    
+
     // Appearance settings
     appearance: 'Appearance',
     theme: 'Theme',
@@ -2306,7 +2306,7 @@ export default {
     themeDark: 'Dark Theme',
     language: 'Language',
     languageDesc: 'Select interface display language',
-    
+
     // Notification settings
     notifications: 'Notifications',
     emailNotifications: 'Email Notifications',
@@ -2315,11 +2315,11 @@ export default {
     pushNotificationsDesc: 'Receive browser push notifications',
     systemAlerts: 'System Alerts',
     systemAlertsDesc: 'Receive system status and security alerts',
-    
+
     // Activity log
     recentActivity: 'Recent Activity',
     noActivity: 'No activity records',
-    
+
     // Messages
     profileUpdated: 'Profile updated successfully',
     profileUpdateFailed: 'Failed to update profile',
@@ -2327,7 +2327,7 @@ export default {
     preferencesUpdateFailed: 'Failed to update preferences',
     preferencesReset: 'Preferences reset to default values',
     resetToDefault: 'Reset to Default',
-    
+
     // Validation messages
     validation: {
       currentPasswordRequired: 'Current password is required',
@@ -2338,7 +2338,7 @@ export default {
       invalidFileType: 'Invalid file type'
     }
   },
-  
+
   // VPN configuration related translations
   vpn: {
     config: {
@@ -2351,7 +2351,7 @@ export default {
       basicConfigDesc: 'Required basic parameter configuration',
       expertConfig: 'Expert Configuration',
       wireGuardBasicDesc: 'Required WireGuard basic parameters',
-      
+
       // VPN configuration parameter translations
       nodeId: 'Node ID',
       networkInterface: 'Network Interface Name',
@@ -2372,7 +2372,7 @@ export default {
       compressionLevel: 'Compression Level',
       memory: 'Memory Scale',
       esArgs: 'ES Arguments',
-      
+
       // WireGuard parameters
       interfaceAddress: 'Interface Address',
       multiConnection: 'Multi Connection Support',

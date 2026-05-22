@@ -280,19 +280,19 @@ const showAllRecommendations = () => {
         }
 
         &.category-network::before {
-          background: linear-gradient(135deg, var(--q-info), #43a7d5);
+          background: linear-gradient(135deg, var(--q-info), #2563EB);
         }
 
         &.category-social::before {
-          background: linear-gradient(135deg, var(--q-secondary), #ff6b9d);
+          background: linear-gradient(135deg, #3B82F6, #2563EB);
         }
 
         &.category-service::before {
-          background: linear-gradient(135deg, var(--q-warning), #ffa726);
+          background: linear-gradient(135deg, var(--q-warning), #D97706);
         }
 
         &.category-optimization::before {
-          background: linear-gradient(135deg, var(--q-positive), #66bb6a);
+          background: linear-gradient(135deg, var(--q-positive), #15803D);
         }
 
         .action-icon-wrapper {

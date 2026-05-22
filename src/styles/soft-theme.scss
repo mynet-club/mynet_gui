@@ -9,20 +9,28 @@
 
 :root {
   /* ===== 页面与结构（冷调的極浅灰） ===== */
-  --page-bg: #F8FAFC;          /* 页面整体底色 */
-  --content-bg: #FFFFFF;       /* 主内容区 / 卡片 */
+  --page-bg: #F8FAFC;
+  /* 页面整体底色 */
+  --content-bg: #FFFFFF;
+  /* 主内容区 / 卡片 */
 
-  --header-bg: #FFFFFF;        /* 顶部 Header */
+  --header-bg: #FFFFFF;
+  /* 顶部 Header */
   --header-border: #E2E8F0;
 
-  --sidebar-bg: #FFFFFF;       /* 侧边栏 */
+  --sidebar-bg: #FFFFFF;
+  /* 侧边栏 */
   --sidebar-border: #E2E8F0;
 
   /* ===== 文本颜色（准黑，不要纯黑） ===== */
-  --text-primary: #0F172A;     /* 主文本 / 标题 */
-  --text-secondary: #475569;   /* 次级说明 */
-  --text-muted: #94A3B8;       /* 技术字段 / 注释 */
-  --text-disabled: #CBD5E1;    /* 禁用态 */
+  --text-primary: #0F172A;
+  /* 主文本 / 标题 */
+  --text-secondary: #475569;
+  /* 次级说明 */
+  --text-muted: #94A3B8;
+  /* 技术字段 / 注释 */
+  --text-disabled: #CBD5E1;
+  /* 禁用态 */
 
   /* ===== 边框 / 分隔 ===== */
   --border-default: #E2E8F0;
@@ -30,9 +38,12 @@
   --border-strong: #CBD5E1;
 
   /* ===== 状态语义（仅用于图标/Badge/文字，不要大块面）===== */
-  --status-available: #16A34A;        /* 🟢 可用 */
-  --status-warning: #F59E0B;          /* 🟡 不稳定 */
-  --status-unavailable: #94A3B8;      /* ⚪ 不可用 */
+  --status-available: #16A34A;
+  /* 🟢 可用 */
+  --status-warning: #F59E0B;
+  /* 🟡 不稳定 */
+  --status-unavailable: #94A3B8;
+  /* ⚪ 不可用 */
   --status-error: #DC2626;
 
   --status-available-bg: #F0FDF4;
@@ -41,7 +52,8 @@
   --status-error-bg: #FEF2F2;
 
   /* ===== 主色（品牌蓝、克制使用）===== */
-  --primary: #2563EB;           /* 主按钮 / 主链接 */
+  --primary: #2563EB;
+  /* 主按钮 / 主链接 */
   --primary-hover: #1D4ED8;
   --primary-active: #1E40AF;
   --primary-soft: #EFF6FF;
@@ -69,12 +81,18 @@
   --soft-radius-full: 999px;
 
   /* ===== 间距（保留） ===== */
-  --soft-spacing-xs: 0.5rem;   /* 8px */
-  --soft-spacing-sm: 0.75rem;  /* 12px */
-  --soft-spacing-md: 1rem;     /* 16px */
-  --soft-spacing-lg: 1.5rem;   /* 24px */
-  --soft-spacing-xl: 2rem;     /* 32px */
-  --soft-spacing-2xl: 3rem;    /* 48px */
+  --soft-spacing-xs: 0.5rem;
+  /* 8px */
+  --soft-spacing-sm: 0.75rem;
+  /* 12px */
+  --soft-spacing-md: 1rem;
+  /* 16px */
+  --soft-spacing-lg: 1.5rem;
+  /* 24px */
+  --soft-spacing-xl: 2rem;
+  /* 32px */
+  --soft-spacing-2xl: 3rem;
+  /* 48px */
 
   /* ===== 兼容旧变量（渐进迁移） ===== */
   --soft-bg-primary: var(--content-bg);
@@ -105,15 +123,15 @@
   --soft-bg-secondary: #2d3748;
   --soft-bg-card: #1e2530;
   --soft-bg-hover: #2a3242;
-  
+
   --soft-text-primary: #e2e8f0;
   --soft-text-secondary: #cbd5e0;
   --soft-text-tertiary: #a0aec0;
   --soft-text-light: #718096;
-  
+
   --soft-border-light: #2d3748;
   --soft-border-medium: #4a5568;
-  
+
   --soft-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
   --soft-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.15);
   --soft-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.25), 0 4px 6px rgba(0, 0, 0, 0.15);
@@ -169,22 +187,22 @@ body {
   font-weight: 500 !important;
   letter-spacing: 0.01em;
   transition: all 0.25s ease !important;
-  
+
   /* 降低按钮阴影 */
   &.q-btn--unelevated {
     box-shadow: var(--soft-shadow-sm) !important;
   }
-  
+
   &.q-btn--outline {
     border-width: 1.5px;
     border-color: var(--border-default);
-    
+
     &:hover {
       background-color: var(--page-bg);
       border-color: var(--text-secondary);
     }
   }
-  
+
   /* 扁平按钮柔和悬停效果 */
   &.q-btn--flat:hover {
     background-color: var(--page-bg) !important;
@@ -195,13 +213,13 @@ body {
 .q-btn-group {
   border-radius: var(--soft-radius-md);
   box-shadow: var(--soft-shadow-sm);
-  
-  > .q-btn {
+
+  >.q-btn {
     &:first-child {
       border-top-left-radius: var(--soft-radius-md) !important;
       border-bottom-left-radius: var(--soft-radius-md) !important;
     }
-    
+
     &:last-child {
       border-top-right-radius: var(--soft-radius-md) !important;
       border-bottom-right-radius: var(--soft-radius-md) !important;
@@ -216,12 +234,12 @@ body {
 .q-field {
   .q-field__control {
     border-radius: var(--soft-radius-md) !important;
-    
+
     &:before {
       border-color: var(--border-light);
     }
   }
-  
+
   /* 聚焦状态 */
   &.q-field--focused {
     .q-field__control:before {
@@ -229,21 +247,21 @@ body {
       border-width: 1.5px;
     }
   }
-  
+
   /* 填充模式 */
   &.q-field--filled {
     .q-field__control {
       background-color: var(--page-bg);
     }
   }
-  
+
   /* 轮廓模式 */
   &.q-field--outlined {
     .q-field__control {
       &:before {
         border-color: var(--border-light);
       }
-      
+
       &:hover:before {
         border-color: var(--border-default);
       }
@@ -296,31 +314,31 @@ body {
   border-radius: var(--soft-radius-lg);
   box-shadow: var(--soft-shadow-md);
   border: 1px solid var(--soft-border-light);
-  
+
   thead tr {
     background-color: var(--soft-bg-secondary);
-    
+
     th {
       color: var(--soft-text-primary);
       font-weight: 600;
       border-bottom: 1px solid var(--soft-border-light);
     }
   }
-  
+
   tbody {
     tr {
       transition: background-color 0.2s ease;
-      
+
       &:hover {
         background-color: var(--soft-bg-hover);
       }
-      
+
       td {
         border-bottom: 1px solid var(--soft-border-light);
       }
     }
   }
-  
+
   /* 移除强烈边框 */
   .q-table__card {
     box-shadow: none;
@@ -333,22 +351,22 @@ body {
 
 .q-list {
   border-radius: var(--soft-radius-md);
-  
+
   .q-item {
     border-radius: var(--soft-radius-sm);
     margin: 0.25rem 0;
     transition: all 0.2s ease;
-    
+
     &:hover {
       background-color: var(--soft-bg-hover);
     }
-    
+
     &.q-item--active {
       background-color: var(--soft-primary-light);
       color: var(--soft-primary);
     }
   }
-  
+
   /* 分隔符柔和 */
   .q-separator {
     background-color: var(--soft-border-light);
@@ -363,7 +381,7 @@ body {
   border-radius: var(--soft-radius-lg) !important;
   box-shadow: var(--soft-shadow-lg) !important;
   border: 1px solid var(--soft-border-light);
-  
+
   &__message {
     color: var(--soft-text-primary);
   }
@@ -374,7 +392,8 @@ body {
    ======================================== */
 
 .q-dialog__backdrop {
-  background-color: rgba(0, 0, 0, 0.3) !important; /* 降低蒙层透明度 */
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  /* 降低蒙层透明度 */
 }
 
 .q-dialog {
@@ -472,7 +491,7 @@ body {
   padding: var(--soft-spacing-xl);
   max-width: 1400px;
   margin: 0 auto;
-  
+
   @media (max-width: 768px) {
     padding: var(--soft-spacing-md);
   }
@@ -483,7 +502,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--soft-spacing-lg);
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: var(--soft-spacing-md);
@@ -526,26 +545,64 @@ body {
    ======================================== */
 
 /* 文字颜色 */
-.text-soft-primary { color: var(--soft-text-primary) !important; }
-.text-soft-secondary { color: var(--soft-text-secondary) !important; }
-.text-soft-tertiary { color: var(--soft-text-tertiary) !important; }
+.text-soft-primary {
+  color: var(--soft-text-primary) !important;
+}
+
+.text-soft-secondary {
+  color: var(--soft-text-secondary) !important;
+}
+
+.text-soft-tertiary {
+  color: var(--soft-text-tertiary) !important;
+}
 
 /* 背景色 */
-.bg-soft-primary { background-color: var(--soft-bg-primary) !important; }
-.bg-soft-secondary { background-color: var(--soft-bg-secondary) !important; }
-.bg-soft-card { background-color: var(--soft-bg-card) !important; }
+.bg-soft-primary {
+  background-color: var(--soft-bg-primary) !important;
+}
+
+.bg-soft-secondary {
+  background-color: var(--soft-bg-secondary) !important;
+}
+
+.bg-soft-card {
+  background-color: var(--soft-bg-card) !important;
+}
 
 /* 圆角 */
-.rounded-soft-sm { border-radius: var(--soft-radius-sm) !important; }
-.rounded-soft-md { border-radius: var(--soft-radius-md) !important; }
-.rounded-soft-lg { border-radius: var(--soft-radius-lg) !important; }
-.rounded-soft-xl { border-radius: var(--soft-radius-xl) !important; }
-.rounded-soft-full { border-radius: var(--soft-radius-full) !important; }
+.rounded-soft-sm {
+  border-radius: var(--soft-radius-sm) !important;
+}
+
+.rounded-soft-md {
+  border-radius: var(--soft-radius-md) !important;
+}
+
+.rounded-soft-lg {
+  border-radius: var(--soft-radius-lg) !important;
+}
+
+.rounded-soft-xl {
+  border-radius: var(--soft-radius-xl) !important;
+}
+
+.rounded-soft-full {
+  border-radius: var(--soft-radius-full) !important;
+}
 
 /* 阴影 */
-.shadow-soft-sm { box-shadow: var(--soft-shadow-sm) !important; }
-.shadow-soft-md { box-shadow: var(--soft-shadow-md) !important; }
-.shadow-soft-lg { box-shadow: var(--soft-shadow-lg) !important; }
+.shadow-soft-sm {
+  box-shadow: var(--soft-shadow-sm) !important;
+}
+
+.shadow-soft-md {
+  box-shadow: var(--soft-shadow-md) !important;
+}
+
+.shadow-soft-lg {
+  box-shadow: var(--soft-shadow-lg) !important;
+}
 
 /* ========================================
    18. 响应式优化
@@ -556,7 +613,7 @@ body {
     --soft-spacing-xl: 1.5rem;
     --soft-spacing-2xl: 2rem;
   }
-  
+
   .q-card {
     border-radius: var(--soft-radius-md) !important;
   }
@@ -591,4 +648,166 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ========================================
+   21. 语义色柔化（全局收敛饱和色）
+   覆盖 Quasar 默认的 bg-positive/negative/warning/info
+   让 Avatar/Banner/Btn 等用浅底深字而非高饱和实色
+   ======================================== */
+
+/* Avatar：浅色背景 + 深色图标（替代高饱和绿/红/橙圆球） */
+.q-avatar.bg-positive,
+.q-avatar.bg-negative,
+.q-avatar.bg-warning,
+.q-avatar.bg-info {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.q-avatar.bg-positive {
+  background-color: var(--status-available-bg) !important;
+  color: var(--status-available) !important;
+  .q-icon { color: var(--status-available) !important; }
+}
+.q-avatar.bg-negative {
+  background-color: var(--status-error-bg) !important;
+  color: var(--status-error) !important;
+  .q-icon { color: var(--status-error) !important; }
+}
+.q-avatar.bg-warning {
+  background-color: var(--status-warning-bg) !important;
+  color: var(--status-warning) !important;
+  .q-icon { color: var(--status-warning) !important; }
+}
+.q-avatar.bg-info,
+.q-avatar.bg-primary {
+  background-color: var(--primary-soft) !important;
+  color: var(--primary) !important;
+  .q-icon { color: var(--primary) !important; }
+}
+.q-avatar.bg-secondary,
+.q-avatar.bg-accent {
+  background-color: var(--primary-soft) !important;
+  color: var(--primary) !important;
+  .q-icon { color: var(--primary) !important; }
+}
+
+/* Banner：去掉高饱和实色块，改为浅底深字 + 左侧色条 */
+.q-banner.bg-positive,
+.q-banner.bg-negative,
+.q-banner.bg-warning,
+.q-banner.bg-info,
+.q-banner.bg-primary,
+.q-banner.bg-orange {
+  border-radius: var(--soft-radius-md) !important;
+  box-shadow: none !important;
+  border: 1px solid transparent;
+  padding: 0.625rem 0.875rem !important;
+}
+
+.q-banner.bg-positive {
+  background-color: var(--status-available-bg) !important;
+  color: #166534 !important;
+  border-color: rgba(22, 163, 74, 0.18);
+  .q-icon { color: var(--status-available) !important; }
+  &.text-white { color: #166534 !important; }
+}
+.q-banner.bg-negative {
+  background-color: var(--status-error-bg) !important;
+  color: #991B1B !important;
+  border-color: rgba(220, 38, 38, 0.18);
+  .q-icon { color: var(--status-error) !important; }
+  &.text-white { color: #991B1B !important; }
+}
+.q-banner.bg-warning,
+.q-banner.bg-orange {
+  background-color: var(--status-warning-bg) !important;
+  color: #92400E !important;
+  border-color: rgba(245, 158, 11, 0.18);
+  .q-icon { color: var(--status-warning) !important; }
+  &.text-white,
+  &.text-dark { color: #92400E !important; }
+}
+.q-banner.bg-info,
+.q-banner.bg-primary {
+  background-color: var(--primary-soft) !important;
+  color: var(--primary-active) !important;
+  border-color: rgba(37, 99, 235, 0.18);
+  .q-icon { color: var(--primary) !important; }
+  &.text-white { color: var(--primary-active) !important; }
+}
+
+/* 行内 bg-*-1 / red-1 等浅色块统一收敛圆角 */
+.bg-negative-1,
+.bg-info-1,
+.bg-positive-1,
+.bg-warning-1,
+.bg-red-1,
+.bg-orange-1,
+.bg-green-1,
+.bg-blue-1 {
+  border-radius: var(--soft-radius-md);
+}
+
+/* Button：non-primary 语义按钮也降饱和 */
+.q-btn.bg-positive,
+.q-btn.bg-negative,
+.q-btn.bg-warning,
+.q-btn.bg-info {
+  box-shadow: none;
+}
+.q-btn.bg-positive:hover { background-color: #15803D !important; }
+.q-btn.bg-negative:hover { background-color: #B91C1C !important; }
+.q-btn.bg-warning:hover  { background-color: #D97706 !important; }
+.q-btn.bg-info:hover     { background-color: var(--primary-hover) !important; }
+
+
+/* ========================================
+   22. Chip / Badge 语义柔化（防止"实色块"）
+   ======================================== */
+
+.q-chip.bg-positive,
+.q-badge.bg-positive {
+  background-color: var(--status-available-bg) !important;
+  color: var(--status-available) !important;
+  border: 1px solid rgba(22, 163, 74, 0.20);
+  box-shadow: none !important;
+  .q-icon { color: var(--status-available) !important; }
+  &.text-white { color: var(--status-available) !important; }
+}
+
+.q-chip.bg-negative,
+.q-badge.bg-negative {
+  background-color: var(--status-error-bg) !important;
+  color: var(--status-error) !important;
+  border: 1px solid rgba(220, 38, 38, 0.20);
+  box-shadow: none !important;
+  .q-icon { color: var(--status-error) !important; }
+  &.text-white { color: var(--status-error) !important; }
+}
+
+.q-chip.bg-warning,
+.q-badge.bg-warning,
+.q-chip.bg-orange,
+.q-badge.bg-orange {
+  background-color: var(--status-warning-bg) !important;
+  color: #92400E !important;
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  box-shadow: none !important;
+  .q-icon { color: var(--status-warning) !important; }
+  &.text-white,
+  &.text-dark { color: #92400E !important; }
+}
+
+.q-chip.bg-info,
+.q-badge.bg-info,
+.q-chip.bg-primary,
+.q-badge.bg-primary {
+  background-color: var(--primary-soft) !important;
+  color: var(--primary) !important;
+  border: 1px solid rgba(37, 99, 235, 0.20);
+  box-shadow: none !important;
+  .q-icon { color: var(--primary) !important; }
+  &.text-white { color: var(--primary) !important; }
 }
