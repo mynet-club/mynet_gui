@@ -129,13 +129,13 @@
    Dark Mode — 全套新 Token 覆盖（之前只覆盖了 --soft-*）
    ======================================== */
 .body--dark {
-  /* 页面与结构 */
-  --page-bg: #0B1220;
-  --content-bg: #111A2E;
-  --header-bg: #111A2E;
-  --header-border: #1E293B;
-  --sidebar-bg: #0F172A;
-  --sidebar-border: #1E293B;
+  /* 页面与结构 — V3.5 Slate-900/800 标准对，拉开层级 */
+  --page-bg: #0F172A;          /* 主内容区：深邃科技暗夜蓝 */
+  --content-bg: #1E293B;       /* 卡片：比页面亮一阶（Slate-800） */
+  --header-bg: #111827;        /* 顶栏：与侧栏同色 */
+  --header-border: rgba(255, 255, 255, 0.06);
+  --sidebar-bg: #111827;       /* 侧栏：比主区域更深一档（Gray-900） */
+  --sidebar-border: rgba(255, 255, 255, 0.05);
 
   /* 文本 */
   --text-primary: #F1F5F9;
@@ -143,9 +143,9 @@
   --text-muted: #64748B;
   --text-disabled: #475569;
 
-  /* 边框 */
-  --border-default: #1E293B;
-  --border-light: #16213A;
+  /* 边框 — 暗色用极淡白线勾边，比纯色边更通透 */
+  --border-default: rgba(255, 255, 255, 0.06);
+  --border-light: rgba(255, 255, 255, 0.04);
   --border-strong: #334155;
 
   /* 状态色 - 略降饱和 */
@@ -224,11 +224,14 @@ body {
   }
 }
 
-/* dark 模式保留边框（暗背景下纯阴影看不清边界） */
+/* dark 模式：极细白线勾边（V3.5），无外阴影 */
 .body--dark .q-card {
   border: 1px solid var(--border-default) !important;
+  box-shadow: none !important;
   &:hover {
-    border-color: var(--border-strong) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+    transform: translateY(-2px);
   }
 }
 
@@ -303,6 +306,20 @@ body {
     color: var(--primary) !important;
     border-color: var(--primary) !important;
     background-color: var(--primary-soft) !important;
+  }
+}
+
+/* 暗色模式幽灵按钮：透明底 + 暗灰边 + 灰文字（V3.5） */
+.body--dark .btn-ghost,
+.body--dark .q-btn.btn-secondary-ghost {
+  background-color: transparent !important;
+  color: #94A3B8 !important;
+  border-color: #334155 !important;
+
+  &:hover {
+    color: #00D2FF !important;
+    border-color: #00D2FF !important;
+    background-color: rgba(0, 210, 255, 0.08) !important;
   }
 }
 
@@ -468,6 +485,53 @@ body {
   .q-separator {
     background-color: var(--soft-border-light);
   }
+}
+
+/* ========================================
+   V3.5 — 暗色侧栏菜单：激活项荧光青呼吸
+   ======================================== */
+.body--dark .q-drawer {
+  background-color: var(--sidebar-bg) !important;
+  border-right: 1px solid var(--sidebar-border) !important;
+  box-shadow: none !important;
+
+  .q-item {
+    color: #94A3B8;
+    transition: all 0.25s ease;
+
+    .q-icon, .q-item__section--avatar .q-icon {
+      color: #64748B;
+      transition: color 0.25s ease, filter 0.25s ease;
+    }
+
+    &:hover {
+      background-color: rgba(0, 210, 255, 0.06) !important;
+      color: #CBD5E1;
+
+      .q-icon { color: #00D2FF; }
+    }
+
+    &.q-item--active,
+    &.q-router-link--active {
+      background-color: rgba(0, 102, 255, 0.15) !important;
+      color: #00D2FF !important;
+
+      .q-icon {
+        color: #00D2FF !important;
+        filter: drop-shadow(0 0 4px rgba(0, 210, 255, 0.5));
+      }
+    }
+  }
+
+  .q-separator {
+    background-color: var(--sidebar-border) !important;
+  }
+}
+
+/* 暗色顶栏 */
+.body--dark .q-header {
+  background-color: var(--header-bg) !important;
+  border-bottom: 1px solid var(--header-border) !important;
 }
 
 /* ========================================

@@ -16,7 +16,7 @@
     </template>
 
     <template #actions>
-      <div class="row q-gutter-sm items-center">
+      <div class="row q-gutter-md items-center">
         <!-- 返回按钮 -->
         <q-btn
           v-if="currentView !== 'node-list'"
