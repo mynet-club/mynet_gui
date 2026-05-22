@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { routesService } from '../services/route/routesService'
 import { useNotify } from './useNotify'
 import { useI18n } from 'vue-i18n'

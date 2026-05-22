@@ -62,7 +62,7 @@
         :empty-title="searchQuery.trim() ? $t('social.search.noResults') : $t('social.search.title')"
         :clickable="false"
       >
-        <template #default="{ item: user, index }">
+        <template #default="{ item: user }">
           <q-card-section>
             <div class="row items-center">
               <div class="col">
@@ -158,7 +158,7 @@
         :empty-title="$t('social.invitations.noInvitations')"
         :clickable="false"
       >
-        <template #default="{ item: invitation, index }">
+        <template #default="{ item: invitation }">
           <q-card-section>
             <div class="row items-center q-mb-sm">
               <div class="col">

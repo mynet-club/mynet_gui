@@ -1,5 +1,5 @@
 import { ref, computed, watch } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import type { 
   NodeConfig, 
   VPNConfigTemplate, 

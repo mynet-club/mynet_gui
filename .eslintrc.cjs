@@ -12,8 +12,17 @@ module.exports = {
     'plugin:vue/vue3-essential'
   ],
 
+  parser: 'vue-eslint-parser',
+  parserOptions: {
+    parser: '@typescript-eslint/parser',
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    extraFileExtensions: ['.vue']
+  },
+
   plugins: [
-    'vue'
+    'vue',
+    '@typescript-eslint'
   ],
 
   globals: {
@@ -38,6 +47,8 @@ module.exports = {
     'prefer-promise-reject-errors': 'off',
     'quotes': ['warn', 'single', { avoidEscape: true }],
     'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    'no-undef': 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
     'vue/multi-word-component-names': 'off'
   }

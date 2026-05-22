@@ -126,7 +126,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { nodeService } from '../../services/node/nodeService'
 import type { AvailableIP, IPPool, IPStatistics } from '../../types/node'
 

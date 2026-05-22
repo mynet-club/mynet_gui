@@ -125,7 +125,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, inject } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNode, useNotify } from '../../../composables'

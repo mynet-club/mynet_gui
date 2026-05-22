@@ -456,7 +456,7 @@ const createKey = async () => {
       const result = await generateKeyPair(params)
       
       if (result) {
-        notifySuccess(isUpdateMode.value ? t('nodes.keys.keyUpdated') : t('nodes.keys.keyPairGenerated'))
+        notifySuccess(isUpdateMode.value ? t('nodes.edit.keys.keyUpdated') : t('nodes.edit.keys.keyPairGenerated'))
         // 如果有私钥，显示私钥保存提示
         if (result.private_key) {
           let downloadClicked = false
@@ -477,7 +477,7 @@ const createKey = async () => {
               }
             }).onOk(() => {
               // 用户确认已保存
-              notifySuccess(t('nodes.keys.privateKeySaved'))
+              notifySuccess(t('nodes.edit.keys.privateKeySaved'))
             }).onCancel(() => {
               // 下载私钥
               const filename = `node_${nodeId.value}_private_key.pem`
@@ -490,7 +490,7 @@ const createKey = async () => {
               URL.revokeObjectURL(url)
               
               downloadClicked = true
-              notifySuccess(t('nodes.keys.privateKeyDownloaded'))
+              notifySuccess(t('nodes.edit.keys.privateKeyDownloaded'))
               
               // 重新显示对话框，这次"我已保存"按钮可用
               setTimeout(() => {
@@ -505,12 +505,12 @@ const createKey = async () => {
     } else if (newKey.value.generation_method === 'upload') {
       // 上传公钥 - 如果是更新模式，也传递 force_regenerate 参数
       // TODO: 实现上传公钥功能，需要传递 force_regenerate 参数
-      notifyError(t('nodes.keys.uploadNotImplemented'))
+      notifyError(t('nodes.edit.keys.uploadNotImplemented'))
       return
     } else {
       // 本地生成
       // TODO: 实现本地生成功能
-      notifyError(t('nodes.keys.localGenerateNotImplemented'))
+      notifyError(t('nodes.edit.keys.localGenerateNotImplemented'))
       return
     }
     
@@ -550,7 +550,7 @@ const deleteKey = async () => {
     // 调用实际的删除API
     await deleteNodeKey(selectedKey.value.id)
     
-    notifySuccess(t('nodes.keys.keyDeleted'))
+    notifySuccess(t('nodes.edit.keys.keyDeleted'))
     showDeleteDialog.value = false
     selectedKey.value = null
     
@@ -559,7 +559,7 @@ const deleteKey = async () => {
     
   } catch (error: any) {
     debug.error('删除密钥失败:', error)
-    const errorMsg = error?.response?.data?.message || error?.message || t('nodes.keys.deleteFailed')
+    const errorMsg = error?.response?.data?.message || error?.message || t('nodes.edit.keys.deleteFailed')
     notifyError(errorMsg)
   } finally {
     deleting.value = false
@@ -597,9 +597,9 @@ const copyPrivateKey = async () => {
   
   try {
     await navigator.clipboard.writeText(selectedKey.value.private_key)
-    notifySuccess(t('nodes.keys.copySuccess'))
+    notifySuccess(t('nodes.edit.keys.copySuccess'))
   } catch (error) {
-    notifyError(t('nodes.keys.copyFailed'))
+    notifyError(t('nodes.edit.keys.copyFailed'))
   }
 }
 

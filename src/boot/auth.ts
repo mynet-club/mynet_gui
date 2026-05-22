@@ -1,5 +1,5 @@
 import { boot } from 'quasar/wrappers'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { LocalStorage } from 'quasar'
 import { tokenManager } from '../utils/tokenManager'
 import { APP_CONFIG } from '../config/app'

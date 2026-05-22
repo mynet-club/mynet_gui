@@ -3,7 +3,7 @@
  */
 
 import { ref, computed, reactive } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { VPNConfigService } from '../services/vpnConfigService'
 import { NodeConfigForm } from '../types/vpnConfig'
 

@@ -190,7 +190,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useRoutes } from '../../../composables/useRoutes'

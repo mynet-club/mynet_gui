@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { ref, computed } from 'vue'
 import { LocalStorage } from 'quasar'
 import { apiService } from '../services/api'

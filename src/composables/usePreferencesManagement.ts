@@ -1,5 +1,5 @@
 import { ref, onMounted } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useQuasar, LocalStorage } from 'quasar'
 import { useI18n } from 'vue-i18n'
 

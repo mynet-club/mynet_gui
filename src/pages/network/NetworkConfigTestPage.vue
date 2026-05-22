@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { ref, provide } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useRoute } from 'vue-router'
 import NetworkConfigPage from './node-edit/NetworkConfigPage.vue'
 import type { Node } from '../../types/node'

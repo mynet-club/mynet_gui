@@ -215,12 +215,12 @@ export const getNodeBreadcrumbs = (route: any) => {
   } else if (path.includes('/nodes/') && !path.includes('/edit')) {
     breadcrumbs.push(
       { label: '节点管理', to: NODE_ROUTES.NODES },
-      { label: `节点详情`, to: NODE_ROUTES.NODE_DETAIL(nodeId) }
+      { label: '节点详情', to: NODE_ROUTES.NODE_DETAIL(nodeId) }
     )
   } else if (path.includes('/nodes/') && path.includes('/edit')) {
     breadcrumbs.push(
       { label: '节点管理', to: NODE_ROUTES.NODES },
-      { label: `节点详情`, to: NODE_ROUTES.NODE_DETAIL(nodeId) },
+      { label: '节点详情', to: NODE_ROUTES.NODE_DETAIL(nodeId) },
       { label: '编辑节点', to: NODE_ROUTES.NODE_EDIT(nodeId) }
     )
 

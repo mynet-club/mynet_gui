@@ -123,7 +123,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import debug from "../../utils/debug"
+import debug from '../../utils/debug'
 import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
 import { useNodes } from '../../composables/useNodes'
@@ -300,8 +300,8 @@ const fetchNodeConnections = async (nodeId: string | number) => {
     
     // 获取每个对端节点的最后一条连接数据
     // 使用 last=1 参数获取每个节点的最新快照
+    // v2: 使用 RESTful 端点 /nodes/{id}/peer-connections 代替已移除的 /monitor/history/connections
     const params: any = {
-      node_id: nodeId,
       last: 1
       // 不传peer_node_id，获取该节点与所有对端的连接记录
     }
@@ -311,7 +311,7 @@ const fetchNodeConnections = async (nodeId: string | number) => {
       params.allpeers = 1
     }
     
-    const monitorResponse = await api.get('/monitor/history/connections', {
+    const monitorResponse = await api.get(`/nodes/${nodeId}/peer-connections`, {
       params
     })
     
@@ -400,9 +400,8 @@ const fetchNodeStats = async (nodeList: any[]) => {
     const statsPromises = nodeList.map(async (node) => {
       const nodeId = String((node as any).node_id || (node as any).id)
       try {
-        const response = await api.get('/monitor/history/connections', {
+        const response = await api.get(`/nodes/${nodeId}/peer-connections`, {
           params: {
-            node_id: nodeId,
             last: 1  // 只获取最新数据
           }
         })

@@ -1,5 +1,5 @@
 import { cacheManager, type CacheOptions } from './cacheManager'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 
 /**
  * API缓存装饰器配置

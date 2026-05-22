@@ -1,5 +1,5 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useAuthStore } from '../stores/auth'
 import { useWebSocket } from '../services/websocket'
 import { apiService } from '../services/api'
@@ -446,14 +446,14 @@ export function useDashboard() {
           addActivity(
             'node_online',
             `节点 "${currentNode.node_name}" 上线`,
-            `/app/nodes`,
+            '/app/nodes',
             { nodeId: id, nodeName: currentNode.node_name }
           )
         } else if (prevNode.node_status === NODE_STATUS.ONLINE && currentNode.node_status !== NODE_STATUS.ONLINE) {
           addActivity(
             'node_offline',
             `节点 "${currentNode.node_name}" 离线`,
-            `/app/nodes`,
+            '/app/nodes',
             { nodeId: id, nodeName: currentNode.node_name }
           )
         }

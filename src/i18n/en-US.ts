@@ -492,7 +492,6 @@ export default {
     // List page
     subtitle: 'Manage and monitor network nodes',
     createNode: 'Create Node',
-    quickCreate: 'Quick Create',
     quickCreateTitle: 'Quick Create Node',
     quickCreateDesc: 'Enter a node name and the system will automatically apply default settings (GNB, port 9016, MTU 1450) and assign an IP address.',
     quickCreateSuccess: 'Node created successfully',
@@ -1952,7 +1951,8 @@ export default {
   websocket: {
     connected: 'Connected',
     disconnected: 'Disconnected',
-    connectionFailed: 'WebSocket connection failed'
+    connectionFailed: 'WebSocket connection failed',
+    heartbeat: 'Heartbeat'
   },
   node: {
     status: {

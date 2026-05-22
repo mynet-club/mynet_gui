@@ -124,7 +124,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useNodes, useNotify } from '../../composables'

@@ -4,7 +4,7 @@
  */
 
 import type { KeyType, LocalKeyPair, KeyValidationResult } from '../types/nodeKeys'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { ED25519_KEY_SPEC } from '../types/nodeKeys'
 
 /**

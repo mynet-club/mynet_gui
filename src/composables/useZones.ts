@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useNotify } from './useNotify'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
@@ -55,9 +55,20 @@ export function useZones() {
         total_nodes: response.total_nodes || 0,
         total_routes: response.total_routes || 0
       }
-    } catch (error) {
-      debug.error('获取zone概览失败:', error)
-      notify.error(t('zones.fetchOverviewError'))
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        // v2 暂未实现 /zones/overview，从已有 zones 数据中推算基础指标
+        const allZones = zones.value.length > 0 ? zones.value : availableZones.value
+        overview.value = {
+          total_zones: allZones.length,
+          active_zones: allZones.filter(z => z.zone_status === 1).length,
+          total_nodes: 0,
+          total_routes: 0
+        }
+      } else {
+        debug.error('获取zone概览失败:', error)
+        notify.error(t('zones.fetchOverviewError'))
+      }
     } finally {
       loading.value = false
     }

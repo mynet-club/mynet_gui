@@ -19,7 +19,7 @@
           unelevated
           color="secondary"
           icon="bolt"
-          :label="$t('nodes.quickCreate')"
+          :label="$t('nodes.quickCreate.btn')"
           @click="showQuickCreateDialog = true"
           :disable="loading"
         />
@@ -43,7 +43,7 @@
       empty-icon="device_hub"
       :empty-title="$t('nodes.noData')"
       :empty-description="$t('nodes.noDataDescription')"
-      @item-click="goToDetail($event.node_id)"
+      @card-click="goToDetail($event.node_id)"
     >
       <template #default="{ item: node }">
         <NodeCardContent
@@ -122,7 +122,7 @@
             unelevated
             color="secondary"
             icon="bolt"
-            :label="$t('nodes.quickCreate')"
+            :label="$t('nodes.quickCreate.btn')"
             @click="handleQuickCreate"
             :loading="quickCreating"
             :disable="!quickCreateName || quickCreateName.trim().length < 3"
@@ -135,7 +135,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -184,18 +184,13 @@ const loadNodeStatusInfo = async (nodeId: string | number) => {
 
   try {
     loadingStatusInfo.value[nodeId] = true
-  try {
     const response = await nodeService.getNodeStatusInfo(String(nodeId))
-    debug.log('节点状态信息获取成功:', response)
-  } catch (error: any) {
-    // status-info API 可能不存在，静默处理404错误
-    if (error?.response?.status !== 404) {
-      debug.error('获取节点状态信息失败:', error)
-    }
-  }
     nodeStatusInfo.value[nodeId] = response.data
-  } catch (error) {
-    debug.error(`获取节点 ${nodeId} 状态信息失败:`, error)
+  } catch (error: any) {
+    // 404 表示节点不存在或端点不可用，静默处理
+    if (error?.response?.status !== 404) {
+      debug.error(`获取节点 ${nodeId} 状态信息失败:`, error)
+    }
   } finally {
     loadingStatusInfo.value[nodeId] = false
   }

@@ -83,7 +83,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useI18n } from 'vue-i18n'
 import { useQuasar, LocalStorage } from 'quasar'
 import { useTheme } from '../composables/useTheme'

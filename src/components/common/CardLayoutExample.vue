@@ -35,7 +35,7 @@
         empty-description="这里还没有任何内容"
         @selection-change="selectedItems = $event"
       >
-        <template #default="{ item, index, isSelected }">
+        <template #default="{ item }">
           <q-card-section>
             <div class="row items-center q-mb-sm">
               <q-avatar 

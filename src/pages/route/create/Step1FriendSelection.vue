@@ -165,7 +165,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useSocial } from '../../../composables/useSocial'

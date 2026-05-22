@@ -178,9 +178,11 @@ export class NodeService {
    * 批量获取节点设备信息
    * @param nodeIds 节点ID列表
    * @returns 批量设备信息
+   *
+   * v2: PUT → POST（请求体传 ID 列表，POST 语义更准确）
    */
   async getBatchNodeDeviceInfo(nodeIds: Array<string | number>): Promise<BatchNodeDeviceInfoResponse> {
-    const response = await api.put('/nodes/deviceinfo', {
+    const response = await api.post('/nodes/deviceinfo', {
       node_ids: nodeIds
     })
     return response.data
@@ -191,9 +193,11 @@ export class NodeService {
    * @param nodeId 节点ID
    * @param deviceInfo 设备信息
    * @returns 更新结果
+   *
+   * v2: 仅保留 PATCH（partial update 语义）
    */
   async updateNodeDeviceInfo(nodeId: string, deviceInfo: NodeDeviceInfo): Promise<ApiResponse<void>> {
-    const response = await api.put(`/nodes/${nodeId}/deviceinfo`, deviceInfo)
+    const response = await api.patch(`/nodes/${nodeId}/deviceinfo`, deviceInfo)
     return response.data
   }
 
@@ -256,19 +260,31 @@ export class NodeService {
    * 获取节点网络配置
    * @param nodeId 节点ID (node_id)
    * @returns 网络配置
+   *
+   * 注意：v2 后端将 GET /nodes/{id}/network-config 合并到统一配置端点
+   *      GET /nodes/{id}/configuration?section=network。
+   *      此处通过 section=network 拉取并解包 data.network，保持调用方接口不变。
+   *      PUT /nodes/{id}/network-config 在 v2 中仍保留。
    */
   async getNodeNetworkConfig(nodeId: string): Promise<ApiResponse<NodeNetworkConfig>> {
-    const response = await api.get(`/nodes/${nodeId}/network-config`)
-    return response.data
+    const response = await api.get(`/nodes/${nodeId}/configuration`, {
+      params: { section: 'network' }
+    })
+    const body = response.data || {}
+    // v2 返回 { data: { network: {...} }, ... }，向后兼容旧调用方期望的扁平 data
+    const networkData = body?.data?.network ?? body?.network ?? body?.data ?? {}
+    return { ...body, data: networkData } as ApiResponse<NodeNetworkConfig>
   }
 
   /**
    * 获取节点状态信息
    * @param nodeId 节点ID (node_id)
    * @returns 节点状态详细信息
+   *
+   * v2: status-info + status-check 合并为 /status（先副作用更新，再返回完整状态）
    */
   async getNodeStatusInfo(nodeId: string): Promise<ApiResponse<NodeStatusInfo>> {
-    const response = await api.get(`/nodes/${nodeId}/status-info`)
+    const response = await api.get(`/nodes/${nodeId}/status`)
     return response.data
   }
 

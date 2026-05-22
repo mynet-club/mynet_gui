@@ -150,7 +150,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useQuasar } from 'quasar'
 import { marked } from 'marked'
 
@@ -166,70 +166,70 @@ const showBackToTop = ref(false)
 
 // 静态帮助文档配置（内联，避免导入问题）
 const helpConfig = ref({
-  version: "1.0.0",
-  title: "MyNet 帮助文档",
+  version: '1.0.0',
+  title: 'MyNet 帮助文档',
   navigation: [
     {
-      id: "overview",
-      title: "系统概述",
-      icon: "info",
+      id: 'overview',
+      title: '系统概述',
+      icon: 'info',
       children: [
         {
-          id: "what-is-mynet",
-          title: "什么是 MyNet",
-          file: "overview/what-is-mynet.md"
+          id: 'what-is-mynet',
+          title: '什么是 MyNet',
+          file: 'overview/what-is-mynet.md'
         },
         {
-          id: "basic-concepts", 
-          title: "基本概念",
-          file: "overview/basic-concepts.md"
+          id: 'basic-concepts', 
+          title: '基本概念',
+          file: 'overview/basic-concepts.md'
         }
       ]
     },
     {
-      id: "getting-started",
-      title: "快速入门", 
-      icon: "rocket_launch",
+      id: 'getting-started',
+      title: '快速入门', 
+      icon: 'rocket_launch',
       children: [
         {
-          id: "registration",
-          title: "用户注册",
-          file: "getting-started/registration.md"
+          id: 'registration',
+          title: '用户注册',
+          file: 'getting-started/registration.md'
         },
         {
-          id: "login",
-          title: "登录系统",
-          file: "getting-started/login.md"
+          id: 'login',
+          title: '登录系统',
+          file: 'getting-started/login.md'
         }
       ]
     },
     {
-      id: "user-guide",
-      title: "用户指南",
-      icon: "book", 
+      id: 'user-guide',
+      title: '用户指南',
+      icon: 'book', 
       children: [
         {
-          id: "ip-pools",
-          title: "IP 池管理",
+          id: 'ip-pools',
+          title: 'IP 池管理',
           children: [
             {
-              id: "create-ip-pool",
-              title: "创建 IP 池",
-              file: "user-guide/ip-pools/create-ip-pool.md"
+              id: 'create-ip-pool',
+              title: '创建 IP 池',
+              file: 'user-guide/ip-pools/create-ip-pool.md'
             }
           ]
         }
       ]
     },
     {
-      id: "faq",
-      title: "常见问题",
-      icon: "help",
+      id: 'faq',
+      title: '常见问题',
+      icon: 'help',
       children: [
         {
-          id: "general-faq",
-          title: "一般问题", 
-          file: "faq/general-faq.md"
+          id: 'general-faq',
+          title: '一般问题', 
+          file: 'faq/general-faq.md'
         }
       ]
     }

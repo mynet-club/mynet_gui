@@ -259,7 +259,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { computed, watch, ref, onMounted, inject } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -398,8 +398,8 @@ const loadNetworkConfig = async () => {
     
     // 并行加载网络配置数据和索引服务器数据
     const [networkResponse, indexServicesResponse] = await Promise.all([
-      nodeService.getNodeNetworkConfig(String(node.value.node_id)),
-      nodeService.getNodeIndexServices(String(node.value.node_id)).catch(() => ({ data: { index_services: [] } }))
+      nodeService.getNodeNetworkConfig(nodeId.value),
+      nodeService.getNodeIndexServices(nodeId.value).catch(() => ({ data: { index_services: [] } }))
     ])
     
     const networkConfig = networkResponse.data || {}
@@ -456,7 +456,7 @@ const initializeForm = async () => {
     // 尝试加载节点的索引服务器作为初始值
     let indexServers: string[] = ['']
     try {
-      const indexServicesResponse = await nodeService.getNodeIndexServices(String(node.value.node_id))
+      const indexServicesResponse = await nodeService.getNodeIndexServices(nodeId.value)
       const nodeIndexServices = indexServicesResponse.data?.index_services || []
       if (nodeIndexServices.length) {
         indexServers = nodeIndexServices.map(service => service.endpoint)
@@ -659,12 +659,12 @@ const onSubmit = async () => {
       return
     }
 
-    debug.log('提交网络配置数据到API端点 PUT /nodes/' + String(node.value.node_id) + '/network-config:', updateData)
+    debug.log('提交网络配置数据到API端点 PUT /nodes/' + nodeId.value + '/network-config:', updateData)
     debug.log('变化的字段:', Object.keys(updateData))
 
     if (node.value) {
       saving.value = true
-      await nodeService.updateNodeNetworkConfig(String(node.value.node_id), updateData as UpdateNodeNetworkConfigRequest)
+      await nodeService.updateNodeNetworkConfig(nodeId.value, updateData as UpdateNodeNetworkConfigRequest)
       
       // 更新原始数据为当前表单数据
       originalData.value = JSON.parse(JSON.stringify(form.value))
@@ -673,7 +673,7 @@ const onSubmit = async () => {
       
       // 重新加载节点数据
       if (loadNode) {
-        await loadNode(String(node.value.node_id))
+        await loadNode(nodeId.value)
       }
     }
   } catch (error: any) {

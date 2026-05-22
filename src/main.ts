@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { createPinia } from 'pinia'
 import { Quasar } from 'quasar'
 

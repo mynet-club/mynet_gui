@@ -444,7 +444,6 @@ export default {
     
     // 列表页面
     createNode: '创建设备',
-    quickCreate: '一键快速创建',
     quickCreateTitle: '一键快速创建设备',
     quickCreateDesc: '只需输入设备名称，系统将自动应用默认配置（GNB、端口9016、MTU 1450）并自动分配 IP 地址。',
     quickCreateSuccess: '设备一键创建成功',
@@ -2120,7 +2119,8 @@ export default {
   websocket: {
     connected: '已连接',
     disconnected: '未连接',
-    connectionFailed: 'WebSocket 连接失败'
+    connectionFailed: 'WebSocket 连接失败',
+    heartbeat: '心跳'
   },
   node: {
     status: {

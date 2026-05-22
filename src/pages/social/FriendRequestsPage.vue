@@ -32,7 +32,7 @@
       :empty-title="$t('social.friendRequests.noRequests')"
       :clickable="false"
     >
-      <template #default="{ item: request, index }">
+      <template #default="{ item: request }">
         <q-card-section>
           <div class="row items-center">
             <div class="col">

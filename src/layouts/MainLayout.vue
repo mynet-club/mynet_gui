@@ -395,7 +395,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive } from 'vue'
-import debug from "../utils/debug"
+import debug from '../utils/debug'
 import { useRouter } from 'vue-router'
 import { useQuasar, date, LocalStorage } from 'quasar'
 import { useAuthStore } from '../stores/auth'

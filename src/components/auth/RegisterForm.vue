@@ -153,7 +153,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'

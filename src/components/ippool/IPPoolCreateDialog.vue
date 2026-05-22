@@ -148,7 +148,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useI18n } from 'vue-i18n'
 import { useIPPools } from '../../composables/useIPPools'
 import type { IPPool } from '../../types/ippool'
@@ -371,7 +371,7 @@ const handleCreate = async () => {
       form.value.poolsCount,
       form.value.continuous,
       targetSequence ? parseInt(targetSequence) : undefined,
-      "server_cluster",
+      'server_cluster',
       `批量创建${form.value.poolsCount}个IP池`
     )
     

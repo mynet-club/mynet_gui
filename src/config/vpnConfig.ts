@@ -424,7 +424,7 @@ export const vpnConfigData: VPNConfigData = {
     default_mode: 'base',
     node_id_ranges: {
       min: 1000000000,
-      max: 9999999999999999
+      max: Number.MAX_SAFE_INTEGER
     },
     port_ranges: {
       gnb: [9000, 9999],

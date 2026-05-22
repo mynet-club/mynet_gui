@@ -1,5 +1,5 @@
 import { tokenManager } from '../utils/tokenManager'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 
 // Token 刷新功能测试
 export const testTokenRefresh = async () => {

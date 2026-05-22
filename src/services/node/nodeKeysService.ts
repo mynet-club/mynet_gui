@@ -4,7 +4,7 @@
  */
 
 import { api } from '../api'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import type {
   NodeKey,
   NodeKeyApiResponse,
@@ -45,9 +45,11 @@ export class NodeKeysService {
    * @param nodeId 节点ID
    * @param request 生成请求参数
    * @returns 生成的密钥（包含私钥，仅显示一次）
+   *
+   * v2: /keys/generate + /keys/upload 合并为 POST /keys（同一实现，通过 custom_public_key 字段区分）
    */
   async generateNodeKeys(nodeId: string, request?: KeyGenerationRequest): Promise<ApiResponse<KeyGenerationApiResponse>> {
-    const response = await api.post(`/nodes/${nodeId}/keys/generate`, request || { key_type: 'ed25519' })
+    const response = await api.post(`/nodes/${nodeId}/keys`, request || { key_type: 'ed25519' })
     return response.data
   }
 
@@ -56,6 +58,8 @@ export class NodeKeysService {
    * @param nodeId 节点ID
    * @param request 上传请求
    * @returns 上传结果
+   *
+   * v2: 与 generateNodeKeys 共用 POST /keys 端点；后端通过 custom_public_key 字段判定为上传
    */
   async uploadPublicKey(nodeId: string, request: KeyUploadRequest): Promise<ApiResponse<NodeKey>> {
     // 首先验证公钥格式
@@ -64,7 +68,7 @@ export class NodeKeysService {
       throw new Error(validation.errors.join(', '))
     }
 
-    const response = await api.post(`/nodes/${nodeId}/keys/upload`, request)
+    const response = await api.post(`/nodes/${nodeId}/keys`, request)
     return response.data
   }
 

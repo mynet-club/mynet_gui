@@ -212,39 +212,6 @@
       </q-card>
     </q-dialog>
 
-    <!-- 申请公开对话框 - 已移除，后端不再支持用户申请公开服务 -->
-    <!--
-    <q-dialog v-model="showApprovalDialog">
-      <q-card style="min-width: 400px">
-        <q-card-section>
-          <div class="text-h6">{{ $t('zoneServices.requestPublic') }}</div>
-          <div class="text-body2 text-grey-6 q-mt-sm">
-            {{ $t('zoneServices.requestPublicDesc') }}
-          </div>
-        </q-card-section>
-
-        <q-card-section>
-          <q-input
-            v-model="approvalReason"
-            :label="$t('zoneServices.approvalReason')"
-            type="textarea"
-            rows="3"
-            outlined
-            :placeholder="$t('zoneServices.approvalReasonPlaceholder')"
-          />
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat :label="$t('common.cancel')" v-close-popup />
-          <q-btn
-            color="primary"
-            :label="$t('zoneServices.submitRequest')"
-            @click="confirmApproval"
-            :loading="loading"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </PageLayout>
 </template>
 
@@ -274,19 +241,15 @@ const {
   loadAllServices,
   deleteService,
   shareService
-  // requestApproval // 已移除 - 不再支持申请公开
 } = useZoneServices()
 
 // 状态
 const activeCategory = ref('public')
 const showServiceDialog = ref(false)
 const showShareDialog = ref(false)
-// const showApprovalDialog = ref(false) // 已移除 - 不再支持申请公开
 const editingService = ref<ZoneService | null>(null)
 const sharingService = ref<ZoneService | null>(null)
-// const approvalService = ref<ZoneService | null>(null) // 已移除
 const shareMessage = ref('')
-// const approvalReason = ref('') // 已移除
 const currentZone = ref<ZoneService | null>(null)
 
 // 计算属性
@@ -362,47 +325,12 @@ const confirmShare = async () => {
   }
 }
 
-// 申请公开 - 已移除，不再支持用户申请公开服务
-/*
-const handleRequestApproval = (service: ZoneService) => {
-  approvalService.value = service
-  approvalReason.value = ''
-  showApprovalDialog.value = true
-}
-*/
-
 // 分享给好友
 const handleShareToFriends = (service: ZoneService) => {
   sharingService.value = service
   shareMessage.value = ''
   showShareDialog.value = true
 }
-
-// 申请公开分享 - 已移除
-/*
-const handleShareToPublic = (service: ZoneService) => {
-  approvalService.value = service
-  approvalReason.value = ''
-  showApprovalDialog.value = true
-}
-
-// 确认申请公开
-const confirmApproval = async () => {
-  if (!approvalService.value) return
-  
-  const success = await requestApproval(
-    approvalService.value.service_id, 
-    approvalReason.value
-  )
-  
-  if (success) {
-    showApprovalDialog.value = false
-    approvalService.value = null
-    approvalReason.value = ''
-    await handleRefresh()
-  }
-}
-*/
 
 // 连接服务
 const handleConnect = (service: ZoneService) => {

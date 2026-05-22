@@ -3,7 +3,7 @@
  */
 
 import { Router } from 'vue-router'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useAuth } from '../composables/useAuth'
 
 /**
@@ -102,21 +102,9 @@ function isValidNodeId(nodeId: string): boolean {
 /**
  * 检查节点编辑权限
  */
-async function hasNodeEditPermission(nodeId: string): Promise<boolean> {
-  // 这里可以添加具体的权限检查逻辑
-  // 例如检查用户是否有编辑该节点的权限
-  try {
-    // 示例：检查节点是否存在且用户有权限
-    // const nodeService = new NodeService()
-    // const node = await nodeService.getNode(nodeId)
-    // return node && userCanEditNode(node)
-    
-    // 暂时返回true，实际应用中需要实现具体逻辑
-    return true
-  } catch (error) {
-    debug.error('检查节点编辑权限失败:', error)
-    return false
-  }
+async function hasNodeEditPermission(_nodeId: string): Promise<boolean> {
+  // TODO: 实现具体的节点编辑权限检查
+  return true
 }
 
 /**

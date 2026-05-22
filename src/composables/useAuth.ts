@@ -1,5 +1,5 @@
 import { ref, reactive } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -185,7 +185,7 @@ export function useAuth() {
           case 401:
             errorMessage = data?.message || 'Invalid email or password. Please check your credentials.'
             break
-          case 403:
+          case 403: {
             // 检查是否是账户激活相关的错误 (403 + error_code)
             // error_code 可能是字符串或数字，都要兼容
             const errorCode = data?.error_code
@@ -202,6 +202,7 @@ export function useAuth() {
             }
             errorMessage = data?.message || 'Account is disabled or access forbidden.'
             break
+          }
           case 422:
             errorMessage = data?.message || 'Invalid input data. Please check your email and password format.'
             break

@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { socialService } from '../services/social/socialService'
 import { useNotify } from './useNotify'
 import { useI18n } from 'vue-i18n'
@@ -101,7 +101,7 @@ export function useSocial() {
       if (response.pending_requests) {
         friendRequests.value = response.pending_requests.map(request => {
           if (!request.status) {
-            debug.error(`好友请求状态缺失:`, request);
+            debug.error('好友请求状态缺失:', request);
             notify.error(t('social.friendRequests.statusError'));
           }
           return {
@@ -115,7 +115,7 @@ export function useSocial() {
       if (response.outgoing_requests) {
         sentRequests.value = response.outgoing_requests.map(request => {
           if (!request.status) {
-            debug.error(`发送的好友请求状态缺失:`, request);
+            debug.error('发送的好友请求状态缺失:', request);
             notify.error(t('social.friendRequests.statusError'));
           }
           return {

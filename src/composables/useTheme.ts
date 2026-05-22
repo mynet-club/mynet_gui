@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { LocalStorage, Dark } from 'quasar'
 
 // 主题类型定义

@@ -301,7 +301,7 @@ const systemInfo = computed(() => {
   // 操作系统名称（只显示主名称，不显示版本）
   if (props.node.os_name) {
     // 提取第一个单词，如 "Debian GNU/Linux 12 (bookworm)" -> "Debian"
-    const osName = props.node.os_name.split(/[\s\/]/)[0]
+    const osName = props.node.os_name.split(/[\s/]/)[0]
     parts.push(osName)
   }
   

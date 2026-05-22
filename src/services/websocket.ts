@@ -1,6 +1,6 @@
 // WebSocket 实现服务 - 使用 Laravel Echo
 import { ref } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import Echo from 'laravel-echo'
 import Pusher from 'pusher-js'
 

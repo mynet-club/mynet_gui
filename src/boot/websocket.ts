@@ -1,5 +1,5 @@
 import { boot } from 'quasar/wrappers'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useWebSocket } from '../services/websocket'
 import { useAuthStore } from '../stores/auth'
 

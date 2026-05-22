@@ -112,7 +112,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { tokenManager } from '../../utils/tokenManager'
 import { testTokenRefresh, testAutoRefresh, getTokenInfo } from '../../utils/tokenRefreshTest'
 import { useNotify } from '../../composables/useNotify'

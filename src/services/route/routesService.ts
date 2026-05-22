@@ -9,24 +9,6 @@ export const routesService = {
     return response.data.data
   },
 
-  // 获取活跃路由列表
-  async getActiveRoutes(params?: { page?: number; per_page?: number }): Promise<any> {
-    const response = await api.get('/route/active', { params })
-    return response.data.data
-  },
-
-  // 获取待处理连接
-  async getPendingConnections(type: 'incoming' | 'outgoing' = 'incoming'): Promise<any> {
-    const response = await api.get(`/route/connections/${type}`)
-    return response.data.data
-  },
-
-  // 获取好友节点列表
-  async getFriendNodes(): Promise<any> {
-    const response = await api.get('/route/friend-nodes')
-    return response.data.data
-  },
- 
   // 连接到节点
   async connectToNode(nodeId: string, message?: string): Promise<BaseResponse> {
     const response = await api.post(`/route/connect/${nodeId}`, { message })

@@ -47,7 +47,9 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label>{{ tip.display.title }}</q-item-label>
-                <q-item-label caption lines="2" v-html="getPlainText(tip.display.content)" />
+                <q-item-label caption lines="2">
+                  <span v-html="getPlainText(tip.display.content)" />
+                </q-item-label>
               </q-item-section>
               <q-item-section side>
                 <q-btn

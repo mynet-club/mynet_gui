@@ -1,5 +1,5 @@
 import { LocalStorage } from 'quasar'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import axios from 'axios';
 import { api } from '../services/api';
 

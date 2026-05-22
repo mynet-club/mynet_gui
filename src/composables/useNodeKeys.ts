@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import type { 
   NodeKey, 
   NodeKeyApiResponse,
@@ -254,7 +254,7 @@ export function useNodeKeys(nodeId?: string) {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `node_key_private.key`
+      a.download = 'node_key_private.key'
       a.click()
       URL.revokeObjectURL(url)
       notifySuccess('私钥下载成功')

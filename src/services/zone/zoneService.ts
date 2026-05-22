@@ -55,7 +55,7 @@ export interface PaginatedZoneResponse {
 export const zoneService = {
   // 获取用户可访问的Zone列表
   async getUserZones(): Promise<Zone[]> {
-    const response = await api.get(`/user/zones`)
+    const response = await api.get('/user/zones')
     return response.data.data
   },
 
@@ -118,9 +118,9 @@ export const zoneService = {
     return response.data.data
   },
 
-  // 获取索引服务列表
+  // 获取索引服务列表（v2: /zones/services/indexes）
   async getIndexServices(): Promise<{ data: IndexServicesResponse }> {
-    const response = await api.get('/zones/services/indexeservices')
+    const response = await api.get('/zones/services/indexes')
     return response.data
   }
 }

@@ -1,5 +1,5 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { cacheManager } from '../utils/cacheManager'
 
 /**

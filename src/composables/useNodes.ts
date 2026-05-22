@@ -4,7 +4,7 @@
  */
 
 import { ref, computed, reactive, readonly } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { nodeService } from '../services/node/nodeService'
 // import { useNotify } from './useNotify'
 import type { 

@@ -1,4 +1,4 @@
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 /**
  * 统一缓存管理器
  * 支持内存缓存、LocalStorage、SessionStorage

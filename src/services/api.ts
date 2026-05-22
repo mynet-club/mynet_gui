@@ -1,5 +1,5 @@
 import axios from 'axios'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { LocalStorage } from 'quasar'
 import { tokenManager } from '../utils/tokenManager'
 import { mockDashboardData, mockDelay } from './mockData'
@@ -489,7 +489,7 @@ export const apiService = {
   },
 
   async createNode(nodeData: any) {
-    return api.post('/nodes', nodeData)
+    return api.post('/nodes/create', nodeData)
   },
 
   async updateNode(id: string, nodeData: any) {
@@ -500,32 +500,10 @@ export const apiService = {
     return api.delete(`/nodes/${id}`)
   },
 
-  // 路由相关
-  async getRoutes() {
-    return api.get('/routes')
-  },
-
-  async createRoute(routeData: any) {
-    return api.post('/routes', routeData)
-  },
-
-  async updateRoute(id: string, routeData: any) {
-    return api.put(`/routes/${id}`, routeData)
-  },
-
-  async deleteRoute(id: string) {
-    return api.delete(`/routes/${id}`)
-  },
-
   // 仪表板相关 - 强制使用模拟数据
   async getDashboardData() {
     // Dashboard 暂时使用模拟数据
     return mockApiResponse(mockDashboardData)
-  },
-
-  // 语言包相关
-  async getLanguagePackage(locale: string) {
-    return api.get(`/i18n/${locale}`)
   },
 
   // 头像相关

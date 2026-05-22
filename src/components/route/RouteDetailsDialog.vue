@@ -173,7 +173,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { useI18n } from 'vue-i18n'
 import { useRoutes } from '../../composables/useRoutes'
 import type { Route } from '../../types'

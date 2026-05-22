@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import debug from "../../utils/debug"
+import debug from '../../utils/debug'
 import { useAvatar } from '../../composables/useAvatar'
 
 interface Props {

@@ -1,5 +1,5 @@
 import { boot } from 'quasar/wrappers'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 
 // 立即执行的日志，确认文件被加载
 debug.log('🚀 [Boot] Init module loaded')

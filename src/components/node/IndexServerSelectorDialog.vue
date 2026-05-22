@@ -170,7 +170,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { zoneService } from '../../services/zone/zoneService'
 import type { IndexService, IndexServiceMeta } from '../../types'
 

@@ -1,5 +1,5 @@
 import { reactive, ref, computed } from 'vue'
-import debug from "src/utils/debug"
+import debug from 'src/utils/debug'
 import { api } from '../services/api'
 import { useNotify } from './useNotify'
 import { useI18n } from 'vue-i18n'
@@ -9,7 +9,6 @@ import type {
   IPAllocation, 
   IPPoolForm, 
   IPPoolFilters,
-  UserIPResources,
   IPPoolCreateResponse,
   IPPoolCreateAdvancedRequest
 } from '../types/ippool'
@@ -263,24 +262,6 @@ export function useIPPools() {
     }
   }
 
-  const checkIPAvailability = async (poolId: string, ipAddress: string) => {
-    try {
-      const response = await api.get(`/ippools/${poolId}/check-ip`, {
-        params: { ip: ipAddress }
-      })
-      
-      if (response.data.success) {
-        return response.data.data.available
-      } else {
-        notifyError(response.data.message || t('ippools.checkIPError'))
-        throw new Error(response.data.message)
-      }
-    } catch (error) {
-      notifyError(t('ippools.checkIPError'))
-      throw error
-    }
-  }
-
   // 统计信息方法
   const fetchStatistics = async (zoneId?: string) => {
     try {
@@ -354,68 +335,6 @@ export function useIPPools() {
     debug.log('calculated statistics:', statistics.value)
   }
 
-  const fetchUserResources = async (userId: string) => {
-    try {
-      const response = await api.get(`/users/${userId}/ip-resources`)
-      
-      if (response.data.success) {
-        return response.data.data.resources as UserIPResources
-      } else {
-        notifyError(response.data.message || t('ippools.fetchUserResourcesError'))
-        throw new Error(response.data.message)
-      }
-    } catch (error) {
-      notifyError(t('ippools.fetchUserResourcesError'))
-      throw error
-    }
-  }
-
-  // 批量操作方法
-  const batchOperations = async (operation: string, poolIds: string[]) => {
-    try {
-      const response = await api.post('/ippools/batch', {
-        operation,
-        pool_ids: poolIds
-      })
-      
-      if (response.data.success) {
-        notifySuccess(t('ippools.batchOperationSuccess'))
-        await fetchPools()
-        return response.data.data
-      } else {
-        notifyError(response.data.message || t('ippools.batchOperationError'))
-        throw new Error(response.data.message)
-      }
-    } catch (error) {
-      notifyError(t('ippools.batchOperationError'))
-      throw error
-    }
-  }
-
-  const exportPools = async (format: 'csv' | 'json' = 'csv') => {
-    try {
-      const response = await api.get('/ippools/export', {
-        params: { format },
-        responseType: 'blob'
-      })
-      
-      // 创建下载链接
-      const url = window.URL.createObjectURL(new Blob([response.data]))
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', `ippools_export_${new Date().toISOString().split('T')[0]}.${format}`)
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-      
-      notifySuccess(t('ippools.exportSuccess'))
-    } catch (error) {
-      notifyError(t('ippools.exportError'))
-      throw error
-    }
-  }
-
   // 工具方法
   const calculateIPCount = (startIP: string, endIP: string): number => {
     const start = ipToNumber(startIP)
@@ -456,7 +375,7 @@ export function useIPPools() {
     groupCount: number = 1,
     preferContinuous: boolean = false,
     targetPoolSequence?: number,
-    purpose: string = "server_cluster",
+    purpose: string = 'server_cluster',
     notes?: string
   ): Promise<IPPool[]> => {
     createLoading.value = true
@@ -617,30 +536,6 @@ export function useIPPools() {
     ].join('.')
   }
 
-  const extendPool = async (poolId: string, additionalSize: number): Promise<IPPool> => {
-    createLoading.value = true
-    try {
-      const response = await api.post(`/ippools/${poolId}/extend`, {
-        size: additionalSize
-      })
-      
-      if (response.data.success) {
-        notifySuccess(t('ippools.extendSuccess'))
-        await fetchPools()
-        await fetchStatistics()
-        return response.data.data
-      } else {
-        notifyError(response.data.message || t('ippools.extendError'))
-        throw new Error(response.data.message)
-      }
-    } catch (error) {
-      notifyError(t('ippools.extendError'))
-      throw error
-    } finally {
-      createLoading.value = false
-    }
-  }
-
   return {
     // 响应式数据
     pools,
@@ -666,23 +561,16 @@ export function useIPPools() {
     // IP池创建相关方法
     createPoolAdvanced,
     autoAllocatePool: createPoolAdvanced, // 保持向后兼容
-    extendPool,
-    
+
     // IP分配方法
     allocateIP,
     releaseIP,
     fetchAllocations,
-    checkIPAvailability,
-    
+
     // 统计信息方法
     fetchStatistics,
     calculateStatisticsFromPools,
-    fetchUserResources,
-    
-    // 批量操作方法
-    batchOperations,
-    exportPools,
-    
+
     // 工具方法
     calculateIPCount,
     validateIPRange,
