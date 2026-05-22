@@ -137,6 +137,13 @@
   --sidebar-bg: #111827;       /* 侧栏：比主区域更深一档（Gray-900） */
   --sidebar-border: rgba(255, 255, 255, 0.05);
 
+  /* V4.5 — 统一卡片表面色，消灭「三明治拼接」 */
+  --color-bg-primary: #1E293B;
+  --color-bg-secondary: #1E293B;
+  --color-bg-tertiary: #1E293B;
+  --color-border: rgba(255, 255, 255, 0.05);
+  --color-divider: rgba(255, 255, 255, 0.05);
+
   /* 文本 */
   --text-primary: #F1F5F9;
   --text-secondary: #94A3B8;
@@ -323,6 +330,38 @@ body {
   }
 }
 
+/* V4.5 — 闪电/快捷按钮：青色线条外框（取代绿色实色块） */
+.btn-flash-outline,
+.q-btn.btn-flash-outline {
+  background: transparent !important;
+  border: 1px solid rgba(0, 210, 255, 0.45) !important;
+  color: #00D2FF !important;
+  box-shadow: none !important;
+
+  .q-icon, .q-btn__content { color: #00D2FF !important; }
+
+  &:hover {
+    background: rgba(0, 210, 255, 0.08) !important;
+    border-color: #00D2FF !important;
+    box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.12) !important;
+  }
+}
+
+/* light 模式下适当加深一点边框，避免浮在亮色背景上不足 */
+body:not(.body--dark) .btn-flash-outline,
+body:not(.body--dark) .q-btn.btn-flash-outline {
+  border-color: rgba(0, 102, 255, 0.40) !important;
+  color: #0066FF !important;
+
+  .q-icon, .q-btn__content { color: #0066FF !important; }
+
+  &:hover {
+    background: rgba(0, 102, 255, 0.06) !important;
+    border-color: #0066FF !important;
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.10) !important;
+  }
+}
+
 /* 按钮组 */
 .q-btn-group {
   border-radius: var(--soft-radius-md);
@@ -496,6 +535,7 @@ body {
   box-shadow: none !important;
 
   .q-item {
+    position: relative;
     color: #94A3B8;
     transition: all 0.25s ease;
 
@@ -511,10 +551,23 @@ body {
       .q-icon { color: #00D2FF; }
     }
 
+    /* V4.5 — 激活态：12% 柔和背景 + 3px 品牌渐变左竹线 */
     &.q-item--active,
     &.q-router-link--active {
-      background-color: rgba(0, 102, 255, 0.15) !important;
-      color: #00D2FF !important;
+      background-color: rgba(0, 102, 255, 0.12) !important;
+      color: #FFFFFF !important;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 6px;
+        bottom: 6px;
+        width: 3px;
+        border-radius: 0 3px 3px 0;
+        background: linear-gradient(180deg, #0066FF 0%, #00D2FF 100%);
+        box-shadow: 0 0 8px rgba(0, 210, 255, 0.45);
+      }
 
       .q-icon {
         color: #00D2FF !important;
@@ -532,6 +585,83 @@ body {
 .body--dark .q-header {
   background-color: var(--header-bg) !important;
   border-bottom: 1px solid var(--header-border) !important;
+}
+
+/* ========================================
+   V4.5 — 卡片内部图标统一降噪（暗色下）
+   除状态指示器之外的全部卡片内 q-icon 重置为低调蓝灰
+   ======================================== */
+.body--dark .node-card-content .info-line .q-icon,
+.body--dark .node-card-content .node-id-section .q-icon,
+.body--dark .node-card-content .system-badge .q-icon {
+  color: #64748B !important;
+}
+.body--dark .node-card-content .info-value {
+  color: #E2E8F0 !important;
+}
+.body--dark .node-card-content .node-id-section .node-id,
+.body--dark .node-card-content .system-badge,
+.body--dark .node-card-content .arch-badge {
+  color: #475569 !important;
+}
+
+/* ========================================
+   V4.5 light 模式 — 侧栏/顶栏 icon 微提亮，去「死气沉沉」
+   ======================================== */
+body:not(.body--dark) .q-drawer {
+  .q-item {
+    transition: all 0.22s ease;
+
+    .q-icon, .q-item__section--avatar .q-icon {
+      color: #64748B;
+      transition: color 0.22s ease, filter 0.22s ease;
+    }
+
+    &:hover {
+      background-color: rgba(0, 102, 255, 0.06) !important;
+
+      .q-icon { color: var(--primary); }
+    }
+
+    &.q-item--active,
+    &.q-router-link--active {
+      position: relative;
+      background-color: rgba(0, 102, 255, 0.08) !important;
+      color: var(--primary) !important;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 6px;
+        bottom: 6px;
+        width: 3px;
+        border-radius: 0 3px 3px 0;
+        background: linear-gradient(180deg, #0066FF 0%, #00D2FF 100%);
+      }
+
+      .q-icon {
+        color: var(--primary) !important;
+        filter: drop-shadow(0 0 3px rgba(0, 102, 255, 0.30));
+      }
+    }
+  }
+}
+
+/* light 顶栏 icon 提亮 + hover 柔和 */
+body:not(.body--dark) .q-header .q-btn .q-icon {
+  color: #475569;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+body:not(.body--dark) .q-header .q-btn:hover .q-icon {
+  color: var(--primary);
+}
+.body--dark .q-header .q-btn .q-icon {
+  color: #94A3B8;
+  transition: color 0.2s ease;
+}
+.body--dark .q-header .q-btn:hover .q-icon {
+  color: #00D2FF;
 }
 
 /* ========================================

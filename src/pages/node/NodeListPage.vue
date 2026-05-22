@@ -5,7 +5,7 @@
     icon="device_hub"
   >
     <template #actions>
-      <q-btn-group>
+      <div class="row items-center" style="gap: 14px">
         <q-btn
           unelevated
           color="primary"
@@ -16,22 +16,20 @@
           :disable="loading"
         />
         <q-btn
-          unelevated
-          color="secondary"
+          class="btn-flash-outline"
           icon="bolt"
           :label="$t('nodes.quickCreate.btn')"
           @click="showQuickCreateDialog = true"
           :disable="loading"
         />
         <q-btn
-          flat
-          color="grey-7"
+          class="btn-ghost"
           icon="refresh"
           :label="$t('common.refresh')"
           @click="refreshNodes"
           :loading="loading"
         />
-      </q-btn-group>
+      </div>
     </template>
 
     <!-- 节点列表 - 卡片布局 -->
