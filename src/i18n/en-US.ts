@@ -1,7 +1,7 @@
 export default {
   app: {
     name: 'MyNet',
-    tagline: 'Self-sovereign Networking Platform'
+    tagline: 'Self-sovereign Private Networking'
   },
   common: {
     login: 'Login',

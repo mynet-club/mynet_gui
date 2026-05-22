@@ -4,7 +4,7 @@
     <div class="auth-logo">
       <img src="/icons/icon.png" alt="MyNet" class="logo-icon" />
       <div class="logo-text">MyNet</div>
-      <div class="logo-tagline">Self-sovereign Networking</div>
+      <div class="logo-tagline">{{ $t('app.tagline') }}</div>
     </div>
     
     <q-card-section class="auth-header">

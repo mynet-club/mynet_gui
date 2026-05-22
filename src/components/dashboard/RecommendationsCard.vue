@@ -131,7 +131,7 @@ const showAllRecommendations = () => {
   background: white;
 
   .card-header-gradient {
-    background: linear-gradient(135deg, var(--q-primary) 0%, #667eea 100%);
+    background: linear-gradient(135deg, var(--q-primary) 0%, #1E40AF 100%);
     position: relative;
     
     &::before {
@@ -276,7 +276,7 @@ const showAllRecommendations = () => {
         }
 
         &.category-setup::before {
-          background: linear-gradient(135deg, var(--q-primary), #667eea);
+          background: linear-gradient(135deg, var(--q-primary), #1E40AF);
         }
 
         &.category-network::before {

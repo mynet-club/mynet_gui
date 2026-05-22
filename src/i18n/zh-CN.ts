@@ -1,7 +1,7 @@
 export default {
   app: {
     name: 'MyNet',
-    tagline: '自主组网平台'
+    tagline: '自主可控 · 私域组网'
   },
   common: {
     login: '登录',

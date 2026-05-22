@@ -1,6 +1,6 @@
 /**
- * MyNet UI Design Tokens
- * Light Mode – Stable / Readable
+ * MyNet UI Theme — Bright / Minimal / Tech
+ * Light Mode — 以 logo 亮蓝 #2563EB 为主调
  */
 
 /* ========================================
@@ -8,58 +8,66 @@
    ======================================== */
 
 :root {
-  /* ===== 页面与结构 ===== */
-  --page-bg: #F3F4F6;          /* 页面整体底色 */
+  /* ===== 页面与结构（冷调的極浅灰） ===== */
+  --page-bg: #F8FAFC;          /* 页面整体底色 */
   --content-bg: #FFFFFF;       /* 主内容区 / 卡片 */
-  
-  --header-bg: #F5F7FA;        /* 顶部 Header */
-  --header-border: #E5E7EB;
-  
-  --sidebar-bg: #F5F7FA;       /* 侧边栏 */
-  --sidebar-border: #E5E7EB;
-  
-  /* ===== 文本颜色 ===== */
-  --text-primary: #374151;     /* 主文本 / 标题 */
-  --text-secondary: #6B7280;   /* 次级说明 */
-  --text-muted: #9CA3AF;       /* 技术字段 / 注释 */
-  --text-disabled: #D1D5DB;    /* 禁用态 */
-  
+
+  --header-bg: #FFFFFF;        /* 顶部 Header */
+  --header-border: #E2E8F0;
+
+  --sidebar-bg: #FFFFFF;       /* 侧边栏 */
+  --sidebar-border: #E2E8F0;
+
+  /* ===== 文本颜色（准黑，不要纯黑） ===== */
+  --text-primary: #0F172A;     /* 主文本 / 标题 */
+  --text-secondary: #475569;   /* 次级说明 */
+  --text-muted: #94A3B8;       /* 技术字段 / 注释 */
+  --text-disabled: #CBD5E1;    /* 禁用态 */
+
   /* ===== 边框 / 分隔 ===== */
-  --border-default: #E5E7EB;
+  --border-default: #E2E8F0;
   --border-light: #EEF2F6;
-  
-  /* ===== 状态语义（统一三态） ===== */
-  --status-available: #10B981;        /* 🟢 可用 */
+  --border-strong: #CBD5E1;
+
+  /* ===== 状态语义（仅用于图标/Badge/文字，不要大块面）===== */
+  --status-available: #16A34A;        /* 🟢 可用 */
   --status-warning: #F59E0B;          /* 🟡 不稳定 */
-  --status-unavailable: #9CA3AF;      /* ⚪ 不可用 */
-  
-  --status-available-bg: #ECFDF5;
+  --status-unavailable: #94A3B8;      /* ⚪ 不可用 */
+  --status-error: #DC2626;
+
+  --status-available-bg: #F0FDF4;
   --status-warning-bg: #FFFBEB;
-  --status-unavailable-bg: #F3F4F6;
-  
-  /* ===== 主色（克制使用） ===== */
-  --primary: #4f46e5;           /* 主按钮 / 主链接 */
-  --primary-hover: #4338ca;
-  --primary-soft: #EEF2FF;
-  
+  --status-unavailable-bg: #F1F5F9;
+  --status-error-bg: #FEF2F2;
+
+  /* ===== 主色（品牌蓝、克制使用）===== */
+  --primary: #2563EB;           /* 主按钮 / 主链接 */
+  --primary-hover: #1D4ED8;
+  --primary-active: #1E40AF;
+  --primary-soft: #EFF6FF;
+  --primary-soft-hover: #DBEAFE;
+  --primary-ring: rgba(37, 99, 235, 0.18);
+
   /* ===== 图标 ===== */
-  --icon-primary: #374151;
-  --icon-secondary: #6B7280;
-  --icon-muted: #9CA3AF;
-  
-  /* ===== 阴影（保留柔和风格） ===== */
-  --soft-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
-  --soft-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.03);
-  --soft-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.03);
-  --soft-shadow-hover: 0 12px 20px rgba(0, 0, 0, 0.06), 0 6px 8px rgba(0, 0, 0, 0.04);
-  
-  /* ===== 圆角（保留） ===== */
-  --soft-radius-sm: 8px;
-  --soft-radius-md: 12px;
-  --soft-radius-lg: 16px;
-  --soft-radius-xl: 20px;
+  --icon-primary: #334155;
+  --icon-secondary: #64748B;
+  --icon-muted: #94A3B8;
+  --icon-brand: var(--primary);
+
+  /* ===== 阴影（中性、不染色） ===== */
+  --soft-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --soft-shadow-md: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --soft-shadow-lg: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --soft-shadow-hover: 0 6px 16px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
+  --soft-shadow-brand: 0 6px 20px rgba(37, 99, 235, 0.18);
+
+  /* ===== 圆角（适当收敛） ===== */
+  --soft-radius-sm: 6px;
+  --soft-radius-md: 10px;
+  --soft-radius-lg: 14px;
+  --soft-radius-xl: 18px;
   --soft-radius-full: 999px;
-  
+
   /* ===== 间距（保留） ===== */
   --soft-spacing-xs: 0.5rem;   /* 8px */
   --soft-spacing-sm: 0.75rem;  /* 12px */
@@ -67,16 +75,28 @@
   --soft-spacing-lg: 1.5rem;   /* 24px */
   --soft-spacing-xl: 2rem;     /* 32px */
   --soft-spacing-2xl: 3rem;    /* 48px */
-  
+
   /* ===== 兼容旧变量（渐进迁移） ===== */
   --soft-bg-primary: var(--content-bg);
   --soft-bg-secondary: var(--page-bg);
+  --soft-bg-card: var(--content-bg);
+  --soft-bg-hover: #F1F5F9;
   --soft-text-primary: var(--text-primary);
   --soft-text-secondary: var(--text-secondary);
   --soft-text-tertiary: var(--text-muted);
+  --soft-text-light: var(--text-muted);
   --soft-border-light: var(--border-light);
   --soft-border-medium: var(--border-default);
   --soft-primary: var(--primary);
+  --soft-primary-light: var(--primary-soft);
+  --soft-success: var(--status-available);
+  --soft-success-bg: var(--status-available-bg);
+  --soft-warning: var(--status-warning);
+  --soft-warning-bg: var(--status-warning-bg);
+  --soft-error: var(--status-error);
+  --soft-error-bg: var(--status-error-bg);
+  --soft-info: var(--primary);
+  --soft-info-bg: var(--primary-soft);
 }
 
 /* 深色模式变量 */
@@ -116,21 +136,17 @@ body {
 .q-card {
   background-color: var(--content-bg) !important;
   border-radius: var(--soft-radius-lg) !important;
-  box-shadow: var(--soft-shadow-md) !important;
+  box-shadow: var(--soft-shadow-sm) !important;
   border: 1px solid var(--border-default);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  
+  transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
+
   &:hover {
-    box-shadow: var(--soft-shadow-hover) !important;
-    transform: translateY(-2px);
-    border-color: var(--border-default);
+    box-shadow: var(--soft-shadow-md) !important;
+    border-color: var(--border-strong, #CBD5E1);
   }
-  
-  /* 移除 Quasar 默认的强阴影 */
-  &.q-hoverable {
-    &:hover {
-      box-shadow: var(--soft-shadow-hover) !important;
-    }
+
+  &.q-hoverable:hover {
+    box-shadow: var(--soft-shadow-md) !important;
   }
 }
 
@@ -242,28 +258,33 @@ body {
 .q-chip {
   border-radius: var(--soft-radius-full) !important;
   font-weight: 500;
-  padding: 0.4rem 0.875rem;
-  box-shadow: var(--soft-shadow-sm);
-  
-  /* 降低饱和度 */
+  padding: 0.25rem 0.75rem;
+  box-shadow: none;
+  border: 1px solid transparent;
+
+  /* 低饱和、无阴影，避免“色块”观感 */
   &.text-positive {
-    background-color: var(--soft-success-bg) !important;
-    color: var(--soft-success) !important;
+    background-color: var(--status-available-bg) !important;
+    color: var(--status-available) !important;
+    border-color: rgba(22, 163, 74, 0.18);
   }
-  
+
   &.text-negative {
-    background-color: var(--soft-error-bg) !important;
-    color: var(--soft-error) !important;
+    background-color: var(--status-error-bg) !important;
+    color: var(--status-error) !important;
+    border-color: rgba(220, 38, 38, 0.18);
   }
-  
+
   &.text-warning {
-    background-color: var(--soft-warning-bg) !important;
-    color: var(--soft-warning) !important;
+    background-color: var(--status-warning-bg) !important;
+    color: var(--status-warning) !important;
+    border-color: rgba(245, 158, 11, 0.18);
   }
-  
+
   &.text-info {
-    background-color: var(--soft-info-bg) !important;
-    color: var(--soft-info) !important;
+    background-color: var(--primary-soft) !important;
+    color: var(--primary) !important;
+    border-color: rgba(37, 99, 235, 0.18);
   }
 }
 
@@ -393,25 +414,20 @@ body {
 .node-card,
 .device-card,
 .status-card {
-  background: linear-gradient(135deg, var(--soft-bg-card) 0%, var(--soft-bg-secondary) 100%);
+  background: var(--content-bg);
   border-radius: var(--soft-radius-lg);
   padding: var(--soft-spacing-lg);
-  box-shadow: var(--soft-shadow-md);
-  border: 1px solid var(--soft-border-light);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
+  box-shadow: var(--soft-shadow-sm);
+  border: 1px solid var(--border-default);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--soft-shadow-hover);
+    box-shadow: var(--soft-shadow-md);
+    border-color: var(--brand-200, #BFDBFE);
   }
-  
-  /* 卡片内的图标 */
+
   .q-icon {
-    transition: transform 0.25s ease;
-  }
-  
-  &:hover .q-icon {
-    transform: scale(1.05);
+    transition: transform 0.2s ease;
   }
 }
 
@@ -422,29 +438,29 @@ body {
 .status-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.35rem 0.75rem;
+  padding: 0.2rem 0.625rem;
   border-radius: var(--soft-radius-full);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  box-shadow: var(--soft-shadow-sm);
-  transition: all 0.2s ease;
-  
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease;
+
   &.status-online {
-    background-color: var(--soft-success-bg);
-    color: var(--soft-success);
-    border: 1px solid rgba(72, 187, 120, 0.2);
+    background-color: var(--status-available-bg);
+    color: var(--status-available);
+    border-color: rgba(22, 163, 74, 0.18);
   }
-  
+
   &.status-offline {
-    background-color: var(--soft-error-bg);
-    color: var(--soft-error);
-    border: 1px solid rgba(245, 101, 101, 0.2);
+    background-color: var(--status-error-bg);
+    color: var(--status-error);
+    border-color: rgba(220, 38, 38, 0.18);
   }
-  
+
   &.status-pending {
-    background-color: var(--soft-warning-bg);
-    color: var(--soft-warning);
-    border: 1px solid rgba(237, 137, 54, 0.2);
+    background-color: var(--status-warning-bg);
+    color: var(--status-warning);
+    border-color: rgba(245, 158, 11, 0.18);
   }
 }
 
@@ -563,7 +579,7 @@ body {
 
 /* 聚焦状态 - 柔和的轮廓线 */
 *:focus-visible {
-  outline: 2px solid var(--soft-primary);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
   border-radius: var(--soft-radius-sm);
 }

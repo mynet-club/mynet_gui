@@ -148,7 +148,9 @@ watch(locale, (newLocale) => {
 
 <style lang="scss" scoped>
 .auth-layout {
-  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 50%, #c7d2fe 100%);
+  background: radial-gradient(circle at 20% 0%, #EFF6FF 0%, transparent 45%),
+              radial-gradient(circle at 80% 100%, #DBEAFE 0%, transparent 50%),
+              #F8FAFC;
   min-height: 100vh;
   position: relative;
   
@@ -161,13 +163,14 @@ watch(locale, (newLocale) => {
     gap: 8px;
     
     .q-btn {
-      background: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.7);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      color: #4f46e5 !important;
+      border: 1px solid rgba(37, 99, 235, 0.12);
+      color: var(--primary) !important;
       
       &:hover {
-        background: rgba(255, 255, 255, 0.85);
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(37, 99, 235, 0.25);
       }
     }
   }
@@ -184,12 +187,14 @@ watch(locale, (newLocale) => {
 // 深色模式优化
 .body--dark {
   .auth-layout {
-    background: linear-gradient(135deg, #1e1b4b 0%, #1e1b4b 50%, #0f172a 100%);
+    background: radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 80% 100%, rgba(30, 64, 175, 0.15) 0%, transparent 50%),
+                #0F172A;
     
     &::before {
       background: 
-        radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(79, 70, 229, 0.06) 0%, transparent 50%);
+        radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(37, 99, 235, 0.06) 0%, transparent 50%);
     }
   }
 }
