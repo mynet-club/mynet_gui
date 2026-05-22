@@ -174,6 +174,11 @@ export default {
     }
   },
   auth: {
+    hero: {
+      point1: 'Spin up your network in minutes',
+      point2: 'End-to-end encrypted, data stays yours',
+      point3: 'Multi-node topology, freely connected'
+    },
     login: 'Login',
     register: 'Register',
     loginTitle: 'Sign in to MyNet',

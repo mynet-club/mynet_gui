@@ -46,25 +46,26 @@
           @update:model-value="handleViewModeChange"
         />
 
-        <q-btn-group v-if="currentView === 'node-list'">
+        <template v-if="currentView === 'node-list'">
           <q-btn
-            color="positive"
+            unelevated
+            color="primary"
             icon="add"
             :label="$t('routes.actions.createRoute')"
             @click="handleCreateRoute"
           />
           <q-btn
-            color="primary"
+            class="btn-ghost"
             icon="sync"
             :label="$t('common.refresh')"
             @click="handleRefresh"
             :loading="loading || nodesLoading"
           />
-        </q-btn-group>
-        
+        </template>
+
         <q-btn
           v-else
-          color="primary"
+          class="btn-ghost"
           icon="sync"
           label="刷新"
           @click="handleRefresh"

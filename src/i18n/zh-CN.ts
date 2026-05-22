@@ -175,6 +175,11 @@ export default {
     }
   },
   auth: {
+    hero: {
+      point1: '极速组网，分钟级上线',
+      point2: '端到端加密，数据不出域',
+      point3: '多节点拓扑，自由连接'
+    },
     login: '登录',
     register: '注册',
     loginTitle: '欢迎回来',
