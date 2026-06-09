@@ -2,8 +2,33 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
 import { defineConfig } from '#q-app/wrappers';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
-export default defineConfig((/* ctx */) => {
+// quasar.config.ts 运行在 Node.js 上下文，process.env 里只有 .env（开发配置）。
+// 生产 build 时需要主动把 .env.production 加载进来，否则 env 块会锁定开发 URL。
+function loadEnvProduction() {
+  try {
+    const lines = readFileSync(resolve(process.cwd(), '.env.production'), 'utf-8').split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eq = trimmed.indexOf('=');
+      if (eq < 0) continue;
+      const key = trimmed.slice(0, eq).trim();
+      const val = trimmed.slice(eq + 1).trim();
+      // 只在 process.env 里没有（即未从 OS 环境注入）时才覆盖
+      if (key && !Object.prototype.hasOwnProperty.call(process.env, key)) {
+        process.env[key] = val;
+      }
+    }
+  } catch (_) { /* .env.production 不存在时静默忽略 */ }
+}
+
+export default defineConfig((ctx) => {
+  if (ctx.prod) {
+    loadEnvProduction();
+  }
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -36,7 +61,7 @@ export default defineConfig((/* ctx */) => {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {
       target: {
-        browser: [ 'es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1' ],
+        browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
         node: 'node16'
       },
 
@@ -46,7 +71,7 @@ export default defineConfig((/* ctx */) => {
       },
 
       vueRouterMode: 'history', // available values: 'hash', 'history'
-      
+
       // 确保生产环境变量正确加载
       env: {
         VITE_API_BASE_URL: process.env.VITE_API_BASE_URL,
@@ -60,7 +85,7 @@ export default defineConfig((/* ctx */) => {
         VITE_ENABLE_CONSOLE_LOG: process.env.VITE_ENABLE_CONSOLE_LOG,
         VITE_LOG_LEVEL: process.env.VITE_LOG_LEVEL
       },
-      
+
       // 生产环境移除调试代码
       minify: 'terser',
       terserOptions: {
@@ -73,7 +98,7 @@ export default defineConfig((/* ctx */) => {
           pure_funcs: ['console.log', 'console.info', 'console.debug']
         }
       },
-      
+
       // 扩展 Vite 配置以支持更精细的控制
       extendViteConf(viteConf, { isClient, isServer }) {
         // 开发环境优化配置
@@ -86,7 +111,7 @@ export default defineConfig((/* ctx */) => {
               'src': '/src'
             }
           }
-          
+
           // 优化服务器配置
           viteConf.server = {
             ...viteConf.server,
@@ -99,12 +124,12 @@ export default defineConfig((/* ctx */) => {
           }
         }
       },
-      
+
       // viteVuePluginOptions: {},
 
       // 移除Vue i18n编译插件，使用纯运行时模式
       // vitePlugins: []
-      
+
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
       // publicPath: '/',

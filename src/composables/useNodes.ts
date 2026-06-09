@@ -6,12 +6,13 @@
 import { ref, computed, reactive, readonly } from 'vue'
 import debug from 'src/utils/debug'
 import { nodeService } from '../services/node/nodeService'
+import { webSocketService, type NodeEventPayload } from '../services/websocket'
 // import { useNotify } from './useNotify'
-import type { 
-  Node, 
-  NodesListParams, 
+import type {
+  Node,
+  NodesListParams,
   CreateNodeRequest,
-  NodeStatus 
+  NodeStatus
 } from '../types/node'
 import type { PaginatedApiResponse } from '../types/api'
 
@@ -53,7 +54,7 @@ export function useNodes() {
   const hasNodes = computed(() => nodes.value.length > 0)
   const isEmpty = computed(() => !loading.value && nodes.value.length === 0)
   const totalPages = computed(() => Math.ceil(pagination.rowsNumber / pagination.rowsPerPage))
-  
+
   // 按状态分组的节点统计
   const nodeStats = computed(() => {
     const stats = {
@@ -62,13 +63,13 @@ export function useNodes() {
       inactive: 0,
       pending: 0
     }
-    
+
     nodes.value.forEach(node => {
       if (node.status === 'active') stats.active++
       else if (node.status === 'inactive') stats.inactive++
       else if (node.status === 'pending') stats.pending++
     })
-    
+
     return stats
   })
 
@@ -80,24 +81,24 @@ export function useNodes() {
         const search = filters.search.toLowerCase()
         const matchesName = node.node_name.toLowerCase().includes(search)
         const matchesId = String(node.node_id).toLowerCase().includes(search)
-        const matchesDescription = node.description?.toLowerCase().includes(search) || 
-                                 node.node_remarks?.toLowerCase().includes(search)
+        const matchesDescription = node.description?.toLowerCase().includes(search) ||
+          node.node_remarks?.toLowerCase().includes(search)
         if (!matchesName && !matchesId && !matchesDescription) {
           return false
         }
       }
-      
+
       // 状态过滤
       const nodeStatus = node.status || node.node_status
       if (filters.status && nodeStatus !== filters.status) {
         return false
       }
-      
+
       // 节点类型过滤
       if (filters.nodeType && node.node_type !== filters.nodeType) {
         return false
       }
-      
+
       return true
     })
   })
@@ -119,7 +120,7 @@ export function useNodes() {
       debug.log('正在请求节点列表，参数:', queryParams)
       const response = await nodeService.getNodes(queryParams)
       debug.log('节点列表API响应:', response)
-      
+
       // 根据实际API响应结构解析数据
       if (response.data && response.data.nodes) {
         nodes.value = response.data.nodes.data || []
@@ -139,7 +140,7 @@ export function useNodes() {
         pagination.rowsNumber = 0
         pagination.page = 1
       }
-      
+
     } catch (error) {
       debug.error('加载节点列表失败:', error)
       notifyError('加载节点列表失败')
@@ -167,11 +168,11 @@ export function useNodes() {
       const newNode = response.data
       debug.log('新节点数据:', newNode)
       debug.log('节点ID字段 - id:', newNode.id, 'node_id:', newNode.node_id)
-      
+
       // 将新节点添加到列表开头
       nodes.value.unshift(newNode)
       pagination.rowsNumber += 1
-      
+
       notifySuccess('节点创建成功')
       return newNode
     } catch (error) {
@@ -190,14 +191,14 @@ export function useNodes() {
     deleting.value = nodeId
     try {
       await nodeService.deleteNode(nodeId)
-      
+
       // 从列表中移除节点
       const index = nodes.value.findIndex(node => node.node_id === nodeId)
       if (index !== -1) {
         nodes.value.splice(index, 1)
         pagination.rowsNumber -= 1
       }
-      
+
       notifySuccess('节点删除成功')
       return true
     } catch (error) {
@@ -215,14 +216,14 @@ export function useNodes() {
   const updateNodeStatus = async (nodeId: string, status: NodeStatus): Promise<boolean> => {
     try {
       await nodeService.updateNodeStatus(nodeId, status)
-      
+
       // 更新本地节点状态
       const node = nodes.value.find(n => n.node_id === nodeId)
       if (node) {
         node.status = status
         node.updated_at = new Date().toISOString()
       }
-      
+
       notifySuccess(`节点状态已更新为${nodeService.formatNodeStatus(status)}`)
       return true
     } catch (error) {
@@ -327,7 +328,7 @@ export function useNodes() {
     } else {
       selectedNodes.value.splice(index, 1)
     }
-    
+
     // 更新全选状态
     selectAll.value = selectedNodes.value.length === filteredNodes.value.length
   }
@@ -342,20 +343,20 @@ export function useNodes() {
    */
   const deleteSelectedNodes = async (): Promise<boolean> => {
     if (selectedNodes.value.length === 0) return false
-    
+
     try {
       const deletePromises = selectedNodes.value.map(nodeId => deleteNode(nodeId))
       const results = await Promise.all(deletePromises)
-      
+
       clearSelection()
-      
+
       const successCount = results.filter(result => result).length
       if (successCount === selectedNodes.value.length) {
         notifySuccess(`成功删除 ${successCount} 个节点`)
       } else {
         notifyError(`删除完成，成功 ${successCount} 个，失败 ${selectedNodes.value.length - successCount} 个`)
       }
-      
+
       return true
     } catch (error) {
       debug.error('批量删除节点失败:', error)
@@ -377,12 +378,12 @@ export function useNodes() {
         ...(filters.status && { status: filters.status })
       }
       const allNodes = await nodeService.getNodes(queryParams)
-      
+
       // 创建数据字符串
       let content = ''
       let fileName = `nodes-${new Date().toISOString().split('T')[0]}`
       let mimeType = 'text/csv'
-      
+
       if (format === 'csv') {
         const headers = ['ID', 'Node ID', 'Name', 'Status', 'Type', 'IP Address', 'Created At']
         const nodesData = allNodes.data?.nodes?.data || []
@@ -403,7 +404,7 @@ export function useNodes() {
         fileName += '.json'
         mimeType = 'application/json'
       }
-      
+
       // 创建下载链接
       const blob = new Blob([content], { type: mimeType })
       const url = window.URL.createObjectURL(blob)
@@ -414,11 +415,71 @@ export function useNodes() {
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
-      
+
       notifySuccess('节点列表导出成功')
     } catch (error) {
       debug.error('导出节点列表失败:', error)
       notifyError('导出节点列表失败')
+    }
+  }
+
+  /**
+   * 启用 WebSocket 实时节点更新（订阅 private-zone.{zoneId}.nodes）
+   * 监听 node.created / node.updated / node.status_changed / node.deleted
+   */
+  let liveZoneId: number | null = null
+  const enableLiveUpdates = (zoneId: number | string) => {
+    const zid = Number(zoneId)
+    if (liveZoneId === zid) return
+    if (liveZoneId !== null) webSocketService.unsubscribeZoneNodes(liveZoneId)
+    liveZoneId = zid
+
+    webSocketService.subscribeZoneNodes(zid, {
+      onCreated: (payload: NodeEventPayload) => {
+        debug.log('[useNodes] node.created', payload)
+        if (!nodes.value.some(n => String(n.node_id) === payload.node_id)) {
+          // 仅当当前在第一页时插入，避免分页错位
+          if (pagination.page === 1) {
+            // 这里只有 id/name 等少量字段，触发一次轻量刷新更稳妥
+            loadNodes().catch((e) => debug.error('实时刷新失败', e))
+          } else {
+            pagination.rowsNumber += 1
+          }
+        }
+      },
+      onUpdated: (payload: NodeEventPayload) => {
+        debug.log('[useNodes] node.updated', payload)
+        const node = nodes.value.find(n => String(n.node_id) === payload.node_id)
+        if (node) {
+          node.updated_at = payload.timestamp
+        }
+      },
+      onStatusChanged: (payload: NodeEventPayload) => {
+        debug.log('[useNodes] node.status_changed', payload)
+        const node = nodes.value.find(n => String(n.node_id) === payload.node_id)
+        if (node && payload.new_status !== undefined) {
+          (node as any).node_status = payload.new_status
+          if (payload.new_status_name) {
+            (node as any).node_status_name = payload.new_status_name
+          }
+          node.updated_at = payload.timestamp
+        }
+      },
+      onDeleted: (payload: NodeEventPayload) => {
+        debug.log('[useNodes] node.deleted', payload)
+        const idx = nodes.value.findIndex(n => String(n.node_id) === payload.node_id)
+        if (idx !== -1) {
+          nodes.value.splice(idx, 1)
+          pagination.rowsNumber = Math.max(0, pagination.rowsNumber - 1)
+        }
+      }
+    })
+  }
+
+  const disableLiveUpdates = () => {
+    if (liveZoneId !== null) {
+      webSocketService.unsubscribeZoneNodes(liveZoneId)
+      liveZoneId = null
     }
   }
 
@@ -430,35 +491,35 @@ export function useNodes() {
     deleting: readonly(deleting),
     pagination,
     filters,
-    
+
     // 计算属性
     hasNodes,
     isEmpty,
     totalPages,
     nodeStats,
     filteredNodes,
-    
+
     // 基础操作
     loadNodes,
     refreshNodes,
     createNode,
     deleteNode,
     updateNodeStatus,
-    
+
     // 搜索和过滤
     searchNodes,
     clearSearch,
     setStatusFilter,
     clearFilters,
-    
+
     // 分页
     goToPage,
     changePageSize,
-    
+
     // 本地更新
     updateLocalNode,
     getNodeIndex,
-    
+
     // 批量选择
     selectedNodes: readonly(selectedNodes),
     selectAll,
@@ -466,8 +527,12 @@ export function useNodes() {
     toggleSelectNode,
     clearSelection,
     deleteSelectedNodes,
-    
+
     // 导出
-    exportNodes
+    exportNodes,
+
+    // WebSocket 实时更新
+    enableLiveUpdates,
+    disableLiveUpdates
   }
 }

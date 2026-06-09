@@ -11,7 +11,7 @@ set -e  # 遇到错误立即退出
 PROJECT_NAME="MyNet Frontend"
 BUILD_DIR="dist/spa"
 REMOTE_USER="root"
-REMOTE_HOST="api.mynet.club"
+REMOTE_HOST="my.mynet.club"   # GUI 静态文件服务器（nginx 在此处代理 API，勿改成 api.mynet.club）
 REMOTE_PATH="/data/app/mynet.club/my/public"
 NGINX_PATH="/usr/sbin/nginx"
 WEB_USER="www"

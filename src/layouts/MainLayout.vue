@@ -156,7 +156,7 @@
                 <q-icon name="settings" />
               </q-item-section>
               <q-item-section>
-                <q-item-label>{{ $t('common.profile') }}</q-item-label>
+                <q-item-label>{{ $t('profile.preferences') }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-separator />
@@ -339,7 +339,7 @@
     <q-dialog v-model="showConnectionDialog">
       <q-card style="min-width: 300px">
         <q-card-section class="row items-center q-pb-none">
-          <div class="text-h6">{{ $t('websocket.connectionFailed') }}</div>
+          <div class="text-h6">{{ wsConnectionStats.connected ? $t('websocket.connectionStatus') : $t('websocket.connectionFailed') }}</div>
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>

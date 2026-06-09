@@ -2125,6 +2125,7 @@ export default {
     connected: '已连接',
     disconnected: '未连接',
     connectionFailed: 'WebSocket 连接失败',
+    connectionStatus: 'WebSocket 连接状态',
     heartbeat: '心跳'
   },
   node: {

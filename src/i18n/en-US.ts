@@ -1957,6 +1957,7 @@ export default {
     connected: 'Connected',
     disconnected: 'Disconnected',
     connectionFailed: 'WebSocket connection failed',
+    connectionStatus: 'WebSocket Connection Status',
     heartbeat: 'Heartbeat'
   },
   node: {

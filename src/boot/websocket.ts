@@ -1,84 +1,66 @@
 import { boot } from 'quasar/wrappers'
 import debug from 'src/utils/debug'
-import { useWebSocket } from '../services/websocket'
+import { useWebSocket, webSocketService } from '../services/websocket'
 import { useAuthStore } from '../stores/auth'
+import { handleNotificationBroadcast } from '../composables/useNotifications'
 
 export default boot(({ app }) => {
   const authStore = useAuthStore()
-  const userZoneId = authStore.user?.zone_id
 
   let isWebSocketInitialized = false
 
-  // WebSocket connection management
+  // 建立连接 + 订阅 user notifications 频道
   const initWebSocket = () => {
-    if (authStore.isAuthenticated && userZoneId && !isWebSocketInitialized) {
-      isWebSocketInitialized = true
+    const zoneId = authStore.user?.zone_id
+    const userId = authStore.user?.user_id ?? (authStore.user as any)?.id
+    if (!authStore.isAuthenticated || !zoneId || !userId || isWebSocketInitialized) return
 
-      const { connect, on, disconnect } = useWebSocket()
-      connect(authStore.token || 'mock_token', userZoneId.toString())
+    isWebSocketInitialized = true
+    const { connect, on, subscribeUserNotifications } = useWebSocket()
+    connect(authStore.token || '', String(zoneId))
 
-      // Listen for time update events - new format
-      on('time_update', (data: { timestamp: number, formatted_time: string, zone_id: number }) => {
-        debug.log(`[Time Update] Current time: ${data.formatted_time}, Unix timestamp: ${data.timestamp}, Zone ID: ${data.zone_id}`)
+    on('connected', (data) => {
+      debug.log('🔌 [WebSocket] 已连接', data)
+      // 连接成功后订阅当前用户的通知频道
+      subscribeUserNotifications(userId, (payload) => {
+        debug.log('🔔 [WebSocket] 收到通知广播', payload)
+        handleNotificationBroadcast(payload)
       })
+    })
 
-      // Listen for connection and disconnect events
-      on('connected', (data) => {
-        debug.log('🔌 [WebSocket] 已连接', data)
-      })
-      
-      on('disconnected', (data) => {
-        debug.log('🔌 [WebSocket] 已断开', data)
-        isWebSocketInitialized = false
-      })
+    on('disconnected', (data) => {
+      debug.log('🔌 [WebSocket] 已断开', data)
+      isWebSocketInitialized = false
+    })
 
-      debug.log('🔌 [WebSocket] Attempting to connect...')
-    }
+    debug.log('🔌 [WebSocket] 正在建立连接...')
   }
 
-  // Disconnect WebSocket connection
   const closeWebSocket = () => {
-    const { disconnect } = useWebSocket()
-    disconnect()
+    webSocketService.disconnect()
     isWebSocketInitialized = false
-    debug.log('🔌 [Boot] WebSocket actively disconnected')
+    debug.log('🔌 [Boot] WebSocket 主动断开')
   }
 
-  // Listen for authentication state changes
-  const handleAuthChange = () => {
-    if (authStore.isAuthenticated) {
-      initWebSocket()
-    } else {
-      closeWebSocket()
-    }
-  }
-  
-  // Add authentication state change listener
-  let previousAuthState = authStore.isAuthenticated;
-  authStore.$subscribe((mutation, state) => {
-    // Only handle when authentication state actually changes
+  // 监听认证状态变化
+  let previousAuthState = authStore.isAuthenticated
+  authStore.$subscribe(() => {
     if (previousAuthState !== authStore.isAuthenticated) {
-      debug.log('🔌 [WebSocket] Auth state changed', 
-        previousAuthState ? 'Logged out' : 'Logged in', 
-        authStore.isAuthenticated
-      )
-      previousAuthState = authStore.isAuthenticated;
-      handleAuthChange();
+      debug.log('🔌 [WebSocket] 认证状态变化', previousAuthState ? '登出' : '登录')
+      previousAuthState = authStore.isAuthenticated
+      if (authStore.isAuthenticated) initWebSocket()
+      else closeWebSocket()
     }
   })
 
-  // If user is logged in, connect WebSocket immediately
+  // 首次加载若已登录则建立连接
   if (authStore.isAuthenticated && authStore.user?.zone_id) {
-    debug.log('🔌 [Boot] User logged in, initializing WebSocket')
-    // Delay initialization to ensure other systems are loaded
-    setTimeout(() => {
-      initWebSocket()
-    }, 500)
+    debug.log('🔌 [Boot] 用户已登录，初始化 WebSocket')
+    setTimeout(initWebSocket, 500)
   }
 
-  // Mount to global properties
   app.config.globalProperties.$initWebSocket = initWebSocket
   app.config.globalProperties.$closeWebSocket = closeWebSocket
 
-  debug.log('🔌 [Boot] WebSocket system initialized')
+  debug.log('🔌 [Boot] WebSocket 系统已初始化')
 })

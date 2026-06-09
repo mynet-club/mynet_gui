@@ -1,8 +1,10 @@
 /**
  * 通知状态管理 Composable
+ * 通知通过 WebSocket 实时推送（src/boot/websocket.ts 订阅 private-user.{userId}）。
+ * 不再使用 HTTP 轮询。
  */
 
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 import { notificationService } from '../services/notification'
 import debug from '../utils/debug'
 import type { Notification, NotificationListParams } from '../types/notification'
@@ -15,20 +17,48 @@ const currentPage = ref(1)
 const perPage = ref(20)
 const total = ref(0)
 const lastPage = ref(1)
-let pollTimer: NodeJS.Timeout | null = null
 let initialized = false
+
+/**
+ * 接收 WebSocket 推送的通知 payload，由 boot/websocket.ts 调用。
+ * 将新通知插入列表头部并自增未读数。
+ */
+export function handleNotificationBroadcast(payload: any) {
+  if (!payload || !payload.id) {
+    debug.warn('📬 [useNotifications] 收到无效通知 payload', payload)
+    return
+  }
+  // 避免重复（同 id 已存在则忽略）
+  if (notifications.value.some(n => n.id === payload.id)) return
+
+  const notification: Notification = {
+    id: payload.id,
+    type: payload.type || 'info',
+    title: payload.title || '',
+    message: payload.message || '',
+    data: payload.data,
+    read: false,
+    created_at: payload.created_at || new Date().toISOString(),
+    ...payload
+  } as Notification
+
+  notifications.value.unshift(notification)
+  unreadCount.value += 1
+  total.value += 1
+  debug.log('📬 [useNotifications] 收到实时通知:', notification.title)
+}
 
 export function useNotifications() {
   // 状态（使用共享的单例状态）
 
   // 计算属性
-  const unreadNotifications = computed(() => 
+  const unreadNotifications = computed(() =>
     notifications.value.filter(n => !n.read)
   )
 
   const hasUnread = computed(() => unreadCount.value > 0)
 
-  const displayUnreadCount = computed(() => 
+  const displayUnreadCount = computed(() =>
     unreadCount.value > 99 ? '99+' : unreadCount.value.toString()
   )
 
@@ -43,12 +73,12 @@ export function useNotifications() {
         per_page: perPage.value,
         ...params
       })
-      
+
       notifications.value = response.data
       currentPage.value = response.meta.current_page
       lastPage.value = response.meta.last_page
       total.value = response.meta.total
-      
+
       debug.log('📬 [useNotifications] 加载通知成功:', notifications.value.length, '条')
     } catch (error) {
       debug.error('📬 [useNotifications] 加载通知失败:', error)
@@ -76,14 +106,14 @@ export function useNotifications() {
   async function markAsRead(id: string) {
     try {
       await notificationService.markAsRead(id)
-      
+
       // 更新本地状态
       const notification = notifications.value.find(n => n.id === id)
       if (notification && !notification.read) {
         notification.read = true
         unreadCount.value = Math.max(0, unreadCount.value - 1)
       }
-      
+
       debug.log('📬 [useNotifications] 标记已读成功:', id)
     } catch (error) {
       debug.error('📬 [useNotifications] 标记已读失败:', error)
@@ -97,13 +127,13 @@ export function useNotifications() {
   async function markAllAsRead() {
     try {
       await notificationService.markAllAsRead()
-      
+
       // 更新本地状态
       notifications.value.forEach(n => {
         n.read = true
       })
       unreadCount.value = 0
-      
+
       debug.log('📬 [useNotifications] 全部标记已读成功')
     } catch (error) {
       debug.error('📬 [useNotifications] 全部标记已读失败:', error)
@@ -117,7 +147,7 @@ export function useNotifications() {
   async function deleteNotification(id: string) {
     try {
       await notificationService.deleteNotification(id)
-      
+
       // 更新本地状态
       const index = notifications.value.findIndex(n => n.id === id)
       if (index !== -1) {
@@ -128,7 +158,7 @@ export function useNotifications() {
         notifications.value.splice(index, 1)
         total.value = Math.max(0, total.value - 1)
       }
-      
+
       debug.log('📬 [useNotifications] 删除通知成功:', id)
     } catch (error) {
       debug.error('📬 [useNotifications] 删除通知失败:', error)
@@ -142,16 +172,16 @@ export function useNotifications() {
   async function batchDelete(ids: string[]) {
     try {
       await notificationService.batchDelete({ ids })
-      
+
       // 更新本地状态
       const deletedUnreadCount = notifications.value
         .filter(n => ids.includes(n.id) && !n.read)
         .length
-      
+
       notifications.value = notifications.value.filter(n => !ids.includes(n.id))
       unreadCount.value = Math.max(0, unreadCount.value - deletedUnreadCount)
       total.value = Math.max(0, total.value - ids.length)
-      
+
       debug.log('📬 [useNotifications] 批量删除成功:', ids.length, '条')
     } catch (error) {
       debug.error('📬 [useNotifications] 批量删除失败:', error)
@@ -165,12 +195,12 @@ export function useNotifications() {
   async function clearRead() {
     try {
       await notificationService.clearRead()
-      
+
       // 更新本地状态
       const readCount = notifications.value.filter(n => n.read).length
       notifications.value = notifications.value.filter(n => !n.read)
       total.value = Math.max(0, total.value - readCount)
-      
+
       debug.log('📬 [useNotifications] 清空已读通知成功')
     } catch (error) {
       debug.error('📬 [useNotifications] 清空已读通知失败:', error)
@@ -201,25 +231,19 @@ export function useNotifications() {
   }
 
   /**
-   * 开始轮询未读数量
+   * 启动通知接收（已迁移至 WebSocket，此方法保留以保持 API 兼容，不再启动轮询）
+   * @deprecated 通知现在通过 WebSocket 实时推送，无需轮询
    */
-  function startPolling(interval = 60000) {
-    stopPolling()
-    pollTimer = setInterval(() => {
-      refreshUnreadCount()
-    }, interval)
-    debug.log('📬 [useNotifications] 开始轮询未读数量, 间隔:', interval, 'ms')
+  function startPolling(_interval = 60000) {
+    debug.log('📬 [useNotifications] startPolling 已废弃 — 通知通过 WebSocket 推送')
   }
 
   /**
-   * 停止轮询
+   * 停止接收（兼容旧 API，无副作用）
+   * @deprecated
    */
   function stopPolling() {
-    if (pollTimer) {
-      clearInterval(pollTimer)
-      pollTimer = null
-      debug.log('📬 [useNotifications] 停止轮询未读数量')
-    }
+    // no-op
   }
 
   /**
@@ -270,12 +294,12 @@ export function useNotifications() {
     perPage,
     total,
     lastPage,
-    
+
     // 计算属性
     unreadNotifications,
     hasUnread,
     displayUnreadCount,
-    
+
     // 方法
     loadNotifications,
     refreshUnreadCount,

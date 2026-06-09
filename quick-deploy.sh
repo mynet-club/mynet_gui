@@ -7,7 +7,7 @@ set -e
 
 # 配置 - 使用与 deployment.sh 相同的配置
 REMOTE_USER="root"
-REMOTE_HOST="18.138.109.228"
+REMOTE_HOST="my.mynet.club"   # GUI 静态文件服务器（nginx 在此处代理 API）
 REMOTE_PATH="/data/app/mynet.club/my/public"
 BUILD_DIR="dist/spa"
 
@@ -46,7 +46,16 @@ echo "部署路径: ${REMOTE_PATH}"
 echo "API地址: ${API_URL}"
 echo "================================"
 
-# 构建项目
+# 构建项目（确保生产环境变量优先）
+if [ -f ".env.production" ]; then
+    # quasar.config.ts 读取 process.env，需要先把 .env.production 导出到 shell 环境
+    # 用逐行 export 而非 source，避免含空格的 value 被当作命令执行
+    while IFS= read -r line; do
+        [[ "$line" =~ ^(VITE_|NODE_ENV) ]] || continue
+        export "$line"
+    done < .env.production
+    print_info "已加载 .env.production (API: $VITE_API_BASE_URL)"
+fi
 print_info "构建项目..."
 npm run build
 
