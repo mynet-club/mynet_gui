@@ -32,11 +32,10 @@ export function useAvatar() {
 
     try {
       debug.log('🔧 [Avatar] Loading avatar for:', cacheKey)
-      const response = await apiService.getAvatar(userId ? String(userId) : undefined)
+      const response = await apiService.getAvatarUrl(userId ? String(userId) : undefined)
       
-      if (response.data && response.data.size > 0) {
-        const blob = response.data
-        const url = URL.createObjectURL(blob)
+      if (response.data?.data?.url) {
+        const url = response.data.data.url
         
         // 缓存URL
         avatarCache.set(cacheKey, url)

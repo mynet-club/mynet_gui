@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import debug from 'src/utils/debug'
+import debug from '../utils/debug'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { apiService } from '../services/api'
@@ -59,8 +59,14 @@ export function useAvatarManagement() {
     try {
       loading.value.avatar = true
       
+      // 获取当前用户ID
+      const userId = authStore.user?.user_id || authStore.user?.id
+      if (!userId) {
+        throw new Error('User not authenticated')
+      }
+      
       // 调用API上传头像
-      const response = await apiService.uploadAvatar(file)
+      const response = await apiService.uploadAvatar(file, String(userId))
       
       if (response.data.success) {
         debug.log('🔧 [Avatar] Upload response:', response.data)

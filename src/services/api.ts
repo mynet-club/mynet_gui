@@ -521,22 +521,20 @@ export const apiService = {
     return mockApiResponse(mockDashboardData)
   },
 
-  // 头像相关
-  async uploadAvatar(file: File) {
+  // 头像相关 (使用框架 Storage 模块 entity 接口)
+  async uploadAvatar(file: File, userId: string) {
     const formData = new FormData()
-    formData.append('avatar', file)
+    formData.append('file', file)
 
-    return api.post('/assets/avatar/upload', formData, {
+    return api.post(`/files/entity/avatar/${userId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     })
   },
 
-  async getAvatar(userId?: string) {
-    const url = userId ? `/assets/avatar/${userId}` : '/assets/avatar'
-    return api.get(url, {
-      responseType: 'blob'
-    })
+  async getAvatarUrl(userId?: string) {
+    const url = userId ? `/files/entity/avatar/${userId}/url` : '/files/entity/avatar/me/url'
+    return api.get(url)
   },
 }

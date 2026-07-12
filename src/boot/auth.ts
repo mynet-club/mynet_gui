@@ -1,5 +1,5 @@
 import { boot } from 'quasar/wrappers'
-import debug from 'src/utils/debug'
+import debug from '../utils/debug'
 import { LocalStorage } from 'quasar'
 import { tokenManager } from '../utils/tokenManager'
 import { APP_CONFIG } from '../config/app'
@@ -69,9 +69,8 @@ export default boot(async ({ router, app }) => {
       
       // 检查和修复头像URL
       if (user.avatar && user.avatar.startsWith('blob:')) {
-        debug.log('🔐 [Boot] Blob avatar URL detected, replacing with backend URL')
-        const apiBaseUrl = APP_CONFIG.api.baseUrl.replace('/api', '')
-        user.avatar = `${apiBaseUrl}/api/v2/assets/avatar`
+        debug.log('🔐 [Boot] Blob avatar URL detected, clearing invalid blob reference')
+        user.avatar = undefined
         // 更新LocalStorage
         LocalStorage.set('user_info', JSON.stringify(user))
       }
