@@ -10,11 +10,11 @@ const getCurrentLanguage = () => {
   return LocalStorage.getItem('app-locale') || 'en-US'
 }
 
-// 配置 API 基础URL - 保持原有域名，仅升级API版本
+// 配置 API 基础URL - 使用框架约定的 v1 版本
 const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_BASE_URL
   const baseUrl = envUrl || 'http://localhost:8000'
-  return `${baseUrl}/api/v2`
+  return `${baseUrl}/api/v1`
 }
 
 export const api = axios.create({
@@ -41,7 +41,7 @@ const processQueue = (error: any, token: string | null = null) => {
       resolve(token)
     }
   })
-  
+
   failedQueue = []
 }
 
@@ -52,21 +52,21 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    
-    // 添加X-Zone-ID头部
+
+    // 添加X-Tenant-ID头部
     const userInfo = LocalStorage.getItem('user_info') as string | null
     if (userInfo) {
       try {
         const user = JSON.parse(userInfo.toString())
         if (user.zone_id) {
-          config.headers['X-Zone-ID'] = user.zone_id
-          debug.log('🔧 [API] Injected X-Zone-ID header:', user.zone_id)
+          config.headers['X-Tenant-ID'] = user.zone_id
+          debug.log('🔧 [API] Injected X-Tenant-ID header:', user.zone_id)
         }
       } catch (error) {
         debug.warn('🔧 [API] Failed to parse user info for zone_id:', error)
       }
     }
-    
+
     return config
   },
   (error) => {
@@ -101,19 +101,19 @@ api.interceptors.response.use(
         isTokenExpired: tokenManager.isTokenExpired(),
         url: originalRequest.url
       })
-      
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
         }).then(token => {
           originalRequest.headers.Authorization = `Bearer ${token}`
-          // 确保刷新token后也注入X-Zone-ID头部
+          // 确保刷新token后也注入X-Tenant-ID头部
           const userInfo = LocalStorage.getItem('user_info') as string | null
           if (userInfo) {
             try {
               const user = JSON.parse(userInfo.toString())
               if (user.zone_id) {
-                originalRequest.headers['X-Zone-ID'] = user.zone_id
+                originalRequest.headers['X-Tenant-ID'] = user.zone_id
               }
             } catch (error) {
               debug.warn('🔧 [API] Failed to parse user info for zone_id during token refresh:', error)
@@ -132,13 +132,13 @@ api.interceptors.response.use(
         const newToken = await tokenManager.refreshToken()
         processQueue(null, newToken)
         originalRequest.headers.Authorization = `Bearer ${newToken}`
-        // 确保刷新token后也注入X-Zone-ID头部
+        // 确保刷新token后也注入X-Tenant-ID头部
         const userInfo = LocalStorage.getItem('user_info') as string | null
         if (userInfo) {
           try {
             const user = JSON.parse(userInfo.toString())
             if (user.zone_id) {
-              originalRequest.headers['X-Zone-ID'] = user.zone_id
+              originalRequest.headers['X-Tenant-ID'] = user.zone_id
             }
           } catch (error) {
             debug.warn('🔧 [API] Failed to parse user info for zone_id during token refresh:', error)
@@ -190,7 +190,7 @@ export const apiService = {
         ...credentials,
         device_name: credentials.device_name || 'Web Browser'
       };
-      
+
       const response = await api.post('/auth/login', loginData);
 
       debug.log('🔧 [API] Raw login response:', response.data);
@@ -204,11 +204,18 @@ export const apiService = {
         };
         tokenManager.saveTokenData(tokenData);
 
+        // 将 tenant_id 合并到 user 对象作为 zone_id（后端返回的 user 对象没有 zone_id）
+        const user = response.data.data.user;
+        if (user && response.data.data.tenant_id) {
+          user.zone_id = response.data.data.tenant_id;
+          debug.log('🔧 [API] Mapped tenant_id to user.zone_id:', user.zone_id);
+        }
+
         return {
           data: {
             auth_token: response.data.data.auth_token,
             refresh_token: response.data.data.refresh_token,
-            user: response.data.data.user,
+            user: user,
             expires_at: tokenData.auth_token_expires_in,
             refresh_token_expires_in: tokenData.refresh_token_expires_in
           }
@@ -293,11 +300,11 @@ export const apiService = {
   },
 
   // 账号激活相关
-  async activateAccount(data: { 
-    email?: string; 
-    user_id?: string; 
-    token?: string; 
-    code?: string; 
+  async activateAccount(data: {
+    email?: string;
+    user_id?: string;
+    token?: string;
+    code?: string;
   }) {
     const lang = getCurrentLanguage();
     return await api.post(`/auth/activate-account?lang=${lang}`, data);
@@ -368,7 +375,7 @@ export const apiService = {
   async getCurrentUser() {
     try {
       const response = await api.get('/user')
-      
+
       // 处理真实API响应格式
       if (response.data.success) {
         return { data: response.data.data }
@@ -404,7 +411,7 @@ export const apiService = {
         phone: data.phone,
         signature: data.signature
       };
-      
+
       // 构建 preferences 对象
       if (data.theme || data.language || data.timezone || data.preferences) {
         requestData.preferences = {
@@ -414,9 +421,9 @@ export const apiService = {
           ...(data.timezone && { timezone: data.timezone })
         };
       }
-      
+
       const response = await api.put('/users/profile', requestData);
-      
+
       if (response.data.success) {
         return { data: response.data.data };
       } else {
@@ -430,19 +437,27 @@ export const apiService = {
     }
   },
 
-  // Zones相关API
+  // Zones相关API（后端已迁移至 Tenant，接口层做字段映射，交互层保持 zone 命名不变）
   async getZones() {
     try {
-      const response = await api.get('/user/zones')
-      
+      // 后端端点: GET /user/tenants/  返回: { tenant_id, name, description, status, ... }
+      const response = await api.get('/user/tenants/')
+
       // 处理真实API响应格式
       if (response.data.success) {
-        // 为每个zone添加兼容属性
-        const zones = response.data.data.map((zone: any) => ({
-          ...zone,
-          name: zone.zone_name,
-          is_active: zone.zone_status === 1,
-          description: zone.zone_remarks
+        // 将 tenant 响应字段映射为前端 zone 兼容结构
+        const zones = response.data.data.map((tenant: any) => ({
+          ...tenant,
+          zone_id: tenant.tenant_id,
+          zone_name: tenant.name,
+          zone_status: tenant.status === 'active' ? 1 : 0,
+          zone_remarks: tenant.description || '',
+          zone_domain: tenant.domain || '',
+          zone_admin_name: tenant.admin_name || '',
+          // 保留旧兼容字段
+          name: tenant.name,
+          is_active: tenant.status === 'active',
+          description: tenant.description
         }))
         return { data: zones }
       } else {
@@ -456,12 +471,12 @@ export const apiService = {
     }
   },
 
-  async switchZone(zoneId: number) { 
+  async switchZone(zoneId: number) {
     try {
-      // 调用真实的switch-zone API
-      const response = await api.post('/user/switch-zone', { zone_id: zoneId })
+      // 后端端点: POST /user/tenants/switch  Body: { tenant_id }
+      const response = await api.post('/user/tenants/switch', { tenant_id: zoneId })
       const result = response.data.data
-      
+
       // 更新本地存储的用户信息
       const userInfoStr = LocalStorage.getItem('user_info') as string | null
       if (userInfoStr) {
@@ -473,7 +488,7 @@ export const apiService = {
           debug.error('Failed to update zone_id in user info:', error)
         }
       }
-      
+
       return { data: result }
     } catch (error: any) {
       if (error.response?.data) {
@@ -484,7 +499,7 @@ export const apiService = {
   },
 
   // 节点相关
-  async getNodes() { 
+  async getNodes() {
     return api.get('/nodes')
   },
 
@@ -510,7 +525,7 @@ export const apiService = {
   async uploadAvatar(file: File) {
     const formData = new FormData()
     formData.append('avatar', file)
-    
+
     return api.post('/assets/avatar/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'

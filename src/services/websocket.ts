@@ -105,7 +105,7 @@ export class WebSocketService {
         auth: {
           headers: {
             Authorization: `Bearer ${token}`,
-            'X-Zone-ID': String(zoneId),
+            'X-Tenant-ID': String(zoneId),
             Accept: 'application/json'
           }
         }
