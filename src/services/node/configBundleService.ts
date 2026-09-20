@@ -3,7 +3,7 @@
  * 统一配置包获取服务，替代原有的多次分散API调用
  */
 
-import { apiService } from '../api'
+import { api } from '../api'
 import debug from 'src/utils/debug'
 import type { 
   ConfigBundleResponse,
@@ -27,7 +27,7 @@ export class ConfigBundleService {
     debug.log(`🔧 [ConfigBundle] 获取节点 ${nodeId} 的配置包`)
     
     try {
-      const response = await apiService.get(`/nodes/${nodeId}/config-bundle`)
+      const response = await api.get(`/nodes/${nodeId}/config-bundle`)
       
       // 处理 warnings 字段
       if (response.data.warnings && response.data.warnings.length > 0) {
@@ -36,7 +36,7 @@ export class ConfigBundleService {
       }
       
       debug.log(`🔧 [ConfigBundle] 节点 ${nodeId} 配置包获取成功`)
-      return response
+      return response as unknown as ApiResponse<ConfigBundleResponse>
       
     } catch (error: any) {
       debug.error(`🔧 [ConfigBundle] 获取节点 ${nodeId} 配置包失败:`, error)
@@ -106,7 +106,7 @@ export class ConfigBundleService {
     delete (standardizedHeartbeat as any).vpn_interface
     
     try {
-      const response = await apiService.post('/monitor/heartbeat', standardizedHeartbeat, {
+      const response = await api.post('/monitor/heartbeat', standardizedHeartbeat, {
         headers: {
           'X-Node-Id': nodeId,
           'X-Timestamp': Math.floor(Date.now() / 1000).toString()
@@ -115,7 +115,7 @@ export class ConfigBundleService {
       })
       
       debug.log(`🔧 [ConfigBundle] 节点 ${nodeId} 心跳发送成功`)
-      return response
+      return response as unknown as ApiResponse<any>
       
     } catch (error: any) {
       debug.error(`🔧 [ConfigBundle] 节点 ${nodeId} 心跳发送失败:`, error)
