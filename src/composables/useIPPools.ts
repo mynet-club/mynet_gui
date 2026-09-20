@@ -6,8 +6,6 @@ import { useI18n } from 'vue-i18n'
 import type { 
   IPPool, 
   IPPoolStatistics, 
-  IPAllocation, 
-  IPPoolForm, 
   IPPoolFilters,
   IPPoolCreateResponse,
   IPPoolCreateAdvancedRequest
@@ -31,7 +29,6 @@ export function useIPPools() {
     user_quota: 0,
     usage_percentage: 0
   })
-  const allocations = ref<IPAllocation[]>([])
   const loading = ref(false)
   const filters = reactive<IPPoolFilters>({
     zone_id: '',
@@ -152,42 +149,6 @@ export function useIPPools() {
     }
   }
 
-  const createPool = async (poolData: IPPoolForm) => {
-    try {
-      const response = await api.post('/ippools', poolData)
-      
-      if (response.data.success) {
-        notifySuccess(t('ippools.createSuccess'))
-        await fetchPools()
-        return response.data.data.ippool
-      } else {
-        notifyError(response.data.message || t('ippools.createError'))
-        throw new Error(response.data.message)
-      }
-    } catch (error) {
-      notifyError(t('ippools.createError'))
-      throw error
-    }
-  }
-
-  const updatePool = async (poolId: string, poolData: Partial<IPPoolForm>) => {
-    try {
-      const response = await api.put(`/ippools/${poolId}`, poolData)
-      
-      if (response.data.success) {
-        notifySuccess(t('ippools.updateSuccess'))
-        await fetchPools()
-        return response.data.data.ippool
-      } else {
-        notifyError(response.data.message || t('ippools.updateError'))
-        throw new Error(response.data.message)
-      }
-    } catch (error) {
-      notifyError(t('ippools.updateError'))
-      throw error
-    }
-  }
-
   const deletePool = async (poolId: string, sequenceNumber?: number) => {
     try {
       // 优先使用sequence_number，如果没有则使用poolId
@@ -203,61 +164,6 @@ export function useIPPools() {
       }
     } catch (error) {
       notifyError(t('ippools.deleteError'))
-      throw error
-    }
-  }
-
-  // IP分配方法
-  const allocateIP = async (poolId: string, nodeId?: string) => {
-    try {
-      const requestData = nodeId ? { node_id: nodeId } : {}
-      const response = await api.post(`/ippools/${poolId}/allocate`, requestData)
-      
-      if (response.data.success) {
-        notifySuccess(t('ippools.allocateSuccess'))
-        await fetchPools()
-        return response.data.data.allocation
-      } else {
-        notifyError(response.data.message || t('ippools.allocateError'))
-        throw new Error(response.data.message)
-      }
-    } catch (error) {
-      notifyError(t('ippools.allocateError'))
-      throw error
-    }
-  }
-
-  const releaseIP = async (poolId: string, ipAddress: string) => {
-    try {
-      const response = await api.post(`/ippools/${poolId}/release`, { ip_address: ipAddress })
-      
-      if (response.data.success) {
-        notifySuccess(t('ippools.releaseSuccess'))
-        await fetchPools()
-      } else {
-        notifyError(response.data.message || t('ippools.releaseError'))
-        throw new Error(response.data.message)
-      }
-    } catch (error) {
-      notifyError(t('ippools.releaseError'))
-      throw error
-    }
-  }
-
-  const fetchAllocations = async (poolId: string) => {
-    try {
-      const response = await api.get(`/ippools/${poolId}/allocations`)
-      
-      if (response.data.success) {
-        allocations.value = response.data.data.allocations || []
-        return response.data.data
-      } else {
-        allocations.value = []
-        notifyError(response.data.message || t('ippools.fetchAllocationsError'))
-        throw new Error(response.data.message)
-      }
-    } catch (error) {
-      notifyError(t('ippools.fetchAllocationsError'))
       throw error
     }
   }
@@ -336,31 +242,8 @@ export function useIPPools() {
   }
 
   // 工具方法
-  const calculateIPCount = (startIP: string, endIP: string): number => {
-    const start = ipToNumber(startIP)
-    const end = ipToNumber(endIP)
-    return end - start + 1
-  }
-
   const ipToNumber = (ip: string): number => {
     return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet), 0)
-  }
-
-  const validateIPRange = (startIP: string, endIP: string): boolean => {
-    const start = ipToNumber(startIP)
-    const end = ipToNumber(endIP)
-    return start <= end
-  }
-
-  const isValidIP = (ip: string): boolean => {
-    const pattern = /^(\d{1,3}\.){3}\d{1,3}$/
-    if (!pattern.test(ip)) return false
-    
-    const parts = ip.split('.')
-    return parts.every(part => {
-      const num = parseInt(part)
-      return num >= 0 && num <= 255
-    })
   }
 
   // 清理方法
@@ -540,7 +423,6 @@ export function useIPPools() {
     // 响应式数据
     pools,
     statistics,
-    allocations,
     loading,
     filters,
     
@@ -554,27 +436,17 @@ export function useIPPools() {
     // IP池管理方法
     fetchPools,
     fetchPoolById,
-    createPool,
-    updatePool,
     deletePool,
     
     // IP池创建相关方法
     createPoolAdvanced,
     autoAllocatePool: createPoolAdvanced, // 保持向后兼容
 
-    // IP分配方法
-    allocateIP,
-    releaseIP,
-    fetchAllocations,
-
     // 统计信息方法
     fetchStatistics,
     calculateStatisticsFromPools,
 
     // 工具方法
-    calculateIPCount,
-    validateIPRange,
-    isValidIP,
     numberToIP,
     resetFilters
   }
