@@ -136,12 +136,12 @@ const isEdit = computed(() => !!props.pool)
 const fetchZones = async () => {
   zonesLoading.value = true
   try {
-    const response = await api.get('/zones')
+    const response = await api.get('/tenants')
     if (response.data.success) {
-      const zones: Zone[] = response.data.data.zones || []
+      const zones: Zone[] = response.data.data || []
       zoneOptions.value = zones.map(zone => ({
-        label: zone.zone_name,
-        value: zone.zone_id
+        label: zone.zone_name || zone.name || '',
+        value: String(zone.zone_id ?? (zone as any).tenant_id ?? '')
       }))
     }
   } catch (error) {

@@ -55,13 +55,13 @@ export interface PaginatedZoneResponse {
 export const zoneService = {
   // 获取用户可访问的Zone列表
   async getUserZones(): Promise<Zone[]> {
-    const response = await api.get('/user/zones')
+    const response = await api.get('/user/tenants')
     return response.data.data
   },
 
   // 切换当前Zone
   async switchZone(zoneId: number): Promise<{ message: string; zone: Zone }> {
-    const response = await api.post('/user/switch-zone', { zone_id: zoneId })
+    const response = await api.post('/user/tenants/switch', { tenant_id: zoneId })
     return response.data.data
   },
 
@@ -72,7 +72,7 @@ export const zoneService = {
     status?: 'active' | 'inactive' | undefined
     search?: string | undefined
   }): Promise<PaginatedZoneResponse> {
-    const response = await api.get('/zones', { params })
+    const response = await api.get('/tenants', { params })
     return response.data.data
   },
 
@@ -81,19 +81,19 @@ export const zoneService = {
     name: string
     description?: string
   }): Promise<Zone> {
-    const response = await api.post('/zones', data)
+    const response = await api.post('/tenants', data)
     return response.data.data
   },
 
   // 获取Zone概览
   async getZoneOverview(): Promise<ZoneOverview> {
-    const response = await api.get('/zones/overview')
+    const response = await api.get('/tenants/overview')
     return response.data.data
   },
 
   // 获取单个Zone详情
   async getZoneById(id: string): Promise<Zone> {
-    const response = await api.get(`/zones/${id}`)
+    const response = await api.get(`/tenants/${id}`)
     return response.data.data
   },
 
@@ -103,24 +103,24 @@ export const zoneService = {
     description?: string
     status?: 'active' | 'inactive'
   }): Promise<Zone> {
-    const response = await api.put(`/zones/${id}`, data)
+    const response = await api.put(`/tenants/${id}`, data)
     return response.data.data
   },
 
   // 删除Zone
   async deleteZone(id: string): Promise<void> {
-    await api.delete(`/zones/${id}`)
+    await api.delete(`/tenants/${id}`)
   },
 
   // 获取Zone统计信息
   async getZoneStatistics(zoneId: string): Promise<ZoneStatistics> {
-    const response = await api.get(`/zones/${zoneId}/statistics`)
+    const response = await api.get(`/tenants/${zoneId}/statistics`)
     return response.data.data
   },
 
-  // 获取索引服务列表（v2: /zones/services/indexes）
+  // 获取索引服务列表
   async getIndexServices(): Promise<{ data: IndexServicesResponse }> {
-    const response = await api.get('/zones/services/indexes')
+    const response = await api.get('/services/indexes')
     return response.data
   }
 }
