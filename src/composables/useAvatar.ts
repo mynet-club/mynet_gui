@@ -19,7 +19,7 @@ export function useAvatar() {
    */
   const getAvatarUrl = async (userId?: string | number, useCache = true): Promise<string> => {
     const cacheKey = userId ? String(userId) : 'current'
-    
+
     // 检查缓存
     if (useCache && avatarCache.has(cacheKey)) {
       const cachedUrl = avatarCache.get(cacheKey)!
@@ -33,14 +33,14 @@ export function useAvatar() {
     try {
       debug.log('🔧 [Avatar] Loading avatar for:', cacheKey)
       const response = await apiService.getAvatarUrl(userId ? String(userId) : undefined)
-      
+
       if (response.data?.data?.url) {
         const url = response.data.data.url
-        
+
         // 缓存URL
         avatarCache.set(cacheKey, url)
         debug.log('🔧 [Avatar] Avatar loaded and cached for:', cacheKey, url.substring(0, 50) + '...')
-        
+
         return url
       } else {
         debug.warn('🔧 [Avatar] Empty avatar response for:', cacheKey)

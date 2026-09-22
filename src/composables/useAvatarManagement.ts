@@ -58,19 +58,19 @@ export function useAvatarManagement() {
   const uploadAvatar = async (file: File) => {
     try {
       loading.value.avatar = true
-      
+
       // 获取当前用户ID
       const userId = authStore.user?.user_id || authStore.user?.id
       if (!userId) {
         throw new Error('User not authenticated')
       }
-      
+
       // 调用API上传头像
       const response = await apiService.uploadAvatar(file, String(userId))
-      
+
       if (response.data.success) {
         debug.log('🔧 [Avatar] Upload response:', response.data)
-        
+
         $q.notify({
           type: 'positive',
           message: response.data.message || t('user.avatarUpdated')
@@ -82,9 +82,9 @@ export function useAvatarManagement() {
       }
     } catch (error: any) {
       debug.error('头像上传失败:', error)
-      
+
       let errorMessage = t('user.avatarUpdateFailed')
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message
       } else if (error.response?.data?.errors) {
@@ -100,7 +100,7 @@ export function useAvatarManagement() {
         type: 'negative',
         message: errorMessage
       })
-      
+
       return false
     } finally {
       loading.value.avatar = false
