@@ -2,3 +2,5 @@
 export * from './nodeService'
 export * from './nodeConfigService'
 export * from './nodeKeysService'
+export * from './configBundleService'
+export * from './bundleEnvelopeService'

@@ -9,6 +9,7 @@ import type {
   ConfigExport
 } from '../types/nodeConfig'
 import { nodeConfigService } from '../services/node/nodeConfigService'
+import { bundleEnvelopeService } from '../services/node/bundleEnvelopeService'
 import { useNotify } from './useNotify'
 
 /**
@@ -32,6 +33,9 @@ export function useNodeConfig(nodeId?: string) {
   // 编辑模式
   const editMode = ref<'basic' | 'expert'>('basic')
   const showAdvanced = ref(false)
+
+  // 最近一次 BundleEnvelope 发布的 generation（R8）
+  const bundleGeneration = ref<string | null>(null)
 
   // 可用模板
   const templates = ref<VPNConfigTemplate[]>([])
@@ -116,6 +120,14 @@ export function useNodeConfig(nodeId?: string) {
       config.value = result.data
       isDirty.value = false
       notifySuccess('配置保存成功')
+
+      // R8/GUI：保存后发布 BundleEnvelope，节点才收得到 bundle_changed
+      const published = await bundleEnvelopeService.publishAfterChange(nodeId, 'saveConfig')
+      if (published?.generation) {
+        bundleGeneration.value = published.generation
+        notifySuccess(`配置已发布 ${published.generation}`)
+      }
+
       return true
     } catch (err) {
       debug.error('保存配置失败:', err)
@@ -462,6 +474,7 @@ export function useNodeConfig(nodeId?: string) {
     // 方法
     loadConfig,
     saveConfig,
+    bundleGeneration,
     validateConfig,
     loadTemplates,
     applyTemplate,

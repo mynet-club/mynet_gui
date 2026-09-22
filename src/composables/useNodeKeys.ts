@@ -8,6 +8,7 @@ import type {
   KeyUploadRequest 
 } from '../types/nodeKeys'
 import { nodeKeysService } from '../services/node/nodeKeysService'
+import { bundleEnvelopeService } from '../services/node/bundleEnvelopeService'
 import { useNotify } from './useNotify'
 
 /**
@@ -110,6 +111,7 @@ export function useNodeKeys(nodeId?: string) {
 
     try {
       const result = await nodeKeysService.generateNodeKeys(nodeId, request)
+      await bundleEnvelopeService.publishAfterChange(nodeId, 'generateKeys')
       // 根据新的API响应格式转换为 LocalKeyPair 格式
       const keyPair: LocalKeyPair = {
         public_key: result.data.public_key,
@@ -149,6 +151,7 @@ export function useNodeKeys(nodeId?: string) {
 
     try {
       await nodeKeysService.uploadPublicKey(nodeId, request)
+      await bundleEnvelopeService.publishAfterChange(nodeId, 'uploadPublicKey')
       notifySuccess('密钥上传成功')
       
       // 重新加载密钥列表
@@ -176,6 +179,7 @@ export function useNodeKeys(nodeId?: string) {
 
     try {
       await nodeKeysService.revokeSpecificKey(nodeId, keyId)
+      await bundleEnvelopeService.publishAfterChange(nodeId, 'revokeKey')
       notifySuccess('密钥撤销成功')
       
       // 更新本地状态
