@@ -259,6 +259,7 @@ import { vpnConfigData } from '../../../config/vpnConfig'
 import { VPNConfigParameter, NodeConfigForm } from '../../../types/vpnConfig'
 import { VPNConfigService } from '../../../services/vpnConfigService'
 import { nodeConfigService } from '../../../services/node/nodeConfigService'
+import { bundleEnvelopeService } from '../../../services/node/bundleEnvelopeService'
 import type { ConfigUpdateRequest, NodeConfigApiResponse } from '../../../types/nodeConfig'
 
 const route = useRoute()
@@ -735,12 +736,20 @@ const onSubmit = async () => {
     
     // 调用API保存配置（扁平化字段格式）
     await nodeConfigService.updateNodeConfig(nodeId.value, submitData)
-    
+
+    // R8：保存后发布 BundleEnvelope，节点才会收到 bundle_changed
+    const published = await bundleEnvelopeService.publishAfterChange(nodeId.value, 'saveDeviceConfig')
+    if (published?.generation) {
+      notifySuccess(`${t('nodes.edit.config.saveSuccess')} · ${published.generation}`)
+    }
+
     // 更新原始数据并重置编辑状态
     originalFormData.value = { ...formData.value }
     hasUserEdited.value = false
-    
-    notifySuccess(t('nodes.edit.config.saveSuccess'))
+
+    if (!published?.generation) {
+      notifySuccess(t('nodes.edit.config.saveSuccess'))
+    }
     
   } catch (error: any) {
     debug.error(t('nodes.edit.config.saveFailedLog'), error)
