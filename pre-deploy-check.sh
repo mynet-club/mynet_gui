@@ -40,7 +40,7 @@ REQUIRED_NODE_VERSION="16.0.0"
 if [ "$(printf '%s\n' "$REQUIRED_NODE_VERSION" "$NODE_VERSION" | sort -V | head -n1)" = "$REQUIRED_NODE_VERSION" ]; then
     print_success "Node.js版本检查通过: $NODE_VERSION"
 else
-    print_error "Node.js版本过低: $NODE_VERSION，需要 >= $REQUIRED_NODE_VERSION"
+    print_error "Node.js版本过低: ${NODE_VERSION}，需要 >= $REQUIRED_NODE_VERSION"
     check_passed=false
 fi
 
