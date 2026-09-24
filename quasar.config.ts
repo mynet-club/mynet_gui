@@ -6,10 +6,14 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 // quasar.config.ts 运行在 Node.js 上下文，process.env 里只有 .env（开发配置）。
-// 生产 build 时需要主动把 .env.production 加载进来，否则 env 块会锁定开发 URL。
+// 生产 build 时需要主动把 .env.prod 加载进来，否则下面的 build.env 块会用 undefined
+// 覆盖掉 Quasar 自己从 .env.prod 读到的 fileEnv（getBuildSystemDefine 里 buildEnv 后写、胜出），
+// 产物就锁定回开发 URL。
+// 文件名是 .env.prod 而不是 .env.production：Quasar 的 buildType 只有 dev|prod
+// （@quasar/app-vite/lib/utils/env.js:31），development/production 它不认。
 function loadEnvProduction() {
   try {
-    const lines = readFileSync(resolve(process.cwd(), '.env.production'), 'utf-8').split('\n');
+    const lines = readFileSync(resolve(process.cwd(), '.env.prod'), 'utf-8').split('\n');
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith('#')) continue;
@@ -22,7 +26,7 @@ function loadEnvProduction() {
         process.env[key] = val;
       }
     }
-  } catch (_) { /* .env.production 不存在时静默忽略 */ }
+  } catch (_) { /* .env.prod 不存在时静默忽略 */ }
 }
 
 export default defineConfig((ctx) => {

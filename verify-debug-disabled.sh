@@ -5,32 +5,32 @@
 
 echo "🔍 验证生产环境Debug模式配置..."
 
-# 检查.env.production文件
+# 检查.env.prod文件
 echo ""
-echo "📄 检查 .env.production 配置文件:"
-if [ -f ".env.production" ]; then
-    echo "✅ .env.production 文件存在"
+echo "📄 检查 .env.prod 配置文件:"
+if [ -f ".env.prod" ]; then
+    echo "✅ .env.prod 文件存在"
     
     # 检查关键debug配置
-    if grep -q "VITE_ENABLE_DEBUG=false" .env.production; then
+    if grep -q "VITE_ENABLE_DEBUG=false" .env.prod; then
         echo "✅ VITE_ENABLE_DEBUG=false"
     else
         echo "❌ VITE_ENABLE_DEBUG 未正确设置为 false"
     fi
     
-    if grep -q "VITE_ENABLE_CONSOLE_LOG=false" .env.production; then
+    if grep -q "VITE_ENABLE_CONSOLE_LOG=false" .env.prod; then
         echo "✅ VITE_ENABLE_CONSOLE_LOG=false"
     else
         echo "❌ VITE_ENABLE_CONSOLE_LOG 未正确设置为 false"
     fi
     
-    if grep -q "VITE_LOG_LEVEL=error" .env.production; then
+    if grep -q "VITE_LOG_LEVEL=error" .env.prod; then
         echo "✅ VITE_LOG_LEVEL=error"
     else
         echo "⚠️  VITE_LOG_LEVEL 建议设置为 error"
     fi
 else
-    echo "❌ .env.production 文件不存在"
+    echo "❌ .env.prod 文件不存在"
     exit 1
 fi
 

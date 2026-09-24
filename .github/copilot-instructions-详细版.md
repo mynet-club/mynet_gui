@@ -971,12 +971,12 @@ watch(() => nodes.value, (newNodes) => {
 ### 环境变量
 
 ```bash
-# .env.development
+# .env.dev
 VITE_API_BASE_URL=http://localhost:8000
 VITE_PUSHER_KEY=your_pusher_key
 VITE_PUSHER_CLUSTER=ap3
 
-# .env.production
+# .env.prod
 VITE_API_BASE_URL=https://api.mynet.com
 VITE_PUSHER_KEY=production_key
 VITE_PUSHER_CLUSTER=ap3

@@ -79,10 +79,10 @@ fi
 
 # 检查环境变量
 print_info "检查环境配置..."
-if [ -f ".env.production" ]; then
+if [ -f ".env.prod" ]; then
     print_success "生产环境配置文件存在"
 else
-    print_warning "未找到.env.production文件"
+    print_warning "未找到.env.prod文件"
 fi
 
 # 检查Git状态

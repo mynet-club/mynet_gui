@@ -18,9 +18,9 @@
 
 | 文件 | 当前 URL | 操作 |
 |------|----------|------|
-| `.env.production` → `VITE_API_BASE_URL` | `https://my.mynet.club` | 改为 `https://api.mynet.club` |
-| `.env.production` → `VITE_REVERB_HOST` | `api.mynet.club` | 无需改 |
-| `.env` / `.env.development` → `VITE_API_BASE_URL` | `http://localhost:8000` | 改为 `http://api.mynet.local` |
+| `.env.prod` → `VITE_API_BASE_URL` | `https://my.mynet.club` | 改为 `https://api.mynet.club` |
+| `.env.prod` → `VITE_REVERB_HOST` | `api.mynet.club` | 无需改 |
+| `.env` / `.env.dev` → `VITE_API_BASE_URL` | `http://localhost:8000` | 改为 `http://api.mynet.local` |
 | `src/config/app.ts` | 读 `VITE_API_BASE_URL` | 不改 |
 | `src/services/api.ts` | 读 `VITE_API_BASE_URL` | 拼接 `/api/v1` → 改 `/api/v2` |
 | `src/components/auth/RegisterForm.vue` | `https://mynet.club/village` | 链接，可选更新 |
@@ -31,7 +31,7 @@
 
 ### 2.1 统一 API 域名
 
-**文件: `.env.production`**
+**文件: `.env.prod`**
 
 ```env
 # 旧值:
@@ -42,7 +42,7 @@ VITE_API_BASE_URL=https://api.mynet.club
 
 ### 2.2 开发环境使用 Nginx 代理
 
-**文件: `.env.development`**
+**文件: `.env.dev`**
 
 ```env
 # 旧值:
@@ -70,8 +70,8 @@ const API_PREFIX = '/api/v2';
 
 | 文件 | 操作 | 变更 |
 |------|------|------|
-| `.env.production` | 编辑 | VITE_API_BASE_URL 域名 |
-| `.env.development` | 编辑 | 开发环境域名 |
+| `.env.prod` | 编辑 | VITE_API_BASE_URL 域名 |
+| `.env.dev` | 编辑 | 开发环境域名 |
 | `src/services/api.ts` | 编辑 | `/api/v1` → `/api/v2` |
 
 ---
@@ -91,6 +91,6 @@ cd mynet_gui && npx quasar dev
 
 ## 五、回滚方案
 
-修改 `.env.production` 和 API 前缀回 v1 即可。
+修改 `.env.prod` 和 API 前缀回 v1 即可。
 
 **预计工作量**: 小（1 小时）

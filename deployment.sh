@@ -70,13 +70,13 @@ print_error() {
 }
 
 # 从环境配置文件读取API URL
-if [ -f ".env.production" ]; then
-    API_URL=$(grep "VITE_API_BASE_URL" .env.production | cut -d'=' -f2)
-    print_info "从 .env.production 读取 API_URL: $API_URL"
+if [ -f ".env.prod" ]; then
+    API_URL=$(grep "VITE_API_BASE_URL" .env.prod | cut -d'=' -f2)
+    print_info "从 .env.prod 读取 API_URL: $API_URL"
 else
     # 默认值作为后备
     API_URL="https://my.mynet.club"
-    print_warning "未找到 .env.production，使用默认 API_URL: $API_URL"
+    print_warning "未找到 .env.prod，使用默认 API_URL: $API_URL"
 fi
 
 # 打印分隔线
@@ -178,22 +178,22 @@ install_dependencies() {
 update_config() {
     print_info "准备生产环境配置..."
     
-    # 确保 .env.production 文件存在并且是最新的
-    if [ -f ".env.production" ]; then
-        print_info "发现 .env.production 配置文件"
+    # 确保 .env.prod 文件存在并且是最新的
+    if [ -f ".env.prod" ]; then
+        print_info "发现 .env.prod 配置文件"
         # 验证生产环境配置是否包含必要的变量
-        if ! grep -q "VITE_API_BASE_URL" .env.production; then
-            print_warning "更新 .env.production 中的 API_URL"
-            echo "VITE_API_BASE_URL=${API_URL}" >> .env.production
+        if ! grep -q "VITE_API_BASE_URL" .env.prod; then
+            print_warning "更新 .env.prod 中的 API_URL"
+            echo "VITE_API_BASE_URL=${API_URL}" >> .env.prod
         fi
-        if ! grep -q "VITE_WS_URL" .env.production; then
-            print_warning "更新 .env.production 中的 WS_URL"
-            echo "VITE_WS_URL=${WS_URL}" >> .env.production
+        if ! grep -q "VITE_WS_URL" .env.prod; then
+            print_warning "更新 .env.prod 中的 WS_URL"
+            echo "VITE_WS_URL=${WS_URL}" >> .env.prod
         fi
         print_success "生产环境配置已验证"
     else
-        print_warning "创建 .env.production 配置文件..."
-        cat > .env.production << EOF
+        print_warning "创建 .env.prod 配置文件..."
+        cat > .env.prod << EOF
 # MyNet Frontend Environment Configuration
 # 生产环境配置文件
 
@@ -258,20 +258,20 @@ build_project() {
         print_info "已临时备份 .env.local 文件"
     fi
     
-    # 确保 .env.production 文件存在并检查配置
-    if [ ! -f ".env.production" ]; then
-        print_error "未找到 .env.production 文件"
+    # 确保 .env.prod 文件存在并检查配置
+    if [ ! -f ".env.prod" ]; then
+        print_error "未找到 .env.prod 文件"
         exit 1
     fi
     
     # 显示将要使用的环境变量
     print_info "检查生产环境配置:"
-    grep "VITE_API_BASE_URL" .env.production || print_warning "未找到 VITE_API_BASE_URL 配置"
-    grep "VITE_WS_URL" .env.production || print_warning "未找到 VITE_WS_URL 配置"
+    grep "VITE_API_BASE_URL" .env.prod || print_warning "未找到 VITE_API_BASE_URL 配置"
+    grep "VITE_WS_URL" .env.prod || print_warning "未找到 VITE_WS_URL 配置"
     
     # 显式加载生产环境变量
-    export $(grep -v '^#' .env.production | xargs)
-    print_info "已显式加载 .env.production 环境变量"
+    export $(grep -v '^#' .env.prod | xargs)
+    print_info "已显式加载 .env.prod 环境变量"
     print_info "VITE_API_BASE_URL=$VITE_API_BASE_URL"
     print_info "VITE_WS_URL=$VITE_WS_URL"
     

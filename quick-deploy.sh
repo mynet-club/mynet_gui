@@ -30,13 +30,13 @@ print_warning() {
 }
 
 # 从环境配置文件读取API URL
-if [ -f ".env.production" ]; then
-    API_URL=$(grep "VITE_API_BASE_URL" .env.production | cut -d'=' -f2)
-    print_info "从 .env.production 读取 API_URL: $API_URL"
+if [ -f ".env.prod" ]; then
+    API_URL=$(grep "VITE_API_BASE_URL" .env.prod | cut -d'=' -f2)
+    print_info "从 .env.prod 读取 API_URL: $API_URL"
 else
     # 默认值作为后备
     API_URL="https://my.mynet.club"
-    print_warning "未找到 .env.production，使用默认 API_URL: $API_URL"
+    print_warning "未找到 .env.prod，使用默认 API_URL: $API_URL"
 fi
 
 echo "🚀 MyNet Frontend - 快速部署"
@@ -47,14 +47,14 @@ echo "API地址: ${API_URL}"
 echo "================================"
 
 # 构建项目（确保生产环境变量优先）
-if [ -f ".env.production" ]; then
-    # quasar.config.ts 读取 process.env，需要先把 .env.production 导出到 shell 环境
+if [ -f ".env.prod" ]; then
+    # quasar.config.ts 读取 process.env，需要先把 .env.prod 导出到 shell 环境
     # 用逐行 export 而非 source，避免含空格的 value 被当作命令执行
     while IFS= read -r line; do
         [[ "$line" =~ ^(VITE_|NODE_ENV) ]] || continue
         export "$line"
-    done < .env.production
-    print_info "已加载 .env.production (API: $VITE_API_BASE_URL)"
+    done < .env.prod
+    print_info "已加载 .env.prod (API: $VITE_API_BASE_URL)"
 fi
 print_info "构建项目..."
 npm run build
