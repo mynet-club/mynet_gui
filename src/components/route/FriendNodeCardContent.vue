@@ -35,7 +35,7 @@
       <div class="technical-details">
         <div v-if="node.vpn_type" class="detail-row">
           <span class="label">VPN类型</span>
-          <span class="value">{{ node.vpn_type?.toUpperCase() }}</span>
+          <span class="value">{{ normalizeVpnType(node.vpn_type) }}</span>
         </div>
         <div v-if="node.endpoint" class="detail-row">
           <span class="label">Endpoint</span>
@@ -130,6 +130,7 @@
 </template>
 
 <script setup lang="ts">
+import { normalizeVpnType } from 'src/utils/vpnType'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { formatDistanceToNow } from 'date-fns'

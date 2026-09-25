@@ -149,6 +149,7 @@
 </template>
 
 <script setup lang="ts">
+import { normalizeVpnType } from 'src/utils/vpnType'
 import { computed } from 'vue'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
@@ -320,9 +321,12 @@ const architecture = computed(() => {
 
 // 连接方式
 const connectionType = computed(() => {
-  // VPN 类型优先
-  if (props.node.vpn_type) {
-    return props.node.vpn_type.toUpperCase()
+  // VPN 类型优先。⚠️ vpn_type 可能是**数组**（新库约束 ["gnb"]）或字符串（老库 gnb），
+  // 直接 .toUpperCase() 会在数组上炸 —— 实测 NodeListPage 一进就
+  // `vpn_type.toUpperCase is not a function` 白屏。
+  const vt = normalizeVpnType(props.node.vpn_type)
+  if (vt) {
+    return vt
   }
   // 判断是否直连
   if (props.node.direct_connection) {
