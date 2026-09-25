@@ -98,19 +98,6 @@ const borderRadius = 6
 
 let autoMinimizeTimer: ReturnType<typeof setTimeout> | null = null
 
-watch(
-  () => props.tip.visible,
-  (newValue) => {
-    visible.value = newValue
-    if (newValue) {
-      isMinimized.value = false
-      updateTargetPosition()
-      startAutoMinimize()
-    }
-  },
-  { immediate: true }
-)
-
 function getTargetElement(): HTMLElement | null {
   const target = props.tip.config.display.target
   if (!target) return null
@@ -191,7 +178,22 @@ const bubbleStyle = computed(() => {
   if (left + width > vw - 12) left = vw - width - 12
   if (top < 12) top = 12
 
-  return {
+  
+watch(
+  () => props.tip.visible,
+  (newValue) => {
+    visible.value = newValue
+    if (newValue) {
+      isMinimized.value = false
+      updateTargetPosition()
+      startAutoMinimize()
+    }
+  },
+  { immediate: true }
+)
+
+
+return {
     left: `${left}px`,
     top: `${top}px`,
     width: `${width}px`,
@@ -211,19 +213,19 @@ function startAutoMinimize() {
   }
 }
 
-const clearAutoMinimize = () => {
+function clearAutoMinimize() {
   if (autoMinimizeTimer) {
     clearTimeout(autoMinimizeTimer)
     autoMinimizeTimer = null
   }
 }
 
-const minimize = () => {
+function minimize() {
   clearAutoMinimize()
   isMinimized.value = true
 }
 
-const restore = () => {
+function restore() {
   isMinimized.value = false
   updateTargetPosition()
   // 恢复后不再自动最小化
