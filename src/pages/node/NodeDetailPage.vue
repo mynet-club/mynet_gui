@@ -786,26 +786,24 @@ const loadNetworkConfig = async () => {
 
 const loadDeviceInfo = async () => {
   if (!nodeId.value) return
-  
-  try {
-    loadingDeviceInfo.value = true
+
+  loadingDeviceInfo.value = true
   try {
     const response = await nodeService.getNodeDeviceInfo(nodeId.value)
     debug.log('设备信息获取成功:', response)
-    // 处理设备信息...
-  } catch (error: any) {
-    // deviceinfo API 可能不存在，静默处理404错误
-    if (error?.response?.status !== 404) {
-      debug.error('获取设备信息失败:', error)
-    }
-  }
-    if (response.success && response.data.exists) {
+    // ⚠️ response 必须在同一作用域内用 —— 此前它在内层 try 里声明、
+    // 外层引用，作用域断裂 → ReferenceError: response is not defined
+    // （实测：进节点详情就报）。
+    if (response?.success && response?.data?.exists) {
       deviceInfo.value = response.data.device_info
     } else {
       deviceInfo.value = null
     }
-  } catch (error) {
-    debug.error('加载设备信息失败:', error)
+  } catch (error: any) {
+    // deviceinfo API 可能不存在，404 静默；其它错误仍记日志
+    if (error?.response?.status !== 404) {
+      debug.error('加载设备信息失败:', error)
+    }
     deviceInfo.value = null
   } finally {
     loadingDeviceInfo.value = false
