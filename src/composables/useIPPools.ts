@@ -88,8 +88,10 @@ export function useIPPools() {
         
         // 转换API数据格式到我们的类型
         const poolsData = rawPoolsData.map((pool: any) => ({
-          id: pool.id.toString(),
-          ippool_id: pool.ippool_id, // 添加ippool_id字段
+          // ⚠️ API 的主键是 ippool_id、租户是 tenant_id，前端类型是 id/zone_id。
+          // 只按 id 取会 undefined.toString() —— 实测进 IP 池页就炸。
+          id: String(pool.id ?? pool.ippool_id ?? ''),
+          ippool_id: pool.ippool_id,
           sequence_number: pool.sequence_number, // 保存序列号用于删除
           name: `IP池 ${pool.sequence_number}`, // 生成名称
           network: '', // API中没有network字段，暂时留空
@@ -97,8 +99,8 @@ export function useIPPools() {
             start: pool.ip_start,
             end: pool.ip_end
           },
-          zone_id: pool.zone_id.toString(),
-          user_id: pool.user_id?.toString(),
+          zone_id: String(pool.zone_id ?? pool.tenant_id ?? ''),
+          user_id: pool.user_id != null ? String(pool.user_id) : undefined,
           total_ips: pool.ip_statistics?.capacity || pool.ip_count || 0, // 优先使用统计数据
           used_ips: pool.ip_statistics?.consumed || 0, // 使用统计中的已消耗数量
           available_ips: pool.ip_statistics?.available || pool.ip_count || 0, // 使用统计中的可用数量
@@ -293,11 +295,11 @@ export function useIPPools() {
           const ipCount = group.ip_count
           
           const poolData: IPPool = {
-            id: group.sequence.toString(),
+            id: String(group.sequence ?? ''),
             sequence_number: group.sequence,
             ip_group_sequence_number: group.sequence,
-            zone_id: createResponse.data.zone_id.toString(),
-            user_id: createResponse.data.user_id.toString(),
+            zone_id: String(createResponse.data.zone_id ?? createResponse.data.tenant_id ?? ''),
+            user_id: String(createResponse.data.user_id ?? ''),
             name: `IP池 ${group.sequence}`,
             ip_range: {
               start: startIp,
