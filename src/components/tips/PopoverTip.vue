@@ -111,7 +111,7 @@ watch(
   { immediate: true }
 )
 
-const getTargetElement = (): HTMLElement | null => {
+function getTargetElement(): HTMLElement | null {
   const target = props.tip.config.display.target
   if (!target) return null
   if (typeof target === 'string') {
@@ -120,7 +120,7 @@ const getTargetElement = (): HTMLElement | null => {
   return target
 }
 
-const updateTargetPosition = () => {
+function updateTargetPosition() {
   try {
     const element = getTargetElement()
     if (element) {
@@ -201,7 +201,7 @@ const bubbleStyle = computed(() => {
 
 const bubbleClass = computed(() => `bubble-${placement.value}`)
 
-const startAutoMinimize = () => {
+function startAutoMinimize() {
   clearAutoMinimize()
   const seconds = props.tip.config.trigger.timing?.autoMinimizeAfterSeconds
   if (seconds && seconds > 0) {
