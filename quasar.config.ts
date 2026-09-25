@@ -79,6 +79,7 @@ export default defineConfig((ctx) => {
       // 确保生产环境变量正确加载
       env: {
         VITE_API_BASE_URL: process.env.VITE_API_BASE_URL,
+        VITE_ROUTER_BASE: process.env.VITE_ROUTER_BASE,
         VITE_WS_URL: process.env.VITE_WS_URL,
         VITE_PUSHER_APP_KEY: process.env.VITE_PUSHER_APP_KEY,
         VITE_REVERB_HOST: process.env.VITE_REVERB_HOST,
@@ -136,7 +137,7 @@ export default defineConfig((ctx) => {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      // publicPath: '/',
+      publicPath: '/gui/',
       // analyze: true,
       // env: {},
       // rawDefine: {}
