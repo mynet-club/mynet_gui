@@ -2,7 +2,7 @@
   <q-card class="auth-card q-pa-md">
     <!-- Logo区域 -->
     <div class="auth-logo">
-      <img src="/icons/icon.png" alt="MyNet" class="logo-icon" />
+      <img :src="iconUrl" alt="MyNet" class="logo-icon" />
       <div class="logo-text">MyNet</div>
       <div class="logo-tagline">{{ $t('app.tagline') }}</div>
     </div>
@@ -152,6 +152,8 @@
 </template>
 
 <script setup lang="ts">
+// 图标跟着 publicPath 走 —— 收进 /gui/ 后写死 /icons/ 会 404
+const iconUrl = (import.meta.env.BASE_URL || "/") + "icons/icon.png"
 import { ref, onMounted } from 'vue'
 import debug from 'src/utils/debug'
 import { useRouter } from 'vue-router'

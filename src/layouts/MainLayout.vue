@@ -190,7 +190,7 @@
             <div class="text-caption brand-tagline">{{ $t('app.tagline') }}</div>
           </div>
           <div class="col-auto">
-            <img src="/icons/icon.png" alt="MyNet" class="brand-logo" />
+            <img :src="iconUrl" alt="MyNet" class="brand-logo" />
           </div>
         </div>
       </div>
@@ -394,6 +394,8 @@
 </template>
 
 <script setup lang="ts">
+// 图标跟着 publicPath 走 —— 收进 /gui/ 后写死 /icons/ 会 404
+const iconUrl = (import.meta.env.BASE_URL || "/") + "icons/icon.png"
 import { ref, computed, onMounted, reactive } from 'vue'
 import debug from '../utils/debug'
 import { useRouter } from 'vue-router'

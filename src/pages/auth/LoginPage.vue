@@ -3,7 +3,7 @@
     <aside class="auth-hero">
       <div class="auth-hero-inner">
         <div class="hero-brand">
-          <img src="/icons/icon.png" alt="MyNet" class="hero-logo" />
+          <img :src="iconUrl" alt="MyNet" class="hero-logo" />
           <div class="hero-title">MyNet</div>
           <div class="hero-tagline">{{ $t('app.tagline') }}</div>
         </div>
@@ -35,6 +35,8 @@
 </template>
 
 <script setup lang="ts">
+// 图标跟着 publicPath 走 —— 收进 /gui/ 后写死 /icons/ 会 404
+const iconUrl = (import.meta.env.BASE_URL || "/") + "icons/icon.png"
 import LoginForm from '../../components/auth/LoginForm.vue'
 </script>
 
