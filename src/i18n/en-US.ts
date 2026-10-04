@@ -1708,7 +1708,7 @@ export default {
     invitations: {
       title: 'Invite Codes',
       myCodeTitle: 'My invite code for this Network',
-      myCodeHint: 'New friends enter this code on the sign-up page to join this Network and become your friend automatically; people who already have an account use "Join another Network" below (that only joins the Network — no automatic friendship).',
+      myCodeHint: 'New friends enter this code on the sign-up page to join this Network and become your friend automatically. Accounts that already exist but are in no Network can use "Join a Network with an invite code" below (that only joins the Network — no automatic friendship); accounts already in another Network must be added as a member here by an admin.',
       noCodeYet: 'No invite code yet — use the button below to create one.',
       refreshCode: 'Get / refresh invite code',
       code: 'Invite code',
@@ -1726,8 +1726,8 @@ export default {
       copyFailed: 'Copy failed',
       fetchError: 'Failed to load the invite code',
       noZone: 'No Network selected: invite codes are per Network, so join or switch one first.',
-      joinTitle: 'Join another Network',
-      joinHint: 'Enter the invite code someone shared with you. Joining switches your current Network to theirs.',
+      joinTitle: 'Join a Network with an invite code',
+      joinHint: 'Only for accounts that are not in any Network yet. If you already belong to one, an admin of the target Network has to add you as a member and you then enter it with the Network switcher at the top — an invite code will never move you from one Network to another.',
       joinPlaceholder: 'Enter an invite code',
       joinButton: 'Join',
       joinCodeRequired: 'Please enter an invite code',
@@ -2382,7 +2382,7 @@ export default {
     },
     inviteFriend: {
       title: '📨 Invite a Friend',
-      content: '<p>Share your personal invite code or link. Signing up with it puts your friend into your Network and makes them your friend right away. Note: an account that is already registered and uses your code to join does not become a friend automatically — that still takes a mutual friend request.</p>'
+      content: '<p>Share your personal invite code or link. Signing up with it puts your friend into your Network and makes them your friend right away. Note: an account that is already registered but in no Network yet does not become a friend automatically when it uses your code — that still takes a mutual friend request. An account already in another Network cannot use your code at all; add it as a member from the console instead.</p>'
     },
     friendDevices: {
       title: '📱 Friend\'s Devices',

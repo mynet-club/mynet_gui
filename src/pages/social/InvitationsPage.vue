@@ -205,7 +205,7 @@
         </q-card-section>
       </q-card>
 
-      <!-- 凭码加入另一个网络区（已注册用户路径；未注册走注册页填码） -->
+      <!-- 凭码入区：仅「还没有加入任何网络」的账号（已在区里的后端 422 拒绝，多区归属走 console 加成员）；未注册走注册页填码 -->
       <q-card flat bordered class="q-mb-lg">
         <q-card-section>
           <div class="text-h6">{{ $t('social.invitations.joinTitle') }}</div>

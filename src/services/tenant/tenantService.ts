@@ -4,7 +4,7 @@ import type { IndexServicesResponse, Tenant } from '../../types'
 /**
  * 用户面的网络区服务（代码层 = Tenant，中文界面叫「网络区」）。
  *
- * 三个动作：列出我归属的网络区、切换当前网络区、凭邀请码加入另一个网络区。
+ * 三个动作：列出我归属的网络区、切换当前网络区、凭邀请码加入网络区（只给还没有归属的账号）。
  * 这一层是**纯 wire**——
  * 不做字段别名映射，也不写本地存储（状态与持久化都在 `stores/auth.ts`），
  * 否则同一份数据会出现两条路径各自映射，页面就会静默空渲染。
@@ -46,17 +46,19 @@ export const tenantService = {
   },
 
   /**
-   * 凭邀请码加入另一个网络区。
+   * 凭邀请码加入网络区（只对**当前无归属**的账号成立）。
    *
    * `POST /api/v1/user/tenants/join` { code }。这里的 code 是**框架的 invite code**：
    * · 未注册用户走注册页填码（`/auth/register` 的 `invite_code`）；
-   * · 已注册用户走本方法。两条路共用同一张码、同一份用量与归因记录，
+   * · 已注册但还没有网络区的账号走本方法；已属于别的区的人服务端回 422（D1：
+   *   多区归属只能由目标区在 console 加成员，凭码搬区不是这条链路的语义）。
+   *   两条路共用同一张码、同一份用量与归因记录，
    *   核销与配额判定都在服务端（back 只补接线，语义在框架 `InviteCodeService`）。
    *
    * 成功即代表服务端已把成员关系置为活跃、并把 `users.tenant_id` 指到该区，
    * 返回的就是新区（`tenant_id` + `name`）。调用方**必须**在拿到结果后刷新
    * 归属列表并落当前网络区（见 `stores/auth.ts` 的 `joinTenant`），
-   * 否则界面还在旧区、而后续 `X-Tenant-ID` 已被后端改写，出现分裂态。
+   * 否则界面还没有区、而后续 `X-Tenant-ID` 已被后端改写，出现分裂态。
    */
   async joinTenant(code: string): Promise<SwitchTenantResult> {
     const response = await api.post('/user/tenants/join', { code })

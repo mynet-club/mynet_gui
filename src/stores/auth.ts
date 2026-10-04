@@ -253,7 +253,10 @@ export const useAuthStore = defineStore('auth', () => {
   }
   
   /**
-   * 凭邀请码加入另一个网络区，并把「当前网络区」切过去。
+   * 凭邀请码加入网络区，并把「当前网络区」切过去。
+   *
+   * 这条链路只对**当前无归属**的账号成立：后端对 `users.tenant_id` 已指向别的区的人
+   * 回 422（多区归属由 console 加成员，见 `ZoneInviteDomainService::join`）。
    *
    * 顺序与 `switchTenant` 同理：**先拿服务端确认，再动本地状态**。加入成功后
    * 后端做了两件事——成员关系置活跃、`users.tenant_id` 指向新区；本地必须同时

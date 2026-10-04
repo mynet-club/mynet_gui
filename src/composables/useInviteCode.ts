@@ -92,8 +92,9 @@ export function useInviteCode() {
   }
 
   /**
-   * 凭码加入另一个网络区。成功后必须把「当前网络区」换过去 —— 后端已经改了
-   * `users.tenant_id`，本地不换就会出现界面在旧区、请求头在新区的分裂态。
+   * 凭码加入网络区（只给还没有归属网络的账号；已在别的区的人后端会 422 拒绝）。
+   * 成功后必须把「当前网络区」换过去 —— 后端已经改了
+   * `users.tenant_id`，本地不换就会出现界面还没有区、请求头在新区的分裂态。
    */
   const join = async (code: string) => {
     const trimmed = code.trim()
