@@ -1708,7 +1708,7 @@ export default {
     invitations: {
       title: 'Invite Codes',
       myCodeTitle: 'My invite code for this Network',
-      myCodeHint: 'New friends enter this code on the sign-up page to join this Network; people who already have an account use "Join another Network" below.',
+      myCodeHint: 'New friends enter this code on the sign-up page to join this Network and become your friend automatically; people who already have an account use "Join another Network" below (that only joins the Network — no automatic friendship).',
       noCodeYet: 'No invite code yet — use the button below to create one.',
       refreshCode: 'Get / refresh invite code',
       code: 'Invite code',
@@ -2377,12 +2377,12 @@ export default {
       title: '✨ Auto-Connection Established'
     },
     inviterFriend: {
-      title: '👥 Add Your Inviter as a Friend',
-      content: '<p>An invite code only puts you into a Network — it does not create a friendship. Search your inviter on the Friends page and send a request; once they accept you can view their devices.</p>'
+      title: '👥 Your Inviter Becomes a Friend Automatically',
+      content: '<p>Signing up with an invite code makes you and your inviter friends right away — no friend request needed. Only when you join a Network without a code (an admin adds you directly) do you have to search for your inviter on the Friends page and send a request.</p>'
     },
     inviteFriend: {
       title: '📨 Invite a Friend',
-      content: '<p>Share your invite code or link. Entering it on the sign-up page puts your friend into your Network; becoming friends still takes a mutual friend request.</p>'
+      content: '<p>Share your personal invite code or link. Signing up with it puts your friend into your Network and makes them your friend right away. Note: an account that is already registered and uses your code to join does not become a friend automatically — that still takes a mutual friend request.</p>'
     },
     friendDevices: {
       title: '📱 Friend\'s Devices',

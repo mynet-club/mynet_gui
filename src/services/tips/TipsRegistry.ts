@@ -207,9 +207,9 @@ function buildTipsRegistry(): TipConfig[] {
       timing: { autoMinimizeAfterSeconds: 8 }
     },
     display: {
-      title: t('tips.inviterFriend.title', '👥 把邀请人加为好友'),
+      title: t('tips.inviterFriend.title', '👥 邀请人会自动成为你的好友'),
       content: t('tips.inviterFriend.content', `
-        <p>邀请码只负责把你接入网络区，不会自动建立好友关系。在好友页搜索邀请人并发出好友请求，对方接受后就能查看他的设备。</p>
+        <p>凭邀请码注册成功后，你和邀请人就自动建立好友关系，不需要再发好友请求。只有入区时没填码（例如管理员直接把你加进网络区），才需要在好友页搜索邀请人并发出请求。</p>
       `),
       target: '[data-tip-target="friends-list"]',
       placement: TipPlacement.Right,
@@ -243,7 +243,7 @@ function buildTipsRegistry(): TipConfig[] {
     display: {
       title: t('tips.inviteFriend.title', '📨 邀请好友加入'),
       content: t('tips.inviteFriend.content', `
-        <p>把邀请码或链接分享给朋友，对方注册时填码即可加入你的网络区。好友关系还要互相发一次好友请求。</p>
+        <p>把你的个人邀请码或链接分享给朋友，对方注册时填码即可加入你的网络区，并自动成为你的好友。注意：已经注册过的账号再用你的码入区，不会自动成为好友，还需要互相发一次好友请求。</p>
       `),
       target: '[data-tip-target="invite-friend-btn"]',
       placement: TipPlacement.Bottom,
