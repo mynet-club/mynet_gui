@@ -1575,6 +1575,7 @@ export default {
     selectZone: 'Select Zone',
     switchedTo: 'Switched to {zoneName}',
     switchFailed: 'Failed to switch zone',
+    unknownZone: 'Unknown zone',
     comingSoonMessage: 'Zone management feature is under development, stay tuned!',
 
     // Extended zone management features

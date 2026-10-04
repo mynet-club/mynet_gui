@@ -1,4 +1,5 @@
 import { RouteRecordRaw } from 'vue-router';
+import { TERM_ZONE } from '../config/terms';
 
 const routes: RouteRecordRaw[] = [
   // 根路径重定向到认证或应用（根据登录状态）
@@ -227,7 +228,7 @@ const routes: RouteRecordRaw[] = [
         path: 'tenants', 
         name: 'tenants',
         component: () => import('../pages/tenant/TenantListPage.vue'),
-        meta: { title: '区域管理', requiresAuth: true }
+        meta: { title: `${TERM_ZONE}管理`, requiresAuth: true }
       },
       { 
         path: 'services', 

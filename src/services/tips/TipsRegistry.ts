@@ -7,6 +7,7 @@ import type { TipConfig, OnboardingPath } from '../../types/tips'
 import { TipType, TipPlacement, OnboardingStage } from '../../types/tips'
 import type { Router } from 'vue-router'
 import { i18n } from '../../boot/i18n'
+import { TERM_ZONE } from '../../config/terms'
 
 /**
  * 获取翻译文本，若 i18n 未就绪则返回 fallback
@@ -542,7 +543,7 @@ function buildTipsRegistry(): TipConfig[] {
     closable: true
   },
 
-  // 时空（Tenant）管理帮助
+  // 网络区管理帮助（用词见 config/terms.ts）
   {
     id: 'zone_management',
     type: TipType.Banner,
@@ -553,9 +554,9 @@ function buildTipsRegistry(): TipConfig[] {
       once: false
     },
     display: {
-      title: t('tips.zoneManagement.title', '🌍 时空（Zone）管理'),
+      title: t('tips.zoneManagement.title', `🌍 ${TERM_ZONE}管理`),
       content: t('tips.zoneManagement.content', `
-        <p>时空是独立的网络空间，适用于公司、家庭、项目等场景。不同时空完全隔离，可随时切换。</p>
+        <p>${TERM_ZONE}是独立的网络空间，适用于公司、家庭、项目等场景。不同${TERM_ZONE}完全隔离，可随时切换。</p>
       `),
       width: '100%'
     },

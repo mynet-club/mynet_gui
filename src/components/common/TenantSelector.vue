@@ -90,7 +90,7 @@ const switchTenant = async (tenantId: number) => {
   try {
     // 先找到要切换到的zone
     const targetTenant = availableTenants.value.find(z => z.zone_id === tenantId)
-    const targetTenantName = targetTenant?.zone_name || targetTenant?.name || 'Unknown Zone'
+    const targetTenantName = targetTenant?.zone_name || targetTenant?.name || t('zones.unknownZone')
     debug.log('🔧 [TenantSelector] Target zone:', targetTenantName)
     
     await authStore.switchTenant(tenantId)

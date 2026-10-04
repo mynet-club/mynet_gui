@@ -1,3 +1,8 @@
+// 中文界面里「一个独立组网空间」这个概念的统一用词，见 config/terms.ts 的说明。
+// 用 TS 常量拼接而不是 vue-i18n 的 `@:` 链接消息：intlify 的 key 解析器会把链接后面的中文
+// 字符一起吃进 key（`@:term.zone名称` 会被解析成 key `term.zone名称` 而查不到文案）。
+import { TERM_ZONE } from '../config/terms'
+
 export default {
   app: {
     name: 'MyNet',
@@ -482,7 +487,7 @@ export default {
       enableNode: '启用',
       viewNode: '查看设备',
       privateKeyWarning: '私钥仅显示一次，请立即保存！',
-      noZone: '当前无可用 Zone，请先切换或加入 Zone',
+      noZone: `当前无可用${TERM_ZONE}，请先切换或加入${TERM_ZONE}`,
       createFailed: '创建失败，请重试',
       keyGenSuccess: '密钥生成成功，请立即保存私钥！',
       keyGenFailed: '密钥生成失败',
@@ -1089,9 +1094,9 @@ export default {
     pendingConnections: '待处理连接',
     friendNodes: '好友设备',
     ippools: 'IP池管理',
-    zones: '区域管理',
-    zoneSharing: '区域分享',
-    zoneServices: '区域服务',
+    zones: `${TERM_ZONE}管理`,
+    zoneSharing: `${TERM_ZONE}分享`,
+    zoneServices: `${TERM_ZONE}服务`,
     services: {
       title: '服务管理',
       description: '管理和访问各类网络服务',
@@ -1712,22 +1717,23 @@ export default {
     configRefreshError: '刷新配置失败'
   },
   zones: {
-    subtitle: '网络区域管理和配置',
-    switchZone: '切换区域',
-    selectZone: '选择区域',
+    subtitle: `${TERM_ZONE}管理和配置`,
+    switchZone: `切换${TERM_ZONE}`,
+    selectZone: `选择${TERM_ZONE}`,
     switchedTo: '已切换到 {zoneName}',
-    switchFailed: '切换区域失败',
-    comingSoonMessage: '区域管理功能正在开发中，敬请期待！',
+    switchFailed: `切换${TERM_ZONE}失败`,
+    unknownZone: `未知${TERM_ZONE}`,
+    comingSoonMessage: `${TERM_ZONE}管理功能正在开发中，敬请期待！`,
 
     // 扩展的zone管理功能
-    currentZone: '当前区域',
-    availableZones: '可用区域',
-    noCurrentZone: '未选择区域',
-    noAvailableZones: '暂无可用区域',
+    currentZone: `当前${TERM_ZONE}`,
+    availableZones: `可用${TERM_ZONE}`,
+    noCurrentZone: `未选择${TERM_ZONE}`,
+    noAvailableZones: `暂无可用${TERM_ZONE}`,
     adminRole: '管理员',
     domain: '域名',
     admin: '管理员',
-    switchToZone: '切换到此区域',
+    switchToZone: `切换到此${TERM_ZONE}`,
 
     // 统计信息
     stats: {
@@ -1740,7 +1746,7 @@ export default {
     // 操作
     actions: {
       switch: '切换',
-      create: '创建区域',
+      create: `创建${TERM_ZONE}`,
       edit: '编辑',
       delete: '删除',
       refresh: '刷新'
@@ -1749,29 +1755,29 @@ export default {
     // 对话框
     dialogs: {
       switchZone: {
-        title: '切换区域',
-        message: '确定要切换到区域 "{zoneName}" 吗？',
-        warning: '切换区域后，您将看到该区域的网络配置和数据。'
+        title: `切换${TERM_ZONE}`,
+        message: `确定要切换到${TERM_ZONE} "{zoneName}" 吗？`,
+        warning: `切换${TERM_ZONE}后，您将看到该${TERM_ZONE}的网络配置和数据。`
       },
       createZone: {
-        title: '创建新区域',
-        nameLabel: '区域名称',
-        descriptionLabel: '区域描述',
+        title: `创建新${TERM_ZONE}`,
+        nameLabel: `${TERM_ZONE}名称`,
+        descriptionLabel: `${TERM_ZONE}描述`,
         create: '创建'
       }
     },
 
     // 错误信息
-    fetchOverviewError: '获取区域概览失败',
-    fetchAvailableZonesError: '获取可用区域失败',
-    fetchZonesError: '获取区域列表失败',
-    fetchDetailsError: '获取区域详情失败',
-    createSuccess: '区域创建成功',
-    createError: '创建区域失败',
-    updateSuccess: '区域更新成功',
-    updateError: '更新区域失败',
-    deleteSuccess: '区域删除成功',
-    deleteError: '删除区域失败'
+    fetchOverviewError: `获取${TERM_ZONE}概览失败`,
+    fetchAvailableZonesError: `获取可用${TERM_ZONE}失败`,
+    fetchZonesError: `获取${TERM_ZONE}列表失败`,
+    fetchDetailsError: `获取${TERM_ZONE}详情失败`,
+    createSuccess: `${TERM_ZONE}创建成功`,
+    createError: `创建${TERM_ZONE}失败`,
+    updateSuccess: `${TERM_ZONE}更新成功`,
+    updateError: `更新${TERM_ZONE}失败`,
+    deleteSuccess: `${TERM_ZONE}删除成功`,
+    deleteError: `删除${TERM_ZONE}失败`
   },
   social: {
     subtitle: '组网连接和用户管理',
@@ -1849,7 +1855,7 @@ export default {
       addFriend: '添加好友',
       requested: '已请求',
       friend: '已是好友',
-      zone: '区域',
+      zone: `${TERM_ZONE}`,
       lastActive: '最后活跃'
     },
     // 好友卡片
@@ -2022,7 +2028,7 @@ export default {
     canCreate: '可创建',
     // 简化版创建相关
     quotaInfo: '当前 {current} 个池，最多 {max} 个池',
-    quotaExhausted: '已达到该Zone的IP池配额上限',
+    quotaExhausted: `已达到该${TERM_ZONE}的IP池配额上限`,
     createCount: '创建数量',
     poolsUnit: '个',
     continuous: '连续性',
@@ -2047,7 +2053,7 @@ export default {
     batchDelete: '批量删除',
     selectedCount: '已选择 {count} 项',
     advancedFilters: '高级过滤器',
-    zoneFilter: 'Zone过滤',
+    zoneFilter: `${TERM_ZONE}过滤`,
     statusFilter: '状态过滤',
     usageFilter: '使用率过滤',
     ipContains: 'IP包含',
@@ -2194,7 +2200,7 @@ export default {
     }
   },
   zoneServices: {
-    subtitle: '区域服务分享和管理',
+    subtitle: `${TERM_ZONE}服务分享和管理`,
 
     // 页面标题和描述
     navigation: {
@@ -2208,7 +2214,7 @@ export default {
       myServicesDescription: '管理和分享你创建的服务'
     },
 
-    currentZone: '当前区域',
+    currentZone: `当前${TERM_ZONE}`,
     servicesCount: '个服务',
 
     // 空状态消息
@@ -2643,8 +2649,8 @@ export default {
       content: '<p>连接详情展示两端节点、网络参数和实时状态。通过拓扑图全局查看网络结构，排查连接问题。</p>'
     },
     zoneManagement: {
-      title: '🌍 时空（Zone）管理',
-      content: '<p>Zone 实现资源隔离，每个 Zone 有独立的 IP 池、节点和连接。如需多环境管理可向管理员申请新的 Zone。</p>'
+      title: `🌍 ${TERM_ZONE}管理`,
+      content: `<p>${TERM_ZONE}实现资源隔离，每个${TERM_ZONE}有独立的 IP 池、节点和连接。如需多环境管理可向管理员申请新的${TERM_ZONE}。</p>`
     },
     settingsCenter: {
       title: '⚙️ 设置中心',
