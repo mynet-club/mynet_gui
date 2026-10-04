@@ -11,9 +11,18 @@ export default boot(({ app }) => {
 
   // 建立连接 + 订阅 user notifications 频道
   const initWebSocket = () => {
-    const tenantId = authStore.user?.zone_id
+    // X-Tenant-ID 的唯一来源就是 user.tenant_id（第 2 步契约翻转后不再有 zone_id 别名）。
+    // 这里缺值以前是静默 return —— 通知功能全站失效且无任何提示，现在明说。
+    const tenantId = authStore.user?.tenant_id
     const userId = authStore.user?.user_id ?? (authStore.user as any)?.id
-    if (!authStore.isAuthenticated || !tenantId || !userId || isWebSocketInitialized) return
+    if (!authStore.isAuthenticated || isWebSocketInitialized) return
+    if (!tenantId || !userId) {
+      debug.warn('🔌 [WebSocket] 未连接：缺少 tenant_id 或 user_id，通知推送不可用', {
+        tenantId,
+        userId
+      })
+      return
+    }
 
     isWebSocketInitialized = true
     const { connect, on, subscribeUserNotifications } = useWebSocket()
@@ -54,7 +63,7 @@ export default boot(({ app }) => {
   })
 
   // 首次加载若已登录则建立连接
-  if (authStore.isAuthenticated && authStore.user?.zone_id) {
+  if (authStore.isAuthenticated && authStore.user?.tenant_id) {
     debug.log('🔌 [Boot] 用户已登录，初始化 WebSocket')
     setTimeout(initWebSocket, 500)
   }

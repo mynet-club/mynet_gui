@@ -118,7 +118,7 @@ export class WebSocketService {
       this.echo.connector.pusher.connection.bind('connected', () => {
         debug.log('WebSocket: 连接成功')
         this.isConnected.value = true
-        this.emit('connected', { status: 'connected', zone_id: tenantId })
+        this.emit('connected', { status: 'connected', tenant_id: tenantId })
       })
 
       this.echo.connector.pusher.connection.bind('disconnected', () => {

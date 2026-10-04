@@ -8,7 +8,7 @@
     class="zone-selector"
   >
     <q-tooltip>
-      {{ currentTenant?.zone_name || currentTenant?.name || $t('zones.selectZone') }}
+      {{ currentTenant?.name || $t('zones.selectZone') }}
     </q-tooltip>
     
     <!-- Tenant 切换弹窗 -->
@@ -24,31 +24,31 @@
           <q-list>
             <q-item 
               v-for="tenant in availableTenants" 
-              :key="tenant.zone_id"
+              :key="tenant.tenant_id"
               clickable
-              @click="switchTenant(tenant.zone_id)"
-              :active="tenant.zone_id === currentTenant?.zone_id"
+              @click="handleSwitch(tenant.tenant_id)"
+              :active="tenant.tenant_id === currentTenant?.tenant_id"
             >
               <q-item-section avatar>
                 <q-icon 
                   name="travel_explore" 
-                  :color="tenant.is_active ? 'primary' : 'grey'" 
+                  :color="tenant.status === 'active' ? 'primary' : 'grey'" 
                 />
               </q-item-section>
               <q-item-section>
-                <q-item-label>{{ tenant.zone_name || tenant.name }}</q-item-label>
-                <q-item-label caption>{{ tenant.zone_remarks || tenant.description }}</q-item-label>
+                <q-item-label>{{ tenant.name }}</q-item-label>
+                <q-item-label caption>{{ tenant.description }}</q-item-label>
               </q-item-section>
               <q-item-section side>
                 <div class="column items-end">
                   <q-chip 
-                    :label="tenant.is_active ? $t('common.active') : $t('common.inactive')"
-                    :color="tenant.is_active ? 'positive' : 'grey'"
+                    :label="tenant.status === 'active' ? $t('common.active') : $t('common.inactive')"
+                    :color="tenant.status === 'active' ? 'positive' : 'grey'"
                     text-color="white"
                     size="sm"
                   />
                   <q-icon 
-                    v-if="tenant.zone_id === currentTenant?.zone_id"
+                    v-if="tenant.tenant_id === currentTenant?.tenant_id"
                     name="check" 
                     color="positive" 
                     class="q-mt-xs"
@@ -64,53 +64,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import debug from 'src/utils/debug'
-import { useQuasar } from 'quasar'
-import { useI18n } from 'vue-i18n'
-import { useAuthStore } from '../../stores/auth'
-import type { Tenant } from '../../types'
+import { useTenants } from '../../composables/useTenants'
 
-const $q = useQuasar()
-const { t } = useI18n()
-const authStore = useAuthStore()
+// 状态与提示都走 useTenants/authStore：这里只负责展示与触发，
+// 不再自己找目标网络区、自己发通知（同一动作两处实现会提示口径不一致）。
+const { currentTenant, availableTenants, switchTenant } = useTenants()
 
-// 对话框显示状态
 const showDialog = ref(false)
 
-// 计算属性
-const currentTenant = computed(() => authStore.currentTenant)
-const availableTenants = computed(() => authStore.availableTenants)
-
-// Zone切换方法
-const switchTenant = async (tenantId: number) => {
-  debug.log('🔧 [TenantSelector] Switching to zone:', tenantId)
-  debug.log('🔧 [TenantSelector] Current zone before switch:', currentTenant.value?.zone_name)
-  
-  try {
-    // 先找到要切换到的zone
-    const targetTenant = availableTenants.value.find(z => z.zone_id === tenantId)
-    const targetTenantName = targetTenant?.zone_name || targetTenant?.name || t('zones.unknownZone')
-    debug.log('🔧 [TenantSelector] Target zone:', targetTenantName)
-    
-    await authStore.switchTenant(tenantId)
-    
-    debug.log('🔧 [TenantSelector] Current zone after switch:', currentTenant.value?.zone_name)
-    
-    $q.notify({
-      type: 'positive',
-      message: t('zones.switchedTo', { zoneName: targetTenantName }),
-      timeout: 3000
-    })
-    
-    // 切换成功后关闭对话框
+const handleSwitch = async (tenantId: number) => {
+  debug.log('🔧 [TenantSelector] Switching to tenant:', tenantId)
+  const switched = await switchTenant(tenantId)
+  if (switched) {
     showDialog.value = false
-  } catch (error) {
-    debug.error('🔧 [TenantSelector] Failed to switch zone:', error)
-    $q.notify({
-      type: 'negative',
-      message: t('zones.switchFailed')
-    })
   }
 }
 </script>

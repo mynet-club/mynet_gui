@@ -1,7 +1,7 @@
 export interface User {
   user_id: number
   id: number  // 保留向后兼容性，但主要使用user_id
-  zone_id: number
+  tenant_id: number
   name: string
   email: string
   phone: string
@@ -32,28 +32,27 @@ export interface AuthTokens {
   expires_at: number
 }
 
+/**
+ * 网络区（代码层 = Tenant）。字段名与 wire 一一对应，不再做 zone_* 别名映射。
+ *
+ * 注意：`tenant_users` 表没有 is_admin 列，所以这里没有权限语义——用户面只做
+ * 「我归属哪些网络区、当前选哪个」，管理面在 console（operator）。
+ */
 export interface Tenant {
-  id: number
-  zone_id: number
-  zone_name: string
-  zone_domain: string
-  zone_status: number
-  zone_admin_id: number
-  zone_admin_name: string
-  created_at: string
-  updated_at: string
-  deleted_at: string | null
-  zone_remarks: string
-  can_access: boolean
+  tenant_id: number
+  name: string
+  domain?: string
+  status: 'active' | 'inactive'
+  description?: string
+  admin_id?: number
+  admin_name?: string
+  created_at?: string
+  updated_at?: string
+  deleted_at?: string | null
   pivot: {
     user_id: number
-    zone_id: number
-    is_admin: number
+    tenant_id: number
   }
-  // 兼容旧的属性名
-  name?: string
-  is_active?: boolean
-  description?: string
 }
 
 // 索引服务器相关类型定义
@@ -379,28 +378,7 @@ export interface RouteDataResponse {
 }
 
 // Tenant Module Types
-export interface TenantOverview {
-  total_zones: number
-  active_zones: number
-  total_nodes: number
-  total_routes: number
-}
-
-export interface TenantStatistics {
-  zone_id: string
-  node_count: number
-  active_node_count: number
-  route_count: number
-  ip_pool_count: number
-  user_count: number
-}
-
-export interface PaginatedTenantResponse {
-  data: Tenant[]
-  meta: {
-    current_page: number
-    per_page: number
-    total: number
-    last_page: number
-  }
-}
+//
+// 用户面只有「我归属哪些网络区 + 当前选哪个」，没有管理视图：
+// overview / statistics / 分页列表属 console（operator）面，此前 GUI 从 /tenants*
+// 读它们，2026-10-04 越权收敛后那些端点在用户面已不可达。

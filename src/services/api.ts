@@ -3,7 +3,6 @@ import debug from 'src/utils/debug'
 import { LocalStorage } from 'quasar'
 import { tokenManager } from '../utils/tokenManager'
 import { mockDashboardData, mockDelay } from './mockData'
-import type { Tenant } from '../types'
 
 // 获取当前语言
 const getCurrentLanguage = () => {
@@ -58,12 +57,12 @@ api.interceptors.request.use(
     if (userInfo) {
       try {
         const user = JSON.parse(userInfo.toString())
-        if (user.zone_id) {
-          config.headers['X-Tenant-ID'] = user.zone_id
-          debug.log('🔧 [API] Injected X-Tenant-ID header:', user.zone_id)
+        if (user.tenant_id) {
+          config.headers['X-Tenant-ID'] = user.tenant_id
+          debug.log('🔧 [API] Injected X-Tenant-ID header:', user.tenant_id)
         }
       } catch (error) {
-        debug.warn('🔧 [API] Failed to parse user info for zone_id:', error)
+        debug.warn('🔧 [API] Failed to parse user info for tenant_id:', error)
       }
     }
 
@@ -112,11 +111,11 @@ api.interceptors.response.use(
           if (userInfo) {
             try {
               const user = JSON.parse(userInfo.toString())
-              if (user.zone_id) {
-                originalRequest.headers['X-Tenant-ID'] = user.zone_id
+              if (user.tenant_id) {
+                originalRequest.headers['X-Tenant-ID'] = user.tenant_id
               }
             } catch (error) {
-              debug.warn('🔧 [API] Failed to parse user info for zone_id during token refresh:', error)
+              debug.warn('🔧 [API] Failed to parse user info for tenant_id during token refresh:', error)
             }
           }
           return api(originalRequest)
@@ -137,11 +136,11 @@ api.interceptors.response.use(
         if (userInfo) {
           try {
             const user = JSON.parse(userInfo.toString())
-            if (user.zone_id) {
-              originalRequest.headers['X-Tenant-ID'] = user.zone_id
+            if (user.tenant_id) {
+              originalRequest.headers['X-Tenant-ID'] = user.tenant_id
             }
           } catch (error) {
-            debug.warn('🔧 [API] Failed to parse user info for zone_id during token refresh:', error)
+            debug.warn('🔧 [API] Failed to parse user info for tenant_id during token refresh:', error)
           }
         }
         return api(originalRequest)
@@ -204,11 +203,11 @@ export const apiService = {
         };
         tokenManager.saveTokenData(tokenData);
 
-        // 将 tenant_id 合并到 user 对象作为 zone_id（后端返回的 user 对象没有 zone_id）
+        // 把登录响应里的当前网络区指针合并进 user（后端 user 对象本身不含它）
         const user = response.data.data.user;
         if (user && response.data.data.tenant_id) {
-          user.zone_id = response.data.data.tenant_id;
-          debug.log('🔧 [API] Mapped tenant_id to user.zone_id:', user.zone_id);
+          user.tenant_id = response.data.data.tenant_id;
+          debug.log('🔧 [API] Mapped tenant_id to user.tenant_id:', user.tenant_id);
         }
 
         return {
@@ -437,66 +436,9 @@ export const apiService = {
     }
   },
 
-  // Zones相关API（后端已迁移至 Tenant，接口层做字段映射，交互层保持 tenant 命名不变）
-  async getTenants() {
-    try {
-      // 后端端点: GET /user/tenants/  返回: { tenant_id, name, description, status, ... }
-      const response = await api.get('/user/tenants/')
-
-      // 处理真实API响应格式
-      if (response.data.success) {
-        // 将 tenant 响应字段映射为前端 tenant 兼容结构
-        const tenants = response.data.data.map((tenant: any) => ({
-          ...tenant,
-          zone_id: tenant.tenant_id,
-          zone_name: tenant.name,
-          zone_status: tenant.status === 'active' ? 1 : 0,
-          zone_remarks: tenant.description || '',
-          zone_domain: tenant.domain || '',
-          zone_admin_name: tenant.admin_name || '',
-          // 保留旧兼容字段
-          name: tenant.name,
-          is_active: tenant.status === 'active',
-          description: tenant.description
-        }))
-        return { data: tenants }
-      } else {
-        throw new Error(response.data.message || 'Failed to get zones')
-      }
-    } catch (error: any) {
-      if (error.response?.data) {
-        throw new Error(error.response.data.message || 'Failed to get zones')
-      }
-      throw error
-    }
-  },
-
-  async switchTenant(tenantId: number) {
-    try {
-      // 后端端点: POST /user/tenants/switch  Body: { tenant_id }
-      const response = await api.post('/user/tenants/switch', { tenant_id: tenantId })
-      const result = response.data.data
-
-      // 更新本地存储的用户信息
-      const userInfoStr = LocalStorage.getItem('user_info') as string | null
-      if (userInfoStr) {
-        try {
-          const user = JSON.parse(userInfoStr)
-          user.zone_id = tenantId
-          LocalStorage.set('user_info', JSON.stringify(user))
-        } catch (error) {
-          debug.error('Failed to update zone_id in user info:', error)
-        }
-      }
-
-      return { data: result }
-    } catch (error: any) {
-      if (error.response?.data) {
-        throw new Error(error.response.data.message || 'Failed to switch zone')
-      }
-      throw error
-    }
-  },
+  // 网络区（Tenant）相关的取数在 services/tenant/tenantService.ts，状态在 stores/auth.ts。
+  // 这里不再重复挂一份 getTenants/switchTenant——两条路径各映射各的字段名，
+  // 正是 TenantListPage 曾经静默空渲染的成因（2026-10-04 第 2 步契约翻转时合并）。
 
   // 节点相关
   async getNodes() {

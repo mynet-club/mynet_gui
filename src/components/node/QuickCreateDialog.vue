@@ -215,7 +215,7 @@ const reset = () => {
 // ── Step 0: 一键创建 ──
 const doCreate = async () => {
   if (nodeName.value.length < 3) return
-  const tenantId = authStore.currentTenant?.zone_id
+  const tenantId = authStore.currentTenant?.tenant_id
   if (!tenantId) {
     $q.notify({ type: 'negative', message: t('nodes.quickCreate.noZone') })
     return

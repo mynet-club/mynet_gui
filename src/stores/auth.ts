@@ -3,7 +3,9 @@ import debug from 'src/utils/debug'
 import { ref, computed } from 'vue'
 import { LocalStorage } from 'quasar'
 import { apiService } from '../services/api'
+import { tenantService } from '../services/tenant/tenantService'
 import { tokenManager } from '../utils/tokenManager'
+import { TENANT_SELECTION_KEY, LEGACY_TENANT_SELECTION_KEY } from '../config/app'
 import type { User, Tenant } from '../types'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -13,6 +15,35 @@ export const useAuthStore = defineStore('auth', () => {
   const currentTenant = ref<Tenant | null>(null)
   const availableTenants = ref<Tenant[]>([])
   const tokenExpiry = ref(0)
+
+  // 当前网络区选择的本地持久化：键名常量在 config/app.ts（单点），
+  // 这里只负责读旧键 `current_zone`（存的是整个对象）并迁移成新键（只存 tenant_id）。
+  const readSavedTenantId = (): number | null => {
+    const saved = LocalStorage.getItem(TENANT_SELECTION_KEY)
+    if (saved !== null && saved !== undefined && saved !== '') return Number(saved)
+
+    const legacy = LocalStorage.getItem(LEGACY_TENANT_SELECTION_KEY)
+    if (legacy === null || legacy === undefined || legacy === '') return null
+
+    try {
+      // 旧值有两种写法：JSON 串（多数写入点）与对象本体（原 setCurrentTenant）
+      const parsed = typeof legacy === 'string' ? JSON.parse(legacy) : legacy
+      const legacyId = parsed?.tenant_id ?? parsed?.zone_id
+      if (legacyId) {
+        LocalStorage.set(TENANT_SELECTION_KEY, Number(legacyId))
+        debug.log('🔧 [AUTH] Migrated saved tenant selection from `current_zone`:', legacyId)
+      }
+      return legacyId ? Number(legacyId) : null
+    } catch (error) {
+      debug.warn('🔧 [AUTH] Unparseable legacy tenant selection:', error)
+      return null
+    }
+  }
+
+  const persistTenantId = (tenantId: number) => {
+    LocalStorage.set(TENANT_SELECTION_KEY, tenantId)
+    LocalStorage.remove(LEGACY_TENANT_SELECTION_KEY)
+  }
   
   // 修改认证状态的判断逻辑
   const isAuthenticated = computed(() => {
@@ -106,18 +137,12 @@ export const useAuthStore = defineStore('auth', () => {
         }
       }
       
-      // 初始化用户Zone
-      await loadUserTenants()
-      
-      // 设置当前Zone
-      if (user.value?.zone_id) {
-        const tenant = availableTenants.value.find(z => z.zone_id === user.value?.zone_id)
-        if (tenant) {
-          currentTenant.value = tenant
-          // 存储当前Zone
-          LocalStorage.set('current_zone', JSON.stringify(tenant))
-          debug.log('🔧 [AUTH] Saved current zone to LocalStorage:', tenant.zone_name)
-        }
+      // 网络区上下文：拉归属列表 + 定当前选中。失败不阻断登录——
+      // 认证是硬条件，网络区只是请求上下文（此前列表接口一挂就把登录一起带崩）。
+      try {
+        await restoreCurrentTenant()
+      } catch (tenantError) {
+        debug.warn('🔧 [AUTH] Tenant context unavailable after login:', tenantError)
       }
       
       debug.log('🔧 [AUTH] Login completed successfully:', {
@@ -151,50 +176,80 @@ export const useAuthStore = defineStore('auth', () => {
     
     // 清除其他本地存储
     LocalStorage.remove('user_info')
-    LocalStorage.remove('current_zone')
+    LocalStorage.remove(TENANT_SELECTION_KEY)
+    LocalStorage.remove(LEGACY_TENANT_SELECTION_KEY)
     debug.log('🔧 [AUTH] Cleared all auth data')
   }
   
   const loadUserTenants = async () => {
-    try {
-      const response = await apiService.getTenants()
-      availableTenants.value = response.data
-    } catch (error) {
-      debug.error('Load zones error:', error)
-    }
+    availableTenants.value = await tenantService.getUserTenants()
   }
-  
+
+  /**
+   * 登录后确定「当前网络区」：本地已选 > 后端记的 user.tenant_id > 归属列表第一个。
+   * 找不到就把 currentTenant 置空并说清楚，不要再伪装成「有一个叫 Global 的网络区」
+   * ——那会让 X-Tenant-ID 指向一个用户并不归属的租户。
+   */
+  const restoreCurrentTenant = async () => {
+    if (availableTenants.value.length === 0) {
+      await loadUserTenants()
+    }
+
+    const savedId = readSavedTenantId()
+    const fallbackId = user.value?.tenant_id
+    const target =
+      availableTenants.value.find(z => z.tenant_id === savedId) ??
+      availableTenants.value.find(z => z.tenant_id === fallbackId) ??
+      availableTenants.value[0] ??
+      null
+
+    currentTenant.value = target
+    if (target) {
+      persistTenantId(target.tenant_id)
+      debug.log('🔧 [AUTH] Current tenant:', `${target.name} (${target.tenant_id})`)
+    } else {
+      debug.warn('🔧 [AUTH] No tenant available for this user; 网络区相关功能将提示无归属')
+    }
+    return target
+  }
+
   const switchTenant = async (tenantId: number) => {
-    debug.log('🔧 [AUTH] Switching to zone:', tenantId)
+    debug.log('🔧 [AUTH] Switching to tenant:', tenantId)
     
-    // 先从可用区域列表中找到目标zone
-    const targetTenant = availableTenants.value.find(z => z.zone_id === tenantId)
+    // 先从可用网络区列表中找到目标（列表本身就是后端按成员关系算出来的）
+    const targetTenant = availableTenants.value.find(z => z.tenant_id === tenantId)
     if (!targetTenant) {
-      throw new Error('Zone not found in available zones')
+      throw new Error('Tenant not found in available tenants')
     }
     
-    const response = await apiService.switchTenant(tenantId)
-    
-    // 更新当前区域为目标zone
+    const result = await tenantService.switchTenant(tenantId)
+    if (result?.tenant_id !== tenantId) {
+      // 服务端确认的落点与请求不一致时不能继续往下改本地状态，
+      // 否则界面在一个网络区、请求头在另一个，且没有任何报错线索。
+      throw new Error(`服务端确认的网络区与请求不一致：${JSON.stringify(result)}`)
+    }
+
+    // 后端确认成功后才改本地状态，顺序不能反：先改本地，请求失败就留下
+    // 「界面在 A 网络区、请求还打 B 网络区」的分裂态。
     currentTenant.value = targetTenant
-    debug.log('🔧 [AUTH] Updated current zone to:', targetTenant.zone_name)
-    
-    // 更新用户信息中的 zone_id
+    debug.log('🔧 [AUTH] Updated current tenant to:', targetTenant.name)
+
+    // 更新用户信息中的 tenant_id（X-Tenant-ID 的三个注入点都读它）
     if (user.value) {
-      user.value.zone_id = tenantId
-      debug.log('🔧 [AUTH] Updated user zone_id:', user.value.zone_id)
-      
-      // 持久化保存用户信息
+      user.value.tenant_id = tenantId
+      debug.log('🔧 [AUTH] Updated user tenant_id:', user.value.tenant_id)
+
+      // 拦截器读的是本地存储里的 user_info，不是这个 ref，必须一起落盘
       LocalStorage.set('user_info', JSON.stringify(user.value))
       debug.log('🔧 [AUTH] Saved user info to LocalStorage')
+    } else {
+      debug.warn('🔧 [AUTH] No in-memory user; X-Tenant-ID 会继续用本地存储里的旧值')
     }
     
-    // 持久化保存当前选择的区域
-    LocalStorage.set('current_zone', JSON.stringify(currentTenant.value))
-    debug.log('🔧 [AUTH] Saved current zone to LocalStorage:', currentTenant.value.zone_name)
-    
-    debug.log('🔧 [AUTH] Zone switched successfully to:', currentTenant.value?.zone_name)
-    return response.data
+    // 持久化保存当前选择的网络区
+    persistTenantId(tenantId)
+    debug.log('🔧 [AUTH] Tenant switched successfully to:', targetTenant.name)
+    return targetTenant
   }
   
   const refreshUserData = async () => {
@@ -289,13 +344,6 @@ export const useAuthStore = defineStore('auth', () => {
     return user.value?.permissions?.includes(role) || false
   }
   
-  // 设置当前zone
-  const setCurrentTenant = (tenant: Tenant) => {
-    currentTenant.value = tenant
-    // 可以在这里添加更多的zone切换逻辑，比如更新本地存储
-    LocalStorage.set('current_zone', tenant)
-  }
-  
   return {
     user,
     token,
@@ -312,8 +360,8 @@ export const useAuthStore = defineStore('auth', () => {
     checkTokenExpiry,
     initializeAuth,
     loadUserTenants,
+    restoreCurrentTenant,
     hasPermission,
-    hasRole,
-    setCurrentTenant
+    hasRole
   }
 })

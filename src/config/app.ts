@@ -12,41 +12,43 @@ import type { Tenant } from '../types'
  * 改指真实平台租户后，属于该租户的用户能正常兜底，不属于的用户仍被服务端
  * IdentifyTenant 的 tenant_users 归属校验挡下（fail-closed）。
  *
- * ⚠️ 未决：`pivot.is_admin: 1` 是原先伪造 999999999 时一起编的，现在指向真实租户，
- * 等于在客户端断言「当前用户是平台租户管理员」。它只影响 UI
- * （`useTenants.ts:39/234`、`TenantListPage.vue:101` 读它决定是否渲染管理入口），
- * 真正的鉴权在服务端，所以不是提权；但会渲染出点了就 403 的按钮。
- * 这属权限语义，未自行改动 —— 见 spec/zone-removal.md 议题 2 的后续项。
+ * 同日越权收敛后，这里不再编 `pivot.is_admin`：`tenant_users` 表根本没有这一列，
+ * 管理员属 operator/console 面，用户面前端不该据此渲染管理入口。
  */
 const PLATFORM_TENANT_ID = 9007199254740991
 
-// 默认的Global Zone配置
+/**
+ * 「当前网络区」选择的本地存储键名（单点）。
+ *
+ * 历史：早期叫 `current_zone` 且存整个对象；现在叫 `current_network` 只存 tenant_id。
+ * 读旧键时兼容并迁移一次（`stores/auth.ts` 的 readSavedTenantId），
+ * 否则改名当天所有老用户的已选网络区会静默回到默认值。
+ */
+export const TENANT_SELECTION_KEY = 'current_network'
+export const LEGACY_TENANT_SELECTION_KEY = 'current_zone'
+
+// 平台兜底网络区（界面叫「网络区」）
 export const DEFAULT_PLATFORM_TENANT: Tenant = {
-  id: PLATFORM_TENANT_ID,
-  zone_id: PLATFORM_TENANT_ID,
-  zone_name: 'Global',
-  zone_domain: 'global',
-  zone_status: 1,
-  zone_admin_id: 1,
-  zone_admin_name: 'System',
+  tenant_id: PLATFORM_TENANT_ID,
+  name: 'Global',
+  domain: 'global',
+  status: 'active',
+  admin_id: 1,
+  admin_name: 'System',
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   deleted_at: null,
-  zone_remarks: 'Default Global Zone',
-  can_access: true,
-  pivot: { user_id: 1, zone_id: PLATFORM_TENANT_ID, is_admin: 1 },
-  name: 'Global',
-  is_active: true,
-  description: 'Default Global Zone'
+  description: 'Default Global tenant',
+  pivot: { user_id: 1, tenant_id: PLATFORM_TENANT_ID }
 }
 
 // 应用配置
 export const APP_CONFIG = {
-  // Zone相关配置
+  // 网络区相关配置
   // ⚠️ 下面这两项全仓无任何读取者（死配置），保留只为不破 APP_CONFIG 的形状。
   tenants: {
-    defaultGlobalZone: DEFAULT_PLATFORM_TENANT,
-    defaultZoneId: PLATFORM_TENANT_ID
+    defaultPlatformTenant: DEFAULT_PLATFORM_TENANT,
+    defaultTenantId: PLATFORM_TENANT_ID
   },
   
   // API相关配置

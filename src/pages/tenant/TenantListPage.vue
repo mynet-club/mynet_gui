@@ -14,7 +14,7 @@
       />
     </template>
 
-    <!-- 当前Zone信息 -->
+    <!-- 当前网络区信息 -->
       <div class="row q-mb-lg">
         <div class="col-12">
           <q-card class="current-zone-card">
@@ -24,24 +24,21 @@
                   <div class="text-h6">{{ $t('zones.currentZone') }}</div>
                   <div v-if="currentTenant" class="text-body1 q-mt-sm">
                     <q-chip 
-                      :color="currentTenant.zone_status === 1 ? 'positive' : 'negative'"
-                      :label="currentTenant.zone_name" 
+                      :color="currentTenant.status === 'active' ? 'positive' : 'negative'"
+                      :label="currentTenant.name" 
                       size="md"
                       icon="public"
                     />
                     <div class="text-body2 text-grey-6 q-mt-xs">
-                      {{ $t('zones.domain') }}: {{ currentTenant.zone_domain }}
+                      {{ $t('zones.domain') }}: {{ currentTenant.domain }}
                     </div>
                     <div class="text-body2 text-grey-6">
-                      {{ $t('zones.admin') }}: {{ currentTenant.zone_admin_name }}
+                      {{ $t('zones.admin') }}: {{ currentTenant.admin_name }}
                     </div>
                   </div>
                   <div v-else class="text-body2 text-grey-6">
                     {{ $t('zones.noCurrentZone') }}
                   </div>
-                </div>
-                <div class="col-auto" v-if="isCurrentTenantAdmin">
-                  <q-chip color="info" :label="$t('zones.adminRole')" icon="admin_panel_settings" />
                 </div>
               </div>
             </q-card-section>
@@ -49,15 +46,7 @@
         </div>
       </div>
 
-      <!-- Zone概览统计 -->
-      <div v-if="currentTenant && zoneStatistics[currentTenant.zone_id]" class="q-mb-lg">
-        <ResponsiveCardGrid
-          :items="tenantStatsCards"
-          variant="standard"
-        />
-      </div>
-
-      <!-- 可用Zones列表 -->
+      <!-- 可用网络区列表 -->
       <div class="row">
         <div class="col-12">
           <q-card>
@@ -77,33 +66,25 @@
                 <div class="row q-gutter-md">
                   <div
                     v-for="tenant in availableTenants"
-                    :key="tenant.id"
+                    :key="tenant.tenant_id"
                     class="col-12 col-md-6 col-lg-4"
                   >
                     <q-card 
                       class="zone-card cursor-pointer"
-                      :class="{ 'current-zone': currentTenant?.id === tenant.id }"
+                      :class="{ 'current-zone': currentTenant?.tenant_id === tenant.tenant_id }"
                       @click="handleSwitchTenant(tenant)"
                     >
                       <q-card-section>
                         <div class="row items-center">
                           <div class="col">
-                            <div class="text-h6">{{ tenant.zone_name }}</div>
-                            <div class="text-body2 text-grey-6">{{ tenant.zone_domain }}</div>
+                            <div class="text-h6">{{ tenant.name }}</div>
+                            <div class="text-body2 text-grey-6">{{ tenant.domain }}</div>
                           </div>
                           <div class="col-auto">
                             <q-chip
-                              :color="tenant.zone_status === 1 ? 'positive' : 'negative'"
-                              :label="tenant.zone_status === 1 ? $t('common.active') : $t('common.inactive')"
+                              :color="tenant.status === 'active' ? 'positive' : 'negative'"
+                              :label="tenant.status === 'active' ? $t('common.active') : $t('common.inactive')"
                               size="sm"
-                            />
-                            <q-icon 
-                              v-if="tenant.pivot.is_admin === 1" 
-                              name="admin_panel_settings"
-                              color="info"
-                              size="sm"
-                              class="q-ml-sm"
-                              :title="$t('zones.adminRole')"
                             />
                           </div>
                         </div>
@@ -111,16 +92,16 @@
 
                       <q-card-section class="q-pt-none">
                         <div class="text-body2 text-grey-6">
-                          {{ $t('zones.admin') }}: {{ tenant.zone_admin_name }}
+                          {{ $t('zones.admin') }}: {{ tenant.admin_name }}
                         </div>
-                        <div class="text-body2 text-grey-6" v-if="tenant.zone_remarks">
-                          {{ tenant.zone_remarks }}
+                        <div class="text-body2 text-grey-6" v-if="tenant.description">
+                          {{ tenant.description }}
                         </div>
                       </q-card-section>
 
                       <q-card-actions align="right">
                         <q-btn
-                          v-if="currentTenant?.id !== tenant.id"
+                          v-if="currentTenant?.tenant_id !== tenant.tenant_id"
                           flat
                           :label="$t('zones.switchToZone')"
                           color="primary"
@@ -180,66 +161,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { ref, onMounted } from 'vue'
 import { useTenants } from '../../composables/useTenants'
-import { useNotify } from '../../composables/useNotify'
-import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import PageLayout from '../../components/layout/PageLayout.vue'
 import type { Tenant } from '../../types'
-
-const { t } = useI18n()
-const notify = useNotify()
 
 const {
   loading,
   currentTenant,
   availableTenants,
-  zoneStatistics,
-  isCurrentTenantAdmin,
   switchTenant,
-  getTenantStatistics,
-  initForUser
+  init
 } = useTenants()
-
-// Zone统计卡片数据
-const tenantStatsCards = computed(() => {
-  if (!currentTenant.value || !zoneStatistics.value[currentTenant.value.zone_id]) {
-    return []
-  }
-  
-  const stats = zoneStatistics.value[currentTenant.value.zone_id]
-  return [
-    {
-      id: 'total_nodes',
-      title: t('zones.stats.totalNodes'),
-      value: stats.node_count,
-      icon: 'dns',
-      color: 'primary'
-    },
-    {
-      id: 'active_nodes',
-      title: t('zones.stats.activeNodes'),
-      value: stats.active_node_count,
-      icon: 'wifi',
-      color: 'positive'
-    },
-    {
-      id: 'routes',
-      title: t('zones.stats.routes'),
-      value: stats.route_count,
-      icon: 'route',
-      color: 'info'
-    },
-    {
-      id: 'users',
-      title: t('zones.stats.users'),
-      value: stats.user_count,
-      icon: 'group',
-      color: 'orange'
-    }
-  ]
-})
 
 // 对话框状态
 const switchDialog = ref({
@@ -248,45 +181,37 @@ const switchDialog = ref({
   tenantName: ''
 })
 
-// 处理Zone切换
+// 处理网络区切换
 const handleSwitchTenant = (tenant: Tenant) => {
-  if (currentTenant.value?.id === tenant.id) {
-    return // 已经是当前zone，无需切换
+  if (currentTenant.value?.tenant_id === tenant.tenant_id) {
+    return // 已经是当前网络区，无需切换
   }
-  
+
   switchDialog.value = {
     show: true,
     tenant,
-    tenantName: tenant.zone_name
+    tenantName: tenant.name
   }
 }
 
-// 确认切换Zone
+// 确认切换
 const confirmSwitchTenant = async () => {
   if (!switchDialog.value.tenant) return
-  
-  const success = await switchTenant(switchDialog.value.tenant.zone_id)
-  if (success) {
-    // 获取新zone的统计信息
-    await getTenantStatistics(switchDialog.value.tenant.zone_id.toString())
+
+  const switched = await switchTenant(switchDialog.value.tenant.tenant_id)
+  if (switched) {
     switchDialog.value.show = false
   }
 }
 
 // 刷新数据
 const handleRefresh = async () => {
-  await initForUser()
-  if (currentTenant.value) {
-    await getTenantStatistics(currentTenant.value.zone_id.toString())
-  }
+  await init()
 }
 
 // 初始化
 onMounted(async () => {
-  await initForUser()
-  if (currentTenant.value) {
-    await getTenantStatistics(currentTenant.value.zone_id.toString())
-  }
+  await init()
 })
 </script>
 

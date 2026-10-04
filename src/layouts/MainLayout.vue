@@ -739,70 +739,20 @@ onMounted(async () => {
     currentLanguage.value = savedLocale
   }
   
-  // 如果已认证但没有区域数据，尝试加载区域数据
-  if (authStore.isAuthenticated && authStore.availableTenants.length === 0) {
-    debug.log('🔧 [MainLayout] Loading zones data...')
+  // 已认证则确保「归属网络区列表 + 当前选中」就绪。
+  // 恢复逻辑只有一份实现（authStore.restoreCurrentTenant）——此前 boot/auth.ts 与
+  // 这里各写了一遍 4 层兜底，两边行为会悄悄分叉。
+  if (authStore.isAuthenticated) {
     try {
-      await authStore.loadUserTenants()
-      debug.log('🔧 [MainLayout] Zones loaded:', authStore.availableTenants.length, 'zones')
-      debug.log('🔧 [MainLayout] Available zones:', authStore.availableTenants.map(z => z.zone_name))
-      
-      // 注意：区域恢复逻辑已经在 boot/auth.ts 中处理
-      // 这里只是一个备用恢复机制，防止 boot 文件执行失败
-      if (!authStore.currentTenant) {
-        debug.log('🔧 [MainLayout] No current zone, attempting fallback recovery...')
-        const savedTenant = LocalStorage.getItem('current_zone') as string | null
-        if (savedTenant) {
-          try {
-            const tenant = JSON.parse(savedTenant)
-            debug.log('🔧 [MainLayout] Fallback: Parsed saved zone:', tenant.zone_name)
-            const validTenant = authStore.availableTenants.find((z: any) => z.zone_id === tenant.zone_id)
-            if (validTenant) {
-              authStore.currentTenant = validTenant
-              debug.log('🔧 [MainLayout] Fallback: Restored saved zone:', validTenant.zone_name)
-            } else {
-              debug.log('🔧 [MainLayout] Fallback: Saved zone not in available zones')
-              // 如果保存的区域不在可用列表中，使用用户默认区域
-              if (authStore.user?.zone_id) {
-                const defaultTenant = authStore.availableTenants.find((z: any) => z.zone_id === authStore.user?.zone_id)
-                if (defaultTenant) {
-                  authStore.currentTenant = defaultTenant
-                  debug.log('🔧 [MainLayout] Fallback: Using default zone:', defaultTenant.zone_name)
-                }
-              }
-            }
-          } catch (error) {
-            debug.warn('🔧 [MainLayout] Fallback: Failed to parse saved zone:', error)
-            // 解析失败时使用用户默认区域
-            if (authStore.user?.zone_id) {
-              const defaultTenant = authStore.availableTenants.find((z: any) => z.zone_id === authStore.user?.zone_id)
-              if (defaultTenant) {
-                authStore.currentTenant = defaultTenant
-                debug.log('🔧 [MainLayout] Fallback: Using default zone after parse error:', defaultTenant.zone_name)
-              }
-            }
-          }
-        } else {
-          // 没有保存的区域选择，使用用户默认区域
-          if (authStore.user?.zone_id) {
-            const tenant = authStore.availableTenants.find((z: any) => z.zone_id === authStore.user?.zone_id)
-            if (tenant) {
-              authStore.currentTenant = tenant
-              debug.log('🔧 [MainLayout] Fallback: Using default zone:', tenant.zone_name)
-            }
-          }
-        }
-      } else {
-        debug.log('🔧 [MainLayout] Current zone already set:', authStore.currentTenant.zone_name)
-      }
+      await authStore.restoreCurrentTenant()
     } catch (error) {
-      debug.error('🔧 [MainLayout] Failed to load zones:', error)
+      debug.error('🔧 [MainLayout] Failed to load tenants:', error)
     }
   }
-  
-  // 如果区域数据仍然为空且用户已认证，使用默认的Global tenant
+
+  // 归属列表为空时兜底到平台租户（2026-10-04 用户裁定 B：与服务端 platform_tenant_id 同源）
   if (authStore.isAuthenticated && authStore.availableTenants.length === 0) {
-    debug.log('🔧 [MainLayout] No zones loaded, using default Global zone')
+    debug.log('🔧 [MainLayout] No tenants loaded, falling back to platform tenant')
     authStore.availableTenants = [DEFAULT_PLATFORM_TENANT]
     if (!authStore.currentTenant) {
       authStore.currentTenant = DEFAULT_PLATFORM_TENANT

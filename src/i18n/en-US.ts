@@ -530,7 +530,7 @@ export default {
       enableNode: 'Enable',
       viewNode: 'View Node',
       privateKeyWarning: 'The private key is shown only once. Save it immediately!',
-      noZone: 'No Zone available. Please switch or join a Zone first.',
+      noZone: 'No Network available. Please switch or join a Network first.',
       createFailed: 'Creation failed, please try again',
       keyGenSuccess: 'Keys generated. Save the private key immediately!',
       keyGenFailed: 'Key generation failed',
@@ -1027,7 +1027,7 @@ export default {
     pendingConnections: 'Pending Connections',
     friendNodes: 'Friend Nodes',
     ippools: 'IP Pool Management',
-    zones: 'Zone Management',
+    zones: 'Network Management',
     zoneSharing: 'Zone Sharing',
     zoneServices: 'Zone Services',
     services: {
@@ -1196,7 +1196,7 @@ export default {
       nodeType: 'Node Type',
       vpnType: 'VPN Type',
       endpoint: 'Endpoint',
-      zone: 'Zone',
+      zone: 'Network',
       lastSeen: 'Last Seen',
       createdAt: 'Created At',
       noDescription: 'No Description',
@@ -1570,23 +1570,23 @@ export default {
     fetchActiveRoutesError: 'Failed to fetch active routes'
   },
   zones: {
-    subtitle: 'Network zone management and configuration',
-    switchZone: 'Switch Zone',
-    selectZone: 'Select Zone',
+    subtitle: 'Your networks and current selection',
+    switchZone: 'Switch Network',
+    selectZone: 'Select Network',
     switchedTo: 'Switched to {zoneName}',
-    switchFailed: 'Failed to switch zone',
-    unknownZone: 'Unknown zone',
-    comingSoonMessage: 'Zone management feature is under development, stay tuned!',
+    switchFailed: 'Failed to switch network',
+    unknownZone: 'Unknown network',
+    comingSoonMessage: 'Network management feature is under development, stay tuned!',
 
-    // Extended zone management features
-    currentZone: 'Current Zone',
-    availableZones: 'Available Zones',
-    noCurrentZone: 'No zone selected',
-    noAvailableZones: 'No available zones',
+    // Extended network management features
+    currentZone: 'Current Network',
+    availableZones: 'Available Networks',
+    noCurrentZone: 'No network selected',
+    noAvailableZones: 'No available networks',
     adminRole: 'Administrator',
     domain: 'Domain',
     admin: 'Administrator',
-    switchToZone: 'Switch to this zone',
+    switchToZone: 'Switch to this network',
 
     // Statistics
     stats: {
@@ -1599,7 +1599,7 @@ export default {
     // Actions
     actions: {
       switch: 'Switch',
-      create: 'Create Zone',
+      create: 'Create Network',
       edit: 'Edit',
       delete: 'Delete',
       refresh: 'Refresh'
@@ -1608,29 +1608,29 @@ export default {
     // Dialogs
     dialogs: {
       switchZone: {
-        title: 'Switch Zone',
-        message: 'Are you sure you want to switch to zone "{zoneName}"?',
-        warning: 'After switching zones, you will see the network configuration and data for that zone.'
+        title: 'Switch Network',
+        message: 'Are you sure you want to switch to network "{zoneName}"?',
+        warning: 'After switching, you will see the node configuration and data of that network.'
       },
       createZone: {
-        title: 'Create New Zone',
-        nameLabel: 'Zone Name',
-        descriptionLabel: 'Zone Description',
+        title: 'Create New Network',
+        nameLabel: 'Network Name',
+        descriptionLabel: 'Network Description',
         create: 'Create'
       }
     },
 
     // Error messages
-    fetchOverviewError: 'Failed to fetch zone overview',
-    fetchAvailableZonesError: 'Failed to fetch available zones',
-    fetchZonesError: 'Failed to fetch zone list',
-    fetchDetailsError: 'Failed to fetch zone details',
-    createSuccess: 'Zone created successfully',
-    createError: 'Failed to create zone',
-    updateSuccess: 'Zone updated successfully',
-    updateError: 'Failed to update zone',
-    deleteSuccess: 'Zone deleted successfully',
-    deleteError: 'Failed to delete zone'
+    fetchOverviewError: 'Failed to fetch network overview',
+    fetchAvailableZonesError: 'Failed to fetch available networks',
+    fetchZonesError: 'Failed to fetch network list',
+    fetchDetailsError: 'Failed to fetch network details',
+    createSuccess: 'Network created successfully',
+    createError: 'Failed to create network',
+    updateSuccess: 'Network updated successfully',
+    updateError: 'Failed to update network',
+    deleteSuccess: 'Network deleted successfully',
+    deleteError: 'Failed to delete network'
   },
   social: {
     subtitle: 'Network connections and user management',
@@ -1694,7 +1694,7 @@ export default {
       addFriend: 'Add Friend',
       requested: 'Requested',
       friend: 'Already Friends',
-      zone: 'Zone',
+      zone: 'Network',
       lastActive: 'Last Active'
     },
     // Friend card
@@ -1852,7 +1852,7 @@ export default {
     canCreate: 'Can Create',
     // Simplified creation related
     quotaInfo: 'Current {current} pools, max {max} pools',
-    quotaExhausted: 'IP pool quota limit reached for this Zone',
+    quotaExhausted: 'IP pool quota limit reached for this Network',
     createCount: 'Create Count',
     poolsUnit: 'pools',
     continuous: 'Continuous',
@@ -2421,8 +2421,8 @@ export default {
       content: '<p>Connection details show both endpoint nodes, network parameters and real-time status. Use the topology view to see your full network structure and troubleshoot issues.</p>'
     },
     zoneManagement: {
-      title: '🌍 Zone Management',
-      content: '<p>Zones provide resource isolation — each has independent IP pools, nodes and connections. Contact an admin to request new Zones for multi-environment management.</p>'
+      title: '🌍 Network Management',
+      content: '<p>Networks provide resource isolation — each has independent IP pools, nodes and connections. Contact an admin to request a new Network for multi-environment management.</p>'
     },
     settingsCenter: {
       title: '⚙️ Settings',

@@ -2,7 +2,7 @@ import { boot } from 'quasar/wrappers'
 import debug from '../utils/debug'
 import { LocalStorage } from 'quasar'
 import { tokenManager } from '../utils/tokenManager'
-import { APP_CONFIG } from '../config/app'
+import { TENANT_SELECTION_KEY, LEGACY_TENANT_SELECTION_KEY } from '../config/app'
 
 // 立即执行的日志，确认文件被加载
 debug.log('🔐 [Boot] Auth module loaded and executing...')
@@ -49,7 +49,8 @@ export default boot(async ({ router, app }) => {
     // Token过期，清除所有认证数据
     tokenManager.clearTokens()
     LocalStorage.remove('user_info')
-    LocalStorage.remove('current_zone')
+    LocalStorage.remove(TENANT_SELECTION_KEY)
+    LocalStorage.remove(LEGACY_TENANT_SELECTION_KEY)
     debug.log('🔐 [Boot] Expired auth data cleared')
   } else if (token && userInfo) {
     debug.log('🔐 [Boot] Valid token found, restoring auth state...')
@@ -110,68 +111,17 @@ export default boot(async ({ router, app }) => {
       }
     }
 
-    // 单独处理zone加载，不影响认证状态
+    // 单独处理网络区加载，不影响认证状态
     if (authStore.isAuthenticated) {
-      debug.log('🔐 [Boot] Loading user zones...')
+      debug.log('🔐 [Boot] Loading user tenants...')
 
-      // 加载用户区域数据 - 如果失败不要清除认证状态
+      // 加载失败不要清除认证状态——网络区是可选上下文，认证才是硬条件
       try {
-        await authStore.loadUserTenants()
-        debug.log('🔐 [Boot] Available zones loaded:', authStore.availableTenants.length)
+        const tenant = await authStore.restoreCurrentTenant()
+        debug.log('🔐 [Boot] Current tenant:', tenant ? `${tenant.name} (${tenant.tenant_id})` : 'None')
       } catch (tenantError) {
-        debug.warn('🔐 [Boot] Failed to load user zones, but keeping auth state:', tenantError)
-        // 不要因为zone加载失败就清除认证状态
+        debug.warn('🔐 [Boot] Failed to load user tenants, but keeping auth state:', tenantError)
       }
-
-      // 优先从 localStorage 恢复用户选择的区域
-      const savedTenant = LocalStorage.getItem('current_zone') as string | null
-      debug.log('🔐 [Boot] Saved zone from localStorage:', savedTenant)
-
-      if (savedTenant) {
-        try {
-          const tenant = JSON.parse(savedTenant.toString())
-          debug.log('🔐 [Boot] Parsed saved zone:', tenant)
-
-          // 验证保存的区域是否在可用区域列表中
-          const validTenant = authStore.availableTenants.find((z: any) => z.zone_id === tenant.zone_id)
-          if (validTenant) {
-            authStore.currentTenant = validTenant
-            debug.log('🔐 [Boot] Restored saved zone:', validTenant.zone_name)
-          } else {
-            debug.log('🔐 [Boot] Saved zone not found in available zones, using default')
-            // 如果保存的区域不在可用列表中，使用用户默认区域
-            if (authStore.user?.zone_id) {
-              const defaultTenant = authStore.availableTenants.find((z: any) => z.zone_id === authStore.user?.zone_id)
-              if (defaultTenant) {
-                authStore.currentTenant = defaultTenant
-                debug.log('🔐 [Boot] Set default zone:', defaultTenant.zone_name)
-              }
-            }
-          }
-        } catch (error) {
-          debug.warn('🔐 [Boot] Failed to parse saved zone:', error)
-          // 解析失败时使用用户默认区域
-          if (authStore.user?.zone_id) {
-            const defaultTenant = authStore.availableTenants.find((z: any) => z.zone_id === authStore.user?.zone_id)
-            if (defaultTenant) {
-              authStore.currentTenant = defaultTenant
-              debug.log('🔐 [Boot] Set default zone after parse error:', defaultTenant.zone_name)
-            }
-          }
-        }
-      } else {
-        debug.log('🔐 [Boot] No saved zone found, using user default zone')
-        // 没有保存的区域选择，使用用户默认区域
-        if (authStore.user?.zone_id) {
-          const tenant = authStore.availableTenants.find((z: any) => z.zone_id === authStore.user?.zone_id)
-          if (tenant) {
-            authStore.currentTenant = tenant
-            debug.log('🔐 [Boot] Set user default zone:', tenant.zone_name)
-          }
-        }
-      }
-
-      debug.log('🔐 [Boot] Current zone:', authStore.currentTenant?.zone_name || 'None')
     }
   } else {
     debug.log('🔐 [Boot] No valid auth data found, user not authenticated')

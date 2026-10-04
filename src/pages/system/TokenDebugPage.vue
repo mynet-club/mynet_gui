@@ -208,14 +208,17 @@ const clearTokens = () => {
 
 // WebSocket 相关方法
 const connectWebSocket = () => {
-  if (!authStore.token || !authStore.currentTenant) {
+  // tenant_id 只认 user.tenant_id 这一个来源（HTTP 拦截器与 boot/websocket 都读它），
+  // 这里再读 currentTenant 就可能出现「界面显示 A、连出去是 B」。
+  const tenantId = authStore.user?.tenant_id
+  if (!authStore.token || !tenantId) {
     addLog('error', `WebSocket 连接失败：缺少认证信息或${TERM_ZONE}信息`)
     notify.error(`缺少认证信息或${TERM_ZONE}信息`)
     return
   }
-  
-  connect(authStore.token, authStore.currentTenant.zone_id.toString())
-  addLog('info', `WebSocket 连接尝试: ${TERM_ZONE} ID ${authStore.currentTenant.zone_id}`)
+
+  connect(authStore.token, String(tenantId))
+  addLog('info', `WebSocket 连接尝试: ${TERM_ZONE} ID ${tenantId}`)
 }
 
 const disconnectWebSocket = () => {
@@ -238,7 +241,7 @@ const handleTimeUpdate = (data: TimeUpdateMessage) => {
 
 const handleConnected = (data: any) => {
   wsConnected.value = true
-  addLog('success', `✅ WebSocket 连接成功: ${TERM_ZONE} ${data.zone_id}`)
+  addLog('success', `✅ WebSocket 连接成功: ${TERM_ZONE} ${data.tenant_id}`)
 }
 
 const handleDisconnected = (data: any) => {
