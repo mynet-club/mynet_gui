@@ -377,15 +377,12 @@ export const useAuthStore = defineStore('auth', () => {
     debug.log('🔧 [AUTH] Auth store initialized')
   }
   
-  // 权限检查
-  const hasPermission = (permission: string) => {
-    return user.value?.permissions?.includes(permission) || false
-  }
-  
-  const hasRole = (role: string) => {
-    return user.value?.permissions?.includes(role) || false
-  }
-  
+  // 权限检查：曾有 hasPermission() / hasRole() 两个 helper，读 user.permissions。
+  // 2026-10-05 裁定 B3 起删除 —— 用户面只有「自己 + 本租户作用域」这一种权限语义
+  // （权限矩阵 R2），后端用户面响应里从来没有 permissions 这一列（tenant_admin 闸门
+  // 只挂在 console 面的 tenant.permission:tenant_admin），且两处零调用点。
+  // 留着就是「假门椒」：看着能挡，实际恒 false，误用时表现为「功能莫名不见了」。
+
   return {
     user,
     token,
@@ -403,8 +400,6 @@ export const useAuthStore = defineStore('auth', () => {
     checkTokenExpiry,
     initializeAuth,
     loadUserTenants,
-    restoreCurrentTenant,
-    hasPermission,
-    hasRole
+    restoreCurrentTenant
   }
 })

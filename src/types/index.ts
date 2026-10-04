@@ -13,7 +13,8 @@ export interface User {
   updated_at: string
   deleted_at: string | null
   profile_photo_url: string
-  permissions?: string[]
+  // 没有 permissions 这一列：用户面（GUI）只有「自己 + 本租户作用域」一种权限语义
+  // （权限矩阵 R2 / 裁定 B3，2026-10-05）。后端从未下发过它，前端也不许再长出门椒。
   avatar?: string
   signature?: string  // 用户签名
   preferences?: {
