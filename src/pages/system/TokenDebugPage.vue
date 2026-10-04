@@ -118,6 +118,7 @@ import { testTokenRefresh, testAutoRefresh, getTokenInfo } from '../../utils/tok
 import { useNotify } from '../../composables/useNotify'
 import { useWebSocket } from '../../services/websocket'
 import { useAuthStore } from '../../stores/auth'
+import { TERM_ZONE } from '../../config/terms'
 import type { TimeUpdateMessage } from '../../services/websocket'
 
 const notify = useNotify()
@@ -208,13 +209,13 @@ const clearTokens = () => {
 // WebSocket 相关方法
 const connectWebSocket = () => {
   if (!authStore.token || !authStore.currentTenant) {
-    addLog('error', 'WebSocket 连接失败：缺少认证信息或区域信息')
-    notify.error('缺少认证信息或区域信息')
+    addLog('error', `WebSocket 连接失败：缺少认证信息或${TERM_ZONE}信息`)
+    notify.error(`缺少认证信息或${TERM_ZONE}信息`)
     return
   }
   
   connect(authStore.token, authStore.currentTenant.zone_id.toString())
-  addLog('info', `WebSocket 连接尝试: Zone ID ${authStore.currentTenant.zone_id}`)
+  addLog('info', `WebSocket 连接尝试: ${TERM_ZONE} ID ${authStore.currentTenant.zone_id}`)
 }
 
 const disconnectWebSocket = () => {
@@ -232,12 +233,12 @@ const clearTimeLogs = () => {
 const handleTimeUpdate = (data: TimeUpdateMessage) => {
   latestTimeData.value = data
   lastTimeUpdate.value = new Date().toLocaleTimeString()
-  addLog('success', `🕐 收到时间更新: ${data.formatted_time} (Zone: ${data.zone_id})`)
+  addLog('success', `🕐 收到时间更新: ${data.formatted_time} (${TERM_ZONE}: ${data.zone_id})`)
 }
 
 const handleConnected = (data: any) => {
   wsConnected.value = true
-  addLog('success', `✅ WebSocket 连接成功: Zone ${data.zone_id}`)
+  addLog('success', `✅ WebSocket 连接成功: ${TERM_ZONE} ${data.zone_id}`)
 }
 
 const handleDisconnected = (data: any) => {
