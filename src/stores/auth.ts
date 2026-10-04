@@ -252,6 +252,48 @@ export const useAuthStore = defineStore('auth', () => {
     return targetTenant
   }
   
+  /**
+   * 凭邀请码加入另一个网络区，并把「当前网络区」切过去。
+   *
+   * 顺序与 `switchTenant` 同理：**先拿服务端确认，再动本地状态**。加入成功后
+   * 后端做了两件事——成员关系置活跃、`users.tenant_id` 指向新区；本地必须同时
+   * 跟上这三处（内存 user、LocalStorage 的 user_info、选区记录），否则界面还在
+   * 旧区而 `X-Tenant-ID` 已是新区，节点列表会莫名其妙空掉。
+   *
+   * 归属列表要**强制重取**：新加入的区此刻才出现，用缓存的旧列表找不到它。
+   */
+  const joinTenant = async (code: string) => {
+    debug.log('🔧 [AUTH] Joining tenant by invite code')
+
+    const result = await tenantService.joinTenant(code)
+    const tenantId = Number(result?.tenant_id)
+    if (!Number.isFinite(tenantId) || tenantId <= 0) {
+      throw new Error(`服务端确认的网络区异常：${JSON.stringify(result)}`)
+    }
+
+    await loadUserTenants()
+
+    const targetTenant = availableTenants.value.find(z => Number(z.tenant_id) === tenantId)
+    if (!targetTenant) {
+      // 后端说进来了、归属列表却查不到 = 成员关系没真写上。
+      // 不兜一个假对象继续跑：那会让界面显示「已加入」而请求全打在进不去的区上。
+      throw new Error(`加入后归属列表里没有网络区 ${tenantId}（${result.name}）`)
+    }
+
+    currentTenant.value = targetTenant
+
+    if (user.value) {
+      user.value.tenant_id = tenantId
+      LocalStorage.set('user_info', JSON.stringify(user.value))
+    } else {
+      debug.warn('🔧 [AUTH] No in-memory user; X-Tenant-ID 会继续用本地存储里的旧值')
+    }
+
+    persistTenantId(tenantId)
+    debug.log('🔧 [AUTH] Joined tenant:', targetTenant.name)
+    return targetTenant
+  }
+
   const refreshUserData = async () => {
     try {
       debug.log('🔧 [AUTH] Refreshing user data...')
@@ -356,6 +398,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     switchTenant,
+    joinTenant,
     refreshUserData,
     checkTokenExpiry,
     initializeAuth,

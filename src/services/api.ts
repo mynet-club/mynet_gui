@@ -244,11 +244,17 @@ export const apiService = {
     return api.get('/auth/verify-token')
   },
 
+  /**
+   * 注册。字段名跟随框架 `UserAuthController::register` 的验证规则：
+   * `invite_code`（不是 back 旧实现的 `invitation`）、`password` 必须带
+   * `confirmed` 对偶字段 `password_confirmation`，否则验证期就 422。
+   */
   async register(data: {
     name: string;
     email: string;
     password: string;
-    invitation: string;
+    password_confirmation: string;
+    invite_code: string;
     device_name?: string;
     activation_url?: string;
   }) {

@@ -136,9 +136,7 @@ export default {
     loadFailed: '加载失败',
     removeFailed: '删除失败',
     acceptFailed: '接受失败',
-    rejectFailed: '拒绝失败',
-    inviteFailed: '邀请失败',
-    emailInviteFailed: '邮件邀请失败'
+    rejectFailed: '拒绝失败'
   },
   notifications: {
     empty: '暂无通知',
@@ -254,13 +252,10 @@ export default {
     newPasswordPlaceholder: '请输入新密码',
     confirmPasswordPlaceholder: '请再次输入您的密码',
     verificationCodePlaceholder: '请输入6位验证码',
-    invitationPlaceholder: '请输入邀请码（必需）',
-    invitationRequired: '请输入邀请码',
-    noInvitationCode: '没有邀请码？',
-    getInvitationCode: '获取邀请码',
-    invitationCodeHelp: '如何获取邀请码',
-    invitationCodeHelpTitle: '获取邀请码',
-    invitationCodeHelpMessage: 'MyNet 采用邀请注册机制，请加入我们的社区获取邀请码：',
+    inviteCodePlaceholder: '请输入邀请码',
+    noInviteCode: '没有邀请码？',
+    inviteCodeHelpTitle: '获取邀请码',
+    inviteCodeHelpMessage: 'MyNet 采用邀请注册机制，请加入我们的社区获取邀请码：',
     joinCommunity: '加入社区',
     telegramCommunity: 'Telegram 社区',
     discordCommunity: 'Discord 社区',
@@ -1872,27 +1867,43 @@ export default {
 
     // 邀请码
     invitations: {
-      title: '邀请码管理',
-      invite: '邀请好友',
-      emailLabel: '邮箱地址',
-      copyFailed: '复制失败',
-      linkCopied: '邀请链接已复制',
-      empty: '暂无可邀请用户',
-      sent: '邀请已发送',
-      emailSent: '邀请邮件已发送到 {email}',
-      createNew: '生成新邀请码',
+      title: '邀请码',
+      myCodeTitle: '我在本网络区的邀请码',
+      myCodeHint: '新朋友在注册页填这个码即可加入本网络区；已经注册过的用下面「加入其它网络区」。',
+      noCodeYet: '还没取过邀请码，点下面的按钮生成一张。',
+      refreshCode: '获取/刷新邀请码',
       code: '邀请码',
-      status: '状态',
-      expiresAt: '过期时间',
-      usedAt: '使用时间',
-      usedBy: '使用者',
-      createdAt: '创建时间',
-      usageCount: '使用次数',
-      copyInviteLink: '复制邀请码链接',
+      usageCount: '已邀请 {used} / {max} 人',
+      usageUnlimited: '已邀请 {used} 人（不限次数）',
+      expiresAt: '到期时间',
+      expiresNever: '长期有效',
       active: '有效',
-      used: '已使用',
+      usedUp: '已用满',
       expired: '已过期',
-      noInvitations: '暂无邀请码'
+      copyCode: '复制邀请码',
+      codeCopied: '邀请码已复制',
+      copyInviteLink: '复制邀请链接',
+      linkCopied: '邀请链接已复制',
+      copyFailed: '复制失败',
+      fetchError: '获取邀请码失败',
+      noZone: '当前没有可用网络区：邀请码按网络区各一张，先加入或切换一个。',
+      joinTitle: '加入其它网络区',
+      joinHint: '输入对方给你的邀请码。加入成功后当前网络区就切到对方那个区。',
+      joinPlaceholder: '请输入邀请码',
+      joinButton: '加入',
+      joinCodeRequired: '请输入邀请码',
+      joinSuccess: '已加入网络区「{name}」',
+      joinError: '加入网络区失败',
+      usagesTitle: '我邀请进来的人',
+      noUsages: '还没有人用过你的邀请码',
+      usageFetchError: '获取邀请记录失败',
+      unknownUser: '未知用户',
+      channelEmail: '邮箱注册',
+      channelSms: '短信注册',
+      channelJoin: '凭码入区',
+      channelUnknown: '未知方式',
+      prevPage: '上一页',
+      nextPage: '下一页'
     },
     // 对话框
     dialogs: {
@@ -1908,12 +1919,6 @@ export default {
         messagePlaceholder: '请输入消息（可选）',
         send: '发送请求',
         cancel: '取消'
-      },
-      createInvitation: {
-        title: '生成邀请码',
-        expiresIn: '有效期（天）',
-        create: '生成',
-        cancel: '取消'
       }
     },
     // 操作消息
@@ -1921,10 +1926,6 @@ export default {
     friendRequestAccepted: '好友请求已接受',
     friendRequestRejected: '好友请求已拒绝',
     friendRemoved: '好友 "{name}" 已删除',
-    invitationCreated: '邀请码已生成',
-    invitationDeleted: '邀请码已删除',
-    invitationCopied: '邀请码已复制到剪贴板',
-    confirmDeleteInvitation: '确定要删除邀请码 "{code}" 吗？',
     // 错误消息
     fetchOverviewError: '获取组网概览失败',
     fetchFriendsError: '获取好友列表失败',
@@ -1934,9 +1935,6 @@ export default {
     friendRequestAcceptError: '接受好友请求失败',
     friendRequestRejectError: '拒绝好友请求失败',
     friendRemoveError: '删除好友失败',
-    fetchInvitationsError: '获取邀请码列表失败',
-    invitationCreateError: '创建邀请码失败',
-    invitationDeleteError: '删除邀请码失败',
 
     // 新增的错误和成功消息
     noFriendNodes: '该好友暂无设备',
@@ -2603,10 +2601,12 @@ export default {
       title: '✨ 自动连接已建立'
     },
     inviterFriend: {
-      title: '👥 你已经和邀请人成为好友'
+      title: '👥 把邀请人加为好友',
+      content: '<p>邀请码只负责把你接入网络区，不会自动建立好友关系。在好友页搜索邀请人并发出好友请求，对方接受后就能查看他的设备。</p>'
     },
     inviteFriend: {
-      title: '📨 邀请好友加入'
+      title: '📨 邀请好友加入',
+      content: '<p>把邀请码或链接分享给朋友，对方注册时填码即可加入你的网络区。好友关系还要互相发一次好友请求。</p>'
     },
     friendDevices: {
       title: '📱 好友的设备',

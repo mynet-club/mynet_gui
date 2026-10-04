@@ -12,9 +12,6 @@ export interface User {
   created_at: string
   updated_at: string
   deleted_at: string | null
-  invitation_count: number
-  invitation_points: number
-  invited_by_user_id: number | null
   profile_photo_url: string
   permissions?: string[]
   avatar?: string
@@ -140,30 +137,50 @@ export interface SocialDataResponse {
   friends: Friend[]
   pending_requests: FriendRequest[]
   outgoing_requests: FriendRequest[]
-  invitations: Invitation[]
   stats: {
     friends_count: number
     pending_count: number
     outgoing_count: number
-    invitations_count: number
     connected_nodes?: number
     active_routes?: number
   }
 }
 
-export interface Invitation {
-  id: number
-  invitation_code: string
-  description: string
+/**
+ * 我的邀请码（框架 `invite_codes` 的用户侧视图）。
+ *
+ * 来源是框架端点 `GET /api/v1/app/invite-code`，它**只回这五个键**，且取码时懒建
+ * （首次调用就会有一张 `max_uses=0` 的个人码）。旧实现里 GUI 依赖的
+ * `invitation_status`（1=pending/2=used/0=expired）、`is_valid`、`description`、
+ * 软删除等字段在框架口径下不存在 —— 状态一律由 `used_count`/`max_uses`/`expires_at`
+ * 现算，不要在前端再造一套档位。
+ */
+export interface MyInviteCode {
+  invite_code_id: string | number
+  code: string
+  /** 0 = 不限次数 */
   max_uses: number
   used_count: number
-  expires_at: string
-  invitation_status: number
-  is_valid: boolean
-  can_use: boolean
-  created_at: string
-  used_at?: string
-  used_by?: string
+  /** null = 永不过期 */
+  expires_at: string | null
+}
+
+/**
+ * 一条归因记录（框架 `invite_code_usages`，不可变表：只有 created_at）。
+ *
+ * `channel` 取值：`email`/`sms`/`oauth:<provider>`（注册核销）与 `join`
+ * （back 的 `POST /api/v1/user/tenants/join`，已注册用户凭码入区）。
+ */
+export interface InviteCodeUsage {
+  usage_id: string | number
+  invite_code_id: string | number
+  tenant_id: string | number
+  inviter_user_id: string | number | null
+  invitee_user_id: string | number
+  channel: string | null
+  used_at: string
+  created_at?: string | null
+  invitee?: { user_id: string | number; name: string; avatar?: string | null }
 }
 
 export interface FriendRequest {
@@ -211,10 +228,6 @@ export interface SocialStats {
   received_requests: number
   connected_nodes: number
   active_routes: number
-  total_invitations: number
-  active_invitations: number
-  used_invitations: number
-  expired_invitations: number
 }
 
 // Routes Module Types

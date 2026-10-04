@@ -31,7 +31,7 @@ export function useAuth() {
     confirmPassword: '',
     agreeTerms: false,
     ageVerified: false,
-    invitation: '' // 添加邀请码字段
+    invite_code: '' // 框架口径的邀请码字段（旧实现叫 invitation，已随 2026-10-04 裁定下架）
   })
 
   // 忘记密码表单
@@ -248,7 +248,8 @@ export function useAuth() {
         name: registerForm.name,
         email: registerForm.email,
         password: registerForm.password,
-        invitation: registerForm.invitation,
+        password_confirmation: registerForm.confirmPassword,
+        invite_code: registerForm.invite_code,
         device_name: 'Web Browser',
         activation_url: `${window.location.origin}/auth/activate`
       });

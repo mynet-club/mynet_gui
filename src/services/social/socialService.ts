@@ -5,7 +5,6 @@ import type {
   SearchUser, 
   FriendRequest, 
   BaseResponse, 
-  Invitation,
   Node
 } from '../../types'
 
@@ -61,24 +60,6 @@ export const socialService = {
   // 删除好友
   async removeFriend(friendId: string): Promise<BaseResponse> {
     const response = await api.post('/social/friend/remove', { friend_id: friendId })
-    return response.data
-  },
-
-  // 获取邀请码列表
-  async getInvitations(): Promise<Invitation[]> {
-    const response = await api.get('/social/invitations')
-    return response.data.data
-  },
-
-  // 生成邀请码
-  async createInvitation(expiresIn?: number): Promise<Invitation> {
-    const response = await api.post('/social/invitation', { expires_in: expiresIn })
-    return response.data.data
-  },
-
-  // 删除邀请码
-  async deleteInvitation(invitationId: string | number): Promise<BaseResponse> {
-    const response = await api.delete(`/social/invitation/${invitationId}`)
     return response.data
   },
 

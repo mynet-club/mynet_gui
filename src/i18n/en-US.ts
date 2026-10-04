@@ -130,9 +130,7 @@ export default {
     loadFailed: 'Load failed',
     removeFailed: 'Remove failed',
     acceptFailed: 'Accept failed',
-    rejectFailed: 'Reject failed',
-    inviteFailed: 'Invite failed',
-    emailInviteFailed: 'Email invite failed'
+    rejectFailed: 'Reject failed'
   },
   notifications: {
     empty: 'No notifications',
@@ -249,13 +247,10 @@ export default {
     newPasswordPlaceholder: 'Please enter new password',
     confirmPasswordPlaceholder: 'Please confirm your password',
     verificationCodePlaceholder: 'Please enter 6-digit code',
-    invitationPlaceholder: 'Please enter invitation code (required)',
-    invitationRequired: 'Please enter invitation code',
-    noInvitationCode: "Don't have an invitation code?",
-    getInvitationCode: 'Get Invitation Code',
-    invitationCodeHelp: 'How to get invitation code',
-    invitationCodeHelpTitle: 'Get Invitation Code',
-    invitationCodeHelpMessage: 'MyNet uses an invitation-based registration system. Please join our community to get an invitation code:',
+    inviteCodePlaceholder: 'Please enter the invite code',
+    noInviteCode: "Don't have an invite code?",
+    inviteCodeHelpTitle: 'Get an invite code',
+    inviteCodeHelpMessage: 'MyNet gates registration with invite codes. Join our community to get one:',
     joinCommunity: 'Join Community',
     telegramCommunity: 'Telegram Community',
     discordCommunity: 'Discord Community',
@@ -1711,23 +1706,43 @@ export default {
 
     // Invitations
     invitations: {
-      title: 'Invitation Management',
-      createNew: 'Create New Invitation',
-      code: 'Invitation Code',
-      status: 'Status',
-      expiresAt: 'Expires At',
-      usedAt: 'Used At',
-      usedBy: 'Used By',
-      createdAt: 'Created At',
-      usageCount: 'Usage Count',
-      copyCode: 'Copy Code',
-      copyInviteLink: 'Copy Invitation Link',
+      title: 'Invite Codes',
+      myCodeTitle: 'My invite code for this Network',
+      myCodeHint: 'New friends enter this code on the sign-up page to join this Network; people who already have an account use "Join another Network" below.',
+      noCodeYet: 'No invite code yet — use the button below to create one.',
+      refreshCode: 'Get / refresh invite code',
+      code: 'Invite code',
+      usageCount: '{used} of {max} invited',
+      usageUnlimited: '{used} invited (no limit)',
+      expiresAt: 'Expires',
+      expiresNever: 'Never expires',
       active: 'Active',
-      used: 'Used',
+      usedUp: 'Used up',
       expired: 'Expired',
-      noInvitations: 'No invitations yet',
-      linkCopied: 'Invitation link copied to clipboard',
-      copyFailed: 'Failed to copy invitation link'
+      copyCode: 'Copy code',
+      codeCopied: 'Invite code copied',
+      copyInviteLink: 'Copy invite link',
+      linkCopied: 'Invite link copied',
+      copyFailed: 'Copy failed',
+      fetchError: 'Failed to load the invite code',
+      noZone: 'No Network selected: invite codes are per Network, so join or switch one first.',
+      joinTitle: 'Join another Network',
+      joinHint: 'Enter the invite code someone shared with you. Joining switches your current Network to theirs.',
+      joinPlaceholder: 'Enter an invite code',
+      joinButton: 'Join',
+      joinCodeRequired: 'Please enter an invite code',
+      joinSuccess: 'Joined Network "{name}"',
+      joinError: 'Failed to join the Network',
+      usagesTitle: 'People I invited',
+      noUsages: 'Nobody has used your invite code yet',
+      usageFetchError: 'Failed to load invite records',
+      unknownUser: 'Unknown user',
+      channelEmail: 'Email sign-up',
+      channelSms: 'SMS sign-up',
+      channelJoin: 'Joined by code',
+      channelUnknown: 'Unknown',
+      prevPage: 'Previous',
+      nextPage: 'Next'
     },
     // Dialogs
     dialogs: {
@@ -1743,12 +1758,6 @@ export default {
         messagePlaceholder: 'Enter message (optional)',
         send: 'Send Request',
         cancel: 'Cancel'
-      },
-      createInvitation: {
-        title: 'Create Invitation',
-        expiresIn: 'Expires In (days)',
-        create: 'Create',
-        cancel: 'Cancel'
       }
     },
     // Action messages
@@ -1756,10 +1765,6 @@ export default {
     friendRequestAccepted: 'Friend request accepted',
     friendRequestRejected: 'Friend request rejected',
     friendRemoved: 'Friend "{name}" removed',
-    invitationCreated: 'Invitation code created',
-    invitationDeleted: 'Invitation code deleted',
-    invitationCopied: 'Invitation code copied to clipboard',
-    confirmDeleteInvitation: 'Are you sure you want to delete invitation code "{code}"?',
     // Error messages
     fetchOverviewError: 'Failed to fetch social overview',
     fetchFriendsError: 'Failed to fetch friends list',
@@ -1769,9 +1774,6 @@ export default {
     friendRequestAcceptError: 'Failed to accept friend request',
     friendRequestRejectError: 'Failed to reject friend request',
     friendRemoveError: 'Failed to remove friend',
-    fetchInvitationsError: 'Failed to fetch invitations',
-    invitationCreateError: 'Failed to create invitation',
-    invitationDeleteError: 'Failed to delete invitation',
     fetchFriendNodesError: 'Failed to fetch friend nodes',
     fetchAllFriendNodesError: 'Failed to fetch all friend nodes',
     friendRequestCancelled: 'Friend request cancelled',
@@ -2375,10 +2377,12 @@ export default {
       title: '✨ Auto-Connection Established'
     },
     inviterFriend: {
-      title: '👥 You Are Now Friends with Your Inviter'
+      title: '👥 Add Your Inviter as a Friend',
+      content: '<p>An invite code only puts you into a Network — it does not create a friendship. Search your inviter on the Friends page and send a request; once they accept you can view their devices.</p>'
     },
     inviteFriend: {
-      title: '📨 Invite a Friend'
+      title: '📨 Invite a Friend',
+      content: '<p>Share your invite code or link. Entering it on the sign-up page puts your friend into your Network; becoming friends still takes a mutual friend request.</p>'
     },
     friendDevices: {
       title: '📱 Friend\'s Devices',

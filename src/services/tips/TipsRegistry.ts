@@ -207,9 +207,9 @@ function buildTipsRegistry(): TipConfig[] {
       timing: { autoMinimizeAfterSeconds: 8 }
     },
     display: {
-      title: t('tips.inviterFriend.title', '👥 你已经和邀请人成为好友'),
+      title: t('tips.inviterFriend.title', '👥 把邀请人加为好友'),
       content: t('tips.inviterFriend.content', `
-        <p>系统已自动与邀请人建立好友关系，你可以查看对方的设备并请求连接。</p>
+        <p>邀请码只负责把你接入网络区，不会自动建立好友关系。在好友页搜索邀请人并发出好友请求，对方接受后就能查看他的设备。</p>
       `),
       target: '[data-tip-target="friends-list"]',
       placement: TipPlacement.Right,
@@ -243,7 +243,7 @@ function buildTipsRegistry(): TipConfig[] {
     display: {
       title: t('tips.inviteFriend.title', '📨 邀请好友加入'),
       content: t('tips.inviteFriend.content', `
-        <p>生成邀请码或链接，分享给朋友即可自动成为好友。</p>
+        <p>把邀请码或链接分享给朋友，对方注册时填码即可加入你的网络区。好友关系还要互相发一次好友请求。</p>
       `),
       target: '[data-tip-target="invite-friend-btn"]',
       placement: TipPlacement.Bottom,

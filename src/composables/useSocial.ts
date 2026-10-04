@@ -6,7 +6,6 @@ import { useI18n } from 'vue-i18n'
 import type { 
   Friend, 
   FriendRequest, 
-  Invitation, 
   SearchUser, 
   SocialOverview,
   SocialStats,
@@ -29,7 +28,6 @@ export function useSocial() {
   const friends = ref<Friend[]>([])
   const friendRequests = ref<FriendRequest[]>([])
   const sentRequests = ref<FriendRequest[]>([])
-  const invitations = ref<Invitation[]>([])
   const searchResults = ref<SearchUser[]>([])
   const searchLoading = ref(false)
   const currentRequestType = ref<'received' | 'sent'>('received')
@@ -44,9 +42,6 @@ export function useSocial() {
   const hasMoreFriends = computed(() => currentPage.value < totalPages.value)
   const onlineFriends = computed(() => friends.value.filter(f => f.status === 'online'))
   const offlineFriends = computed(() => friends.value.filter(f => f.status === 'offline'))
-  const pendingInvitations = computed(() => invitations.value.filter(i => i.invitation_status === 1))
-  const usedInvitations = computed(() => invitations.value.filter(i => i.invitation_status === 2))
-  const expiredInvitations = computed(() => invitations.value.filter(i => i.invitation_status === 0))
   
   // 根据当前请求类型返回相应的请求列表
   const currentRequests = computed(() => {
@@ -123,11 +118,6 @@ export function useSocial() {
             status: request.status || 'undefined' // 保留原始逻辑，但记录错误
           };
         });
-      }
-      
-      // 设置邀请码数据
-      if (response.invitations) {
-        invitations.value = response.invitations
       }
     } catch (error) {
       debug.error('获取组网概览失败:', error)
@@ -298,67 +288,6 @@ export function useSocial() {
     }
   }
 
-  // 获取邀请码列表（现在从已缓存的数据中获取）
-  const fetchInvitations = async () => {
-    try {
-      loading.value = true
-      
-      // 如果还没有数据，先获取overview数据
-      if (invitations.value.length === 0) {
-        await fetchOverview()
-      }
-      
-      // 数据已经通过 fetchOverview 设置，无需额外处理
-      
-    } catch (error) {
-      debug.error('获取邀请码列表失败:', error)
-      notify.error(t('social.fetchInvitationsError'))
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 创建邀请码
-  const createInvitation = async (expiresIn = 7) => {
-    try {
-      loading.value = true
-      const response = await socialService.createInvitation(expiresIn)
-      if (response) {
-        notify.success(t('social.invitationCreated'))
-        invitations.value.unshift(response)
-      }
-    } catch (error) {
-      debug.error('创建邀请码失败:', error)
-      notify.error(t('social.invitationCreateError'))
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 删除邀请码
-  const deleteInvitation = async (invitation: Invitation) => {
-    try {
-      loading.value = true
-      const response = await socialService.deleteInvitation(invitation.id)
-      if (response.success) {
-        notify.success(t('social.invitationDeleted'))
-        // 从列表中移除已删除的邀请码
-        const index = invitations.value.findIndex(inv => inv.id === invitation.id)
-        if (index > -1) {
-          invitations.value.splice(index, 1)
-        }
-        return true
-      }
-      return false
-    } catch (error) {
-      debug.error('删除邀请码失败:', error)
-      notify.error(t('social.invitationDeleteError'))
-      return false
-    } finally {
-      loading.value = false
-    }
-  }
-
   // 获取好友的节点
   const getFriendNodes = async (friendId: string) => {
     try {
@@ -447,7 +376,6 @@ export function useSocial() {
     overview,
     friends,
     friendRequests: currentRequests,
-    invitations,
     searchResults,
     searchLoading,
     currentPage,
@@ -460,14 +388,10 @@ export function useSocial() {
     hasMoreFriends,
     onlineFriends,
     offlineFriends,
-    pendingInvitations,
-    usedInvitations,
-    expiredInvitations,
     
     // 方法
     fetchOverview,
     fetchFriends,
-    fetchInvitations,
     searchUsers,
     fetchFriendRequests,
     sendFriendRequest,
@@ -475,8 +399,6 @@ export function useSocial() {
     rejectFriendRequest,
     cancelFriendRequest,
     removeFriend,
-    createInvitation,
-    deleteInvitation,
     getFriendNodes,
     getAllFriendNodes,
     handleRequestTypeChange,

@@ -132,149 +132,245 @@
       </ResponsiveCardGrid>
     </div>
 
-    <!-- 邀请码管理标签页 -->
+    <!-- 邀请码标签页（框架 invite code：一个网络区一张个人码，用量与归因都在服务端） -->
     <div v-show="activeTab === 'invitations'">
-      <div class="row q-mb-md">
-        <div class="col-auto">
-          <q-btn
-            @click="createInvitation"
-            color="primary"
-            :label="$t('social.invitations.createNew')"
-            icon="add"
-            no-caps
-            :loading="loading"
-          />
-        </div>
-      </div>
+      <!-- 无当前网络区时不请求：框架按请求上下文取码，上下文为空会在租户 0 上建出一张废码 -->
+      <q-banner v-if="!currentTenant" class="bg-orange-1 text-grey-9 q-mb-lg" rounded>
+        <template #avatar><q-icon name="warning" color="orange" /></template>
+        {{ $t('social.invitations.noZone') }}
+      </q-banner>
 
-      <!-- 邀请码列表 -->
-      <ResponsiveCardGrid
-        :items="invitations"
-        :loading="loading"
-        :loading-count="8"
-        variant="standard"
-        spacing="normal"
-        :empty-icon="'card_giftcard'"
-        :empty-title="$t('social.invitations.noInvitations')"
-        :clickable="false"
-      >
-        <template #default="{ item: invitation }">
-          <q-card-section>
-            <div class="row items-center q-mb-sm">
-              <div class="col">
-                <div class="row items-center">
-                  <q-icon name="card_giftcard" size="30px" class="q-mr-md" color="primary" />
-                  <div>
-                    <div class="text-h6 text-weight-bold text-mono">{{ invitation.invitation_code }}</div>
-                    <div class="text-caption text-grey-6">
-                      {{ $t('social.invitations.createdAt') }}: {{ formatDate(invitation.created_at) }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-auto">
-                <q-chip
-                  :color="getStatusColor(invitation.invitation_status)"
-                  text-color="white"
-                  :label="$t(`social.invitations.${getInvitationStatus(invitation.invitation_status)}`)"
-                  size="md"
-                />
-              </div>
+      <!-- 我的邀请码 -->
+      <q-card flat bordered class="q-mb-lg">
+        <q-card-section>
+          <div class="text-h6">{{ $t('social.invitations.myCodeTitle') }}</div>
+          <div class="text-caption text-grey-6">{{ $t('social.invitations.myCodeHint') }}</div>
+        </q-card-section>
+
+        <q-card-section v-if="myCode" class="q-pt-none">
+          <div class="row items-center q-col-gutter-md">
+            <div class="col-auto">
+              <div class="text-h5 text-weight-bold text-mono">{{ myCode.code }}</div>
             </div>
-          </q-card-section>
-
-          <q-card-section class="q-pt-none">
-            <div class="invitation-details">
-              <div class="detail-row">
-                <q-icon name="schedule" size="sm" color="grey-6" class="q-mr-sm" />
-                <span class="text-caption text-grey-6">
-                  {{ $t('social.invitations.expiresAt') }}: {{ formatDate(invitation.expires_at) }}
-                </span>
-              </div>
-              <div class="detail-row">
-                <q-icon name="people" size="sm" color="info" class="q-mr-sm" />
-                <span class="text-caption text-grey-6">
-                  {{ $t('social.invitations.usageCount') }}: {{ invitation.used_count }} / {{ invitation.max_uses }}
-                </span>
-              </div>
-              <div v-if="invitation.used_at" class="detail-row">
-                <q-icon name="check_circle" size="sm" color="positive" class="q-mr-sm" />
-                <span class="text-caption text-grey-6">
-                  {{ $t('social.invitations.usedAt') }}: {{ formatDate(invitation.used_at) }}
-                </span>
-              </div>
-              <div v-if="invitation.used_by" class="detail-row">
-                <q-icon name="person" size="sm" color="info" class="q-mr-sm" />
-                <span class="text-caption text-grey-6">
-                  {{ $t('social.invitations.usedBy') }}: {{ invitation.used_by }}
-                </span>
-              </div>
+            <div class="col-auto">
+              <q-chip :color="codeStatusColor" text-color="white" :label="codeStatusText" size="md" />
             </div>
-          </q-card-section>
+          </div>
 
-          <q-card-actions v-if="invitation.is_valid || (getInvitationStatus(invitation.invitation_status) === 'expired' && invitation.used_count === 0)" align="right">
+          <div class="text-caption text-grey-6 q-mt-sm">
+            {{ usageLimitText }}
+            ·
+            <template v-if="myCode.expires_at">
+              {{ $t('social.invitations.expiresAt') }}: {{ formatDate(myCode.expires_at) }}
+            </template>
+            <template v-else>{{ $t('social.invitations.expiresNever') }}</template>
+          </div>
+
+          <div class="row q-gutter-sm q-mt-md">
             <q-btn
-              v-if="invitation.is_valid"
-              @click="copyInvitationLink(invitation.invitation_code)"
+              @click="copyText(myCode.code, 'social.invitations.codeCopied')"
               flat
+              dense
+              no-caps
               color="primary"
-              :label="$t('social.invitations.copyInviteLink')"
               icon="content_copy"
+              :label="$t('social.invitations.copyCode')"
               size="sm"
-              no-caps
             />
             <q-btn
-              v-if="getInvitationStatus(invitation.invitation_status) === 'expired' && invitation.used_count === 0"
-              @click="deleteInvitation(invitation)"
+              @click="copyText(inviteLink(myCode.code), 'social.invitations.linkCopied')"
               flat
-              color="negative"
-              :label="$t('common.delete')"
-              icon="delete"
-              size="sm"
+              dense
               no-caps
-              :loading="loading"
+              color="primary"
+              icon="link"
+              :label="$t('social.invitations.copyInviteLink')"
+              size="sm"
             />
-          </q-card-actions>
-        </template>
+          </div>
+        </q-card-section>
 
-        <template #emptyAction>
+        <q-card-section v-else class="q-pt-none">
+          <div class="text-body2 text-grey-6 q-mb-sm">{{ $t('social.invitations.noCodeYet') }}</div>
           <q-btn
-            @click="createInvitation"
+            @click="fetchMyCode"
+            outline
+            no-caps
             color="primary"
-            :label="$t('social.invitations.createNew')"
-            icon="add"
-            :loading="loading"
+            icon="refresh"
+            :label="$t('social.invitations.refreshCode')"
+            :loading="inviteLoading"
+            :disable="!currentTenant"
           />
-        </template>
-      </ResponsiveCardGrid>
+        </q-card-section>
+      </q-card>
+
+      <!-- 凭码加入另一个网络区（已注册用户路径；未注册走注册页填码） -->
+      <q-card flat bordered class="q-mb-lg">
+        <q-card-section>
+          <div class="text-h6">{{ $t('social.invitations.joinTitle') }}</div>
+          <div class="text-caption text-grey-6">{{ $t('social.invitations.joinHint') }}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none row items-start q-col-gutter-sm">
+          <div class="col-12 col-md-6">
+            <q-input
+              v-model="joinCode"
+              dense
+              outlined
+              :placeholder="$t('social.invitations.joinPlaceholder')"
+              @keyup.enter="handleJoin"
+            >
+              <template v-slot:prepend><q-icon name="vpn_key" /></template>
+            </q-input>
+          </div>
+          <div class="col-auto">
+            <q-btn
+              @click="handleJoin"
+              color="primary"
+              no-caps
+              :label="$t('social.invitations.joinButton')"
+              :loading="joining"
+              :disable="!joinCode.trim()"
+            />
+          </div>
+        </q-card-section>
+      </q-card>
+
+      <!-- 邀请记录（框架 invite_code_usages：谁用我的码进来了） -->
+      <q-card flat bordered>
+        <q-card-section class="row items-center">
+          <div class="text-h6">{{ $t('social.invitations.usagesTitle') }}</div>
+          <q-space />
+          <q-btn
+            @click="fetchUsages(usagePage)"
+            flat
+            dense
+            no-caps
+            icon="refresh"
+            :label="$t('common.refresh')"
+            :loading="inviteLoading"
+            :disable="!currentTenant"
+          />
+        </q-card-section>
+
+        <q-separator />
+
+        <q-list v-if="usages.length" separator>
+          <q-item v-for="usage in usages" :key="usage.usage_id">
+            <q-item-section avatar>
+              <q-avatar
+                :text="usage.invitee?.name?.charAt(0) || '?'"
+                :source="usage.invitee?.avatar || undefined"
+                color="primary"
+                text-color="white"
+              />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ usage.invitee?.name || $t('social.invitations.unknownUser') }}</q-item-label>
+              <q-item-label caption>
+                {{ channelText(usage.channel) }} · {{ formatDate(usage.used_at) }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+
+        <q-card-section v-else class="text-center text-grey-6">
+          <q-icon name="card_giftcard" size="36px" />
+          <div class="q-mt-sm">{{ $t('social.invitations.noUsages') }}</div>
+        </q-card-section>
+
+        <q-card-actions v-if="usageLastPage > 1" align="center" class="q-py-sm">
+          <q-btn
+            flat
+            dense
+            no-caps
+            size="sm"
+            icon="chevron_left"
+            :label="$t('social.invitations.prevPage')"
+            :disable="usagePage <= 1"
+            @click="fetchUsages(usagePage - 1)"
+          />
+          <div class="text-caption text-grey-6">{{ usagePage }} / {{ usageLastPage }}</div>
+          <q-btn
+            flat
+            dense
+            no-caps
+            size="sm"
+            icon="chevron_right"
+            :label="$t('social.invitations.nextPage')"
+            :disable="usagePage >= usageLastPage"
+            @click="fetchUsages(usagePage + 1)"
+          />
+        </q-card-actions>
+      </q-card>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import { useSocial } from '../../composables/useSocial'
-import type { Invitation, SearchUser } from '../../types'
+import { useInviteCode } from '../../composables/useInviteCode'
+import { useAuthStore } from '../../stores/auth'
 
 const { t } = useI18n()
 const $q = useQuasar()
-const { 
-  invitations,
+const auth = useAuthStore()
+
+// 搜索标签页仍归 useSocial，邀请码这条线走 useInviteCode（框架 invite code）。
+// 两个 loading 不合并：搜索转圈不该让邀请码卡片显示忙态，反之亦然。
+const {
   searchResults,
   searchLoading,
-  loading, 
-  fetchInvitations,
-  createInvitation: createInvite,
-  deleteInvitation: deleteInvite,
+  loading,
   searchUsers,
   sendFriendRequest: sendRequest
 } = useSocial()
 
+const {
+  myCode,
+  usages,
+  usagePage,
+  usageLastPage,
+  loading: inviteLoading,
+  joining,
+  usageLimitText,
+  isUsedUp,
+  isExpired,
+  fetchMyCode,
+  fetchUsages,
+  join,
+  inviteLink
+} = useInviteCode()
+
 const activeTab = ref<'search' | 'invitations'>('search')
 const searchQuery = ref('')
+const joinCode = ref('')
+
+const currentTenant = computed(() => auth.currentTenant)
+
+/**
+ * 档位由服务端给的三个字段现算（used_count/max_uses/expires_at），
+ * 不再读旧实现那个 `invitation_status`（1=pending/2=used/0=expired）——
+ * 框架没有这一列，也不允许前端再造一套状态机。
+ */
+const CODE_STATUS_COLORS: Record<string, string> = {
+  active: 'positive',
+  usedUp: 'info',
+  expired: 'negative'
+}
+
+const codeStatus = computed(() => {
+  if (isUsedUp.value) return 'usedUp'
+  if (isExpired.value) return 'expired'
+  return 'active'
+})
+const codeStatusText = computed(() => t(`social.invitations.${codeStatus.value}`))
+const codeStatusColor = computed(() => CODE_STATUS_COLORS[codeStatus.value] ?? 'grey')
 
 const handleSearch = async () => {
   if (searchQuery.value.trim()) {
@@ -286,67 +382,42 @@ const sendFriendRequest = async (userId: string, userName: string) => {
   await sendRequest(userId, userName)
 }
 
-const createInvitation = async () => {
-  await createInvite()
+const handleJoin = async () => {
+  if (await join(joinCode.value)) {
+    joinCode.value = ''
+  }
 }
 
-const deleteInvitation = async (invitation: Invitation) => {
-  await deleteInvite(invitation)
+/** `oauth:wechat` 这类框架渠道值没有本地化词条，直接显示原值而不是假装未知 */
+const CHANNEL_KEYS: Record<string, string> = {
+  email: 'social.invitations.channelEmail',
+  sms: 'social.invitations.channelSms',
+  join: 'social.invitations.channelJoin'
 }
 
-const copyInvitationLink = (code: string) => {
-  const baseUrl = window.location.origin
-  const link = `${baseUrl}/auth/register?invitation=${code}`
-  
-  navigator.clipboard.writeText(link).then(() => {
-    $q.notify({
-      type: 'positive',
-      message: t('social.invitations.linkCopied'),
-      position: 'top'
-    })
+const channelText = (channel: string | null) => {
+  if (!channel) return t('social.invitations.channelUnknown')
+  const key = CHANNEL_KEYS[channel]
+  return key ? t(key) : channel
+}
+
+const copyText = (text: string, successKey: string) => {
+  navigator.clipboard.writeText(text).then(() => {
+    $q.notify({ type: 'positive', message: t(successKey), position: 'top' })
   }).catch(() => {
-    $q.notify({
-      type: 'negative', 
-      message: t('social.invitations.copyFailed'),
-      position: 'top'
-    })
+    $q.notify({ type: 'negative', message: t('social.invitations.copyFailed'), position: 'top' })
   })
 }
 
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString()
-}
+const formatDate = (dateString: string) => new Date(dateString).toLocaleString()
 
-const getInvitationStatus = (status: number) => {
-  switch (status) {
-    case 1:
-      return 'active'
-    case 2:
-      return 'used'
-    case 0:
-      return 'expired'
-    default:
-      return 'unknown'
+onMounted(async () => {
+  // 直接刷新到本页时 store 可能还没定当前网络区；先补上下文再取码 ——
+  // 空上下文会让框架在租户 0 上懒建一张进不去任何区的废码。
+  if (!auth.currentTenant) {
+    await auth.restoreCurrentTenant().catch(() => null)
   }
-}
-
-const getStatusColor = (status: number) => {
-  const statusString = getInvitationStatus(status)
-  switch (statusString) {
-    case 'active':
-      return 'positive'
-    case 'used':
-      return 'info'
-    case 'expired':
-      return 'negative'
-    default:
-      return 'grey'
-  }
-}
-
-onMounted(() => {
-  fetchInvitations()
+  await Promise.all([fetchMyCode(), fetchUsages(1)])
 })
 </script>
 
@@ -354,17 +425,5 @@ onMounted(() => {
 .page-header {
   border-bottom: 1px solid var(--q-separator-color);
   padding-bottom: 1rem;
-}
-
-.invitation-details {
-  .detail-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
 }
 </style>

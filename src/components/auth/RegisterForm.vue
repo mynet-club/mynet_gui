@@ -58,18 +58,17 @@
           ]"
         />
         
-        <div class="invitation-field-wrapper">
+        <div class="invite-code-field-wrapper">
           <q-input 
-            v-model="registerForm.invitation"
+            v-model="registerForm.invite_code"
             outlined
             class="form-field"
-            :placeholder="$t('auth.invitationPlaceholder')"
-            :rules="[val => !!val || $t('auth.invitationRequired')]"
+            :placeholder="$t('auth.inviteCodePlaceholder')"
           />
           
-          <div class="invitation-help">
-            <span class="invitation-help-text" @click="showInvitationHelp = true">
-              {{ $t('auth.noInvitationCode') }}
+          <div class="invite-code-help">
+            <span class="invite-code-help-text" @click="showInviteCodeHelp = true">
+              {{ $t('auth.noInviteCode') }}
             </span>
           </div>
         </div>
@@ -104,16 +103,16 @@
     </q-card-section>
     
     <!-- 邀请码获取帮助对话框 -->
-    <q-dialog v-model="showInvitationHelp">
+    <q-dialog v-model="showInviteCodeHelp">
       <q-card style="min-width: 350px; max-width: 500px;">
         <q-card-section class="row items-center q-pb-none">
-          <div class="text-h6">{{ $t('auth.invitationCodeHelpTitle') }}</div>
+          <div class="text-h6">{{ $t('auth.inviteCodeHelpTitle') }}</div>
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
 
         <q-card-section>
-          <p class="text-body2 q-mb-md">{{ $t('auth.invitationCodeHelpMessage') }}</p>
+          <p class="text-body2 q-mb-md">{{ $t('auth.inviteCodeHelpMessage') }}</p>
           
           <div class="community-links q-gutter-sm">
             <q-btn
@@ -168,7 +167,7 @@ const { t } = useI18n()
 const { registerForm, isLoading, validateEmail, register } = useAuth()
 
 // 邀请码帮助对话框状态
-const showInvitationHelp = ref(false)
+const showInviteCodeHelp = ref(false)
 
 const handleRegister = async () => {
   try {
@@ -197,26 +196,29 @@ const handleRegister = async () => {
 // 打开Telegram社区
 const openTelegram = () => {
   window.open('https://t.me/+QjdreEYp2ZRkMjc1', '_blank')
-  showInvitationHelp.value = false
+  showInviteCodeHelp.value = false
 }
 
 // 打开Discord社区
 const openDiscord = () => {
   window.open('https://discord.gg/7e3NaPnJ', '_blank')
-  showInvitationHelp.value = false
+  showInviteCodeHelp.value = false
 }
 
 // 打开社区主页
 const openVillage = () => {
   window.open(`${APP_CONFIG.urls.www}/village`, '_blank')
-  showInvitationHelp.value = false
+  showInviteCodeHelp.value = false
 }
 
 onMounted(() => {
   const urlParams = new URLSearchParams(window.location.search);
-  const invitationCode = urlParams.get('invitation');
-  if (invitationCode) {
-    registerForm.invitation = invitationCode;
+  // 分享链接的查询参数改名跟随框架（`invite_code`），但**已发出去的旧链接带的是
+  // `invitation=`** —— 先读新名、再兜旧名，不能让分享链接因为一次改名就静默丢码，
+  // 用户会以为「邀请无效」。
+  const inviteCode = urlParams.get('invite_code') ?? urlParams.get('invitation');
+  if (inviteCode) {
+    registerForm.invite_code = inviteCode;
   }
 });
 </script>
@@ -224,14 +226,14 @@ onMounted(() => {
 <style lang="scss" scoped>
 @import '../../styles/auth.scss';
 
-.invitation-field-wrapper {
+.invite-code-field-wrapper {
   position: relative;
   
-  .invitation-help {
+  .invite-code-help {
     margin-top: 0.5rem;
     text-align: right;
     
-    .invitation-help-text {
+    .invite-code-help-text {
       font-size: 0.8125rem;
       color: var(--q-primary);
       cursor: pointer;
