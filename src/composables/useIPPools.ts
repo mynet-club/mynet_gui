@@ -73,10 +73,10 @@ export function useIPPools() {
   })
 
   // IP池管理方法
-  const fetchPools = async (zoneId?: string) => {
+  const fetchPools = async (tenantId?: string) => {
     loading.value = true
     try {
-      const params = zoneId ? { zone_id: zoneId } : {}
+      const params = tenantId ? { zone_id: tenantId } : {}
       const response = await api.get('/ippools', { params })
       
       debug.log('fetchPools API response:', response.data)
@@ -171,9 +171,9 @@ export function useIPPools() {
   }
 
   // 统计信息方法
-  const fetchStatistics = async (zoneId?: string) => {
+  const fetchStatistics = async (tenantId?: string) => {
     try {
-      const params = zoneId ? { zone_id: zoneId } : {}
+      const params = tenantId ? { zone_id: tenantId } : {}
       const response = await api.get('/ippools/statistics', { params })
       
       if (response.data.success) {

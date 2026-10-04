@@ -542,13 +542,13 @@ function buildTipsRegistry(): TipConfig[] {
     closable: true
   },
 
-  // 时空（Zone）管理帮助
+  // 时空（Tenant）管理帮助
   {
     id: 'zone_management',
     type: TipType.Banner,
     stage: OnboardingStage.Welcome,
     trigger: {
-      route: '/app/zones',
+      route: '/app/tenants',
       condition: () => true,
       once: false
     },

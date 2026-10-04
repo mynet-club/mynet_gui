@@ -1,4 +1,4 @@
-import type { Zone } from '../types'
+import type { Tenant } from '../types'
 
 /**
  * 平台兜底租户 —— 与服务端同源。
@@ -14,14 +14,14 @@ import type { Zone } from '../types'
  *
  * ⚠️ 未决：`pivot.is_admin: 1` 是原先伪造 999999999 时一起编的，现在指向真实租户，
  * 等于在客户端断言「当前用户是平台租户管理员」。它只影响 UI
- * （`useZones.ts:39/234`、`ZoneListPage.vue:101` 读它决定是否渲染管理入口），
+ * （`useTenants.ts:39/234`、`TenantListPage.vue:101` 读它决定是否渲染管理入口），
  * 真正的鉴权在服务端，所以不是提权；但会渲染出点了就 403 的按钮。
  * 这属权限语义，未自行改动 —— 见 spec/zone-removal.md 议题 2 的后续项。
  */
 const PLATFORM_TENANT_ID = 9007199254740991
 
 // 默认的Global Zone配置
-export const DEFAULT_GLOBAL_ZONE: Zone = {
+export const DEFAULT_PLATFORM_TENANT: Tenant = {
   id: PLATFORM_TENANT_ID,
   zone_id: PLATFORM_TENANT_ID,
   zone_name: 'Global',
@@ -44,8 +44,8 @@ export const DEFAULT_GLOBAL_ZONE: Zone = {
 export const APP_CONFIG = {
   // Zone相关配置
   // ⚠️ 下面这两项全仓无任何读取者（死配置），保留只为不破 APP_CONFIG 的形状。
-  zones: {
-    defaultGlobalZone: DEFAULT_GLOBAL_ZONE,
+  tenants: {
+    defaultGlobalZone: DEFAULT_PLATFORM_TENANT,
     defaultZoneId: PLATFORM_TENANT_ID
   },
   

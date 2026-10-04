@@ -16,7 +16,7 @@ export { useVpnConfig } from './useVpnConfig'
 export { useConfigBundle } from './useConfigBundle'
 
 // 区域管理相关
-export { useZones } from './useZones'
+export { useTenants } from './useTenants'
 export { useZoneServices } from './useZoneServices'
 
 // 缓存管理相关

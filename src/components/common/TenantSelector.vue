@@ -8,10 +8,10 @@
     class="zone-selector"
   >
     <q-tooltip>
-      {{ currentZone?.zone_name || currentZone?.name || $t('zones.selectZone') }}
+      {{ currentTenant?.zone_name || currentTenant?.name || $t('zones.selectZone') }}
     </q-tooltip>
     
-    <!-- Zone 切换弹窗 -->
+    <!-- Tenant 切换弹窗 -->
     <q-dialog v-model="showDialog">
       <q-card style="min-width: 400px">
         <q-card-section class="row items-center q-pb-none">
@@ -23,32 +23,32 @@
         <q-card-section>
           <q-list>
             <q-item 
-              v-for="zone in availableZones" 
-              :key="zone.zone_id"
+              v-for="tenant in availableTenants" 
+              :key="tenant.zone_id"
               clickable
-              @click="switchZone(zone.zone_id)"
-              :active="zone.zone_id === currentZone?.zone_id"
+              @click="switchTenant(tenant.zone_id)"
+              :active="tenant.zone_id === currentTenant?.zone_id"
             >
               <q-item-section avatar>
                 <q-icon 
                   name="travel_explore" 
-                  :color="zone.is_active ? 'primary' : 'grey'" 
+                  :color="tenant.is_active ? 'primary' : 'grey'" 
                 />
               </q-item-section>
               <q-item-section>
-                <q-item-label>{{ zone.zone_name || zone.name }}</q-item-label>
-                <q-item-label caption>{{ zone.zone_remarks || zone.description }}</q-item-label>
+                <q-item-label>{{ tenant.zone_name || tenant.name }}</q-item-label>
+                <q-item-label caption>{{ tenant.zone_remarks || tenant.description }}</q-item-label>
               </q-item-section>
               <q-item-section side>
                 <div class="column items-end">
                   <q-chip 
-                    :label="zone.is_active ? $t('common.active') : $t('common.inactive')"
-                    :color="zone.is_active ? 'positive' : 'grey'"
+                    :label="tenant.is_active ? $t('common.active') : $t('common.inactive')"
+                    :color="tenant.is_active ? 'positive' : 'grey'"
                     text-color="white"
                     size="sm"
                   />
                   <q-icon 
-                    v-if="zone.zone_id === currentZone?.zone_id"
+                    v-if="tenant.zone_id === currentTenant?.zone_id"
                     name="check" 
                     color="positive" 
                     class="q-mt-xs"
@@ -69,7 +69,7 @@ import debug from 'src/utils/debug'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../stores/auth'
-import type { Zone } from '../../types'
+import type { Tenant } from '../../types'
 
 const $q = useQuasar()
 const { t } = useI18n()
@@ -79,34 +79,34 @@ const authStore = useAuthStore()
 const showDialog = ref(false)
 
 // 计算属性
-const currentZone = computed(() => authStore.currentZone)
-const availableZones = computed(() => authStore.availableZones)
+const currentTenant = computed(() => authStore.currentTenant)
+const availableTenants = computed(() => authStore.availableTenants)
 
 // Zone切换方法
-const switchZone = async (zoneId: number) => {
-  debug.log('🔧 [ZoneSelector] Switching to zone:', zoneId)
-  debug.log('🔧 [ZoneSelector] Current zone before switch:', currentZone.value?.zone_name)
+const switchTenant = async (tenantId: number) => {
+  debug.log('🔧 [TenantSelector] Switching to zone:', tenantId)
+  debug.log('🔧 [TenantSelector] Current zone before switch:', currentTenant.value?.zone_name)
   
   try {
     // 先找到要切换到的zone
-    const targetZone = availableZones.value.find(z => z.zone_id === zoneId)
-    const targetZoneName = targetZone?.zone_name || targetZone?.name || 'Unknown Zone'
-    debug.log('🔧 [ZoneSelector] Target zone:', targetZoneName)
+    const targetTenant = availableTenants.value.find(z => z.zone_id === tenantId)
+    const targetTenantName = targetTenant?.zone_name || targetTenant?.name || 'Unknown Zone'
+    debug.log('🔧 [TenantSelector] Target zone:', targetTenantName)
     
-    await authStore.switchZone(zoneId)
+    await authStore.switchTenant(tenantId)
     
-    debug.log('🔧 [ZoneSelector] Current zone after switch:', currentZone.value?.zone_name)
+    debug.log('🔧 [TenantSelector] Current zone after switch:', currentTenant.value?.zone_name)
     
     $q.notify({
       type: 'positive',
-      message: t('zones.switchedTo', { zoneName: targetZoneName }),
+      message: t('zones.switchedTo', { zoneName: targetTenantName }),
       timeout: 3000
     })
     
     // 切换成功后关闭对话框
     showDialog.value = false
   } catch (error) {
-    debug.error('🔧 [ZoneSelector] Failed to switch zone:', error)
+    debug.error('🔧 [TenantSelector] Failed to switch zone:', error)
     $q.notify({
       type: 'negative',
       message: t('zones.switchFailed')

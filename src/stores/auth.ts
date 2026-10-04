@@ -4,14 +4,14 @@ import { ref, computed } from 'vue'
 import { LocalStorage } from 'quasar'
 import { apiService } from '../services/api'
 import { tokenManager } from '../utils/tokenManager'
-import type { User, Zone } from '../types'
+import type { User, Tenant } from '../types'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const token = ref<string | null>(null)
   const isLoading = ref(false)
-  const currentZone = ref<Zone | null>(null)
-  const availableZones = ref<Zone[]>([])
+  const currentTenant = ref<Tenant | null>(null)
+  const availableTenants = ref<Tenant[]>([])
   const tokenExpiry = ref(0)
   
   // 修改认证状态的判断逻辑
@@ -107,16 +107,16 @@ export const useAuthStore = defineStore('auth', () => {
       }
       
       // 初始化用户Zone
-      await loadUserZones()
+      await loadUserTenants()
       
       // 设置当前Zone
       if (user.value?.zone_id) {
-        const zone = availableZones.value.find(z => z.zone_id === user.value?.zone_id)
-        if (zone) {
-          currentZone.value = zone
+        const tenant = availableTenants.value.find(z => z.zone_id === user.value?.zone_id)
+        if (tenant) {
+          currentTenant.value = tenant
           // 存储当前Zone
-          LocalStorage.set('current_zone', JSON.stringify(zone))
-          debug.log('🔧 [AUTH] Saved current zone to LocalStorage:', zone.zone_name)
+          LocalStorage.set('current_zone', JSON.stringify(tenant))
+          debug.log('🔧 [AUTH] Saved current zone to LocalStorage:', tenant.zone_name)
         }
       }
       
@@ -142,8 +142,8 @@ export const useAuthStore = defineStore('auth', () => {
     // 清除本地数据
     user.value = null
     token.value = null
-    currentZone.value = null
-    availableZones.value = []
+    currentTenant.value = null
+    availableTenants.value = []
     tokenExpiry.value = 0
     
     // 使用 tokenManager 清除所有 token
@@ -155,33 +155,33 @@ export const useAuthStore = defineStore('auth', () => {
     debug.log('🔧 [AUTH] Cleared all auth data')
   }
   
-  const loadUserZones = async () => {
+  const loadUserTenants = async () => {
     try {
-      const response = await apiService.getZones()
-      availableZones.value = response.data
+      const response = await apiService.getTenants()
+      availableTenants.value = response.data
     } catch (error) {
       debug.error('Load zones error:', error)
     }
   }
   
-  const switchZone = async (zoneId: number) => {
-    debug.log('🔧 [AUTH] Switching to zone:', zoneId)
+  const switchTenant = async (tenantId: number) => {
+    debug.log('🔧 [AUTH] Switching to zone:', tenantId)
     
     // 先从可用区域列表中找到目标zone
-    const targetZone = availableZones.value.find(z => z.zone_id === zoneId)
-    if (!targetZone) {
+    const targetTenant = availableTenants.value.find(z => z.zone_id === tenantId)
+    if (!targetTenant) {
       throw new Error('Zone not found in available zones')
     }
     
-    const response = await apiService.switchZone(zoneId)
+    const response = await apiService.switchTenant(tenantId)
     
     // 更新当前区域为目标zone
-    currentZone.value = targetZone
-    debug.log('🔧 [AUTH] Updated current zone to:', targetZone.zone_name)
+    currentTenant.value = targetTenant
+    debug.log('🔧 [AUTH] Updated current zone to:', targetTenant.zone_name)
     
     // 更新用户信息中的 zone_id
     if (user.value) {
-      user.value.zone_id = zoneId
+      user.value.zone_id = tenantId
       debug.log('🔧 [AUTH] Updated user zone_id:', user.value.zone_id)
       
       // 持久化保存用户信息
@@ -190,10 +190,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
     
     // 持久化保存当前选择的区域
-    LocalStorage.set('current_zone', JSON.stringify(currentZone.value))
-    debug.log('🔧 [AUTH] Saved current zone to LocalStorage:', currentZone.value.zone_name)
+    LocalStorage.set('current_zone', JSON.stringify(currentTenant.value))
+    debug.log('🔧 [AUTH] Saved current zone to LocalStorage:', currentTenant.value.zone_name)
     
-    debug.log('🔧 [AUTH] Zone switched successfully to:', currentZone.value?.zone_name)
+    debug.log('🔧 [AUTH] Zone switched successfully to:', currentTenant.value?.zone_name)
     return response.data
   }
   
@@ -290,30 +290,30 @@ export const useAuthStore = defineStore('auth', () => {
   }
   
   // 设置当前zone
-  const setCurrentZone = (zone: Zone) => {
-    currentZone.value = zone
+  const setCurrentTenant = (tenant: Tenant) => {
+    currentTenant.value = tenant
     // 可以在这里添加更多的zone切换逻辑，比如更新本地存储
-    LocalStorage.set('current_zone', zone)
+    LocalStorage.set('current_zone', tenant)
   }
   
   return {
     user,
     token,
     isLoading,
-    currentZone,
-    availableZones,
+    currentTenant,
+    availableTenants,
     tokenExpiry,
     isAuthenticated,
     isTokenExpired,
     login,
     logout,
-    switchZone,
+    switchTenant,
     refreshUserData,
     checkTokenExpiry,
     initializeAuth,
-    loadUserZones,
+    loadUserTenants,
     hasPermission,
     hasRole,
-    setCurrentZone
+    setCurrentTenant
   }
 })

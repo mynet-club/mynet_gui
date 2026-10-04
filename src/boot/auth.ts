@@ -116,35 +116,35 @@ export default boot(async ({ router, app }) => {
 
       // 加载用户区域数据 - 如果失败不要清除认证状态
       try {
-        await authStore.loadUserZones()
-        debug.log('🔐 [Boot] Available zones loaded:', authStore.availableZones.length)
-      } catch (zoneError) {
-        debug.warn('🔐 [Boot] Failed to load user zones, but keeping auth state:', zoneError)
+        await authStore.loadUserTenants()
+        debug.log('🔐 [Boot] Available zones loaded:', authStore.availableTenants.length)
+      } catch (tenantError) {
+        debug.warn('🔐 [Boot] Failed to load user zones, but keeping auth state:', tenantError)
         // 不要因为zone加载失败就清除认证状态
       }
 
       // 优先从 localStorage 恢复用户选择的区域
-      const savedZone = LocalStorage.getItem('current_zone') as string | null
-      debug.log('🔐 [Boot] Saved zone from localStorage:', savedZone)
+      const savedTenant = LocalStorage.getItem('current_zone') as string | null
+      debug.log('🔐 [Boot] Saved zone from localStorage:', savedTenant)
 
-      if (savedZone) {
+      if (savedTenant) {
         try {
-          const zone = JSON.parse(savedZone.toString())
-          debug.log('🔐 [Boot] Parsed saved zone:', zone)
+          const tenant = JSON.parse(savedTenant.toString())
+          debug.log('🔐 [Boot] Parsed saved zone:', tenant)
 
           // 验证保存的区域是否在可用区域列表中
-          const validZone = authStore.availableZones.find((z: any) => z.zone_id === zone.zone_id)
-          if (validZone) {
-            authStore.currentZone = validZone
-            debug.log('🔐 [Boot] Restored saved zone:', validZone.zone_name)
+          const validTenant = authStore.availableTenants.find((z: any) => z.zone_id === tenant.zone_id)
+          if (validTenant) {
+            authStore.currentTenant = validTenant
+            debug.log('🔐 [Boot] Restored saved zone:', validTenant.zone_name)
           } else {
             debug.log('🔐 [Boot] Saved zone not found in available zones, using default')
             // 如果保存的区域不在可用列表中，使用用户默认区域
             if (authStore.user?.zone_id) {
-              const defaultZone = authStore.availableZones.find((z: any) => z.zone_id === authStore.user?.zone_id)
-              if (defaultZone) {
-                authStore.currentZone = defaultZone
-                debug.log('🔐 [Boot] Set default zone:', defaultZone.zone_name)
+              const defaultTenant = authStore.availableTenants.find((z: any) => z.zone_id === authStore.user?.zone_id)
+              if (defaultTenant) {
+                authStore.currentTenant = defaultTenant
+                debug.log('🔐 [Boot] Set default zone:', defaultTenant.zone_name)
               }
             }
           }
@@ -152,10 +152,10 @@ export default boot(async ({ router, app }) => {
           debug.warn('🔐 [Boot] Failed to parse saved zone:', error)
           // 解析失败时使用用户默认区域
           if (authStore.user?.zone_id) {
-            const defaultZone = authStore.availableZones.find((z: any) => z.zone_id === authStore.user?.zone_id)
-            if (defaultZone) {
-              authStore.currentZone = defaultZone
-              debug.log('🔐 [Boot] Set default zone after parse error:', defaultZone.zone_name)
+            const defaultTenant = authStore.availableTenants.find((z: any) => z.zone_id === authStore.user?.zone_id)
+            if (defaultTenant) {
+              authStore.currentTenant = defaultTenant
+              debug.log('🔐 [Boot] Set default zone after parse error:', defaultTenant.zone_name)
             }
           }
         }
@@ -163,15 +163,15 @@ export default boot(async ({ router, app }) => {
         debug.log('🔐 [Boot] No saved zone found, using user default zone')
         // 没有保存的区域选择，使用用户默认区域
         if (authStore.user?.zone_id) {
-          const zone = authStore.availableZones.find((z: any) => z.zone_id === authStore.user?.zone_id)
-          if (zone) {
-            authStore.currentZone = zone
-            debug.log('🔐 [Boot] Set user default zone:', zone.zone_name)
+          const tenant = authStore.availableTenants.find((z: any) => z.zone_id === authStore.user?.zone_id)
+          if (tenant) {
+            authStore.currentTenant = tenant
+            debug.log('🔐 [Boot] Set user default zone:', tenant.zone_name)
           }
         }
       }
 
-      debug.log('🔐 [Boot] Current zone:', authStore.currentZone?.zone_name || 'None')
+      debug.log('🔐 [Boot] Current zone:', authStore.currentTenant?.zone_name || 'None')
     }
   } else {
     debug.log('🔐 [Boot] No valid auth data found, user not authenticated')

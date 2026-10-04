@@ -3,26 +3,26 @@ import debug from 'src/utils/debug'
 import { useNotify } from './useNotify'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
-import type { Zone, ZoneOverview } from '../types'
-import { zoneService } from '../services/zone/zoneService'
+import type { Tenant, TenantOverview } from '../types'
+import { tenantService } from '../services/tenant/tenantService'
 
-export function useZones() {
+export function useTenants() {
   const { t } = useI18n()
   const notify = useNotify()
   const authStore = useAuthStore()
 
   // 响应式状态
   const loading = ref(false)
-  const overview = ref<ZoneOverview>({
+  const overview = ref<TenantOverview>({
     total_zones: 0,
     active_zones: 0,
     total_nodes: 0,
     total_routes: 0
   })
   
-  const zones = ref<Zone[]>([])
-  const currentZone = ref<Zone | null>(null)
-  const availableZones = ref<Zone[]>([]) // 用户可访问的zones
+  const tenants = ref<Tenant[]>([])
+  const currentTenant = ref<Tenant | null>(null)
+  const availableTenants = ref<Tenant[]>([]) // 用户可访问的zones
   const zoneStatistics = ref<any>({})
   
   // 分页状态
@@ -32,11 +32,11 @@ export function useZones() {
   const totalItems = ref(0)
 
   // 计算属性
-  const hasZones = computed(() => zones.value.length > 0)
-  const activeZones = computed(() => zones.value.filter(z => z.zone_status === 1))
-  const inactiveZones = computed(() => zones.value.filter(z => z.zone_status === 0))
-  const isCurrentZoneAdmin = computed(() => {
-    return currentZone.value?.pivot?.is_admin === 1
+  const hasTenants = computed(() => tenants.value.length > 0)
+  const activeTenants = computed(() => tenants.value.filter(z => z.zone_status === 1))
+  const inactiveTenants = computed(() => tenants.value.filter(z => z.zone_status === 0))
+  const isCurrentTenantAdmin = computed(() => {
+    return currentTenant.value?.pivot?.is_admin === 1
   })
   const canCreateZone = computed(() => {
     // 根据用户角色和权限判断是否可以创建zone
@@ -47,7 +47,7 @@ export function useZones() {
   const fetchOverview = async () => {
     try {
       loading.value = true
-      const response = await zoneService.getZoneOverview()
+      const response = await tenantService.getTenantOverview()
       
       overview.value = {
         total_zones: response.total_zones || 0,
@@ -57,11 +57,11 @@ export function useZones() {
       }
     } catch (error: any) {
       if (error?.response?.status === 404) {
-        // v2 暂未实现 /zones/overview，从已有 zones 数据中推算基础指标
-        const allZones = zones.value.length > 0 ? zones.value : availableZones.value
+        // v2 暂未实现 /tenants/overview，从已有 tenants 数据中推算基础指标
+        const allTenants = tenants.value.length > 0 ? tenants.value : availableTenants.value
         overview.value = {
-          total_zones: allZones.length,
-          active_zones: allZones.filter(z => z.zone_status === 1).length,
+          total_zones: allTenants.length,
+          active_zones: allTenants.filter(z => z.zone_status === 1).length,
           total_nodes: 0,
           total_routes: 0
         }
@@ -75,16 +75,16 @@ export function useZones() {
   }
 
   // 获取用户可访问的zones
-  const fetchAvailableZones = async () => {
+  const fetchAvailableTenants = async () => {
     try {
       loading.value = true  
       
-      const response = await zoneService.getUserZones()
-      availableZones.value = response || []
+      const response = await tenantService.getUserTenants()
+      availableTenants.value = response || []
       
       // 设置当前zone
-      if (availableZones.value.length > 0 && !currentZone.value) {
-        currentZone.value = availableZones.value[0] || null
+      if (availableTenants.value.length > 0 && !currentTenant.value) {
+        currentTenant.value = availableTenants.value[0] || null
       }
     } catch (error) {
       debug.error('获取可访问zones失败:', error)
@@ -95,7 +95,7 @@ export function useZones() {
   }
 
   // 获取zones列表（管理员功能）
-  const fetchZones = async (page = 1, search = '', status?: 'active' | 'inactive') => {
+  const fetchTenants = async (page = 1, search = '', status?: 'active' | 'inactive') => {
     try {
       loading.value = true
       
@@ -107,9 +107,9 @@ export function useZones() {
       if (search) params.search = search
       if (status) params.status = status
       
-      const response = await zoneService.getZones(params)
+      const response = await tenantService.getTenants(params)
       
-      zones.value = response.data || []
+      tenants.value = response.data || []
       currentPage.value = response.meta.current_page
       totalPages.value = response.meta.last_page
       totalItems.value = response.meta.total
@@ -123,15 +123,15 @@ export function useZones() {
   }
 
   // 切换当前zone
-  const switchZone = async (zoneId: number) => {
+  const switchTenant = async (tenantId: number) => {
     try {
       loading.value = true
-      const response = await zoneService.switchZone(zoneId)
+      const response = await tenantService.switchTenant(tenantId)
       
-      currentZone.value = response.zone
+      currentTenant.value = response.tenant
       // 更新用户状态中的当前zone
-      authStore.setCurrentZone(response.zone)
-      notify.success(t('zones.switchedTo', { zoneName: response.zone.zone_name }))
+      authStore.setCurrentTenant(response.tenant)
+      notify.success(t('zones.switchedTo', { zoneName: response.tenant.zone_name }))
       
       // 刷新相关数据
       await fetchOverview()
@@ -147,14 +147,14 @@ export function useZones() {
   }
 
   // 创建新zone（管理员功能）
-  const createZone = async (data: { name: string; description?: string }) => {
+  const createTenant = async (data: { name: string; description?: string }) => {
     try {
       loading.value = true
-      const response = await zoneService.createZone(data)
+      const response = await tenantService.createTenant(data)
       
       notify.success(t('zones.createSuccess'))
       // 刷新zones列表
-      await fetchZones()
+      await fetchTenants()
       await fetchOverview()
       return response
     } catch (error) {
@@ -167,14 +167,14 @@ export function useZones() {
   }
 
   // 更新zone信息（管理员功能）
-  const updateZone = async (id: string, data: { name?: string; description?: string }) => {
+  const updateTenant = async (id: string, data: { name?: string; description?: string }) => {
     try {
       loading.value = true
-      const response = await zoneService.updateZone(id, data)
+      const response = await tenantService.updateTenant(id, data)
       
       notify.success(t('zones.updateSuccess'))
       // 刷新zones列表
-      await fetchZones()
+      await fetchTenants()
       return response
     } catch (error) {
       debug.error('更新zone失败:', error)
@@ -186,14 +186,14 @@ export function useZones() {
   }
 
   // 删除zone（管理员功能）
-  const deleteZone = async (id: string) => {
+  const deleteTenant = async (id: string) => {
     try {
       loading.value = true
-      await zoneService.deleteZone(id)
+      await tenantService.deleteTenant(id)
       
       notify.success(t('zones.deleteSuccess'))
       // 刷新zones列表
-      await fetchZones()
+      await fetchTenants()
       await fetchOverview()
       return true
     } catch (error) {
@@ -208,7 +208,7 @@ export function useZones() {
   // 获取zone详情
   const getZoneDetails = async (id: string) => {
     try {
-      const response = await zoneService.getZoneById(id)
+      const response = await tenantService.getZoneById(id)
       return response
     } catch (error) {
       debug.error('获取zone详情失败:', error)
@@ -218,10 +218,10 @@ export function useZones() {
   }
 
   // 获取zone统计信息
-  const getZoneStatistics = async (zoneId: string) => {
+  const getTenantStatistics = async (tenantId: string) => {
     try {
-      const response = await zoneService.getZoneStatistics(zoneId)
-      zoneStatistics.value[zoneId] = response
+      const response = await tenantService.getTenantStatistics(tenantId)
+      zoneStatistics.value[tenantId] = response
       return response
     } catch (error) {
       debug.error('获取zone统计失败:', error)
@@ -230,27 +230,27 @@ export function useZones() {
   }
 
   // 检查用户是否有zone管理权限
-  const hasZoneManagePermission = (zone: Zone) => {
-    return zone.pivot?.is_admin === 1 || authStore.user?.user_role === 'admin'
+  const hasTenantManagePermission = (tenant: Tenant) => {
+    return tenant.pivot?.is_admin === 1 || authStore.user?.user_role === 'admin'
   }
 
   // 初始化数据
   const init = async () => {
-    await fetchAvailableZones()
+    await fetchAvailableTenants()
     await fetchOverview()
   }
 
   // 普通用户初始化（只加载可访问的zones）
   const initForUser = async () => {
-    await fetchAvailableZones()
-    if (currentZone.value) {
-      await getZoneStatistics(currentZone.value.zone_id.toString())
+    await fetchAvailableTenants()
+    if (currentTenant.value) {
+      await getTenantStatistics(currentTenant.value.zone_id.toString())
     }
   }
 
   // 管理员初始化（加载所有zones）
   const initForAdmin = async () => {
-    await fetchZones()
+    await fetchTenants()
     await fetchOverview()
   } 
 
@@ -258,9 +258,9 @@ export function useZones() {
     // 状态
     loading,
     overview,
-    zones,
-    currentZone,
-    availableZones,
+    tenants,
+    currentTenant,
+    availableTenants,
     zoneStatistics,
     currentPage,
     perPage,
@@ -268,23 +268,23 @@ export function useZones() {
     totalItems,
     
     // 计算属性
-    hasZones,
-    activeZones,
-    inactiveZones,
-    isCurrentZoneAdmin,
+    hasTenants,
+    activeTenants,
+    inactiveTenants,
+    isCurrentTenantAdmin,
     canCreateZone,
     
     // 方法
     fetchOverview,
-    fetchAvailableZones,
-    fetchZones,
-    switchZone,
-    createZone,
-    updateZone,
-    deleteZone,
+    fetchAvailableTenants,
+    fetchTenants,
+    switchTenant,
+    createTenant,
+    updateTenant,
+    deleteTenant,
     getZoneDetails,
-    getZoneStatistics,
-    hasZoneManagePermission,
+    getTenantStatistics,
+    hasTenantManagePermission,
     init,
     initForUser,
     initForAdmin

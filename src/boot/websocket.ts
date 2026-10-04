@@ -11,13 +11,13 @@ export default boot(({ app }) => {
 
   // 建立连接 + 订阅 user notifications 频道
   const initWebSocket = () => {
-    const zoneId = authStore.user?.zone_id
+    const tenantId = authStore.user?.zone_id
     const userId = authStore.user?.user_id ?? (authStore.user as any)?.id
-    if (!authStore.isAuthenticated || !zoneId || !userId || isWebSocketInitialized) return
+    if (!authStore.isAuthenticated || !tenantId || !userId || isWebSocketInitialized) return
 
     isWebSocketInitialized = true
     const { connect, on, subscribeUserNotifications } = useWebSocket()
-    connect(authStore.token || '', String(zoneId))
+    connect(authStore.token || '', String(tenantId))
 
     on('connected', (data) => {
       debug.log('🔌 [WebSocket] 已连接', data)

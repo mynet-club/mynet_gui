@@ -16,7 +16,7 @@
         <q-space />
 
         <!-- 区域切换 -->
-        <ZoneSelector />
+        <TenantSelector />
 
         <!-- Tips 帮助 -->
         <TipsHelper class="q-mr-sm" />
@@ -406,12 +406,12 @@ import { useTheme } from '../composables/useTheme'
 import { useSidebarStats } from '../composables/useSidebarStats'
 import { useNotifications } from '../composables/useNotifications'
 import { useI18n } from 'vue-i18n'
-import ZoneSelector from '../components/common/ZoneSelector.vue'
+import TenantSelector from '../components/common/TenantSelector.vue'
 import TipsHelper from '../components/tips/TipsHelper.vue'
 import UserAvatar from '../components/avatar/UserAvatar.vue'
 import NotificationDialog from '../components/notification/NotificationDialog.vue'
 import TipsContainer from '../components/tips/TipsContainer.vue'
-import { DEFAULT_GLOBAL_ZONE } from '../config/app'
+import { DEFAULT_PLATFORM_TENANT } from '../config/app'
 import { useOnboardingStore } from '../stores/onboarding'
 import { getTipsEngine } from '../services/tips/TipsEngine'
 
@@ -740,34 +740,34 @@ onMounted(async () => {
   }
   
   // 如果已认证但没有区域数据，尝试加载区域数据
-  if (authStore.isAuthenticated && authStore.availableZones.length === 0) {
+  if (authStore.isAuthenticated && authStore.availableTenants.length === 0) {
     debug.log('🔧 [MainLayout] Loading zones data...')
     try {
-      await authStore.loadUserZones()
-      debug.log('🔧 [MainLayout] Zones loaded:', authStore.availableZones.length, 'zones')
-      debug.log('🔧 [MainLayout] Available zones:', authStore.availableZones.map(z => z.zone_name))
+      await authStore.loadUserTenants()
+      debug.log('🔧 [MainLayout] Zones loaded:', authStore.availableTenants.length, 'zones')
+      debug.log('🔧 [MainLayout] Available zones:', authStore.availableTenants.map(z => z.zone_name))
       
       // 注意：区域恢复逻辑已经在 boot/auth.ts 中处理
       // 这里只是一个备用恢复机制，防止 boot 文件执行失败
-      if (!authStore.currentZone) {
+      if (!authStore.currentTenant) {
         debug.log('🔧 [MainLayout] No current zone, attempting fallback recovery...')
-        const savedZone = LocalStorage.getItem('current_zone') as string | null
-        if (savedZone) {
+        const savedTenant = LocalStorage.getItem('current_zone') as string | null
+        if (savedTenant) {
           try {
-            const zone = JSON.parse(savedZone)
-            debug.log('🔧 [MainLayout] Fallback: Parsed saved zone:', zone.zone_name)
-            const validZone = authStore.availableZones.find((z: any) => z.zone_id === zone.zone_id)
-            if (validZone) {
-              authStore.currentZone = validZone
-              debug.log('🔧 [MainLayout] Fallback: Restored saved zone:', validZone.zone_name)
+            const tenant = JSON.parse(savedTenant)
+            debug.log('🔧 [MainLayout] Fallback: Parsed saved zone:', tenant.zone_name)
+            const validTenant = authStore.availableTenants.find((z: any) => z.zone_id === tenant.zone_id)
+            if (validTenant) {
+              authStore.currentTenant = validTenant
+              debug.log('🔧 [MainLayout] Fallback: Restored saved zone:', validTenant.zone_name)
             } else {
               debug.log('🔧 [MainLayout] Fallback: Saved zone not in available zones')
               // 如果保存的区域不在可用列表中，使用用户默认区域
               if (authStore.user?.zone_id) {
-                const defaultZone = authStore.availableZones.find((z: any) => z.zone_id === authStore.user?.zone_id)
-                if (defaultZone) {
-                  authStore.currentZone = defaultZone
-                  debug.log('🔧 [MainLayout] Fallback: Using default zone:', defaultZone.zone_name)
+                const defaultTenant = authStore.availableTenants.find((z: any) => z.zone_id === authStore.user?.zone_id)
+                if (defaultTenant) {
+                  authStore.currentTenant = defaultTenant
+                  debug.log('🔧 [MainLayout] Fallback: Using default zone:', defaultTenant.zone_name)
                 }
               }
             }
@@ -775,37 +775,37 @@ onMounted(async () => {
             debug.warn('🔧 [MainLayout] Fallback: Failed to parse saved zone:', error)
             // 解析失败时使用用户默认区域
             if (authStore.user?.zone_id) {
-              const defaultZone = authStore.availableZones.find((z: any) => z.zone_id === authStore.user?.zone_id)
-              if (defaultZone) {
-                authStore.currentZone = defaultZone
-                debug.log('🔧 [MainLayout] Fallback: Using default zone after parse error:', defaultZone.zone_name)
+              const defaultTenant = authStore.availableTenants.find((z: any) => z.zone_id === authStore.user?.zone_id)
+              if (defaultTenant) {
+                authStore.currentTenant = defaultTenant
+                debug.log('🔧 [MainLayout] Fallback: Using default zone after parse error:', defaultTenant.zone_name)
               }
             }
           }
         } else {
           // 没有保存的区域选择，使用用户默认区域
           if (authStore.user?.zone_id) {
-            const zone = authStore.availableZones.find((z: any) => z.zone_id === authStore.user?.zone_id)
-            if (zone) {
-              authStore.currentZone = zone
-              debug.log('🔧 [MainLayout] Fallback: Using default zone:', zone.zone_name)
+            const tenant = authStore.availableTenants.find((z: any) => z.zone_id === authStore.user?.zone_id)
+            if (tenant) {
+              authStore.currentTenant = tenant
+              debug.log('🔧 [MainLayout] Fallback: Using default zone:', tenant.zone_name)
             }
           }
         }
       } else {
-        debug.log('🔧 [MainLayout] Current zone already set:', authStore.currentZone.zone_name)
+        debug.log('🔧 [MainLayout] Current zone already set:', authStore.currentTenant.zone_name)
       }
     } catch (error) {
       debug.error('🔧 [MainLayout] Failed to load zones:', error)
     }
   }
   
-  // 如果区域数据仍然为空且用户已认证，使用默认的Global zone
-  if (authStore.isAuthenticated && authStore.availableZones.length === 0) {
+  // 如果区域数据仍然为空且用户已认证，使用默认的Global tenant
+  if (authStore.isAuthenticated && authStore.availableTenants.length === 0) {
     debug.log('🔧 [MainLayout] No zones loaded, using default Global zone')
-    authStore.availableZones = [DEFAULT_GLOBAL_ZONE]
-    if (!authStore.currentZone) {
-      authStore.currentZone = DEFAULT_GLOBAL_ZONE
+    authStore.availableTenants = [DEFAULT_PLATFORM_TENANT]
+    if (!authStore.currentTenant) {
+      authStore.currentTenant = DEFAULT_PLATFORM_TENANT
     }
   }
   

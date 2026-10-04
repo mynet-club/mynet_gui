@@ -3,7 +3,7 @@ import debug from 'src/utils/debug'
 import { LocalStorage } from 'quasar'
 import { tokenManager } from '../utils/tokenManager'
 import { mockDashboardData, mockDelay } from './mockData'
-import type { Zone } from '../types'
+import type { Tenant } from '../types'
 
 // 获取当前语言
 const getCurrentLanguage = () => {
@@ -437,16 +437,16 @@ export const apiService = {
     }
   },
 
-  // Zones相关API（后端已迁移至 Tenant，接口层做字段映射，交互层保持 zone 命名不变）
-  async getZones() {
+  // Zones相关API（后端已迁移至 Tenant，接口层做字段映射，交互层保持 tenant 命名不变）
+  async getTenants() {
     try {
       // 后端端点: GET /user/tenants/  返回: { tenant_id, name, description, status, ... }
       const response = await api.get('/user/tenants/')
 
       // 处理真实API响应格式
       if (response.data.success) {
-        // 将 tenant 响应字段映射为前端 zone 兼容结构
-        const zones = response.data.data.map((tenant: any) => ({
+        // 将 tenant 响应字段映射为前端 tenant 兼容结构
+        const tenants = response.data.data.map((tenant: any) => ({
           ...tenant,
           zone_id: tenant.tenant_id,
           zone_name: tenant.name,
@@ -459,7 +459,7 @@ export const apiService = {
           is_active: tenant.status === 'active',
           description: tenant.description
         }))
-        return { data: zones }
+        return { data: tenants }
       } else {
         throw new Error(response.data.message || 'Failed to get zones')
       }
@@ -471,10 +471,10 @@ export const apiService = {
     }
   },
 
-  async switchZone(zoneId: number) {
+  async switchTenant(tenantId: number) {
     try {
       // 后端端点: POST /user/tenants/switch  Body: { tenant_id }
-      const response = await api.post('/user/tenants/switch', { tenant_id: zoneId })
+      const response = await api.post('/user/tenants/switch', { tenant_id: tenantId })
       const result = response.data.data
 
       // 更新本地存储的用户信息
@@ -482,7 +482,7 @@ export const apiService = {
       if (userInfoStr) {
         try {
           const user = JSON.parse(userInfoStr)
-          user.zone_id = zoneId
+          user.zone_id = tenantId
           LocalStorage.set('user_info', JSON.stringify(user))
         } catch (error) {
           debug.error('Failed to update zone_id in user info:', error)

@@ -207,14 +207,14 @@ const clearTokens = () => {
 
 // WebSocket 相关方法
 const connectWebSocket = () => {
-  if (!authStore.token || !authStore.currentZone) {
+  if (!authStore.token || !authStore.currentTenant) {
     addLog('error', 'WebSocket 连接失败：缺少认证信息或区域信息')
     notify.error('缺少认证信息或区域信息')
     return
   }
   
-  connect(authStore.token, authStore.currentZone.zone_id.toString())
-  addLog('info', `WebSocket 连接尝试: Zone ID ${authStore.currentZone.zone_id}`)
+  connect(authStore.token, authStore.currentTenant.zone_id.toString())
+  addLog('info', `WebSocket 连接尝试: Zone ID ${authStore.currentTenant.zone_id}`)
 }
 
 const disconnectWebSocket = () => {

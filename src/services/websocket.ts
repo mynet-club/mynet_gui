@@ -1,5 +1,5 @@
 // WebSocket 服务 — Laravel Echo + Reverb 私有频道
-// 提供 Zone 节点事件、用户通知事件订阅入口
+// 提供 Tenant 节点事件、用户通知事件订阅入口
 import { ref } from 'vue'
 import debug from 'src/utils/debug'
 import Echo from 'laravel-echo'
@@ -21,7 +21,7 @@ interface WebSocketMessage {
   timestamp: string
 }
 
-// Zone 节点事件 payload
+// Tenant 节点事件 payload
 export interface NodeEventPayload {
   node_id: string
   node_name?: string
@@ -58,14 +58,14 @@ export class WebSocketService {
   private echo: Echo<any> | null = null
   private eventListeners: Map<string, Array<(data: any) => void>> = new Map()
   private token: string = ''
-  private zoneId: string = ''
-  private subscribedZoneChannels: Set<number> = new Set()
+  private tenantId: string = ''
+  private subscribedTenantChannels: Set<number> = new Set()
   private subscribedUserChannels: Set<number | string> = new Set()
   public isConnected = ref(false)
 
-  connect(token: string, zoneId: string) {
+  connect(token: string, tenantId: string) {
     this.token = token
-    this.zoneId = zoneId
+    this.tenantId = tenantId
 
     if (this.echo && this.isConnected.value) {
       debug.log('WebSocket: 已经连接，跳过重复连接')
@@ -105,7 +105,7 @@ export class WebSocketService {
         auth: {
           headers: {
             Authorization: `Bearer ${token}`,
-            'X-Tenant-ID': String(zoneId),
+            'X-Tenant-ID': String(tenantId),
             Accept: 'application/json'
           }
         }
@@ -118,7 +118,7 @@ export class WebSocketService {
       this.echo.connector.pusher.connection.bind('connected', () => {
         debug.log('WebSocket: 连接成功')
         this.isConnected.value = true
-        this.emit('connected', { status: 'connected', zone_id: zoneId })
+        this.emit('connected', { status: 'connected', zone_id: tenantId })
       })
 
       this.echo.connector.pusher.connection.bind('disconnected', () => {
@@ -141,15 +141,15 @@ export class WebSocketService {
   }
 
   /**
-   * 订阅 Zone 节点事件（私有频道 private-zone.{zoneId}.nodes）
+   * 订阅 Tenant 节点事件（私有频道 private-zone.{tenantId}.nodes）
    * 监听后端 NodeCreatedEvent / NodeUpdatedEvent / NodeStatusChangedEvent / NodeDeletedEvent
    */
-  subscribeZoneNodes(zoneId: number | string, handlers: NodeEventHandlers) {
+  subscribeTenantNodes(tenantId: number | string, handlers: NodeEventHandlers) {
     if (!this.echo) {
       debug.warn('WebSocket: Echo 未初始化，无法订阅 Zone 节点频道')
       return
     }
-    const zid = Number(zoneId)
+    const zid = Number(tenantId)
     const channelName = `zone.${zid}.nodes`
     debug.log(`WebSocket: 订阅私有频道 private-${channelName}`)
     const channel = this.echo.private(channelName)
@@ -159,15 +159,15 @@ export class WebSocketService {
     if (handlers.onStatusChanged) channel.listen('.node.status_changed', handlers.onStatusChanged)
     if (handlers.onDeleted) channel.listen('.node.deleted', handlers.onDeleted)
 
-    this.subscribedZoneChannels.add(zid)
+    this.subscribedTenantChannels.add(zid)
   }
 
-  unsubscribeZoneNodes(zoneId: number | string) {
+  unsubscribeTenantNodes(tenantId: number | string) {
     if (!this.echo) return
-    const zid = Number(zoneId)
+    const zid = Number(tenantId)
     try {
       this.echo.leave(`zone.${zid}.nodes`)
-      this.subscribedZoneChannels.delete(zid)
+      this.subscribedTenantChannels.delete(zid)
       debug.log(`WebSocket: 已退订 private-zone.${zid}.nodes`)
     } catch (err) {
       debug.warn('WebSocket: 退订 Zone 节点频道失败', err)
@@ -208,7 +208,7 @@ export class WebSocketService {
 
   unsubscribeAll() {
     if (!this.echo) return
-    this.subscribedZoneChannels.forEach((zid) => this.unsubscribeZoneNodes(zid))
+    this.subscribedTenantChannels.forEach((zid) => this.unsubscribeTenantNodes(zid))
     this.subscribedUserChannels.forEach((uid) => this.unsubscribeUserNotifications(uid))
   }
 
@@ -252,13 +252,13 @@ export const webSocketService = new WebSocketService()
 export const useWebSocket = () => {
   return {
     isConnected: webSocketService.isConnected,
-    connect: (token: string, zoneId: string) => webSocketService.connect(token, zoneId),
+    connect: (token: string, tenantId: string) => webSocketService.connect(token, tenantId),
     disconnect: () => webSocketService.disconnect(),
     on: (event: string, callback: (data: any) => void) => webSocketService.on(event, callback),
     off: (event: string, callback: (data: any) => void) => webSocketService.off(event, callback),
-    subscribeZoneNodes: (zoneId: number | string, handlers: NodeEventHandlers) =>
-      webSocketService.subscribeZoneNodes(zoneId, handlers),
-    unsubscribeZoneNodes: (zoneId: number | string) => webSocketService.unsubscribeZoneNodes(zoneId),
+    subscribeTenantNodes: (tenantId: number | string, handlers: NodeEventHandlers) =>
+      webSocketService.subscribeTenantNodes(tenantId, handlers),
+    unsubscribeTenantNodes: (tenantId: number | string) => webSocketService.unsubscribeTenantNodes(tenantId),
     subscribeUserNotifications: (userId: number | string, handler: (payload: NotificationEventPayload) => void) =>
       webSocketService.subscribeUserNotifications(userId, handler),
     unsubscribeUserNotifications: (userId: number | string) =>

@@ -58,7 +58,7 @@ export const mockUsers: MockUser[] = [
 ]
 
 // 模拟区域数据
-export const mockZones: MockZone[] = [
+export const mockTenants: MockZone[] = [
   {
     id: 'zone_1',
     name: 'TechCorpVPN',
@@ -145,8 +145,8 @@ export const mockDashboardData = {
     activeNodes: mockNodes.filter(n => n.status === 'active').length,
     totalRoutes: mockRoutes.length,
     activeRoutes: mockRoutes.filter(r => r.status === 'active').length,
-    totalZones: mockZones.length,
-    activeZones: mockZones.filter(z => z.is_active).length
+    totalZones: mockTenants.length,
+    activeTenants: mockTenants.filter(z => z.is_active).length
   },
   recentActivity: [
     {

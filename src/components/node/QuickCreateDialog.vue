@@ -215,15 +215,15 @@ const reset = () => {
 // ── Step 0: 一键创建 ──
 const doCreate = async () => {
   if (nodeName.value.length < 3) return
-  const zoneId = authStore.currentZone?.zone_id
-  if (!zoneId) {
+  const tenantId = authStore.currentTenant?.zone_id
+  if (!tenantId) {
     $q.notify({ type: 'negative', message: t('nodes.quickCreate.noZone') })
     return
   }
 
   try {
     creating.value = true
-    const res = await nodeService.quickCreateNode(nodeName.value, zoneId)
+    const res = await nodeService.quickCreateNode(nodeName.value, tenantId)
     if (res.success && res.data) {
       createdNode.value = res.data.node
       createdConfig.value = res.data.config

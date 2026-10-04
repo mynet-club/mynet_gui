@@ -35,8 +35,8 @@ const routes: RouteRecordRaw[] = [
     redirect: '/app/ippools'
   },
   {
-    path: '/zones',
-    redirect: '/app/zones'
+    path: '/tenants',
+    redirect: '/app/tenants'
   },
   {
     path: '/services',
@@ -224,9 +224,9 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'IP池管理', requiresAuth: true }
       },
       { 
-        path: 'zones', 
-        name: 'zones',
-        component: () => import('../pages/zone/ZoneListPage.vue'),
+        path: 'tenants', 
+        name: 'tenants',
+        component: () => import('../pages/tenant/TenantListPage.vue'),
         meta: { title: '区域管理', requiresAuth: true }
       },
       { 

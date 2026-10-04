@@ -32,7 +32,7 @@ export interface AuthTokens {
   expires_at: number
 }
 
-export interface Zone {
+export interface Tenant {
   id: number
   zone_id: number
   zone_name: string
@@ -378,15 +378,15 @@ export interface RouteDataResponse {
   timestamp: string
 }
 
-// Zone Module Types
-export interface ZoneOverview {
+// Tenant Module Types
+export interface TenantOverview {
   total_zones: number
   active_zones: number
   total_nodes: number
   total_routes: number
 }
 
-export interface ZoneStatistics {
+export interface TenantStatistics {
   zone_id: string
   node_count: number
   active_node_count: number
@@ -395,8 +395,8 @@ export interface ZoneStatistics {
   user_count: number
 }
 
-export interface PaginatedZoneResponse {
-  data: Zone[]
+export interface PaginatedTenantResponse {
+  data: Tenant[]
   meta: {
     current_page: number
     per_page: number

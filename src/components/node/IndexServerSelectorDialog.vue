@@ -171,7 +171,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import debug from 'src/utils/debug'
-import { zoneService } from '../../services/zone/zoneService'
+import { tenantService } from '../../services/tenant/tenantService'
 import type { IndexService, IndexServiceMeta } from '../../types'
 
 interface Props {
@@ -220,7 +220,7 @@ const filteredServices = computed(() => {
 const loadIndexServices = async () => {
   loading.value = true
   try {
-    const response = await zoneService.getIndexServices()
+    const response = await tenantService.getIndexServices()
     const responseData = response.data
     
     indexServices.value = responseData.index_services || []

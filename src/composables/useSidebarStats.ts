@@ -7,7 +7,7 @@ export interface SidebarStats {
   ippools: number
   routes: number
   connections: number
-  zones: number
+  tenants: number
 }
 
 export function useSidebarStats() {
@@ -16,7 +16,7 @@ export function useSidebarStats() {
     ippools: 0,
     routes: 0,
     connections: 0,
-    zones: 0
+    tenants: 0
   })
 
   const isLoading = ref(false)
@@ -42,7 +42,7 @@ export function useSidebarStats() {
         ippools: Math.floor((seedValue * 0.2) % 20) + 5,
         routes: Math.floor((seedValue * 1.0) % 100) + 20,
         connections: Math.floor((seedValue * 2.0) % 200) + 50,
-        zones: Math.floor((seedValue * 0.1) % 10) + 3
+        tenants: Math.floor((seedValue * 0.1) % 10) + 3
       }
       
       debug.log('📊 [SidebarStats] Updated stats:', stats.value)
@@ -55,7 +55,7 @@ export function useSidebarStats() {
 
   // 计算属性
   const totalItems = computed(() => {
-    return stats.value.nodes + stats.value.ippools + stats.value.routes + stats.value.connections + stats.value.zones
+    return stats.value.nodes + stats.value.ippools + stats.value.routes + stats.value.connections + stats.value.tenants
   })
 
   const hasData = computed(() => {

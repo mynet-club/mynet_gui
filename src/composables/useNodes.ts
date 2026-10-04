@@ -424,17 +424,17 @@ export function useNodes() {
   }
 
   /**
-   * 启用 WebSocket 实时节点更新（订阅 private-zone.{zoneId}.nodes）
+   * 启用 WebSocket 实时节点更新（订阅 private-zone.{tenantId}.nodes）
    * 监听 node.created / node.updated / node.status_changed / node.deleted
    */
-  let liveZoneId: number | null = null
-  const enableLiveUpdates = (zoneId: number | string) => {
-    const zid = Number(zoneId)
-    if (liveZoneId === zid) return
-    if (liveZoneId !== null) webSocketService.unsubscribeZoneNodes(liveZoneId)
-    liveZoneId = zid
+  let liveTenantId: number | null = null
+  const enableLiveUpdates = (tenantId: number | string) => {
+    const zid = Number(tenantId)
+    if (liveTenantId === zid) return
+    if (liveTenantId !== null) webSocketService.unsubscribeTenantNodes(liveTenantId)
+    liveTenantId = zid
 
-    webSocketService.subscribeZoneNodes(zid, {
+    webSocketService.subscribeTenantNodes(zid, {
       onCreated: (payload: NodeEventPayload) => {
         debug.log('[useNodes] node.created', payload)
         if (!nodes.value.some(n => String(n.node_id) === payload.node_id)) {
@@ -477,9 +477,9 @@ export function useNodes() {
   }
 
   const disableLiveUpdates = () => {
-    if (liveZoneId !== null) {
-      webSocketService.unsubscribeZoneNodes(liveZoneId)
-      liveZoneId = null
+    if (liveTenantId !== null) {
+      webSocketService.unsubscribeTenantNodes(liveTenantId)
+      liveTenantId = null
     }
   }
 

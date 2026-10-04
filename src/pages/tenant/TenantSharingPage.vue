@@ -250,7 +250,7 @@ const showShareDialog = ref(false)
 const editingService = ref<ZoneService | null>(null)
 const sharingService = ref<ZoneService | null>(null)
 const shareMessage = ref('')
-const currentZone = ref<ZoneService | null>(null)
+const currentTenant = ref<ZoneService | null>(null)
 
 // 计算属性
 const totalServices = computed(() => {
