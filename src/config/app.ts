@@ -23,6 +23,13 @@ const PLATFORM_TENANT_ID = 9007199254740991
  * 历史：早期叫 `current_zone` 且存整个对象；现在叫 `current_network` 只存 tenant_id。
  * 读旧键时兼容并迁移一次（`stores/auth.ts` 的 readSavedTenantId），
  * 否则改名当天所有老用户的已选网络区会静默回到默认值。
+ *
+ * 2026-10-04 裁定 A2 之后，这个键**只是显示缓存**：「当前区」的唯一权威是服务端指针
+ * `users.tenant_id`（由 `POST /user/tenants/switch` 写、由 `ResolveTenantFromUser` 解析成
+ * 租户上下文）。用户面整组不挂框架的 `IdentifyTenant`，`X-Tenant-ID` / `?tenant_id=`
+ * 也不再被 `BaseApiController::getCurrentTenantId()` 采 —— 所以这里的值只影响
+ * 刷新前的首屏渲染，不影响服务端按哪个区回数据。真正让两边一致的仍是
+ * `stores/auth.ts:switchTenant()` 的「先拿服务端确认、再写本地状态」顺序。
  */
 export const TENANT_SELECTION_KEY = 'current_network'
 export const LEGACY_TENANT_SELECTION_KEY = 'current_zone'
