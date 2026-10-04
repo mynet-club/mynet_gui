@@ -156,7 +156,7 @@
                 <q-icon name="settings" />
               </q-item-section>
               <q-item-section>
-                <q-item-label>{{ $t('profile.preferences') }}</q-item-label>
+                <q-item-label>{{ $t('user.preferences') }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-separator />
