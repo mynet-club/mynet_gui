@@ -14,6 +14,14 @@
 #     不能拿它把 push 永久堵死，也不能加 `--passWithNoTests` 装绿（AGENTS.md §2.6：
 #     「没东西可查」型门禁等于没有门禁）。所以这里自己数套件：零用例就**响着**放行，
 #     并把 M0 的「单元测试可运行」按未达标处理（见 docs/MYNET_V1_PLAYBOOK.md §10）。
+#   · 类型检查是**棘轮**（`dev-tools/check-types.js` + `typecheck-baseline.json`）：
+#     自有源码实测带 211 条存量错（43 个文件），清它是另一件事；设成「必须 0 错」
+#     = 每次 push 被历史债堵死，结局一定是有人 `--no-verify`。所以判据取**逐文件条数**
+#     而不是退出码：只许降不许升。放宽要显式跑 `npm run check:types:update`，改动进 diff。
+#   · 根 `tsconfig.json` 原先是 `.quasar/tsconfig.json` 的**逐字副本**，而那份里的相对路径
+#     是按 `.quasar/` 为基准写的（`include: "./../**/*"`）⇒ 从仓库根跑 vue-tsc / IDE 会把
+#     workspace 父目录整个拖进检查（实测多报 485 条，其中 389 条在 `../mynet_api`）。
+#     现在根文件只做 `extends`，两种跑法结果一致。
 
 .PHONY: lint test guard check install-hooks
 
@@ -22,6 +30,8 @@ lint:
 	@npm run lint
 	@echo "▸ lint（i18n 键一致性）"
 	@npm run check:i18n
+	@echo "▸ lint（类型检查 · 棘轮）"
+	@npm run check:types
 
 test:
 	@echo "▸ test（vitest）"

@@ -20,7 +20,9 @@
     "lint": "eslint --ext .js,.ts,.vue ./src",
     "lint:fix": "eslint --ext .js,.ts,.vue ./src --fix",
     "check:i18n": "node dev-tools/check-i18n.js",
-    "postinstall": "quasar prepare"
+    "postinstall": "quasar prepare",
+    "check:types": "node dev-tools/check-types.js",
+    "check:types:update": "node dev-tools/check-types.js --update"
   },
   "dependencies": {
     "@quasar/extras": "^1.16.9",
@@ -50,7 +52,8 @@
     "sass": "^1.69.0",
     "sharp": "^0.34.5",
     "typescript": "^5.3.0",
-    "vitest": "^1.1.0"
+    "vitest": "^1.1.0",
+    "vue-tsc": "^3.3.12"
   },
   "engines": {
     "node": "^18 || ^20 || ^21 || ^22 || ^24",
