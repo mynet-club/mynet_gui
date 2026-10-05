@@ -11,10 +11,11 @@
 #     这类错运行时不报错，只把键的字面量印在界面上 —— 装这道闸的当场就抓到一处
 #     （`layouts/MainLayout.vue` 曾引用两语都无此键的 `profile.preferences`，
 #     现已改指 `user.preferences`；留着这条是因为它说明了这道闸为什么值得装）。
-#   · 本仓**当前零用例**，`vitest run` 在 "No test files found" 时 exit 1。
-#     不能拿它把 push 永久堵死，也不能加 `--passWithNoTests` 装绿（AGENTS.md §2.6：
-#     「没东西可查」型门禁等于没有门禁）。所以这里自己数套件：零用例就**响着**放行，
-#     并把 M0 的「单元测试可运行」按未达标处理（见 docs/MYNET_V1_PLAYBOOK.md §10）。
+#   · `vitest run` 在 "No test files found" 时 exit 1。首个套件落地前（2026-10-05
+#     src/utils/__tests__/ 起）不能拿它把 push 永久堵死，也不能加 `--passWithNoTests`
+#     装绿（AGENTS.md §2.6：「没东西可查」型门禁等于没有门禁）。所以这里自己数套件：
+#     零用例就**响着**放行、并把 M0 的「单元测试可运行」按未达标处理（见 §10）；
+#     有套件才真跑 vitest。
 #   · 类型检查是**棘轮**（`dev-tools/check-types.js` + `typecheck-baseline.json`）：
 #     自有源码实测带一批存量错，清它是另一件事；设成「必须 0 错」
 #     = 每次 push 被历史债堵死，结局一定是有人 `--no-verify`。所以判据取**逐文件条数**
