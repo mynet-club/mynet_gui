@@ -1570,34 +1570,19 @@ export default {
     selectZone: 'Select Network',
     switchedTo: 'Switched to {zoneName}',
     switchFailed: 'Failed to switch network',
-    unknownZone: 'Unknown network',
-    comingSoonMessage: 'Network management feature is under development, stay tuned!',
 
     // Extended network management features
     currentZone: 'Current Network',
     availableZones: 'Available Networks',
     noCurrentZone: 'No network selected',
     noAvailableZones: 'No available networks',
-    adminRole: 'Administrator',
     domain: 'Domain',
     admin: 'Administrator',
     switchToZone: 'Switch to this network',
 
-    // Statistics
-    stats: {
-      totalNodes: 'Total Nodes',
-      activeNodes: 'Active Nodes',
-      routes: 'Routes',
-      users: 'Users'
-    },
-
     // Actions
     actions: {
       switch: 'Switch',
-      create: 'Create Network',
-      edit: 'Edit',
-      delete: 'Delete',
-      refresh: 'Refresh'
     },
 
     // Dialogs
@@ -1607,25 +1592,10 @@ export default {
         message: 'Are you sure you want to switch to network "{zoneName}"?',
         warning: 'After switching, you will see the node configuration and data of that network.'
       },
-      createZone: {
-        title: 'Create New Network',
-        nameLabel: 'Network Name',
-        descriptionLabel: 'Network Description',
-        create: 'Create'
-      }
     },
 
     // Error messages
-    fetchOverviewError: 'Failed to fetch network overview',
     fetchAvailableZonesError: 'Failed to fetch available networks',
-    fetchZonesError: 'Failed to fetch network list',
-    fetchDetailsError: 'Failed to fetch network details',
-    createSuccess: 'Network created successfully',
-    createError: 'Failed to create network',
-    updateSuccess: 'Network updated successfully',
-    updateError: 'Failed to update network',
-    deleteSuccess: 'Network deleted successfully',
-    deleteError: 'Failed to delete network'
   },
   social: {
     subtitle: 'Network connections and user management',
@@ -1903,10 +1873,6 @@ export default {
     subtitle: 'API interface testing and debugging tools',
     comingSoonMessage: 'API testing tool is under development, stay tuned!'
   },
-  help: {
-    subtitle: 'Help documentation and user guide',
-    comingSoonMessage: 'Help documentation is being improved, stay tuned!'
-  },
   websocket: {
     connected: 'Connected',
     disconnected: 'Disconnected',
@@ -2019,9 +1985,7 @@ export default {
     submitRequest: 'Submit Request',
     confirmDelete: 'Confirm Delete',
     confirmDeleteMessage: 'Are you sure you want to delete service "{name}"? This action cannot be undone.',
-    deleteWarning: 'Are you sure you want to delete service "{name}"? This action cannot be undone.',
     connect: 'Connect',
-    authRequired: 'Auth Required',
     noAuth: 'No Auth',
 
     // ServiceCard related translations

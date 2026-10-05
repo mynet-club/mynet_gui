@@ -7,7 +7,11 @@
 - **统一缓存管理器** (`CacheManager`)
 - **API缓存装饰器** (`@apiCache`, `withCache`)
 - **Vue组合式函数** (`useCache`, `useApiCache`)
-- **可视化管理界面** (`CacheManagementPage`)
+
+> 原第 4 项「可视化管理界面 `CacheManagementPage`」已删除（2026-10-05）：该页没有任何路由
+> 与入口引用它，属于死代码。缓存能力本身（上面三件）仍在 `src/utils/cacheManager.ts`、
+> `src/utils/apiCache.ts`、`src/composables/useCache.ts` 里活着，不受影响。
+> 需要管理界面时按现有 API 重新接线，别去找这个旧页。
 
 ## 🚀 使用方法
 

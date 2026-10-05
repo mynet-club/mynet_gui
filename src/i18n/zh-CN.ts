@@ -1717,34 +1717,19 @@ export default {
     selectZone: `选择${TERM_ZONE}`,
     switchedTo: '已切换到 {zoneName}',
     switchFailed: `切换${TERM_ZONE}失败`,
-    unknownZone: `未知${TERM_ZONE}`,
-    comingSoonMessage: `${TERM_ZONE}管理功能正在开发中，敬请期待！`,
 
     // 扩展的zone管理功能
     currentZone: `当前${TERM_ZONE}`,
     availableZones: `可用${TERM_ZONE}`,
     noCurrentZone: `未选择${TERM_ZONE}`,
     noAvailableZones: `暂无可用${TERM_ZONE}`,
-    adminRole: '管理员',
     domain: '域名',
     admin: '管理员',
     switchToZone: `切换到此${TERM_ZONE}`,
 
-    // 统计信息
-    stats: {
-      totalNodes: '总设备数',
-      activeNodes: '活跃设备',
-      routes: '连接数',
-      users: '用户数'
-    },
-
     // 操作
     actions: {
       switch: '切换',
-      create: `创建${TERM_ZONE}`,
-      edit: '编辑',
-      delete: '删除',
-      refresh: '刷新'
     },
 
     // 对话框
@@ -1754,25 +1739,10 @@ export default {
         message: `确定要切换到${TERM_ZONE} "{zoneName}" 吗？`,
         warning: `切换${TERM_ZONE}后，您将看到该${TERM_ZONE}的网络配置和数据。`
       },
-      createZone: {
-        title: `创建新${TERM_ZONE}`,
-        nameLabel: `${TERM_ZONE}名称`,
-        descriptionLabel: `${TERM_ZONE}描述`,
-        create: '创建'
-      }
     },
 
     // 错误信息
-    fetchOverviewError: `获取${TERM_ZONE}概览失败`,
     fetchAvailableZonesError: `获取可用${TERM_ZONE}失败`,
-    fetchZonesError: `获取${TERM_ZONE}列表失败`,
-    fetchDetailsError: `获取${TERM_ZONE}详情失败`,
-    createSuccess: `${TERM_ZONE}创建成功`,
-    createError: `创建${TERM_ZONE}失败`,
-    updateSuccess: `${TERM_ZONE}更新成功`,
-    updateError: `更新${TERM_ZONE}失败`,
-    deleteSuccess: `${TERM_ZONE}删除成功`,
-    deleteError: `删除${TERM_ZONE}失败`
   },
   social: {
     subtitle: '组网连接和用户管理',
@@ -2072,10 +2042,6 @@ export default {
     subtitle: 'API接口测试和调试工具',
     comingSoonMessage: 'API测试工具正在开发中，敬请期待！'
   },
-  help: {
-    subtitle: '帮助文档和使用指南',
-    comingSoonMessage: '帮助文档正在完善中，敬请期待！'
-  },
   websocket: {
     connected: '已连接',
     disconnected: '未连接',
@@ -2242,9 +2208,7 @@ export default {
     submitRequest: '提交申请',
     confirmDelete: '确认删除',
     confirmDeleteMessage: '确定要删除服务 "{name}" 吗？此操作不可恢复。',
-    deleteWarning: '确定要删除服务 "{name}" 吗？此操作不可恢复。',
     connect: '连接',
-    authRequired: '需要认证',
     noAuth: '无需认证',
 
     // ServiceCard 相关翻译
