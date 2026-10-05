@@ -1034,8 +1034,6 @@ export default {
       publicServicesDescription: 'Browse public services provided by system (connected devices share automatically)',
       friendServices: 'Friend Services',
       friendServicesDescription: 'Browse services shared by your friends',
-      anonymousServices: 'Anonymous Services (Deprecated)', // Feature removed, kept to avoid errors
-      anonymousServicesDescription: 'This feature has been deprecated', // Feature removed
       myServices: 'My Services',
       myServicesDescription: 'Manage and share services you created'
     },
@@ -1962,8 +1960,6 @@ export default {
       publicServicesDescription: 'Browse public services provided by system (connected devices share automatically)',
       friendServices: 'Friend Services',
       friendServicesDescription: 'Browse services shared by your friends',
-      anonymousServices: 'Anonymous Services (Deprecated)', // Feature removed
-      anonymousServicesDescription: 'This feature has been deprecated', // Feature removed
       myServices: 'My Services',
       myServicesDescription: 'Manage and share services you created'
     },
@@ -2018,8 +2014,6 @@ export default {
       publicDesc: 'Public services approved by administrators',
       friend: 'Friend Sharing',
       friendDesc: 'Services shared by your friends',
-      anonymous: 'Anonymous Sharing',
-      anonymousDesc: 'Services shared by anonymous users',
       my: 'My Services',
       myDesc: 'Services you created and manage'
     },
@@ -2106,8 +2100,6 @@ export default {
       publicServicesDesc: 'No system services or services from connected devices available yet',
       friendServices: 'No Friend Sharing',
       friendServicesDesc: 'No services have been shared by your friends yet',
-      anonymousServices: 'This feature has been deprecated', // Feature removed
-      anonymousServicesDesc: 'Anonymous services feature has been removed, please use friend services', // Feature removed
       myServices: 'You haven\'t created any services yet',
       myServicesDesc: 'Click the button below to create your first service'
     },

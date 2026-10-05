@@ -1101,8 +1101,6 @@ export default {
       publicServicesDescription: '浏览系统提供的公共网络服务（已连接设备自动共享）',
       friendServices: '好友服务',
       friendServicesDescription: '浏览好友分享的网络服务',
-      anonymousServices: '匿名服务（已废弃）', // 功能已移除，保留以避免错误
-      anonymousServicesDescription: '该功能已废弃', // 功能已移除
       myServices: '我的服务',
       myServicesDescription: '管理和分享你创建的服务'
     },
@@ -2172,8 +2170,6 @@ export default {
       publicServicesDescription: '浏览系统提供的公共网络服务（已连接设备自动共享）',
       friendServices: '好友服务',
       friendServicesDescription: '浏览好友分享的网络服务',
-      anonymousServices: '匿名服务（已废弃）', // 功能已移除
-      anonymousServicesDescription: '该功能已废弃', // 功能已移除
       myServices: '我的服务',
       myServicesDescription: '管理和分享你创建的服务'
     },
@@ -2183,8 +2179,6 @@ export default {
 
     // 空状态消息
     empty: {
-      anonymousServices: '该功能已废弃',
-      anonymousServicesDesc: '匿名服务功能已移除，请使用好友服务',
       publicServices: '暂无公共服务',
       publicServicesDesc: '暂无系统服务或已连接设备共享的服务',
       friendServices: '暂无好友分享',
@@ -2241,8 +2235,6 @@ export default {
       publicDesc: '由管理员审核通过的公共服务',
       friend: '好友分享',
       friendDesc: '好友与你分享的服务',
-      anonymous: '匿名共享',
-      anonymousDesc: '匿名用户共享的服务',
       my: '我的服务',
       myDesc: '你创建和管理的服务'
     },

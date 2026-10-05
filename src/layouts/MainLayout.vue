@@ -559,13 +559,6 @@ const networkNavigationItems = computed((): NavigationItem[] => [
         icon: 'group',
         path: '/app/services/friends'
       },
-      // 匿名服务已移除 - 2026-01 简化服务分类
-      // {
-      //   name: 'services-anonymous',
-      //   label: 'navigation.services.anonymousServices',
-      //   icon: 'visibility_off',
-      //   path: '/app/services/anonymous'
-      // },
       {
         name: 'services-my',
         label: 'navigation.services.myServices',

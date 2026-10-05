@@ -248,12 +248,6 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/services/FriendServicesPage.vue'),
         meta: { title: '好友服务', requiresAuth: true }
       },
-      // {
-      //   path: 'services/anonymous',
-      //   name: 'services-anonymous',
-      //   component: () => import('../pages/services/AnonymousServicesPage.vue'),
-      //   meta: { title: '匿名服务', requiresAuth: true }
-      // }, // 已注释 - 移除匿名服务功能
       {
         path: 'services/my',
         name: 'services-my',

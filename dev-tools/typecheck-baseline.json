@@ -2,7 +2,7 @@
   "_comment": "类型检查棘轮基线：逐文件的 vue-tsc 错误条数。只许降不许升；上调请用 --update 并连同 diff 提交。",
   "generatedBy": "node dev-tools/check-types.js --update",
   "tsconfig": "tsconfig.json",
-  "total": 203,
+  "total": 202,
   "files": {
     "src/components/node/NodeCardContent.vue": 36,
     "src/components/route/NodeTopologyView.vue": 30,
@@ -38,7 +38,6 @@
     "src/pages/node/NodeDetailPage.vue": 1,
     "src/pages/route/create/Step3MyNodeSelection.vue": 1,
     "src/pages/route/FriendNodesPage.vue": 1,
-    "src/pages/services/AnonymousServicesPage.vue": 1,
     "src/pages/system/TokenDebugPage.vue": 1,
     "src/pages/user/ProfilePage.vue": 1,
     "src/services/apiVersionService.ts": 1,

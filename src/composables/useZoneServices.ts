@@ -20,8 +20,6 @@ export function useZoneServices() {
   const loading = ref(false)
   const publicServices = ref<ZoneService[]>([])
   const friendServices = ref<ZoneService[]>([])
-  // 匿名服务已移除 - 简化服务分类
-  // const anonymousServices = ref<ZoneService[]>([])
   const myServices = ref<ZoneService[]>([])
 
   // 服务分类配置
@@ -39,14 +37,6 @@ export function useZoneServices() {
       icon: 'group',
       color: 'positive',
       description: t('zoneServices.categories.friendDesc')
-    // 匿名服务已移除 - 简化服务分类
-    // {
-    //   key: 'anonymous',
-    //   title: t('zoneServices.categories.anonymous'),
-    //   icon: 'visibility_off',
-    //   color: 'warning',
-    //   description: t('zoneServices.categories.anonymousDesc')
-    //   description: t('zoneServices.categories.anonymousDesc')
     },
     {
       key: 'my',
@@ -103,17 +93,14 @@ export function useZoneServices() {
     loading.value = true
 
     try {
-      // 匿名服务已移除 - 简化服务分类
       const [publicRes, friendRes, myRes] = await Promise.all([
         zoneServiceApi.getPublicServices(),
         zoneServiceApi.getFriendServices(),
-        // zoneServiceApi.getAnonymousServices(), // 已移除
         zoneServiceApi.getMyServices()
       ])
 
       publicServices.value = publicRes.data || []
       friendServices.value = friendRes.data || []
-      // anonymousServices.value = anonymousRes.data || [] // 已移除
       myServices.value = myRes.data || []
     } catch (error) {
       debug.error('Failed to load services:', error)
@@ -293,7 +280,6 @@ export function useZoneServices() {
     loading,
     publicServices,
     friendServices,
-    // anonymousServices, // 已移除
     myServices,
     
     // 配置

@@ -59,20 +59,6 @@ export const zoneServiceApi = {
     }
   ),
 
-  // 获取匿名共享的服务 - 较长缓存
-  getAnonymousServices: withCache(
-    async (): Promise<ZoneServiceListResponse> => {
-      const response = await api.get('/services/anonymous')
-      return response.data
-    },
-    {
-      ttl: 3 * 60 * 1000, // 3分钟缓存
-      storage: 'memory',
-      key: 'anonymous_services',
-      tags: ['zone_services', 'anonymous_services']
-    }
-  ),
-
   // 获取我的服务 - 短期缓存
   getMyServices: withCache(
     async (): Promise<ZoneServiceListResponse> => {

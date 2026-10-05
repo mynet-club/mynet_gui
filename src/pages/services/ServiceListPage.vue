@@ -130,7 +130,6 @@ const {
   loading,
   publicServices,
   friendServices,
-  // anonymousServices, // 已移除
   myServices,
   loadAllServices
 } = useZoneServices()
@@ -153,15 +152,6 @@ const navigationItems = computed(() => [
     count: friendServices.value.length,
     action: () => router.push('/app/services/friends')
   },
-  // 匿名服务已移除
-  // {
-  //   title: t('navigation.services.anonymousServices'),
-  //   description: t('navigation.services.anonymousServicesDescription'),
-  //   icon: 'visibility_off',
-  //   color: 'warning',
-  //   count: anonymousServices.value.length,
-  //   action: () => router.push('/app/services/anonymous')
-  // },
   {
     title: t('navigation.services.myServices'),
     description: t('navigation.services.myServicesDescription'),
