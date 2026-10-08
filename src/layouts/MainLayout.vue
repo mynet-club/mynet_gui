@@ -8,11 +8,13 @@
           dense
           round
           icon="menu"
-          aria-label="Menu"
+          :aria-label="$t('common.navigation')"
+          :aria-expanded="leftDrawerOpen"
           @click="toggleLeftDrawer"
           class="q-mr-sm"
         />
 
+        <div class="toolbar-brand">MyNet</div>
         <q-space />
 
         <!-- 区域切换 -->
@@ -26,6 +28,7 @@
           flat
           dense
           :icon="'language'"
+          :aria-label="$t('settings.language')"
           :label="$q.screen.gt.sm ? getCurrentLanguageLabel() : ''"
           class="q-mr-sm"
         >
@@ -57,6 +60,7 @@
           dense
           round
           :icon="wsConnectionStats.connected ? 'wifi' : 'wifi_off'"
+          :aria-label="wsConnectionStats.connected ? $t('common.connected') : $t('common.disconnected')"
           :color="wsConnectionStats.connected ? 'positive' : 'negative'"
           @click="showConnectionDialog = true"
           class="q-mr-sm"
@@ -71,6 +75,7 @@
           flat 
           dense
           :icon="getThemeIcon()"
+          :aria-label="$t('settings.theme')"
           :label="$q.screen.gt.sm ? getThemeLabel() : ''"
           class="q-mr-sm"
         >
@@ -107,6 +112,7 @@
           dense
           round
           icon="notifications"
+          :aria-label="$t('common.notifications')"
           @click="showNotificationDialog = true"
           class="q-mr-sm"
         >
@@ -126,13 +132,14 @@
           flat 
           dense
           class="user-menu-btn"
+          :aria-label="$t('common.profile')"
         >
           <template v-slot:label>
             <div class="row items-center no-wrap q-gutter-xs">
                             <UserAvatar
                 v-if="user?.user_id"
                 :userId="user.user_id"
-                size="lg"
+                size="sm"
                 class="q-mr-md"
               />
               <span v-if="$q.screen.gt.sm">{{ user?.name || 'User' }}</span>
@@ -211,6 +218,8 @@
             :icon="item.icon"
             :label="$t(item.label + '.title')"
             header-class="nav-item"
+            :model-value="expandedGroups[item.name] ?? isNavigationGroupActive(item)"
+            @update:model-value="expandedGroups[item.name] = $event"
           >
             <q-item 
               v-for="child in item.children"
@@ -263,6 +272,8 @@
             :icon="item.icon"
             :label="$t(item.label + '.title')"
             header-class="nav-item"
+            :model-value="expandedGroups[item.name] ?? isNavigationGroupActive(item)"
+            @update:model-value="expandedGroups[item.name] = $event"
           >
             <q-item 
               v-for="child in item.children"
@@ -398,7 +409,7 @@
 const iconUrl = (import.meta.env.BASE_URL || "/") + "icons/icon.png"
 import { ref, computed, onMounted, reactive } from 'vue'
 import debug from '../utils/debug'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useQuasar, date, LocalStorage } from 'quasar'
 import { useAuthStore } from '../stores/auth'
 import { useWebSocket } from '../services/websocket'
@@ -417,6 +428,8 @@ import { getTipsEngine } from '../services/tips/TipsEngine'
 
 const $q = useQuasar()
 const router = useRouter()
+const route = useRoute()
+const expandedGroups = reactive<Record<string, boolean>>({})
 const authStore = useAuthStore()
 const { isConnected, connect } = useWebSocket()
 const { themeMode: currentThemeMode, setThemeMode, getThemeOptions, initializeTheme } = useTheme()
@@ -436,7 +449,7 @@ const user = computed(() => authStore.user)
 
 const supportedLanguages = computed(() => [
   { code: 'en-US', name: 'English', nativeName: 'English' },
-  { code: 'zh-CN', name: 'Chinese', nativeName: 'Chinese' }
+  { code: 'zh-CN', name: 'Chinese', nativeName: '简体中文' }
 ])
 const themeOptions = computed(() => getThemeOptions())
 
@@ -451,6 +464,11 @@ interface NavigationItem {
   comingSoon?: boolean
   children?: NavigationItem[]
 }
+
+// Keep the current section visible on direct links; allow manual collapse.
+const isNavigationGroupActive = (item: NavigationItem) =>
+  item.children?.some(child => child.path &&
+    (route.path === child.path || route.path.startsWith(`${child.path}/`))) ?? false
 
 // 创建一个composable来管理sidebar统计数据
 // 现在使用 useSidebarStats composable
@@ -615,7 +633,7 @@ const getThemeIcon = () => {
 }
 
 const getThemeLabel = () => {
-  return currentThemeMode.value.charAt(0).toUpperCase() + currentThemeMode.value.slice(1)
+  return t(`settings.themes.${currentThemeMode.value}`)
 }
 
 const changeLanguage = async (newLocale: string) => {
@@ -786,9 +804,9 @@ onMounted(async () => {
       debug.log('🎓 [Onboarding] Starting onboarding for new user')
       onboardingStore.start()
       
-      // 导航到Dashboard
-      if (router.currentRoute.value.path !== '/dashboard') {
-        router.push('/dashboard')
+      // 首次登录直接创建设备，不打断已有的深链接。
+      if (router.currentRoute.value.path === '/dashboard' || router.currentRoute.value.path === '/app/dashboard') {
+        await router.replace('/app/nodes/create')
       }
     }
   }

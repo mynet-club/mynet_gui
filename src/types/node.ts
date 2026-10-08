@@ -384,27 +384,28 @@ export interface QuickCreateNodeRequest {
 
 // 一键快速创建节点响应接口
 export interface QuickCreateNodeResponse {
+  success: boolean
   code: number
   message: string
   data: {
     node: {
-      node_id: number                 // 16位安全整数
+      node_id: number
       node_name: string
-      vpn_type: 'gnb'
+      vpn_type: VpnType | VpnType[]
       node_ip: string | null
-      node_type: number               // 1 = 边缘节点
-      created_at: string              // ISO 8601
+      node_type: number
+      created_at: string
     }
     config: {
-      nodeid: number
-      ifname: string                  // 'gnb_tun'
-      listen: number                  // 9016
-      mtu: number                     // 1450
-      multi_socket: 'on' | 'off'
+      nodeid?: number
+      ifname?: string
+      listen?: number
+      listen_port?: number
+      mtu: number
+      multi_socket?: 'on' | 'off'
     }
-    next_steps: {
-      [key: string]: string           // 操作提示文本
-    }
+    ip_pool_created?: boolean
+    next_steps: { [key: string]: string }
   }
 }
 

@@ -15,54 +15,20 @@
             icon="arrow_back"
             :label="$t('common.back')"
             @click="goBack"
+            :disable="submitting || showSuccessDialog"
           />
         </div>
       </div>
 
       <!-- 步骤指示器 -->
-      <q-stepper
-        v-model="currentStep"
-        ref="stepper"
-        color="primary"
-        animated
-        flat
-        class="q-mb-lg"
-      >
-        <q-step
-          :name="1"
-          :title="$t('routes.create.steps.selectFriend')"
-          icon="people"
-          :done="currentStep > 1"
-          active-icon="people"
-        />
-        <q-step
-          :name="2"
-          :title="$t('routes.create.steps.selectFriendNode')"
-          icon="device_hub"
-          :done="currentStep > 2"
-          active-icon="device_hub"
-        />
-        <q-step
-          :name="3"
-          :title="$t('routes.create.steps.selectMyNode')"
-          icon="router"
-          :done="currentStep > 3"
-          active-icon="router"
-        />
-        <q-step
-          :name="4"
-          :title="$t('routes.create.steps.submitRequest')"
-          icon="send"
-          active-icon="send"
-        />
-      </q-stepper>
+      <RouteCreateProgress :step="4" :busy="submitting || showSuccessDialog" />
 
       <!-- 选择总结 -->
       <q-card class="q-mb-md">
         <q-card-section>
           <div class="text-h6 q-mb-md">{{ $t('routes.create.step4.selectionSummary') }}</div>
           
-          <div class="row q-gutter-lg">
+          <div class="row q-col-gutter-lg">
             <!-- 好友信息 -->
             <div class="col-12 col-md-4">
               <q-item class="q-pa-none">
@@ -118,7 +84,7 @@
         <q-card-section>
           <div class="text-h6 q-mb-md">{{ $t('routes.create.step4.requestForm') }}</div>
           
-          <q-form @submit="submitRequest" class="q-gutter-md">
+          <q-form ref="requestFormRef" @submit="submitRequest" class="q-gutter-md">
             <!-- 请求消息 -->
             <q-input
               v-model="requestForm.message"
@@ -129,10 +95,12 @@
               outlined
               maxlength="500"
               counter
+              :readonly="submitting || showSuccessDialog"
+              lazy-rules
               :rules="[
-                val => !!val || $t('routes.create.step4.messageRequired'),
-                val => val.length >= 10 || $t('routes.create.step4.messageMinLength'),
-                val => val.length <= 500 || $t('routes.create.step4.messageMaxLength')
+                val => !!val?.trim() || $t('routes.create.step4.messageRequired'),
+                val => (val?.trim().length ?? 0) >= 10 || $t('routes.create.step4.messageMinLength'),
+                val => (val?.length ?? 0) <= 500 || $t('routes.create.step4.messageMaxLength')
               ]"
             >
               <template v-slot:hint>
@@ -147,13 +115,14 @@
             flat
             :label="$t('common.previous')"
             @click="goBack"
-            :disable="submitting"
+            :disable="submitting || showSuccessDialog"
           />
           <q-btn
             color="primary"
             :label="$t('routes.create.step4.submitRequest')"
             @click="submitRequest"
             :loading="submitting"
+            :disable="showSuccessDialog"
             icon-right="send"
           />
         </q-card-actions>
@@ -173,9 +142,10 @@
           <q-card-actions align="center">
             <q-btn
               color="primary"
-              :label="$t('routes.create.step4.viewRoutes')"
-              @click="goToRoutes"
+              :label="$t('workflow.viewPending')"
+              @click="goToPending"
             />
+            <q-btn flat :label="$t('routes.create.step4.viewRoutes')" @click="goToRoutes" />
             <q-btn
               flat
               :label="$t('routes.create.step4.createAnother')"
@@ -189,24 +159,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import RouteCreateProgress from '../../../components/route/RouteCreateProgress.vue'
+import { createRouteDraft } from '../../../utils/routeCreateDraft'
+
+import { ref, reactive, onMounted, watch } from 'vue'
 import debug from 'src/utils/debug'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useRoutes } from '../../../composables/useRoutes'
 import { useNotify } from '../../../composables/useNotify'
+import type { QForm } from 'quasar'
 import type { Friend } from '../../../types'
 
 const { t } = useI18n()
 const router = useRouter()
+const draft = createRouteDraft(sessionStorage)
 const notify = useNotify()
 
 const { createRouteRequest } = useRoutes()
 
 // 页面状态
-const currentStep = ref(4)
 const submitting = ref(false)
 const showSuccessDialog = ref(false)
+const requestFormRef = ref<QForm | null>(null)
+onBeforeRouteLeave(() => !submitting.value)
 const selectedFriend = ref<Friend | null>(null)
 const selectedFriendNode = ref<any | null>(null)
 const selectedMyNode = ref<any | null>(null)
@@ -222,15 +198,14 @@ const goBack = () => {
 }
 
 const submitRequest = async () => {
+  if (submitting.value || showSuccessDialog.value) return
   if (!selectedFriend.value || !selectedFriendNode.value || !selectedMyNode.value) {
     notify.error(t('routes.create.step4.incompleteSelection'))
     return
   }
 
-  if (!requestForm.message || requestForm.message.length < 10) {
-    notify.error(t('routes.create.step4.messageRequired'))
-    return
-  }
+  if (!await requestFormRef.value?.validate()) return
+  if (submitting.value || showSuccessDialog.value) return
 
   try {
     submitting.value = true
@@ -245,9 +220,7 @@ const submitRequest = async () => {
     await createRouteRequest(requestData)
     
     // 清除会话存储
-    sessionStorage.removeItem('route-create-friend')
-    sessionStorage.removeItem('route-create-friend-node')
-    sessionStorage.removeItem('route-create-my-node')
+    draft.reset()
     
     showSuccessDialog.value = true
   } catch (error) {
@@ -256,6 +229,11 @@ const submitRequest = async () => {
   } finally {
     submitting.value = false
   }
+}
+
+const goToPending = () => {
+  showSuccessDialog.value = false
+  router.push('/app/routes/pending')
 }
 
 const goToRoutes = () => {
@@ -268,37 +246,22 @@ const createAnother = () => {
   router.push('/app/routes/create/prev_1')
 }
 
-// 初始化
-onMounted(() => {
-  // 检查是否有完整的选择数据
-  const savedFriend = sessionStorage.getItem('route-create-friend')
-  const savedFriendNode = sessionStorage.getItem('route-create-friend-node')
-  const savedMyNode = sessionStorage.getItem('route-create-my-node')
-  
-  if (!savedFriend || !savedFriendNode || !savedMyNode) {
-    notify.error(t('routes.create.step4.incompleteSelection'))
-    router.push('/app/routes/create/prev_1')
-    return
-  }
-  
-  try {
-    selectedFriend.value = JSON.parse(savedFriend)
-    selectedFriendNode.value = JSON.parse(savedFriendNode)
-    selectedMyNode.value = JSON.parse(savedMyNode)
-  } catch (error) {
-    debug.error('解析已保存的数据失败:', error)
-    router.push('/app/routes/create/prev_1')
-    return
-  }
+// Retain the edited message when going back or refreshing; clear after submission.
+watch(() => requestForm.message, message => {
+  if (!showSuccessDialog.value) draft.saveMessage(message)
+}, { flush: 'sync' })
 
-  // 生成默认请求消息
-  if (selectedFriend.value && selectedFriendNode.value && selectedMyNode.value) {
-    requestForm.message = t('routes.create.step4.defaultMessage', {
-      friendName: selectedFriend.value.name,
-      friendNode: selectedFriendNode.value.name,
-      myNode: selectedMyNode.value.name
-    })
-  }
+onMounted(() => {
+  const saved = draft.read()
+  if (saved.requiredStep < 4) { router.replace(`/app/routes/create/prev_${saved.requiredStep}`); return }
+  selectedFriend.value = saved.friend as Friend
+  selectedFriendNode.value = saved.friendNode
+  selectedMyNode.value = saved.myNode
+  requestForm.message = saved.message ?? t('routes.create.step4.defaultMessage', {
+    friendName: selectedFriend.value.name,
+    friendNode: selectedFriendNode.value.name,
+    myNode: selectedMyNode.value.name
+  })
 })
 </script>
 

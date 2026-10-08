@@ -68,8 +68,8 @@ export class NodeService {
    * @param nodeName 节点名称 (3-255字符)
    * @returns 创建结果，含节点信息、配置和下一步操作提示
    */
-  async quickCreateNode(nodeName: string): Promise<QuickCreateNodeResponse> {
-    const response = await api.post('/nodes/quick-create', { node_name: nodeName })
+  async quickCreateNode(nodeName: string, vpnType: 'gnb' | 'wireguard' = 'gnb', description?: string): Promise<QuickCreateNodeResponse> {
+    const response = await api.post('/nodes/quick-create', { node_name: nodeName, vpn_type: vpnType, ...(description && { description }) })
     return response.data
   }
 

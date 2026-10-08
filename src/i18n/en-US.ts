@@ -1,4 +1,28 @@
 export default {
+  workflow: {
+    deviceCreatedHint: 'View your device, adjust advanced settings or add another device.',
+    manageIpPools: 'Manage IP pools',
+    connectionSteps: 'Connection setup steps',
+    stepCount: 'Step {current} of {total}',
+    retry: 'Retry',
+    noMatches: 'No matches. Try another keyword or clear the filters.',
+    clearFilters: 'Clear filters',
+    manageFriends: 'Manage friends',
+    viewPending: 'View pending requests',
+    deviceCreated: 'Device created',
+    simpleCreateHint: 'Choose a VPN type and name your device to get started.',
+    vpnType: 'VPN type',
+    automaticDefaults: 'IP addresses are assigned automatically. Your first IP pool is created with your first device; other settings use defaults.',
+    expertMode: 'Expert mode',
+    optionalDescription: 'Description (optional)',
+    expertAfterCreate: 'Adjust ports, interfaces, MTU and other advanced settings after creation. OpenVPN uses the existing setup flow.',
+    selectedPool: 'Selected IP pool',
+    firstPoolCreated: 'Your first IP pool was created automatically.',
+    deviceNextStep: 'Your device is created. Choose Connect this computer in the local panel to finish setup automatically. For another computer, sign in to its local panel and select this device.',
+    connectLocally: 'Connect this computer',
+    createAnotherDevice: 'Add another device',
+    createFirstDevice: 'Start with your first device',
+  },
   app: {
     name: 'MyNet',
     tagline: 'Self-sovereign Private Networking'
@@ -2316,7 +2340,7 @@ export default {
     },
     createIpPool: {
       title: '💡 Create IP Pool',
-      content: '<p>Click "Create IP Pool" to start. IP pools assign virtual addresses to your devices.</p>'
+      content: '<p>Your first IP pool and address are assigned automatically when you create your first device.</p>'
     },
     addFirstDevice: {
       title: '📱 Add Your First Device',

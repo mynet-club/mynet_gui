@@ -119,9 +119,11 @@ export function useSocial() {
           };
         });
       }
+      return true
     } catch (error) {
       debug.error('获取组网概览失败:', error)
       notify.error(t('social.fetchOverviewError'))
+      return false
     } finally {
       loading.value = false
     }
@@ -289,12 +291,13 @@ export function useSocial() {
   }
 
   // 获取好友的节点
-  const getFriendNodes = async (friendId: string) => {
+  const getFriendNodes = async (friendId: string, throwOnError = false) => {
     try {
       const response = await socialService.getFriendNodes(friendId)
       return response
     } catch (error) {
       debug.error('获取好友节点失败:', error)
+      if (throwOnError) throw error
       notify.error(t('social.fetchFriendNodesError'))
       return []
     }

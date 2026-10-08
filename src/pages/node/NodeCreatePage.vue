@@ -1,249 +1,139 @@
 <template>
-  <PageLayout
-    :title="$t('nodes.createNode')"
-    :subtitle="$t('nodes.createFirstNode')"
-    icon="add_circle"
-  >
-    <div class="row justify-center">
-      <div class="col-12 col-md-8 col-lg-6">
-        <!-- 创建表单 -->
-        <q-card>
-          <q-card-section>
-            <!-- IP池信息提示 -->
-            <q-banner
-              v-if="showIpPoolInfo"
-              class="bg-blue-1 text-blue-8 q-mb-lg"
-              rounded
-              dense
-            >
-              <template v-slot:avatar>
-                <q-icon name="info" color="blue" />
-              </template>
-              <div class="text-body2">
-                <div v-if="ipPoolId">IP池ID: <strong>{{ ipPoolId }}</strong></div>
-                <div v-if="ipGroupSequenceNumber">IP组序号: <strong>{{ ipGroupSequenceNumber }}</strong></div>
-                <div class="text-caption q-mt-xs">节点将自动关联到指定的IP池</div>
-              </div>
-            </q-banner>
-
-            <q-form @submit="onSubmit" class="q-gutter-md">
-              <!-- 基础信息 -->
-              <div class="text-h6 q-mb-md">基础信息</div>
-              
-              <q-input
-                v-model="form.node_name"
-                placeholder="节点名称"
-                required
-                :rules="[
-                  val => !!val || '节点名称不能为空',
-                  val => (val.length >= 3 && val.length <= 255) || '节点名称长度必须在3-255字符之间'
-                ]"
-                outlined
-                maxlength="255"
+  <PageLayout :title="$t(createdDevice ? 'workflow.deviceCreated' : 'nodes.createNode')" :subtitle="$t(createdDevice ? 'workflow.deviceCreatedHint' : 'workflow.simpleCreateHint')" icon="add_circle">
+    <div class="create-device">
+      <q-card v-if="!createdDevice">
+        <q-card-section>
+          <q-form ref="createForm" @submit="onSubmit" class="q-gutter-lg">
+            <q-input
+              v-model="form.node_name" :label="$t('nodes.name')" :placeholder="$t('nodes.namePlaceholder')"
+              outlined autofocus maxlength="255" lazy-rules :readonly="isCreating"
+              :rules="[value => (!!value && value.trim().length >= 3 && value.trim().length <= 255) || $t('nodes.quickCreate.nameRule')]"
+            />
+            <div>
+              <div class="text-subtitle2 q-mb-sm">{{ $t('workflow.vpnType') }}</div>
+              <q-btn-toggle
+                v-model="form.vpn_type" :options="vpnOptions" :disable="isCreating"
+                :aria-label="$t('workflow.vpnType')" no-caps unelevated toggle-color="primary"
               />
-
-              <q-input
-                v-model="form.description"
-                placeholder="节点描述"
-                type="textarea"
-                rows="3"
-                outlined
-                maxlength="1000"
-                :rules="[
-                  val => !val || val.length <= 1000 || '描述长度不能超过1000字符'
-                ]"
-              />
-
-              <!-- VPN类型选择 -->
-              <div class="q-mb-md">
-                <div class="text-subtitle2 q-mb-sm">VPN类型</div>
-                <div class="row q-gutter-md">
-                  <q-btn
-                    :color="form.vpn_type === 'gnb' ? 'primary' : 'grey-7'"
-                    :outline="form.vpn_type !== 'gnb'"
-                    :unelevated="form.vpn_type === 'gnb'"
-                    @click="onVpnTypeChange('gnb')"
-                    no-caps
-                    rounded
-                  >
-                    GNB
-                  </q-btn>
-                  <q-btn
-                    :color="form.vpn_type === 'wireguard' ? 'primary' : 'grey-7'"
-                    :outline="form.vpn_type !== 'wireguard'"
-                    :unelevated="form.vpn_type === 'wireguard'"
-                    @click="onVpnTypeChange('wireguard')"
-                    no-caps
-                    rounded
-                  >
-                    WireGuard
-                  </q-btn>
-                  <q-btn
-                    :color="form.vpn_type === 'openvpn' ? 'primary' : 'grey-7'"
-                    :outline="form.vpn_type !== 'openvpn'"
-                    :unelevated="form.vpn_type === 'openvpn'"
-                    @click="onVpnTypeChange('openvpn')"
-                    no-caps
-                    rounded
-                  >
-                    OpenVPN
-                  </q-btn>
-                </div>
+            </div>
+            <div class="creation-defaults text-body2">
+              <q-icon name="auto_awesome" color="primary" class="q-mr-sm" />
+              {{ $t('workflow.automaticDefaults') }}
+            </div>
+            <q-expansion-item v-model="expertMode" :disable="isCreating" :label="$t('workflow.expertMode')" icon="tune" dense>
+              <div class="q-pt-md">
+                <q-banner v-if="ipPoolId || ipGroupSequenceNumber" class="q-mb-md" rounded>
+                  {{ $t('workflow.selectedPool') }}: {{ ipPoolId || ipGroupSequenceNumber }}
+                </q-banner>
+                <q-input v-model="form.description" :label="$t('workflow.optionalDescription')" outlined type="textarea" rows="3" maxlength="1000" :readonly="isCreating" />
+                <div class="text-caption q-mt-md">{{ $t('workflow.expertAfterCreate') }}</div>
+                <q-btn flat color="primary" icon="dns" :label="$t('workflow.manageIpPools')" to="/app/ippools" :disable="isCreating" class="q-mt-sm" />
               </div>
-
-              <!-- 操作按钮 -->
-              <div class="row q-gutter-sm q-mt-lg">
-                <q-btn
-                  flat
-                  type="submit"
-                  color="primary"
-                  :loading="isCreating"
-                  :disable="!isFormValid"
-                >
-                  <q-icon name="add" class="q-mr-sm" />
-                  创建节点
-                </q-btn>
-                
-                <q-btn
-                  flat
-                  color="grey-7"
-                  @click="onCancel"
-                  :disable="isCreating"
-                >
-                  取消
-                </q-btn>
-              </div>
-            </q-form>
-          </q-card-section>
-        </q-card>
-      </div>
+            </q-expansion-item>
+            <q-banner v-if="createError" rounded class="creation-error" role="alert">{{ createError }}</q-banner>
+            <div class="row q-gutter-sm">
+              <q-btn type="submit" unelevated color="primary" icon="add" :label="$t('nodes.createNode')" :loading="isCreating" />
+              <q-btn flat :label="$t('common.cancel')" to="/app/nodes" :disable="isCreating" />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+      <q-card v-else>
+        <q-card-section class="text-center" role="status">
+          <q-icon name="check_circle" color="positive" size="48px" />
+          <h2 class="text-h6 q-my-md">{{ createdDevice.name }}</h2>
+          <div class="text-body1 q-mb-sm">{{ createdDevice.ip || $t('nodes.quickCreate.ipPending') }}</div>
+          <div class="text-caption">{{ createdDevice.vpnType }}</div>
+          <p v-if="createdDevice.poolCreated" class="text-body2 q-mt-md">{{ $t('workflow.firstPoolCreated') }}</p>
+          <p class="text-body2 q-mt-md">{{ $t('workflow.deviceNextStep') }}</p>
+        </q-card-section>
+        <q-card-actions class="creation-actions" align="center">
+          <q-btn v-if="isLocalPanel" unelevated color="primary" icon="link" :label="$t('workflow.connectLocally')" @click="connectLocally" />
+          <q-btn unelevated :color="isLocalPanel ? 'secondary' : 'primary'" icon="device_hub" :label="$t('nodes.quickCreate.viewNode')" :to="`/app/nodes/${createdDevice.id}`" />
+          <q-btn flat color="primary" :label="$t('workflow.expertMode')" :to="`/app/nodes/${createdDevice.id}/edit/config?mode=expert`" />
+          <q-btn flat :label="$t('workflow.createAnotherDevice')" @click="createAnother" />
+        </q-card-actions>
+      </q-card>
     </div>
   </PageLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import debug from 'src/utils/debug'
-import { useRouter, useRoute } from 'vue-router'
-import { useQuasar } from 'quasar'
-import { useNodes, useNotify } from '../../composables'
+import { useRoute, onBeforeRouteLeave } from 'vue-router'
+import type { QForm } from 'quasar'
+import { nodeService } from '../../services/node/nodeService'
 import { useOnboardingActions } from '../../composables/useOnboardingActions'
-import { CreateNodeRequest, VpnType } from '../../types/node'
+import type { VpnType } from '../../types/node'
 import PageLayout from '../../components/layout/PageLayout.vue'
 
-const router = useRouter()
 const route = useRoute()
-const $q = useQuasar()
 const { t } = useI18n()
-const { createNode } = useNodes()
-const { success: notifySuccess, error: notifyError } = useNotify()
-const { onNodeCreated } = useOnboardingActions()
-
-// 表单数据接口
-interface CreateNodeForm {
-  node_name: string
-  description: string
-  vpn_type: VpnType
-  ip_pool_id?: string
-  ip_group_sequence_number?: string
-}
-
-const form = ref<CreateNodeForm>({
-  node_name: '',
-  description: '',
-  vpn_type: 'gnb'
-})
-
-// 从URL参数获取IP池相关信息
-const ipPoolId = computed(() => route.query.ip_pool_id as string)
-const ipGroupSequenceNumber = computed(() => route.query.ip_group_sequence_number as string)
-
-// 是否显示IP池提示
-const showIpPoolInfo = computed(() => {
-  return !!(ipPoolId.value || ipGroupSequenceNumber.value)
-})
-
-// VPN类型改变时的处理
-const onVpnTypeChange = (value: VpnType) => {
-  form.value.vpn_type = value
-}
-
-// 状态
+const { onNodeCreated, onIpPoolCreated } = useOnboardingActions()
+const createForm = ref<QForm | null>(null)
+const form = ref({ node_name: '', description: '', vpn_type: 'gnb' as VpnType })
 const isCreating = ref(false)
+const createError = ref('')
+const ipPoolId = computed(() => route.query.ip_pool_id as string | undefined)
+const ipGroupSequenceNumber = computed(() => route.query.ip_group_sequence_number as string | undefined)
+const expertMode = ref(!!(ipPoolId.value || ipGroupSequenceNumber.value))
+watch(expertMode, enabled => { if (!enabled && form.value.vpn_type === 'openvpn') form.value.vpn_type = 'gnb' })
+const vpnOptions = computed(() => [
+  { label: 'GNB', value: 'gnb' },
+  { label: 'WireGuard', value: 'wireguard' },
+  ...(expertMode.value ? [{ label: 'OpenVPN', value: 'openvpn' }] : [])
+])
+// Only the same-origin local panel can consume this explicit user action.
+const isLocalPanel = window.parent !== window && window.location.pathname.startsWith('/gui/')
+const connectLocally = () => {
+  if (!createdDevice.value) return
+  window.parent.postMessage({ type: 'mynet:connect-device', nodeId: String(createdDevice.value.id) }, window.location.origin)
+}
+const createdDevice = ref<{ id: string | number; name: string; ip?: string | null; vpnType: string; poolCreated: boolean } | null>(null)
+onBeforeRouteLeave(() => !isCreating.value)
 
-// 计算属性
-const isFormValid = computed(() => {
-  return form.value.node_name && 
-         form.value.node_name.length >= 3 && 
-         form.value.node_name.length <= 255 &&
-         form.value.vpn_type &&
-         (!form.value.description || form.value.description.length <= 1000)
-})
-
-// 提交表单
 const onSubmit = async () => {
-  if (!isFormValid.value) return
-
+  if (isCreating.value || createdDevice.value) return
+  if (!await createForm.value?.validate() || isCreating.value) return
+  isCreating.value = true
+  createError.value = ''
   try {
-    isCreating.value = true
-    
-    const nodeData: CreateNodeRequest = {
-      node_name: form.value.node_name,
-      vpn_type: form.value.vpn_type,
-      ...(form.value.description && { description: form.value.description }),
-      ...(ipPoolId.value && { ip_pool_id: ipPoolId.value }),
-      ...(ipGroupSequenceNumber.value && { ip_group_sequence_number: ipGroupSequenceNumber.value })
+    // Explicit pool and legacy driver selections retain the existing expert path.
+    if (ipPoolId.value || ipGroupSequenceNumber.value || form.value.vpn_type === 'openvpn') {
+      const response = await nodeService.createNode({
+        node_name: form.value.node_name.trim(), vpn_type: form.value.vpn_type,
+        ...(form.value.description && { description: form.value.description }),
+        ...(ipPoolId.value && { ip_pool_id: ipPoolId.value }),
+        ...(ipGroupSequenceNumber.value && { ip_group_sequence_number: ipGroupSequenceNumber.value })
+      })
+      if (!response.success || !response.data) throw new Error(response.message || t('nodes.operations.createFailed'))
+      const node = response.data
+      createdDevice.value = { id: node.node_id || node.id, name: node.node_name, ip: node.node_ip ?? null, vpnType: form.value.vpn_type.toUpperCase(), poolCreated: false }
+    } else {
+      const response = await nodeService.quickCreateNode(form.value.node_name.trim(), form.value.vpn_type, form.value.description)
+      if (!response.success || !response.data?.node?.node_id) throw new Error(response.message || t('nodes.operations.createFailed'))
+      const node = response.data.node
+      createdDevice.value = { id: node.node_id, name: node.node_name, ip: node.node_ip ?? null, vpnType: form.value.vpn_type.toUpperCase(), poolCreated: response.data.ip_pool_created ?? false }
+      onIpPoolCreated()
     }
-
-    const newNode = await createNode(nodeData)
-    
-    if (newNode) {
-      debug.log('创建的节点数据:', newNode)
-      notifySuccess(t('nodes.operations.createSuccess'))
-      onNodeCreated()
-      // 跳转到节点编辑页面 - 使用node_id或id字段
-      const nodeId = newNode.node_id || newNode.id
-      debug.log('节点ID:', nodeId, '(node_id:', newNode.node_id, ', id:', newNode.id, ')')
-      if (nodeId) {
-        router.push(`/app/nodes/${nodeId}/edit/basic`)
-      } else {
-        debug.warn('节点创建成功但无法获取节点ID，跳转到节点列表')
-        router.push('/app/nodes')
-      }
-    }
-    
-  } catch (error) {
-    debug.error('创建节点失败:', error)
-    notifyError(t('nodes.operations.createFailed'))
+    onNodeCreated()
+  } catch (error: any) {
+    createError.value = error?.response?.data?.message || error?.message || t('nodes.operations.createFailed')
   } finally {
     isCreating.value = false
   }
 }
-
-// 取消操作
-const onCancel = () => {
-  router.push('/app/nodes')
+const createAnother = () => {
+  form.value = { node_name: '', description: '', vpn_type: 'gnb' }
+  createdDevice.value = null
+  createError.value = ''
 }
-
-// 组件挂载时加载数据
-onMounted(async () => {
-  // 可以在这里加载区域列表等数据
-})
 </script>
 
-<style scoped>
-.q-page {
-  min-height: calc(100vh - 150px);
-}
-
-.vpn-btn-selected {
-  background-color: #1976d2 !important;
-  color: white !important;
-}
-
-.vpn-btn-unselected {
-  background-color: rgba(25, 118, 210, 0.3) !important;
-  color: #1976d2 !important;
-}
+<style scoped lang="scss">
+.create-device { max-width: 680px; margin: 0 auto; }
+.creation-defaults { padding: 16px; border-radius: 8px; background: var(--primary-soft); color: var(--text-secondary); }
+.creation-error { color: var(--status-error); }
+.creation-actions { flex-wrap: wrap; gap: 8px; padding-bottom: 24px; }
 </style>

@@ -20,42 +20,7 @@
       </div>
 
       <!-- 步骤指示器 -->
-      <q-stepper
-        v-model="currentStep"
-        ref="stepper"
-        color="primary"
-        animated
-        flat
-        class="q-mb-lg"
-      >
-        <q-step
-          :name="1"
-          :title="$t('routes.create.steps.selectFriend')"
-          icon="people"
-          :done="currentStep > 1"
-          active-icon="people"
-        />
-        <q-step
-          :name="2"
-          :title="$t('routes.create.steps.selectFriendNode')"
-          icon="device_hub"
-          :done="currentStep > 2"
-          active-icon="device_hub"
-        />
-        <q-step
-          :name="3"
-          :title="$t('routes.create.steps.selectMyNode')"
-          icon="router"
-          :done="currentStep > 3"
-          active-icon="router"
-        />
-        <q-step
-          :name="4"
-          :title="$t('routes.create.steps.submitRequest')"
-          icon="send"
-          active-icon="send"
-        />
-      </q-stepper>
+      <RouteCreateProgress :step="2" />
 
       <!-- 选中的好友信息 -->
       <q-card class="q-mb-md" v-if="selectedFriend">
@@ -90,13 +55,18 @@
           </div>
 
           <!-- 无节点状态 -->
+          <q-banner v-else-if="loadFailed" class="q-mb-md" rounded>
+            {{ $t('routes.create.step2.fetchNodesError') }}
+            <template #action><q-btn flat color="primary" :label="$t('workflow.retry')" @click="fetchFriendNodes" /></template>
+          </q-banner>
           <div v-else-if="friendNodes.length === 0" class="text-center q-py-lg text-grey-6">
             <q-icon name="device_hub" size="3em" class="q-mb-md" />
             <div>{{ $t('routes.create.step2.noNodes') }}</div>
+            <q-btn flat color="primary" :label="$t('routes.create.step2.changeFriend')" @click="changeFriend" />
           </div>
 
           <!-- 节点卡片列表 -->
-          <div v-else class="row q-gutter-md">
+          <div v-else class="row q-col-gutter-md">
             <div
               v-for="node in friendNodes"
               :key="node.id"
@@ -109,6 +79,11 @@
                   'disabled': !node.ui_can_select
                 }"
                 @click="selectNode(node)"
+                role="radio" :tabindex="node.ui_can_select ? 0 : -1"
+                :aria-label="node.name" :aria-checked="selectedNode?.id === node.id"
+                :aria-disabled="!node.ui_can_select"
+                @keydown.enter.prevent="selectNode(node)"
+                @keydown.space.prevent="selectNode(node)"
                 bordered
                 flat
               >
@@ -194,7 +169,7 @@
           <q-btn
             color="primary"
             :label="$t('routes.create.step2.nextStep')"
-            :disable="!selectedNode || !selectedNode.ui_can_select"
+            :disable="loading || loadFailed || !selectedNode || !selectedNode.ui_can_select"
             @click="goToNextStep"
             icon-right="arrow_forward"
           />
@@ -278,6 +253,9 @@
 </template>
 
 <script setup lang="ts">
+import RouteCreateProgress from '../../../components/route/RouteCreateProgress.vue'
+import { createRouteDraft } from '../../../utils/routeCreateDraft'
+
 import { ref, onMounted } from 'vue'
 import debug from 'src/utils/debug'
 import { useI18n } from 'vue-i18n'
@@ -288,14 +266,16 @@ import type { Friend } from '../../../types'
 
 const { t } = useI18n()
 const router = useRouter()
+const draft = createRouteDraft(sessionStorage)
 const { getFriendNodes } = useSocial()
-const { notify } = useNotify()
+const notify = useNotify()
 
 // 响应式状态
 const selectedFriend = ref<Friend | null>(null)
 const selectedNode = ref<any>(null)
 const friendNodes = ref<any[]>([])
 const loading = ref(false)
+const loadFailed = ref(false)
 const debugDialog = ref({
   show: false,
   node: null as any
@@ -314,6 +294,7 @@ const selectNode = (node: any) => {
     return
   }
   selectedNode.value = node
+  draft.selectFriendNode(node)
 }
 
 const getStatusColor = (status: string) => {
@@ -342,18 +323,20 @@ const goToNextStep = () => {
   }
   
   // 将选中的节点存储到会话存储中
-  sessionStorage.setItem('route-create-friend-node', JSON.stringify(selectedNode.value))
+  draft.selectFriendNode(selectedNode.value)
   
   router.push('/app/routes/create/prev_3')
 }
 
 // 获取好友节点列表
 const fetchFriendNodes = async () => {
-  if (!selectedFriend.value) return
+  if (!selectedFriend.value || loading.value) return
+  loadFailed.value = false
+  selectedNode.value = null
   
   try {
     loading.value = true
-    const nodes = await getFriendNodes(selectedFriend.value.id)
+    const nodes = await getFriendNodes(selectedFriend.value.id, true)
     
     // 为每个节点添加UI可选状态判断
     // 注意：此时还未选择源节点，不能使用后端的 can_connect 字段（它可能基于某个特定源节点判断）
@@ -392,7 +375,11 @@ const fetchFriendNodes = async () => {
         backend_can_connect: node.can_connect  // 保留原始值供调试
       }
     })
+    const saved = draft.read().friendNode
+    selectedNode.value = friendNodes.value.find(node => String(node.id) === String(saved?.id) && node.ui_can_select) ?? null
+    draft.selectFriendNode(selectedNode.value)
   } catch (error) {
+    loadFailed.value = true
     debug.error('获取好友节点失败:', error)
     notify.error(t('routes.create.step2.fetchNodesError'))
   } finally {
@@ -400,35 +387,10 @@ const fetchFriendNodes = async () => {
   }
 }
 
-// 初始化
 onMounted(async () => {
-  // 检查是否有选择的好友
-  const savedFriend = sessionStorage.getItem('route-create-friend')
-  if (!savedFriend) {
-    notify.error(t('routes.create.step2.noFriendSelected'))
-    router.push('/app/routes/create/prev_1')
-    return
-  }
-  
-  try {
-    selectedFriend.value = JSON.parse(savedFriend)
-  } catch (error) {
-    debug.error('解析已保存的好友数据失败:', error)
-    router.push('/app/routes/create/prev_1')
-    return
-  }
-  
-  // 检查是否有已选择的节点
-  const savedNode = sessionStorage.getItem('route-create-friend-node')
-  if (savedNode) {
-    try {
-      selectedNode.value = JSON.parse(savedNode)
-    } catch (error) {
-      debug.error('解析已保存的节点数据失败:', error)
-    }
-  }
-  
-  // 获取好友节点列表
+  const saved = draft.read()
+  if (!saved.friend) { router.replace('/app/routes/create/prev_1'); return }
+  selectedFriend.value = saved.friend as Friend
   await fetchFriendNodes()
 })
 </script>

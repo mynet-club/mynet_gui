@@ -5,11 +5,11 @@
       <div class="row items-start">
         <div class="col">
           <div class="page-title-wrapper">
-            <h4 class="page-title q-my-none">
+            <h1 class="page-title q-my-none">
               <q-icon v-if="icon" :name="icon" class="q-mr-sm" />
               {{ title }}
-            </h4>
-            <p v-if="subtitle" class="page-subtitle text-grey-6 q-mt-xs q-mb-none">
+            </h1>
+            <p v-if="subtitle" class="page-subtitle q-mt-xs q-mb-none">
               {{ subtitle }}
             </p>
           </div>
@@ -43,6 +43,11 @@ defineProps<Props>()
 @import '../../styles/design-tokens.scss';
 
 .page-layout {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 32px;
+
   .page-header {
     .page-title {
       font-weight: $font-weight-semibold;
@@ -91,26 +96,21 @@ defineProps<Props>()
   }
 }
 
-// 响应式设计
+// Actions wrap without hiding their labels on smaller screens.
+.page-actions :deep(> *) {
+  flex-wrap: wrap;
+  gap: 8px !important;
+}
+
+.page-title-wrapper { min-width: 0; }
+.page-title { overflow-wrap: anywhere; }
+.page-subtitle { max-width: 72ch; }
+
 @media (max-width: 768px) {
   .page-layout {
-    .page-header {
-      .page-title {
-        font-size: $font-size-xl;
-      }
-      
-      .page-actions {
-        .q-btn-group {
-          .q-btn {
-            .q-btn__content {
-              .q-btn__label {
-                display: none;
-              }
-            }
-          }
-        }
-      }
-    }
+    padding: 16px;
+    .page-header .page-title { font-size: $font-size-xl; }
+    .page-actions :deep(.q-btn) { min-height: 40px; }
   }
 }
 </style>

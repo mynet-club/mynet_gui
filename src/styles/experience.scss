@@ -1,0 +1,109 @@
+/* MyNet shared baseline: quiet surfaces, blue actions, readable states. */
+:root {
+  --text-muted: #64748b;
+  --color-text-tertiary: var(--text-muted);
+  --color-bg-primary: var(--page-bg);
+  --color-bg-secondary: var(--page-bg);
+  --color-bg-tertiary: var(--content-bg);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-border: var(--border-default);
+  --primary-gradient: #2563eb;
+  --primary-gradient-hover: #1d4ed8;
+  --primary-glow: 0 1px 2px rgba(15, 23, 42, .08);
+  --primary-glow-hover: 0 2px 6px rgba(15, 23, 42, .12);
+  --focus-ring: #2563eb;
+}
+
+body.body--dark {
+  --text-muted: #94a3b8;
+  --color-bg-primary: var(--page-bg);
+  --color-bg-secondary: var(--sidebar-bg);
+  --color-bg-tertiary: var(--content-bg);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-muted);
+  --color-border: var(--border-default);
+  --focus-ring: #93c5fd;
+}
+
+body .q-btn:focus-visible,
+body .q-item:focus-visible,
+body a:focus-visible,
+body [tabindex="0"]:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+body .q-field--outlined .q-field__control { border-radius: 8px; }
+body .q-field--focused .q-field__control { box-shadow: 0 0 0 3px var(--primary-ring); }
+body .q-menu { border: 1px solid var(--border-default); border-radius: 12px; }
+body .q-dialog__inner > .q-card { max-width: calc(100vw - 32px); min-width: 0 !important; }
+
+/* Stationary cards keep controls under the pointer in both themes. */
+body .q-card:hover,
+body.body--dark .q-card:hover {
+  transform: none !important;
+}
+body .q-card:not(.cursor-pointer):not(.q-hoverable):hover {
+  box-shadow: var(--soft-shadow-card) !important;
+}
+
+body .main-layout {
+  .soft-header { box-shadow: none; }
+  .q-toolbar { gap: 4px; padding: 8px 16px; }
+  .toolbar-brand { font-size: 18px; font-weight: 600; letter-spacing: -.5px; }
+  .q-toolbar .q-btn { min-height: 40px; }
+  .q-toolbar .q-btn--round { min-width: 40px; }
+  .q-toolbar .user-menu-btn { margin-left: 8px; }
+  .drawer-header { padding: 24px 20px; }
+  .q-drawer .q-item { min-height: 44px; }
+  .q-drawer .q-item__label--header {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    color: var(--text-muted);
+    padding: 20px 24px 8px;
+  }
+  .q-drawer .nav-item { margin: 4px 12px; border-radius: 8px; }
+  .q-drawer .nav-child-item { padding-left: 40px; }
+  .q-drawer .q-item__section--avatar { min-width: 36px; }
+  .q-drawer .q-item--active,
+  .q-drawer .q-router-link--active {
+    background: var(--primary-soft) !important;
+    color: var(--primary) !important;
+    &::before { background: var(--primary) !important; box-shadow: none !important; }
+    .q-icon { color: var(--primary) !important; filter: none !important; }
+  }
+}
+
+/* Preserve the semantic color of the connection indicator. */
+body .main-layout .q-header .q-btn.text-positive .q-icon { color: var(--status-available); }
+body .main-layout .q-header .q-btn.text-negative .q-icon { color: var(--status-error); }
+body.body--dark .node-card-content .node-id-section .node-id,
+body.body--dark .node-card-content .system-badge,
+body.body--dark .node-card-content .arch-badge { color: var(--text-muted) !important; }
+
+@media (max-width: 599px) {
+  body .main-layout .q-toolbar { flex-wrap: wrap; padding: 8px; gap: 0; }
+  body .main-layout .q-toolbar > .q-btn { margin-right: 0; }
+  body .main-layout .toolbar-brand { font-size: 16px; }
+  body .q-dialog__inner { padding: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Selected choices remain clear even with legacy card border resets. */
+body .route-create-step1-page .friend-card.selected,
+body .route-create-step2-page .node-card.selected,
+body .route-create-step3-page .node-card.selected {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}

@@ -141,10 +141,12 @@ export function useNodes() {
         pagination.page = 1
       }
 
+      return true
     } catch (error) {
       debug.error('加载节点列表失败:', error)
       notifyError('加载节点列表失败')
       nodes.value = []
+      return false
     } finally {
       loading.value = false
     }

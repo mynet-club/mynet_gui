@@ -381,6 +381,7 @@ export class TipsEngine {
    */
   private async evaluateTip(tip: TipConfig): Promise<boolean> {
     this.log('🔍 Evaluating tip:', tip.id)
+    if (this.onboardingStore.shouldSkip || (tip.trigger.once && this.isStageCompleted(tip.stage))) return false
     
     // 检查是否被用户永久隐藏
     if (TipsStorage.isTipHidden(tip.id)) {
@@ -472,8 +473,11 @@ export class TipsEngine {
       this.log('⏱️ Scheduling tip with delay:', tip.trigger.delay)
       this.pendingTips.add(tip.id)
       setTimeout(() => {
+        if (!this.pendingTips.has(tip.id)) return
         this.pendingTips.delete(tip.id)
-        this.showTip(tip)
+        const trigger = { ...tip.trigger }
+        delete trigger.delay
+        this.evaluateTip({ ...tip, trigger })
       }, tip.trigger.delay)
       return true
     }

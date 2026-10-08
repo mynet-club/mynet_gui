@@ -223,7 +223,7 @@ const doCreate = async () => {
 
   try {
     creating.value = true
-    const res = await nodeService.quickCreateNode(nodeName.value, tenantId)
+    const res = await nodeService.quickCreateNode(nodeName.value)
     if (res.success && res.data) {
       createdNode.value = res.data.node
       createdConfig.value = res.data.config
@@ -290,8 +290,9 @@ const closeAndRefresh = () => {
 
 // 前往节点详情
 const goToDetail = () => {
+  const nodeId = createdNodeId.value
   closeAndRefresh()
-  router.push(`/app/nodes/${createdNodeId.value}`)
+  router.push(`/app/nodes/${nodeId}`)
 }
 
 // 每次对话框打开时重置

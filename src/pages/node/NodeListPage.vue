@@ -16,13 +16,6 @@
           :disable="loading"
         />
         <q-btn
-          class="btn-flash-outline"
-          icon="bolt"
-          :label="$t('nodes.quickCreate.btn')"
-          @click="showQuickCreateDialog = true"
-          :disable="loading"
-        />
-        <q-btn
           class="btn-ghost"
           icon="refresh"
           :label="$t('common.refresh')"
@@ -81,7 +74,7 @@
           </span>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat :label="$t('nodes.deleteCancel')" v-close-popup />
+          <q-btn flat :label="$t('nodes.deleteCancel')" v-close-popup :disable="deleting" />
           <q-btn
             flat
             :label="$t('nodes.deleteConfirmAction')"
@@ -93,48 +86,14 @@
       </q-card>
     </q-dialog>
 
-    <!-- 一键快速创建对话框 -->
-    <q-dialog v-model="showQuickCreateDialog" persistent>
-      <q-card style="min-width: 400px">
-        <q-card-section>
-          <div class="text-h6">
-            <q-icon name="bolt" class="q-mr-sm" color="secondary" />
-            {{ $t('nodes.quickCreateTitle') }}
-          </div>
-          <div class="text-caption text-grey q-mt-sm">{{ $t('nodes.quickCreateDesc') }}</div>
-        </q-card-section>
-        <q-card-section class="q-pt-none">
-          <q-input
-            v-model="quickCreateName"
-            :label="$t('nodes.name')"
-            :placeholder="$t('nodes.namePlaceholder')"
-            outlined
-            autofocus
-            :rules="[val => (!!val && val.trim().length >= 3) || $t('nodes.nameMinLength')]"
-            @keyup.enter="handleQuickCreate"
-          />
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat :label="$t('common.cancel')" v-close-popup :disable="quickCreating" />
-          <q-btn
-            unelevated
-            color="secondary"
-            icon="bolt"
-            :label="$t('nodes.quickCreate.btn')"
-            @click="handleQuickCreate"
-            :loading="quickCreating"
-            :disable="!quickCreateName || quickCreateName.trim().length < 3"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+
   </PageLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import debug from 'src/utils/debug'
-import { useRouter } from 'vue-router'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
@@ -158,10 +117,7 @@ const showDeleteDialog = ref(false)
 const nodeToDelete = ref<Node | null>(null)
 const deleting = ref(false)
 
-// 一键快速创建
-const showQuickCreateDialog = ref(false)
-const quickCreateName = ref('')
-const quickCreating = ref(false)
+onBeforeRouteLeave(() => !deleting.value)
 
 // 状态切换
 const statusChanging = ref<Record<string | number, boolean>>({})
@@ -387,49 +343,6 @@ const goToCreate = () => {
   router.push('/app/nodes/create')
 }
 
-// 一键快速创建节点
-const handleQuickCreate = async () => {
-  const name = quickCreateName.value.trim()
-  if (!name || name.length < 3) return
-
-  try {
-    quickCreating.value = true
-    const result = await nodeService.quickCreateNode(name)
-    showQuickCreateDialog.value = false
-    quickCreateName.value = ''
-
-    // 刷新节点列表
-    await refreshNodes()
-
-    const nodeId = result.data.node.node_id
-    // 提示用户下一步操作
-    $q.notify({
-      type: 'positive',
-      message: t('nodes.quickCreateSuccess'),
-      caption: t('nodes.quickCreateNextStep'),
-      timeout: 8000,
-      actions: [
-        {
-          label: t('nodes.goToKeys'),
-          color: 'white',
-          handler: () => {
-            router.push(`/app/nodes/${nodeId}/edit/config`)
-          }
-        }
-      ]
-    })
-  } catch (error: any) {
-    debug.error('一键快速创建节点失败:', error)
-    const msg = error?.response?.data?.message || error?.message || ''
-    if (msg.includes('IP') || msg.includes('ip')) {
-      notifyError(t('nodes.quickCreateIpPoolEmpty'))
-    } else {
-      notifyError(t('nodes.quickCreateFailed'))
-    }
-  } finally {
-    quickCreating.value = false
-  }
-}
 
 const goToDetail = (nodeId: string | number) => {
   router.push(`/app/nodes/${nodeId}`)
@@ -454,7 +367,7 @@ const confirmDelete = (node: Node) => {
 }
 
 const deleteNode = async () => {
-  if (!nodeToDelete.value) return
+  if (deleting.value || !nodeToDelete.value) return
 
   try {
     deleting.value = true

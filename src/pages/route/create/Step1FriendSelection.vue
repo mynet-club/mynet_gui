@@ -20,42 +20,7 @@
       </div>
 
       <!-- 步骤指示器 -->
-      <q-stepper
-        v-model="currentStep"
-        ref="stepper"
-        color="primary"
-        animated
-        flat
-        class="q-mb-lg"
-      >
-        <q-step
-          :name="1"
-          :title="$t('routes.create.steps.selectFriend')"
-          icon="people"
-          :done="currentStep > 1"
-          active-icon="people"
-        />
-        <q-step
-          :name="2"
-          :title="$t('routes.create.steps.selectFriendNode')"
-          icon="device_hub"
-          :done="currentStep > 2"
-          active-icon="device_hub"
-        />
-        <q-step
-          :name="3"
-          :title="$t('routes.create.steps.selectMyNode')"
-          icon="router"
-          :done="currentStep > 3"
-          active-icon="router"
-        />
-        <q-step
-          :name="4"
-          :title="$t('routes.create.steps.submitRequest')"
-          icon="send"
-          active-icon="send"
-        />
-      </q-stepper>
+      <RouteCreateProgress :step="1" />
 
       <!-- 好友列表 -->
       <q-card>
@@ -82,12 +47,18 @@
             <div class="q-mt-md">{{ $t('common.loading') }}</div>
           </div>
 
+          <q-banner v-else-if="loadFailed" class="q-mb-md" rounded>
+            {{ $t('social.fetchOverviewError') }}
+            <template #action><q-btn flat color="primary" :label="$t('workflow.retry')" @click="loadFriends" /></template>
+          </q-banner>
           <div v-else-if="filteredFriends.length === 0" class="text-center q-py-lg text-grey-6">
             <q-icon name="people_outline" size="3em" class="q-mb-md" />
-            <div>{{ $t('routes.create.step1.noFriends') }}</div>
+            <div>{{ $t(searchQuery ? 'workflow.noMatches' : 'routes.create.step1.noFriends') }}</div>
+            <q-btn v-if="searchQuery" flat color="primary" :label="$t('workflow.clearFilters')" @click="searchQuery = ''" />
+            <q-btn v-else flat color="primary" :label="$t('workflow.manageFriends')" to="/app/social/friends" />
           </div>
 
-          <div v-else class="row q-gutter-md">
+          <div v-else class="row q-col-gutter-md">
             <div
               v-for="friend in filteredFriends"
               :key="friend.id"
@@ -97,6 +68,12 @@
                 class="friend-card cursor-pointer"
                 :class="{ 'selected': selectedFriend?.id === friend.id }"
                 @click="selectFriend(friend)"
+                role="radio"
+                tabindex="0"
+                :aria-label="friend.name"
+                :aria-checked="selectedFriend?.id === friend.id"
+                @keydown.enter.prevent="selectFriend(friend)"
+                @keydown.space.prevent="selectFriend(friend)"
                 bordered
                 flat
               >
@@ -153,7 +130,7 @@
           <q-btn
             color="primary"
             :label="$t('routes.create.step1.nextStep')"
-            :disable="!selectedFriend"
+            :disable="loading || loadFailed || !selectedFriend"
             @click="goToNextStep"
             icon-right="arrow_forward"
           />
@@ -164,6 +141,9 @@
 </template>
 
 <script setup lang="ts">
+import RouteCreateProgress from '../../../components/route/RouteCreateProgress.vue'
+import { createRouteDraft } from '../../../utils/routeCreateDraft'
+
 import { ref, computed, onMounted } from 'vue'
 import debug from 'src/utils/debug'
 import { useI18n } from 'vue-i18n'
@@ -174,6 +154,7 @@ import type { Friend } from '../../../types'
 
 const { t } = useI18n()
 const router = useRouter()
+const draft = createRouteDraft(sessionStorage)
 const notify = useNotify()
 
 const {
@@ -183,8 +164,8 @@ const {
 } = useSocial()
 
 // 页面状态
-const currentStep = ref(1)
 const searchQuery = ref('')
+const loadFailed = ref(false)
 const selectedFriend = ref<Friend | null>(null)
 
 // 计算属性
@@ -198,6 +179,7 @@ const filteredFriends = computed(() => {
 // 方法
 const selectFriend = (friend: Friend) => {
   selectedFriend.value = friend
+  draft.selectFriend(friend)
 }
 
 const getStatusColor = (status: string) => {
@@ -222,25 +204,22 @@ const goToNextStep = () => {
   }
   
   // 将选中的好友存储到会话存储中
-  sessionStorage.setItem('route-create-friend', JSON.stringify(selectedFriend.value))
+  draft.selectFriend(selectedFriend.value)
   
   router.push('/app/routes/create/prev_2')
 }
 
-// 初始化
-onMounted(async () => {
-  await fetchOverview()
-  
-  // 检查是否有已选择的好友
-  const savedFriend = sessionStorage.getItem('route-create-friend')
-  if (savedFriend) {
-    try {
-      selectedFriend.value = JSON.parse(savedFriend)
-    } catch (error) {
-      debug.error('解析已保存的好友数据失败:', error)
-    }
-  }
-})
+const loadFriends = async () => {
+  if (loading.value) return
+  loadFailed.value = false
+  const success = await fetchOverview()
+  loadFailed.value = !success
+  if (!success) { selectedFriend.value = null; return }
+  const saved = draft.read().friend
+  selectedFriend.value = friends.value.find(friend => String(friend.id) === String(saved?.id)) ?? null
+  draft.selectFriend(selectedFriend.value)
+}
+onMounted(loadFriends)
 </script>
 
 <style lang="scss" scoped>

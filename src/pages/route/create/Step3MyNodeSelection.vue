@@ -5,8 +5,7 @@
       <div class="row items-center q-mb-lg">
         <div class="col">
           <h4 class="q-my-none">{{ $t('routes.create.step3.title') }}</h4>
-                      <!-- 根据节点状态显示正确的错误信息 -->
-                      {{ getNodeStatusText(node) + ' - ' + $t('routes.create.step3.nodeNotAvailable') }}     <p class="text-grey-6 q-mt-xs q-mb-none">
+          <p class="text-grey-6 q-mt-xs q-mb-none">
             {{ $t('routes.create.step3.subtitle') }}
           </p>
         </div>
@@ -21,48 +20,13 @@
       </div>
 
       <!-- 步骤指示器 -->
-      <q-stepper
-        v-model="currentStep"
-        ref="stepper"
-        color="primary"
-        animated
-        flat
-        class="q-mb-lg"
-      >
-        <q-step
-          :name="1"
-          :title="$t('routes.create.steps.selectFriend')"
-          icon="people"
-          :done="currentStep > 1"
-          active-icon="people"
-        />
-        <q-step
-          :name="2"
-          :title="$t('routes.create.steps.selectFriendNode')"
-          icon="device_hub"
-          :done="currentStep > 2"
-          active-icon="device_hub"
-        />
-        <q-step
-          :name="3"
-          :title="$t('routes.create.steps.selectMyNode')"
-          icon="router"
-          :done="currentStep > 3"
-          active-icon="router"
-        />
-        <q-step
-          :name="4"
-          :title="$t('routes.create.steps.submitRequest')"
-          icon="send"
-          active-icon="send"
-        />
-      </q-stepper>
+      <RouteCreateProgress :step="3" />
 
       <!-- 选择总结 -->
       <q-card class="q-mb-md">
         <q-card-section>
           <div class="text-h6 q-mb-md">{{ $t('routes.create.step3.selectionSummary') }}</div>
-          <div class="row q-gutter-md">
+          <div class="row q-col-gutter-md">
             <div class="col">
               <q-item>
                 <q-item-section avatar>
@@ -117,6 +81,7 @@
               <q-select
                 v-model="statusFilter"
                 :options="statusOptions"
+                emit-value map-options
                 :placeholder="$t('routes.create.step3.filterByStatus')"
                 outlined
                 dense
@@ -132,16 +97,22 @@
           </div>
 
           <!-- 无可用节点状态 -->
+          <q-banner v-else-if="loadFailed" class="q-mb-md" rounded>
+            {{ $t('routes.create.step3.fetchNodesError') }}
+            <template #action><q-btn flat color="primary" :label="$t('workflow.retry')" @click="fetchMyNodes" /></template>
+          </q-banner>
           <div v-else-if="filteredNodes.length === 0" class="text-center q-py-lg text-grey-6">
             <q-icon name="router" size="3em" class="q-mb-md" />
-            <div>{{ $t('routes.create.step3.noAvailableNodes') }}</div>
-            <div class="text-body2 q-mt-sm">
+            <div>{{ $t(hasFilters ? 'workflow.noMatches' : 'routes.create.step3.noAvailableNodes') }}</div>
+            <div v-if="!hasFilters" class="text-body2 q-mt-sm">
               {{ $t('routes.create.step3.createNodeHint') }}
             </div>
+            <q-btn v-if="hasFilters" flat color="primary" :label="$t('workflow.clearFilters')" @click="clearFilters" />
+            <q-btn v-else flat color="primary" :label="$t('nodes.createNode')" to="/app/nodes/create" />
           </div>
 
           <!-- 节点卡片列表 -->
-          <div v-else class="row q-gutter-md">
+          <div v-else class="row q-col-gutter-md">
             <div
               v-for="node in filteredNodes"
               :key="node.id"
@@ -154,6 +125,11 @@
                   'disabled': !node.can_connect
                 }"
                 @click="selectMyNode(node)"
+                role="radio" :tabindex="node.can_connect ? 0 : -1"
+                :aria-label="node.name" :aria-checked="selectedMyNode?.id === node.id"
+                :aria-disabled="!node.can_connect"
+                @keydown.enter.prevent="selectMyNode(node)"
+                @keydown.space.prevent="selectMyNode(node)"
                 bordered
                 flat
               >
@@ -282,7 +258,7 @@
           <q-btn
             color="primary"
             :label="$t('routes.create.step3.nextStep')"
-            :disable="!selectedMyNode || !selectedMyNode.can_connect || (selectedMyNode.connection_status !== 'none' && selectedMyNode.connection_status !== 'rejected')"
+            :disable="loading || loadFailed || !selectedMyNode || !selectedMyNode.can_connect || (selectedMyNode.connection_status !== 'none' && selectedMyNode.connection_status !== 'rejected')"
             @click="goToNextStep"
             icon-right="arrow_forward"
           />
@@ -293,6 +269,9 @@
 </template>
 
 <script setup lang="ts">
+import RouteCreateProgress from '../../../components/route/RouteCreateProgress.vue'
+import { createRouteDraft } from '../../../utils/routeCreateDraft'
+
 import { ref, computed, onMounted } from 'vue'
 import debug from 'src/utils/debug'
 import { useI18n } from 'vue-i18n'
@@ -306,6 +285,7 @@ import type { Friend } from '../../../types'
 
 const { t } = useI18n()
 const router = useRouter()
+const draft = createRouteDraft(sessionStorage)
 const notify = useNotify()
 
 const { nodes, loadNodes } = useNodes()
@@ -319,10 +299,12 @@ const {
 } = useRoutes()
 
 // 页面状态
-const currentStep = ref(3)
 const loading = ref(false)
+const loadFailed = ref(false)
 const searchQuery = ref('')
 const statusFilter = ref('all')
+const hasFilters = computed(() => !!searchQuery.value || statusFilter.value !== 'all')
+const clearFilters = () => { searchQuery.value = ''; statusFilter.value = 'all' }
 const selectedFriend = ref<Friend | null>(null)
 const selectedFriendNode = ref<any | null>(null)
 const selectedMyNode = ref<any | null>(null)
@@ -385,6 +367,7 @@ const selectMyNode = (node: any) => {
     return
   }
   selectedMyNode.value = node
+  draft.selectMyNode(node)
 }
 
 const getNodeStatusColor = (node: any) => {
@@ -425,21 +408,24 @@ const goToNextStep = () => {
   }
   
   // 将选中的我的节点存储到会话存储中
-  sessionStorage.setItem('route-create-my-node', JSON.stringify(selectedMyNode.value))
+  draft.selectMyNode(selectedMyNode.value)
   
   router.push('/app/routes/create/prev_4')
 }
 
 // 获取我的节点列表
 const fetchMyNodes = async () => {
+  if (loading.value) return
+  loadFailed.value = false
+  selectedMyNode.value = null
   try {
     loading.value = true
     
     // 获取节点数据
-    await loadNodes()
+    if (!await loadNodes()) throw new Error('Node list unavailable')
     
     // 获取路由连接和请求数据
-    await fetchRouteData()
+    if (!await fetchRouteData()) throw new Error('Connection list unavailable')
     
     // 为每个节点添加连接能力判断和连接状态检查
     myNodes.value = nodes.value.map((node: any) => {
@@ -495,7 +481,11 @@ const fetchMyNodes = async () => {
         connection_color: connectionStatus.color
       }
     })
+    const saved = draft.read().myNode
+    selectedMyNode.value = myNodes.value.find(node => String(node.id) === String(saved?.id) && node.can_connect) ?? null
+    draft.selectMyNode(selectedMyNode.value)
   } catch (error) {
+    loadFailed.value = true
     debug.error('获取我的节点失败:', error)
     notify.error(t('routes.create.step3.fetchNodesError'))
   } finally {
@@ -507,7 +497,7 @@ const fetchMyNodes = async () => {
 const fetchRouteData = async () => {
   try {
     // 获取概览数据，这应该包含所有连接和请求信息
-    await fetchOverview()
+    if (!await fetchOverview()) return false
     
     // 从概览数据中提取连接和请求信息
     // 根据后端实际返回的数据结构调整
@@ -536,8 +526,10 @@ const fetchRouteData = async () => {
       activeRoutesCount: routeConnections.value.length,
       pendingRequestsCount: routeRequests.value.length
     })
+    return true
   } catch (error) {
     debug.error('获取路由数据失败:', error)
+    return false
   }
 }
 
@@ -624,44 +616,11 @@ const checkConnectionStatusLocal = (myNodeId: string | number, friendNodeId: str
   }
 }
 
-// 初始化
 onMounted(async () => {
-  // 检查是否有选择的好友
-  const savedFriend = sessionStorage.getItem('route-create-friend')
-  if (!savedFriend) {
-    notify.error(t('routes.create.step3.noFriendSelected'))
-    router.push('/app/routes/create/prev_1')
-    return
-  }
-  
-  // 检查是否有选择的好友节点
-  const savedFriendNode = sessionStorage.getItem('route-create-friend-node')
-  if (!savedFriendNode) {
-    notify.error(t('routes.create.step3.noFriendNodeSelected'))
-    router.push('/app/routes/create/prev_2')
-    return
-  }
-  
-  try {
-    selectedFriend.value = JSON.parse(savedFriend)
-    selectedFriendNode.value = JSON.parse(savedFriendNode)
-  } catch (error) {
-    debug.error('解析已保存的数据失败:', error)
-    router.push('/app/routes/create/prev_1')
-    return
-  }
-  
-  // 检查是否有已选择的我的节点
-  const savedMyNode = sessionStorage.getItem('route-create-my-node')
-  if (savedMyNode) {
-    try {
-      selectedMyNode.value = JSON.parse(savedMyNode)
-    } catch (error) {
-      debug.error('解析已保存的节点数据失败:', error)
-    }
-  }
-  
-  // 获取我的节点列表
+  const saved = draft.read()
+  if (saved.requiredStep < 3) { router.replace(`/app/routes/create/prev_${saved.requiredStep}`); return }
+  selectedFriend.value = saved.friend as Friend
+  selectedFriendNode.value = saved.friendNode
   await fetchMyNodes()
 })
 </script>

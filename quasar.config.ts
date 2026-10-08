@@ -137,7 +137,7 @@ export default defineConfig((ctx) => {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      publicPath: '/gui/',
+      publicPath: process.env.VITE_ROUTER_BASE || '/',
       // analyze: true,
       // env: {},
       // rawDefine: {}
@@ -236,4 +236,4 @@ export default defineConfig((ctx) => {
       ],
     }
   }
-}); 
+});

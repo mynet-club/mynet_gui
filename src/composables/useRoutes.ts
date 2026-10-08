@@ -79,9 +79,11 @@ export function useRoutes() {
         overview: overview.value
       })
       
+      return true
     } catch (error) {
       debug.error('获取路由概览失败:', error)
       notify.error(t('routes.fetchOverviewError'))
+      return false
     } finally {
       loading.value = false
     }

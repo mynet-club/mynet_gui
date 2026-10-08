@@ -277,7 +277,7 @@ const exporting = ref(false)
 
 // 基础配置
 const vpnType = ref<'gnb' | 'wireguard'>('gnb')
-const configMode = ref<'base' | 'expert'>('base')
+const configMode = ref<'base' | 'expert'>(route.query.mode === 'expert' ? 'expert' : 'base')
 
 // 完整的表单数据结构（包含所有参数的完整结构）
 const formData = ref<Record<string, any>>({})
@@ -872,7 +872,7 @@ onMounted(async () => {
             if (nodeInfo?.vpn_type) {
               vpnType.value = nodeInfo.vpn_type as 'gnb' | 'wireguard'
             }
-            if (customConfig.config_mode) {
+            if (customConfig.config_mode && route.query.mode !== 'expert') {
               configMode.value = customConfig.config_mode as 'base' | 'expert'
             }
             

@@ -4,6 +4,30 @@
 import { TERM_ZONE } from '../config/terms'
 
 export default {
+  workflow: {
+    deviceCreatedHint: '可以查看设备、进入专家配置或继续添加。',
+    manageIpPools: '管理 IP 池',
+    connectionSteps: '创建连接步骤',
+    stepCount: '第 {current} 步，共 {total} 步',
+    retry: '重试',
+    noMatches: '没有匹配结果，试试其他关键词或清除筛选。',
+    clearFilters: '清除筛选',
+    manageFriends: '前往好友管理',
+    viewPending: '查看待处理请求',
+    deviceCreated: '设备创建成功',
+    simpleCreateHint: '填写设备名称、选择 VPN 类型，即可创建设备。',
+    vpnType: 'VPN 类型',
+    automaticDefaults: 'IP 地址自动分配，首次创建自动建立 IP 池，其余配置采用默认值。',
+    expertMode: '专家模式',
+    optionalDescription: '设备说明（选填）',
+    expertAfterCreate: '端口、接口、MTU 等高级参数可在创建后的专家配置中调整。OpenVPN 沿用原有配置流程。',
+    selectedPool: '已选择 IP 池',
+    firstPoolCreated: '已自动为你创建第一个 IP 池。',
+    deviceNextStep: '设备已创建。在本机面板点击“接入本机”即可自动完成配置；其他设备请登录其本机面板并选择此设备。',
+    connectLocally: '接入本机',
+    createAnotherDevice: '继续添加设备',
+    createFirstDevice: '从你的第一个设备开始',
+  },
   app: {
     name: 'MyNet',
     tagline: '自主可控 · 私域组网'
@@ -2540,7 +2564,7 @@ export default {
     },
     createIpPool: {
       title: '💡 创建 IP 资源池',
-      content: '<p>点击「创建 IP 池」开始。IP 池为你的设备分配虚拟地址。</p>'
+      content: '<p>第一次创建设备时会自动创建 IP 池并分配地址，无需提前配置。</p>'
     },
     addFirstDevice: {
       title: '📱 添加第一个设备',

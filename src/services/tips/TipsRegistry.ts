@@ -51,11 +51,11 @@ function buildTipsRegistry(): TipConfig[] {
   // ========== 阶段0: 欢迎 ==========
   {
     id: 'welcome',
-    type: TipType.Modal,
+    type: TipType.Banner,
     stage: OnboardingStage.Welcome,
     trigger: {
       route: '/app/dashboard',
-      condition: () => true,
+      condition: async () => !(await getOnboardingStore()).stages.first_device_added,
       once: true
     },
     display: {
@@ -68,7 +68,7 @@ function buildTipsRegistry(): TipConfig[] {
     },
     actions: [
       {
-        label: t('tips.actions.startSetup', '带我看看'),
+        label: t('nodes.createNode', '创建设备'),
         type: 'primary',
         closeOnClick: true,
         handler: () => {
@@ -77,7 +77,7 @@ function buildTipsRegistry(): TipConfig[] {
               return
             }
             setTimeout(() => {
-              _router!.push('/app/ippools').catch(() => {})
+              _router!.push('/app/nodes/create').catch(() => {})
             }, 300)
           } catch (error) {
             // Error handling
@@ -114,8 +114,7 @@ function buildTipsRegistry(): TipConfig[] {
     display: {
       title: t('tips.createIpPool.title', '💡 创建 IP 资源池'),
       content: t('tips.createIpPool.content', `
-        <p><strong>IP资源池</strong>为设备提供虚拟IP，是添加设备的前提。</p>
-        <p>建议使用 <code>10.0.0.0/24</code>（适合大多数场景）</p>
+        <p>第一次创建设备时会自动创建 IP 池并分配地址，无需提前配置。</p>
       `),
       target: '[data-tip-target="create-ippool-btn"]',
       placement: TipPlacement.Bottom,
@@ -140,7 +139,7 @@ function buildTipsRegistry(): TipConfig[] {
     type: TipType.Popover,
     stage: OnboardingStage.AddFirstDevice,
     trigger: {
-      route: '/app/nodes',
+      route: /^\/app\/nodes\/?$/,
       condition: () => true,
       once: true,
       delay: 800,
@@ -430,7 +429,7 @@ function buildTipsRegistry(): TipConfig[] {
     display: {
       title: t('tips.ippoolManagement.title', '🌐 IP 资源池管理'),
       content: t('tips.ippoolManagement.content', `
-        <p>IP 资源池为设备分配虚拟 IP 地址。建议使用私有网段（如 <code>10.0.0.0/24</code>），可为不同用途创建多个池，避免与本地网络冲突。</p>
+        <p>首次创建设备时会自动创建资源池并分配地址。通常无需手动管理；专家模式可查看剩余地址、管理已有资源池。</p>
       `),
       width: '100%'
     },

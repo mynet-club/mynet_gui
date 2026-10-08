@@ -109,25 +109,17 @@ export const useOnboardingStore = defineStore('onboarding', () => {
    * 引导进度（0-100）
    */
   const progress = computed(() => {
-    const totalStages = Object.keys(stages.value).length
-    const completedStages = Object.values(stages.value).filter(Boolean).length
-    return Math.round((completedStages / totalStages) * 100)
+    const required: (keyof OnboardingStages)[] = ['first_device_added', 'connection_management_shown']
+    if (selectedPath.value === OnboardingPath.DeviceFirst) required.push('second_device_added', 'auto_connection_understood')
+    if (selectedPath.value === OnboardingPath.FriendFirst) required.push('inviter_friend_added', 'inviter_devices_viewed', 'cross_user_connection_established')
+    return Math.round(required.filter(key => stages.value[key]).length / required.length * 100)
   })
 
   /**
    * 下一个阶段
    */
   const nextStage = computed((): OnboardingStage | null => {
-    // 欢迎阶段
-    if (!stages.value.welcome_shown) {
-      return OnboardingStage.Welcome
-    }
-    
-    // IP资源池阶段
-    if (!stages.value.first_ippool_created) {
-      return OnboardingStage.CreateIPPool
-    }
-    
+    // The first pool is provisioned with the first device, without a setup step.
     // 第一个设备阶段
     if (!stages.value.first_device_added) {
       return OnboardingStage.AddFirstDevice
@@ -202,8 +194,8 @@ export const useOnboardingStore = defineStore('onboarding', () => {
       completed.value = stored.completed || false
       currentStage.value = stored.currentStage || OnboardingStage.Welcome
       selectedPath.value = stored.selectedPath || OnboardingPath.None
-      stages.value = stored.stages || defaultStages()
-      preferences.value = stored.preferences || defaultPreferences()
+      stages.value = { ...defaultStages(), ...stored.stages }
+      preferences.value = { ...defaultPreferences(), ...stored.preferences }
       startedAt.value = stored.startedAt
       completedAt.value = stored.completedAt
       updatedAt.value = stored.updatedAt || new Date().toISOString()
@@ -223,6 +215,21 @@ export const useOnboardingStore = defineStore('onboarding', () => {
       // 首次使用，初始化状态
       reset()
       console.log('[Onboarding] Initialized new state')
+    }
+    // Recover milestones from the actual inventory, including devices created
+    // before this onboarding version. Keep dismissals and user preferences.
+    try {
+      const { data } = await api.get('/nodes', { params: { per_page: 1 } })
+      const total = data?.data?.nodes?.total
+      if (typeof total === 'number' && total > 0) {
+        stages.value.first_device_added = true
+        stages.value.first_ippool_created = true
+        if (total > 1) stages.value.second_device_added = true
+        checkCompletion()
+        save()
+      }
+    } catch {
+      // Temporary inventory failures must not erase the saved milestones.
     }
   }
 
@@ -307,8 +314,6 @@ export const useOnboardingStore = defineStore('onboarding', () => {
    */
   const checkCompletion = () => {
     const requiredStages: (keyof OnboardingStages)[] = [
-      'welcome_shown',
-      'first_ippool_created',
       'first_device_added',
       'connection_management_shown'
     ]

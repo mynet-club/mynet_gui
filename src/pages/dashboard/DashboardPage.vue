@@ -32,6 +32,12 @@
     </q-inner-loading>
 
     <div v-if="!isLoading" class="dashboard-content">
+      <q-banner v-if="dashboardData.totalNodes === 0" rounded class="q-mb-lg">
+        <template #avatar><q-icon name="devices" color="primary" /></template>
+        <div class="text-subtitle1">{{ $t('workflow.createFirstDevice') }}</div>
+        <div class="text-body2">{{ $t('workflow.automaticDefaults') }}</div>
+        <template #action><q-btn unelevated color="primary" :label="$t('nodes.createNode')" to="/app/nodes/create" /></template>
+      </q-banner>
       <!-- 统计卡片 -->
       <DashboardStats 
         :dashboard-data="dashboardData"
