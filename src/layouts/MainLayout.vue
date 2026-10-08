@@ -799,15 +799,9 @@ onMounted(async () => {
       currentStage: onboardingStore.currentStage
     })
     
-    // 首次登录自动开始引导
-    if (!onboardingStore.isStarted && !onboardingStore.completed) {
-      debug.log('🎓 [Onboarding] Starting onboarding for new user')
+    // 空设备列表可提供引导；没有引导记录不代表新账号。登录保留目的页面。
+    if (onboardingStore.canOfferFirstDevice && !onboardingStore.isStarted) {
       onboardingStore.start()
-      
-      // 首次登录直接创建设备，不打断已有的深链接。
-      if (router.currentRoute.value.path === '/dashboard' || router.currentRoute.value.path === '/app/dashboard') {
-        await router.replace('/app/nodes/create')
-      }
     }
   }
 })

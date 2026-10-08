@@ -39,4 +39,31 @@ describe('device first onboarding', () => {
     expect(store.stages.welcome_shown).toBe(false)
     expect(store.stages.first_ippool_created).toBe(false)
   })
+  it('does not classify an existing account without onboarding history as new', async () => {
+    vi.mocked(api.get).mockImplementation(async (url) => ({ data: url === '/nodes'
+      ? { data: { nodes: { total: 13 } } } : {} }) as never)
+    const store = useOnboardingStore()
+    await store.initialize('existing-user')
+    expect(store.deviceCount).toBe(13)
+    expect(store.canOfferFirstDevice).toBe(false)
+    expect(store.stages.first_device_added).toBe(true)
+  })
+  it('offers optional creation only after a confirmed empty inventory', async () => {
+    const store = useOnboardingStore()
+    expect(store.canOfferFirstDevice).toBe(false)
+    vi.mocked(api.get).mockImplementation(async (url) => ({ data: url === '/nodes'
+      ? { data: { nodes: { total: 0 } } } : {} }) as never)
+    await store.initialize('empty-user')
+    expect(store.canOfferFirstDevice).toBe(true)
+    store.skipAll()
+    expect(store.canOfferFirstDevice).toBe(false)
+  })
+  it('does not treat an inventory failure as an empty account', async () => {
+    vi.mocked(api.get).mockRejectedValue(new Error('temporary failure'))
+    const store = useOnboardingStore()
+    await store.initialize('unknown-user')
+    expect(store.deviceCount).toBeNull()
+    expect(store.canOfferFirstDevice).toBe(false)
+  })
+
 })

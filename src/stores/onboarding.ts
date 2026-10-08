@@ -91,6 +91,9 @@ export const useOnboardingStore = defineStore('onboarding', () => {
   const startedAt = ref<string | undefined>()
   const completedAt = ref<string | undefined>()
   const updatedAt = ref<string>(new Date().toISOString())
+  // Missing onboarding history is not evidence of a new account.
+  const deviceCount = ref<number | null>(null)
+  const canOfferFirstDevice = computed(() => deviceCount.value === 0 && !stages.value.first_device_added && !shouldSkip.value)
 
   // 后端同步状态
   let syncTimer: ReturnType<typeof setTimeout> | null = null
@@ -183,6 +186,7 @@ export const useOnboardingStore = defineStore('onboarding', () => {
    * 初始化状态
    */
   const initialize = async (uid: string) => {
+    deviceCount.value = null
     userId.value = uid
 
     // 优先从后端加载，回退到 localStorage
@@ -221,6 +225,9 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     try {
       const { data } = await api.get('/nodes', { params: { per_page: 1 } })
       const total = data?.data?.nodes?.total
+      if (typeof total === 'number' && Number.isInteger(total) && total >= 0) {
+        deviceCount.value = total
+      }
       if (typeof total === 'number' && total > 0) {
         stages.value.first_device_added = true
         stages.value.first_ippool_created = true
@@ -516,6 +523,8 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     startedAt,
     completedAt,
     updatedAt,
+    deviceCount,
+    canOfferFirstDevice,
 
     // 计算属性
     isStarted,

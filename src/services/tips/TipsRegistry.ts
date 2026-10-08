@@ -55,7 +55,7 @@ function buildTipsRegistry(): TipConfig[] {
     stage: OnboardingStage.Welcome,
     trigger: {
       route: '/app/dashboard',
-      condition: async () => !(await getOnboardingStore()).stages.first_device_added,
+      condition: async () => (await getOnboardingStore()).canOfferFirstDevice,
       once: true
     },
     display: {
@@ -140,7 +140,7 @@ function buildTipsRegistry(): TipConfig[] {
     stage: OnboardingStage.AddFirstDevice,
     trigger: {
       route: /^\/app\/nodes\/?$/,
-      condition: () => true,
+      condition: async () => (await getOnboardingStore()).canOfferFirstDevice,
       once: true,
       delay: 800,
       timing: { autoMinimizeAfterSeconds: 8 }
