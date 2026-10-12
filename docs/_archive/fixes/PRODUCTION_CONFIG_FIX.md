@@ -64,8 +64,8 @@ VITE_WS_URL=ws://localhost:8000
 
 **生产环境配置**: `.env` / `.env.production`
 ```bash
-VITE_API_BASE_URL=https://api-mynet.dsplat.com
-VITE_WS_URL=wss://api-mynet.dsplat.com
+VITE_API_BASE_URL=https://__BACK_API_HOST__
+VITE_WS_URL=wss://__BACK_API_HOST__
 # ... 其他生产环境配置
 ```
 
@@ -79,14 +79,14 @@ grep -o "localhost:8000" dist/spa/assets/api-*.js
 
 # 构建后 - 生产地址
 grep -o "api-mynet\.dsplat\.com" dist/spa/assets/api-*.js  
-# 输出: api-mynet.dsplat.com
+# 输出: __BACK_API_HOST__
 ```
 
 ### 部署验证
 ```bash
 # 生产服务器API配置验证
 ssh root@112.124.22.220 "grep -o 'api-mynet\.dsplat\.com' /alidata/www/dsplat.com/mynet.dsplat.com/front/assets/api-*.js"
-# 输出: api-mynet.dsplat.com
+# 输出: __BACK_API_HOST__
 
 # 语言包文件验证
 ssh root@112.124.22.220 "ls -la /alidata/www/dsplat.com/mynet.dsplat.com/front/assets/ | grep i18n"
@@ -102,7 +102,7 @@ ssh root@112.124.22.220 "grep -o '中文\|English' /alidata/www/dsplat.com/mynet
 **部署时间**: 2025-08-13 18:15:14  
 **部署版本**: 1.0.0  
 **生产地址**: https://mynet.dsplat.com  
-**API地址**: https://api-mynet.dsplat.com  
+**API地址**: https://__BACK_API_HOST__  
 
 ## 技术细节
 
@@ -118,7 +118,7 @@ ssh root@112.124.22.220 "grep -o '中文\|English' /alidata/www/dsplat.com/mynet
 
 ## 问题解决状态
 
-- ✅ **API配置问题**: 已修复，生产环境正确指向 https://api-mynet.dsplat.com
+- ✅ **API配置问题**: 已修复，生产环境正确指向 https://__BACK_API_HOST__
 - ✅ **语言包问题**: 已修复，多语言功能在生产环境正常工作
 - ✅ **部署自动化**: 完善的部署脚本确保未来部署的一致性
 - ✅ **验证机制**: 建立了完整的构建和部署验证流程

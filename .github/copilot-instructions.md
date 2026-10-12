@@ -16,14 +16,14 @@
 
 **违反以下规则将导致构建失败或运行时错误，必须严格遵守：**
 
-### 0. 🌐 部署目标服务器：my.mynet.club，不是 api.mynet.club ⚠️ MANDATORY
+### 0. 🌐 部署目标服务器：my.mynet.club（前端站点） ⚠️ MANDATORY
 ```
 GUI 静态文件部署到：root@my.mynet.club:/data/app/mynet.club/my/public/
 API 请求由 my.mynet.club 上的 nginx 反向代理到后端
 ```
-- **❌ 禁止**：`REMOTE_HOST="api.mynet.club"` 或 `REMOTE_HOST="18.138.109.228"`
+- **❌ 禁止**：`REMOTE_HOST` 填后端 API 部署地址或其 IP（地址不落仓库、不入前端）
 - **✅ 正确**：`REMOTE_HOST="my.mynet.club"`
-- GUI 前端**从不直接连接** `api.mynet.club`，nginx 在 `my.mynet.club` 上做代理
+- GUI 前端**从不直接连接后端 API**，一律同源相对路径，nginx 在 `my.mynet.club` 上做代理
 
 ### 1. 🔧 Use `debug` Tool, NOT `console` ⚠️ MANDATORY
 ```typescript

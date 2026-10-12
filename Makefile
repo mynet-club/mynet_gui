@@ -50,6 +50,7 @@ test:
 guard:
 	@echo "▸ guard（安全红线）"
 	@sh .githooks/guard.sh
+	@sh dev-tools/check-no-back-url.sh
 
 check: guard lint test
 	@echo "✓ check 通过"

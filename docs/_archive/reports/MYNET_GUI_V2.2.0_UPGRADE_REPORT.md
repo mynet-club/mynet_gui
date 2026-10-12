@@ -10,7 +10,7 @@
 
 根据 mynet_ctl 项目的升级指导，将 mynet_gui 从 v2.1.0 升级到 v2.2.0，主要适配：
 - ✅ **back_api v2.2.0**：config-bundle warnings 字段 + vpn_interfaces 规范化
-- ✅ **API 基础配置**：使用 `/api/v2` 前缀和 `api.mynet.club` 域名
+- ✅ **API 基础配置**：使用 `/api/v2` 前缀和 `__BACK_API_HOST__` 域名
 - ✅ **版本兼容性检查**：确保客户端符合后端要求
 
 ---
@@ -26,8 +26,8 @@
 const baseUrl = envUrl || 'http://localhost:8000'
 return `${baseUrl}/api/v1`
 
-// 升级后：/api/v2 前缀 + api.mynet.club 域名
-const baseUrl = envUrl || (import.meta.env.PROD ? 'https://api.mynet.club' : 'http://localhost:8000')
+// 升级后：/api/v2 前缀 + __BACK_API_HOST__ 域名
+const baseUrl = envUrl || (import.meta.env.PROD ? 'https://__BACK_API_HOST__' : 'http://localhost:8000')
 return `${baseUrl}/api/v2`
 ```
 
@@ -136,7 +136,7 @@ if (apiVersionService.supportsConfigBundle(versionCheck.current_back_api)) {
 ### 1. 环境变量配置
 ```bash
 # 生产环境
-VITE_API_BASE_URL=https://api.mynet.club
+VITE_API_BASE_URL=https://__BACK_API_HOST__
 
 # 开发环境（可选）
 VITE_API_BASE_URL=http://localhost:8000

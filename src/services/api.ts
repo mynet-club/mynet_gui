@@ -10,10 +10,11 @@ const getCurrentLanguage = () => {
 }
 
 // 配置 API 基础URL - 使用框架约定的 v1 版本
+// 同源相对路径：浏览器永远不接触后端 API 部署地址（2026-10-12 裁定：不暴露）。
+// dev 要打本机后端时由 .env.dev 显式给 VITE_API_BASE_URL，代码里不留直连兜底。
 const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_BASE_URL
-  const baseUrl = envUrl || 'http://localhost:8000'
-  return `${baseUrl}/api/v1`
+  return envUrl ? `${envUrl}/api/v1` : '/api/v1'
 }
 
 export const api = axios.create({

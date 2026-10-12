@@ -18,12 +18,16 @@
 
 | 文件 | 当前 URL | 操作 |
 |------|----------|------|
-| `.env.prod` → `VITE_API_BASE_URL` | `https://my.mynet.club` | 改为 `https://api.mynet.club` |
-| `.env.prod` → `VITE_REVERB_HOST` | `api.mynet.club` | 无需改 |
+| `.env.prod` → `VITE_API_BASE_URL` | `https://my.mynet.club` | **留空（同源）**——2026-10-12 裁定：后端 API 地址不入构建产物，下方旧口径作废 |
+| `.env.prod` → `VITE_REVERB_HOST` | 站点自有域名 | 无需改 |
 | `.env` / `.env.dev` → `VITE_API_BASE_URL` | `http://localhost:8000` | 改为 `http://api.mynet.local` |
 | `src/config/app.ts` | 读 `VITE_API_BASE_URL` | 不改 |
 | `src/services/api.ts` | 读 `VITE_API_BASE_URL` | 拼接 `/api/v1` → 改 `/api/v2` |
 | `src/components/auth/RegisterForm.vue` | `https://mynet.club/village` | 链接，可选更新 |
+
+> **2026-10-12 裁定（覆盖 §2.1 旧口径）**：`VITE_API_BASE_URL` 一律**留空走同源**，
+> 浏览器不接触后端 API 部署地址；nginx 的上游 Host 用 `__BACK_API_HOST__` 占位，
+> 部署时在服务器上替换。旧文「改为后端 API 地址」作废。
 
 ---
 
@@ -36,8 +40,8 @@
 ```env
 # 旧值:
 # VITE_API_BASE_URL=https://my.mynet.club
-# 新值:
-VITE_API_BASE_URL=https://api.mynet.club
+# 新值（2026-10-12 裁定：同源，后端地址不入构建产物）:
+VITE_API_BASE_URL=
 ```
 
 ### 2.2 开发环境使用 Nginx 代理

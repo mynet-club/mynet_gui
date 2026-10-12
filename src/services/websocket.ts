@@ -78,7 +78,9 @@ export class WebSocketService {
       this.echo = null
     }
 
-    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:1080'
+    // 同源派生（默认）：浏览器不接触后端/内网地址；dev 由 .env.dev 显式覆盖
+    const wsUrl = import.meta.env.VITE_WS_URL ||
+      `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/wss`
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
     const url = new URL(wsUrl)
     const wsHost = url.hostname

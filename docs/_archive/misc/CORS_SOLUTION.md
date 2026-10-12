@@ -2,7 +2,7 @@
 
 ## 问题描述
 
-当前端域名（`my.mynet.club`）与API域名（`api.mynet.club`）不同时，浏览器会认为这是跨域请求，导致：
+当前端域名（`my.mynet.club`）与API域名（`__BACK_API_HOST__`）不同时，浏览器会认为这是跨域请求，导致：
 
 1. **CORS预检请求** - 浏览器会先发送OPTIONS请求
 2. **增加网络延迟** - 每个API请求前都要预检
@@ -16,7 +16,7 @@
 
 ```
 前端: https://my.mynet.club/
-API:  https://my.mynet.club/api/v1/  (代理到 api.mynet.club/api/v1/)
+API:  https://my.mynet.club/api/v1/  (代理到 __BACK_API_HOST__/api/v1/)
 WSS:  wss://my.mynet.club/wss        (代理到后端WebSocket)
 ```
 
@@ -59,8 +59,8 @@ VITE_WS_URL=wss://my.mynet.club/wss
 ```nginx
 location /api/ {
     # 保持完整路径代理
-    proxy_pass https://api.mynet.club;
-    proxy_set_header Host api.mynet.club;
+    proxy_pass https://__BACK_API_HOST__;
+    proxy_set_header Host __BACK_API_HOST__;
 }
 ```
 
@@ -85,7 +85,7 @@ location /wss {
 ```javascript
 // 前端发送请求到同域名（代码自动添加 /api/v1）
 fetch('/api/v1/user/profile')  // 实际请求
-// nginx自动代理到 https://api.mynet.club/api/v1/user/profile
+// nginx自动代理到 https://__BACK_API_HOST__/api/v1/user/profile
 ```
 
 ### 3. 测试WebSocket
@@ -98,7 +98,7 @@ const ws = new WebSocket('wss://my.mynet.club/wss');
 
 1. **确保nginx配置正确** - 检查代理规则
 2. **SSL证书配置** - 确保HTTPS正常工作
-3. **后端API可访问** - 确保 api.mynet.club 可正常访问
+3. **后端API可访问** - 确保 __BACK_API_HOST__ 可正常访问
 4. **WebSocket服务运行** - 确保WebSocket服务正常
 
 这种方案是业界标准做法，既解决了CORS问题，又提供了更好的性能和安全性。

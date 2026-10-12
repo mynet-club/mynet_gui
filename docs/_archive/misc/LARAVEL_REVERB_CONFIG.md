@@ -11,7 +11,7 @@ Laravel Reverb 是 Laravel 官方的 WebSocket 服务器，替代了第三方 Pu
 REVERB_APP_ID=686554
 REVERB_APP_KEY=oyzmmhlqzmar2uvanq2k
 REVERB_APP_SECRET=yabimhxofy2jud7f3lo5
-REVERB_HOST="api.mynet.club"
+REVERB_HOST="__BACK_API_HOST__"
 REVERB_PORT=1080
 REVERB_SCHEME=http
 WEBSOCKET_ENABLED=true
@@ -54,7 +54,7 @@ VITE_WS_URL=wss://my.mynet.club/wss
 # Laravel Reverb WebSocket 配置
 VITE_PUSHER_APP_KEY=oyzmmhlqzmar2uvanq2k
 VITE_REVERB_APP_ID=686554
-VITE_REVERB_HOST=api.mynet.club
+VITE_REVERB_HOST=__BACK_API_HOST__
 VITE_REVERB_PORT=1080
 VITE_REVERB_SCHEME=https
 ```
@@ -85,7 +85,7 @@ const config = {
 ```nginx
 # /wss 路径代理到 Reverb 服务器
 location /wss {
-    proxy_pass http://api.mynet.club:1080;
+    proxy_pass http://__BACK_API_HOST__:1080;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
@@ -104,7 +104,7 @@ location /wss {
 ```nginx
 # SSL 终止后，内部使用 HTTP 连接到 Reverb
 location /wss {
-    proxy_pass http://api.mynet.club:1080;
+    proxy_pass http://__BACK_API_HOST__:1080;
     proxy_set_header X-Forwarded-Proto https;
     # ... 其他配置
 }
@@ -134,7 +134,7 @@ console.log('Reverb 配置:', {
 
 ### 3. 连接日志
 ```
-WebSocket: 连接参数 - Host: api.mynet.club, Port: 1080, Path: /wss, TLS: true
+WebSocket: 连接参数 - Host: __BACK_API_HOST__, Port: 1080, Path: /wss, TLS: true
 WebSocket: Echo 配置 {broadcaster: "reverb", key: "oyzmmhlqzmar2uvanq2k", ...}
 WebSocket: Laravel Echo 连接成功
 ```
@@ -171,7 +171,7 @@ WebSocket: Laravel Echo 连接成功
 php artisan reverb:start --debug
 
 # 测试 WebSocket 连接
-wscat -c ws://api.mynet.club:1080
+wscat -c ws://__BACK_API_HOST__:1080
 ```
 
 现在前端配置已与后端 Laravel Reverb 完全同步！
