@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import routes from './routes'
-import { setupRouteGuards, createRouteUtils } from './middleware'
+import { setupRouteGuards } from './middleware'
 import { createNodeRouteGuards } from './nodeRoutes'
 
 // publicPath / 路由 base 必须一致。收进 mynetd 的 /gui/ 时 base=/gui/，
@@ -16,8 +16,5 @@ setupRouteGuards(router)
 
 // 设置节点路由守卫
 createNodeRouteGuards(router)
-
-// 创建路由工具实例
-export const routeUtils = createRouteUtils(router)
 
 export default router

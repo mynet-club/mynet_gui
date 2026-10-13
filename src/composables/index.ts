@@ -18,9 +18,6 @@ export { useVpnConfig } from './useVpnConfig'
 export { useTenants } from './useTenants'
 export { useZoneServices } from './useZoneServices'
 
-// 缓存管理相关
-export { useCacheStatus, useApiCache, useDataPrefetch } from './useCache'
-
 // 通用工具
 export { useNotify } from './useNotify'
 export { useAuth } from './useAuth'

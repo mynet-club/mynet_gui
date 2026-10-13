@@ -2,7 +2,6 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import debug from 'src/utils/debug'
 import { useAuthStore } from '../stores/auth'
 import { useWebSocket } from '../services/websocket'
-import { apiService } from '../services/api'
 import { useNodes } from './useNodes'
 import { useRoutes } from './useRoutes'
 import type { 
