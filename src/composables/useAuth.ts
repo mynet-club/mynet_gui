@@ -1,5 +1,6 @@
 import { ref, reactive } from 'vue'
 import debug from 'src/utils/debug'
+import { resolveCallbackRedirect } from 'src/utils/callbackGuard'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -156,10 +157,11 @@ export function useAuth() {
 
       // 确保认证状态已经更新
       if (authStore.isAuthenticated) {
-        // 检查是否有外部回调（如 CTL setup 跳转登录）
-        const callback = route.query.callback as string
+        // 检查是否有外部回调（如 mynet_ctl setup 跳转登录）。
+        // 目标必须过 resolveCallbackRedirect 白名单（同源/注册回调域），外域一律不跳（S1）
+        const callback = resolveCallbackRedirect(route.query.callback, window.location.origin)
         if (callback) {
-          debug.log('[useAuth] OAuth callback detected, redirecting to:', callback)
+          debug.log('[useAuth] 外部回调目标通过白名单，跳回:', callback)
           const sep = callback.includes('?') ? '&' : '?'
           window.location.href = callback + sep + 'token=' + encodeURIComponent(authStore.token!)
           return

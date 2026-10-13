@@ -4,6 +4,7 @@
 
 import { Router } from 'vue-router'
 import debug from 'src/utils/debug'
+import { resolveCallbackRedirect } from 'src/utils/callbackGuard'
 import { useAuth } from '../composables/useAuth'
 
 /**
@@ -18,8 +19,9 @@ export function setupRouteGuards(router: Router) {
 
     // 如果已登录用户访问登录或注册页
     if (isAuthenticated && (to.path === '/auth/login' || to.path === '/auth/register')) {
-      // 如果带 callback 参数（外部 OAuth 回调），直接带 token 跳回去
-      const callback = to.query.callback as string
+      // 如果带 callback 参数（外部站点跳来登录，如 mynet_ctl setup），带 token 跳回去。
+      // 目标必须过 resolveCallbackRedirect 白名单（同源/注册回调域），外域一律不跳（S1）
+      const callback = resolveCallbackRedirect(to.query.callback, window.location.origin)
       if (callback && to.path === '/auth/login') {
         const token = localStorage.getItem('auth_token')
         if (token) {
