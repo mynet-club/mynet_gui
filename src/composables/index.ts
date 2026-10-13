@@ -13,7 +13,6 @@ export { useKeyGeneration } from './useKeyGeneration'
 // 配置管理相关
 export { useNodeConfig } from './useNodeConfig'
 export { useVpnConfig } from './useVpnConfig'
-export { useConfigBundle } from './useConfigBundle'
 
 // 区域管理相关
 export { useTenants } from './useTenants'
