@@ -2,7 +2,6 @@ import axios from 'axios'
 import debug from 'src/utils/debug'
 import { LocalStorage } from 'quasar'
 import { tokenManager } from '../utils/tokenManager'
-import { mockDashboardData, mockDelay } from './mockData'
 
 // 获取当前语言
 const getCurrentLanguage = () => {
@@ -160,15 +159,6 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-
-// 模拟API响应 - 仅用于Dashboard
-const mockApiResponse = <T>(data: T, delay = 500) => {
-  return new Promise<{ data: T }>((resolve) => {
-    setTimeout(() => {
-      resolve({ data })
-    }, delay)
-  })
-}
 
 // API服务
 export const apiService = {
@@ -445,12 +435,6 @@ export const apiService = {
 
   async deleteNode(id: string) {
     return api.delete(`/nodes/${id}`)
-  },
-
-  // 仪表板相关 - 强制使用模拟数据
-  async getDashboardData() {
-    // Dashboard 暂时使用模拟数据
-    return mockApiResponse(mockDashboardData)
   },
 
   // 头像相关 (使用框架 Storage 模块 entity 接口)
