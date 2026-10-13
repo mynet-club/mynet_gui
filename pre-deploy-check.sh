@@ -5,6 +5,9 @@
 
 set -e
 
+# 部署目标唯一来源（与 deployment.sh/quick-deploy.sh/rollback.sh 同源）
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/deploy-target.sh"
+
 # 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -108,8 +111,7 @@ fi
 
 # 检查SSH连接
 print_info "检查SSH连接..."
-REMOTE_HOST="112.124.22.220"
-if ssh -o ConnectTimeout=5 -o BatchMode=yes root@${REMOTE_HOST} exit 2>/dev/null; then
+if ssh -o ConnectTimeout=5 -o BatchMode=yes ${REMOTE_USER}@${REMOTE_HOST} exit 2>/dev/null; then
     print_success "SSH连接正常"
 else
     print_error "SSH连接失败，请检查SSH密钥配置"
@@ -118,8 +120,7 @@ fi
 
 # 检查远程目录权限
 print_info "检查远程目录权限..."
-REMOTE_PATH="/alidata/www/dsplat.com/mynet.dsplat.com/front"
-if ssh root@${REMOTE_HOST} "test -w '${REMOTE_PATH}' || mkdir -p '${REMOTE_PATH}'" 2>/dev/null; then
+if ssh ${REMOTE_USER}@${REMOTE_HOST} "test -w '${REMOTE_PATH}' || mkdir -p '${REMOTE_PATH}'" 2>/dev/null; then
     print_success "远程目录权限正常"
 else
     print_error "远程目录权限检查失败"
@@ -128,7 +129,7 @@ fi
 
 # 检查Nginx配置
 print_info "检查Nginx配置..."
-if ssh root@${REMOTE_HOST} "nginx -t" 2>/dev/null; then
+if ssh ${REMOTE_USER}@${REMOTE_HOST} "nginx -t" 2>/dev/null; then
     print_success "Nginx配置语法正确"
 else
     print_warning "Nginx配置可能有问题"

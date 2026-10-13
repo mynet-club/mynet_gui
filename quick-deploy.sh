@@ -5,10 +5,8 @@
 
 set -e
 
-# 配置 - 使用与 deployment.sh 相同的配置
-REMOTE_USER="root"
-REMOTE_HOST="my.mynet.club"   # GUI 静态文件服务器（nginx 在此处代理 API）
-REMOTE_PATH="/data/app/mynet.club/my/public"
+# 配置 - 部署目标与 deployment.sh/rollback.sh/pre-deploy-check.sh 同源
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/deploy-target.sh"
 BUILD_DIR="dist/spa"
 
 # 颜色

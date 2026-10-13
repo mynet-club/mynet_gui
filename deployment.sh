@@ -10,9 +10,8 @@ set -e  # 遇到错误立即退出
 # =============================================================================
 PROJECT_NAME="MyNet Frontend"
 BUILD_DIR="dist/spa"
-REMOTE_USER="root"
-REMOTE_HOST="my.mynet.club"   # GUI 静态文件服务器（nginx 在此处代理 API，勿改成后端地址）
-REMOTE_PATH="/data/app/mynet.club/my/public"
+# 部署目标唯一来源（与 quick-deploy/rollback/pre-deploy-check 同源）
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/deploy-target.sh"
 NGINX_PATH="/usr/sbin/nginx"
 WEB_USER="www"
 WS_URL="wss://my.mynet.club/wss"

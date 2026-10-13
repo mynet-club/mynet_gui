@@ -5,10 +5,9 @@
 
 set -e
 
-# 配置
-REMOTE_USER="root"
-REMOTE_HOST="112.124.22.220"
-REMOTE_PATH="/alidata/www/dsplat.com/mynet.dsplat.com/front"
+# 配置 - 部署目标与 deployment.sh/quick-deploy.sh/pre-deploy-check.sh 同源
+# （此前指向旧 dsplat 主机/目录，真回滚会 rm -rf 旧目录、救不了现行站点）
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/deploy-target.sh"
 
 # 颜色
 RED='\033[0;31m'
@@ -103,4 +102,4 @@ ssh ${REMOTE_USER}@${REMOTE_HOST} "
 
 print_success "🎉 回滚完成!"
 print_info "当前版本已备份到: $CURRENT_BACKUP"
-echo "访问地址: https://mynet.dsplat.com"
+echo "访问地址: https://my.mynet.club"
