@@ -247,7 +247,7 @@ export const apiService = {
 
   /**
    * 注册。字段名跟随框架 `UserAuthController::register` 的验证规则：
-   * `invite_code`（不是 back 旧实现的 `invitation`）、`password` 必须带
+   * `invite_code`（不是后端旧实现的 `invitation`）、`password` 必须带
    * `confirmed` 对偶字段 `password_confirmation`，否则验证期就 422。
    */
   async register(data: {

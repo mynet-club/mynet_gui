@@ -4,7 +4,7 @@ import type { InviteCodeUsage, MyInviteCode } from '../../types'
 /**
  * 用户侧邀请码（框架端点，代码层 = invite code，界面词「邀请码」）。
  *
- * 这两条路由是 **dsplat 框架自带的**，不在 back 的业务模块里：
+ * 这两条路由是 **dsplat 框架自带的**，不在后端的业务模块里：
  * · `GET /api/v1/app/invite-code` → `InviteCodeController@myCode`
  *   —— 取「我在这个网络区的个人码」，没有就懒建（`max_uses=0` 不限次）。
  * · `GET /api/v1/app/invite-code/usages` → `@myUsages`，分页的归因记录。
@@ -16,14 +16,14 @@ import type { InviteCodeUsage, MyInviteCode } from '../../types'
  *    若上下文缺失（例如 X-Tenant-ID 指向已退出的区），框架会把租户解析成 0 并照样建码，
  *    所以调用方**必须保证当前网络区已就绪**（见 `stores/auth.ts` 的 currentTenant）。
  * 2. **框架的码管的是「注册时加入该区」**。已注册用户凭码入区走
- *    `POST /api/v1/user/tenants/join`（back 补的接线，在 `tenantService.joinTenant`），
+ *    `POST /api/v1/user/tenants/join`（后端补的接线，在 `tenantService.joinTenant`），
  *    两者共用同一张码、同一份用量与归因记录。
  *
- * 旧实现（back 自建 `invitations` 表 + `/social/invitation*` 三条接口）已于
+ * 旧实现（后端自建 `invitations` 表 + `/social/invitation*` 三条接口）已于
  * 2026-10-04 裁定下架：不再由用户「生成多张带备注的码」，也没有「删除码」。
  */
 
-/** 框架信封是 `{ success, data }`，没有 back 用户面的 message/code 字段 */
+/** 框架信封是 `{ success, data }`，没有后端用户面的 message/code 字段 */
 const unwrap = (response: any) => {
   if (response.data?.success) return response.data.data
   throw new Error(

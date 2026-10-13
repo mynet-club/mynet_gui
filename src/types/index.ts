@@ -170,7 +170,7 @@ export interface MyInviteCode {
  * 一条归因记录（框架 `invite_code_usages`，不可变表：只有 created_at）。
  *
  * `channel` 取值：`email`/`sms`/`oauth:<provider>`（注册核销）与 `join`
- * （back 的 `POST /api/v1/user/tenants/join`，已注册用户凭码入区）。
+ * （后端的 `POST /api/v1/user/tenants/join`，已注册用户凭码入区）。
  */
 export interface InviteCodeUsage {
   usage_id: string | number

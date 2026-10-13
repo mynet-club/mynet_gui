@@ -13,7 +13,7 @@ import type { InviteCodeUsage, MyInviteCode } from '../types'
  * · `max_uses === 0` = 不限次数（框架个人码就是这个形状，别显示成「已用 0 / 0」）
  * · `used_count >= max_uses`（且 max_uses>0）= 已用满
  * · `expires_at` 为 null = 长期有效
- * 旧实现里 `invitation_status`（1/2/0）与 `is_valid` 那一套枚举已随 back 的
+ * 旧实现里 `invitation_status`（1/2/0）与 `is_valid` 那一套枚举已随后端的
  * `invitations` 表一起下架，不要再在前端映射一遍。
  */
 export function useInviteCode() {
