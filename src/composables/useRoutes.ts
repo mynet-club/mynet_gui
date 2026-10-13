@@ -159,29 +159,6 @@ export function useRoutes() {
   // }
 
   // 连接到节点
-  const connectToNode = async (nodeId: string, message?: string) => {
-    try {
-      loading.value = true
-      const response = await routesService.connectToNode(nodeId, message)
-      if (response.success) {
-        notify.success(t('routes.connectionRequestSent'))
-        // 更新好友节点状态
-        const nodeIndex = friendNodes.value.findIndex(n => n.id === nodeId)
-        if (nodeIndex !== -1 && friendNodes.value[nodeIndex]) {
-          friendNodes.value[nodeIndex].connection_status = 'pending'
-        }
-        // 刷新待处理连接
-        await fetchPendingConnections('outgoing')
-      } else {
-        notify.error(response.message || t('routes.connectionRequestError'))
-      }
-    } catch (error) {
-      debug.error('连接节点失败:', error)
-      notify.error(t('routes.connectionRequestError'))
-    } finally {
-      loading.value = false
-    }
-  }
 
   // 批准连接
   const approveConnection = async (connectionId: string | number) => {
@@ -317,15 +294,6 @@ export function useRoutes() {
   }
 
   // 获取连接统计
-  const getConnectionStats = async (routeId: string) => {
-    try {
-      const response = await routesService.getConnectionStats(routeId)
-      return response
-    } catch (error) {
-      debug.error('获取连接统计失败:', error)
-      return null
-    }
-  }
 
   // 初始化数据
   const init = async () => {
@@ -375,13 +343,11 @@ export function useRoutes() {
     fetchActiveRoutes,
     fetchPendingConnections,
     fetchFriendNodes,
-    connectToNode,
     approveConnection,
     rejectConnection,
     disconnectRoute,
     handleConnectionTypeChange,
     getRouteDetails,
-    getConnectionStats,
     createRouteRequest,
     init
   }

@@ -167,10 +167,11 @@ const loadConnectionDetails = async () => {
       const now = new Date()
       const oneMinuteAgo = new Date(now.getTime() - 60 * 1000)
       
-      const response = await api.get('/monitor/history/connections', {
+      // G2：迁 GET /nodes/{id}/peer-connections（真能力）
+      // peer_node_id→peer_id；时间窗 start_time/end_time 与 service 对齐
+      const response = await api.get(`/nodes/${nodeId.value}/peer-connections`, {
         params: {
-          node_id: nodeId.value,
-          peer_node_id: peerId.value,
+          peer_id: peerId.value,
           start_time: oneMinuteAgo.toISOString().slice(0, 19).replace('T', ' '),
           end_time: now.toISOString().slice(0, 19).replace('T', ' '),
           per_page: 1  // 只需要最新的一条记录
@@ -182,7 +183,7 @@ const loadConnectionDetails = async () => {
         
         connectionDetails.value = {
           node_id: conn.node_id,
-          peer_node_id: conn.peer_node_id,
+          peer_node_id: conn.peer_id ?? conn.peer_node_id,
           online: conn.online || false,
           conn_type: conn.conn_type || '',
           latency: conn.latency || 0,
@@ -192,7 +193,7 @@ const loadConnectionDetails = async () => {
         }
         
         // 如果监控数据包含节点元数据，更新节点信息
-        const metadata = response.data.data.nodes_metadata
+        const metadata = response.data.data.peers_metadata || response.data.data.nodes_metadata
         if (metadata) {
           // 处理本节点信息
           if (metadata[nodeId.value]) {
@@ -278,8 +279,7 @@ const loadHistoryData = async () => {
     const endTime = new Date()
     
     const params: any = {
-      node_id: nodeId.value,
-      peer_node_id: peerId.value,
+      peer_id: peerId.value,
       end_time: endTime.toISOString().slice(0, 19).replace('T', ' '),
       per_page: 100
     }
@@ -290,7 +290,7 @@ const loadHistoryData = async () => {
       params.start_time = startTime.toISOString().slice(0, 19).replace('T', ' ')
     }
     
-    const response = await api.get('/monitor/history/connections', { params })
+    const response = await api.get(`/nodes/${nodeId.value}/peer-connections`, { params })
     
     if (response.data && response.data.data) {
       connectionHistory.value = response.data.data.connections || []
@@ -299,7 +299,7 @@ const loadHistoryData = async () => {
       calculateTrafficStats()
       
       // 如果有节点元数据，更新节点信息
-      const metadata = response.data.data.nodes_metadata
+      const metadata = response.data.data.peers_metadata || response.data.data.nodes_metadata
       if (metadata) {
         if (metadata[nodeId.value] && !sourceNodeInfo.value) {
           const nodeData = metadata[nodeId.value]

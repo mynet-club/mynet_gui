@@ -120,31 +120,6 @@
       </div>
 
       <!-- 连接统计 -->
-      <div class="col-12" v-if="connectionStats">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6 q-mb-md">{{ $t('routes.details.connectionStats') }}</div>
-            <div class="row q-gutter-md">
-              <div class="col-12 col-md-6">
-                <div class="text-body2">
-                  <strong>{{ $t('routes.details.bandwidthIn') }}:</strong> {{ connectionStats.bandwidth_in }}
-                </div>
-                <div class="text-body2">
-                  <strong>{{ $t('routes.details.bandwidthOut') }}:</strong> {{ connectionStats.bandwidth_out }}
-                </div>
-              </div>
-              <div class="col-12 col-md-6">
-                <div class="text-body2">
-                  <strong>{{ $t('routes.details.bytesSent') }}:</strong> {{ formatBytes(connectionStats.bytes_sent) }}
-                </div>
-                <div class="text-body2">
-                  <strong>{{ $t('routes.details.bytesReceived') }}:</strong> {{ formatBytes(connectionStats.bytes_received) }}
-                </div>
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
     </div>
 
     <!-- 操作按钮 -->
@@ -190,10 +165,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const { t } = useI18n()
-const { getConnectionStats, disconnectRoute } = useRoutes()
-
-// 连接统计数据
-const connectionStats = ref<any>(null)
+const { disconnectRoute } = useRoutes()
 
 // 获取状态颜色
 const getStatusColor = (status: string) => {
@@ -246,14 +218,7 @@ const handleDisconnect = async () => {
   emit('close')
 }
 
-// 初始化时获取连接统计
-onMounted(async () => {
-  try {
-    connectionStats.value = await getConnectionStats(props.route.id)
-  } catch (error) {
-    debug.error('Failed to load connection stats:', error)
-  }
-})
+
 </script>
 
 <style lang="scss" scoped>

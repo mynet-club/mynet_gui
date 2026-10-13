@@ -9,12 +9,6 @@ export const routesService = {
     return response.data.data
   },
 
-  // 连接到节点
-  async connectToNode(nodeId: string, message?: string): Promise<BaseResponse> {
-    const response = await api.post(`/route/connect/${nodeId}`, { message })
-    return response.data
-  },
-
   // 批准连接
   async approveConnection(connectionId: string): Promise<BaseResponse> {
     const response = await api.post(`/route/accept-request/${connectionId}`)
@@ -47,9 +41,4 @@ export const routesService = {
     return response.data.data
   },
 
-  // 获取连接统计
-  async getConnectionStats(routeId: string): Promise<any> {
-    const response = await api.get(`/route/${routeId}/stats`)
-    return response.data.data
-  }
 }
