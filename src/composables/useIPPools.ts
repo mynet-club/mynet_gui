@@ -151,11 +151,19 @@ export function useIPPools() {
     }
   }
 
-  const deletePool = async (poolId: string, sequenceNumber?: number) => {
+  /**
+   * 删除 IP 池 —— 后端是 `DELETE /ippools/{sequence}`（IPPoolController::release），
+   * {sequence} 只认**序号**（数字）。原先「无序号就回退 poolId」把 16 位全局 ID
+   * 发进 {sequence} 槽：纯数字 poolId 能过路由正则，按序号查不到行 → 404/误删
+   * 同序号池。缺序号直接报错，不再猜。
+   */
+  const deletePool = async (sequenceNumber?: number) => {
+    if (!sequenceNumber) {
+      notifyError(t('ippools.deleteError'))
+      throw new Error('sequence_number is required to delete an IP pool')
+    }
     try {
-      // 优先使用sequence_number，如果没有则使用poolId
-      const identifier = sequenceNumber || poolId
-      const response = await api.delete(`/ippools/${identifier}`)
+      const response = await api.delete(`/ippools/${sequenceNumber}`)
       
       if (response.data.success) {
         notifySuccess(t('ippools.deleteSuccess'))

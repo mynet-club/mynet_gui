@@ -697,10 +697,11 @@ const logout = async () => {
       message: 'Logged out successfully',
       timeout: 2000
     })
-    router.push('/login')
+    // 登录路由是 /auth/login（routes.ts）——/login 不存在，登出失败路径会落 404 页
+    router.push('/auth/login')
   } catch (error) {
     debug.error('Logout failed:', error)
-    router.push('/login')
+    router.push('/auth/login')
   }
 }
 

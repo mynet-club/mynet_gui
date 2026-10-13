@@ -15,7 +15,6 @@ import type {
   UpdateNodeNetworkConfigRequest,
   AvailableIPsResponse,
   NodeIndexServicesResponse,
-  NodeStatusInfo,
   NodeDeviceInfo,
   NodeDeviceInfoResponse,
   BatchNodeDeviceInfoResponse,
@@ -274,18 +273,6 @@ export class NodeService {
     // v2 返回 { data: { network: {...} }, ... }，向后兼容旧调用方期望的扁平 data
     const networkData = body?.data?.network ?? body?.network ?? body?.data ?? {}
     return { ...body, data: networkData } as ApiResponse<NodeNetworkConfig>
-  }
-
-  /**
-   * 获取节点状态信息
-   * @param nodeId 节点ID (node_id)
-   * @returns 节点状态详细信息
-   *
-   * v2: status-info + status-check 合并为 /status（先副作用更新，再返回完整状态）
-   */
-  async getNodeStatusInfo(nodeId: string): Promise<ApiResponse<NodeStatusInfo>> {
-    const response = await api.get(`/nodes/${nodeId}/status`)
-    return response.data
   }
 
   // --- 实用方法 ---

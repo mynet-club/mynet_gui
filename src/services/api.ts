@@ -357,26 +357,9 @@ export const apiService = {
     return await this.resendActivationEmail({ email });
   },
 
-  // Token 刷新
-  async refreshToken(refreshToken: string) {
-    try {
-      const response = await api.post('/auth/refresh-token', { refresh_token: refreshToken });
-      const { auth_token, refresh_token, auth_token_expires_in, refresh_token_expires_in } = response.data;
-
-      // 更新Token管理器中的Token数据
-      tokenManager.saveTokenData({
-        auth_token,
-        refresh_token,
-        auth_token_expires_in,
-        refresh_token_expires_in
-      });
-
-      return { success: true };
-    } catch (error) {
-      debug.error('🔧 [API] Token refresh error:', error);
-      throw new Error('Token refresh failed');
-    }
-  },
+  // Token 刷新只留 tokenManager 一处口径（utils/tokenManager.ts）。
+  // 原 apiService.refreshToken 直接解信封层（response.data）会把 token 刷成
+  // undefined，且零调用方，已删 —— 别再加第二套解包实现。
 
   async getCurrentUser() {
     try {

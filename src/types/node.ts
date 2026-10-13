@@ -408,18 +408,3 @@ export interface QuickCreateNodeResponse {
     next_steps: { [key: string]: string }
   }
 }
-
-// 节点状态信息接口 (对应 /api/v1/nodes/{id}/status-info)
-export interface NodeStatusInfo {
-  node_id: number
-  current_status: {
-    code: number
-    name: string
-    description: string
-  }
-  configuration_status: any
-  can_enable: boolean
-  available_transitions: string[]
-  status_definitions: Record<number, string>
-  next_steps: string[]
-}

@@ -299,8 +299,8 @@ const deletePool = (pool: IPPool) => {
     cancel: true,
     persistent: true
   }).onOk(async () => {
-    const identifier = pool.sequence_number || pool.id
-    await deletePoolAction(identifier.toString(), pool.sequence_number)
+    // 后端 DELETE /ippools/{sequence} 只认序号；缺序号由 deletePool 报错（不回退 poolId）
+    await deletePoolAction(pool.sequence_number)
     refreshData()
   })
 }

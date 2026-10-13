@@ -100,7 +100,7 @@ import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import NodeCardContent from '../../components/node/NodeCardContent.vue'
 import PageLayout from '../../components/layout/PageLayout.vue'
 import { useNodes, useNotify } from '../../composables'
-import { Node, NodeStatus, NODE_STATUS, NodeStatusInfo, NodeDeviceInfo } from '../../types/node'
+import { Node, NodeStatus, NODE_STATUS, NodeDeviceInfo } from '../../types/node'
 import { nodeService } from '../../services/node/nodeService'
 import { NodeStatusManager, normalizeNodeStatus } from '../../utils/nodeStatus'
 
@@ -122,45 +122,9 @@ onBeforeRouteLeave(() => !deleting.value)
 // 状态切换
 const statusChanging = ref<Record<string | number, boolean>>({})
 
-// 节点状态信息管理
-const nodeStatusInfo = ref<Record<string | number, NodeStatusInfo>>({})
-const loadingStatusInfo = ref<Record<string | number, boolean>>({})
-
 // 节点设备信息管理
 const nodeDeviceInfo = ref<Record<string | number, NodeDeviceInfo>>({})
 const loadingDeviceInfo = ref<Record<string | number, boolean>>({})
-
-// 加载节点状态信息
-const loadNodeStatusInfo = async (nodeId: string | number) => {
-  if (loadingStatusInfo.value[nodeId] || nodeStatusInfo.value[nodeId]) {
-    return // 避免重复加载
-  }
-
-  try {
-    loadingStatusInfo.value[nodeId] = true
-    const response = await nodeService.getNodeStatusInfo(String(nodeId))
-    nodeStatusInfo.value[nodeId] = response.data
-  } catch (error: any) {
-    // 404 表示节点不存在或端点不可用，静默处理
-    if (error?.response?.status !== 404) {
-      debug.error(`获取节点 ${nodeId} 状态信息失败:`, error)
-    }
-  } finally {
-    loadingStatusInfo.value[nodeId] = false
-  }
-}
-
-// 检查并加载未配置节点的状态信息
-const checkAndLoadUnconfiguredNodes = async () => {
-  const unconfiguredNodes = nodes.value.filter(isUnconfiguredNode)
-  
-  // 并发加载所有未配置节点的状态信息
-  const loadPromises = unconfiguredNodes.map(node => 
-    loadNodeStatusInfo(node.node_id)
-  )
-  
-  await Promise.allSettled(loadPromises)
-}
 
 // 批量加载所有节点的设备信息（用于显示操作系统信息）
 const loadAllNodesDeviceInfo = async () => {
@@ -234,12 +198,6 @@ const filteredNodes = computed(() => {
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString('zh-CN')
-}
-
-// 检查是否为未完成配置的节点
-const isUnconfiguredNode = (node: Node): boolean => {
-  const status = normalizeNodeStatus(node.node_status, node.status)
-  return NodeStatusManager.needsConfiguration(status)
 }
 
 // 转换节点数据为 NodeCardContent 所需格式
@@ -354,11 +312,8 @@ const goToEdit = (nodeId: string | number) => {
 
 const refreshNodes = async () => {
   await loadNodes()
-  // 自动加载未配置节点的状态信息和所有节点的设备信息
-  await Promise.all([
-    checkAndLoadUnconfiguredNodes(),
-    loadAllNodesDeviceInfo()
-  ])
+  // 加载所有节点的设备信息
+  await loadAllNodesDeviceInfo()
 }
 
 const confirmDelete = (node: Node) => {

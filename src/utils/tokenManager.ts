@@ -131,26 +131,27 @@ export class TokenManager {
 
       const data = response.data;
 
-      let expiresAt = Date.now() + (60 * 60 * 1000); // 默认1小时
-
-      // 处理不同的响应格式
+      // 后端信封（RefreshTokenController）：
+      //   { success, code, message, data: { auth_token, refresh_token,
+      //     auth_token_expires_in, refresh_token_expires_in } }
+      // 两个 *_expires_in 都是**剩余秒数**（与登录响应同形，api.ts login 同口径）
       const tokenData = data.success ? data.data : data;
 
-      if (tokenData.expires_at) {
-        if (typeof tokenData.expires_at === 'number') {
-          expiresAt = tokenData.expires_at;
-        } else {
-          expiresAt = new Date(tokenData.expires_at).getTime();
-        }
-      } else if (tokenData.expires_in) {
-        expiresAt = Date.now() + (tokenData.expires_in * 1000);
-      }
+      // TokenData 的 *_expires_in 在 GUI 内部存的是**到期时刻 epoch 毫秒**
+      const defaultExpiry = Date.now() + (60 * 60 * 1000); // 字段缺失时兜底 1 小时
+      const authExpiresAt = tokenData.auth_token_expires_in
+        ? Date.now() + (Number(tokenData.auth_token_expires_in) * 1000)
+        : defaultExpiry;
+      const refreshExpiresAt = tokenData.refresh_token_expires_in
+        ? Date.now() + (Number(tokenData.refresh_token_expires_in) * 1000)
+        : authExpiresAt;
 
       const newTokenData: TokenData = {
         auth_token: tokenData.auth_token || tokenData.access_token || tokenData.token,
         refresh_token: tokenData.refresh_token || refreshToken,
-        auth_token_expires_in: expiresAt,
-        refresh_token_expires_in: expiresAt, // 假设刷新令牌过期时间与访问令牌相同
+        auth_token_expires_in: authExpiresAt,
+        // 刷新窗独立（后端 REFRESH_TTL 是 7 天，不是跟随 access TTL）
+        refresh_token_expires_in: refreshExpiresAt,
       };
 
       this.saveTokenData(newTokenData);
