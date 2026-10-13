@@ -42,3 +42,7 @@ coverage/
 tmp/
 temp/
 .env.local.*
+
+# Quasar 生成物（npm ci → quasar prepare 可重建；勿入库）
+.quasar/
+front/.quasar/
