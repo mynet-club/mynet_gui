@@ -1,3 +1,4 @@
+import { setupRouteGuards } from '../router/middleware'
 import { boot } from 'quasar/wrappers'
 import debug from '../utils/debug'
 import { LocalStorage } from 'quasar'
@@ -7,7 +8,7 @@ import { TENANT_SELECTION_KEY, LEGACY_TENANT_SELECTION_KEY } from '../config/app
 // 立即执行的日志，确认文件被加载
 debug.log('🔐 [Boot] Auth module loaded and executing...')
 
-export default boot(async ({ router, app }) => {
+export default boot(async ({ router }) => {
   debug.log('🔐 [Boot] Auth boot starting...')
 
   debug.log('🔐 [Boot] About to import useAuthStore...')
@@ -23,7 +24,7 @@ export default boot(async ({ router, app }) => {
     debug.log('🔐 [Boot] Auth store initialized successfully')
   } catch (error) {
     debug.error('🔐 [Boot] Failed to initialize auth store:', error)
-    return
+    throw error
   }
 
   // 检查本地存储的认证信息
@@ -127,50 +128,8 @@ export default boot(async ({ router, app }) => {
     debug.log('🔐 [Boot] No valid auth data found, user not authenticated')
   }
 
-  // 路由守卫
-  router.beforeEach(async (to, from, next) => {
-    const isAuthRoute = to.path.startsWith('/auth/')
-    const isAuthenticated = authStore.isAuthenticated
-    const isRootPath = to.path === '/'
-
-    debug.log('🔐 [Router] Navigation guard:', {
-      to: to.path,
-      from: from.path,
-      isAuthRoute,
-      isAuthenticated,
-      isRootPath,
-      hasUser: !!authStore.user,
-      hasToken: !!authStore.token
-    })
-
-    // 防止无限重定向：如果已经在正确的页面，直接放行
-    if ((isAuthenticated && to.path === '/app/dashboard') ||
-      (!isAuthenticated && to.path === '/auth/login')) {
-      debug.log('🔐 [Router] Already at correct destination, allowing navigation')
-      next()
-      return
-    }
-
-    // 特殊处理：允许所有用户访问根路径（IndexPage），让组件内部处理重定向
-    if (isRootPath) {
-      debug.log('🔐 [Router] Allowing access to IndexPage, component will handle redirect')
-      next()
-      return
-    }
-
-    if (!isAuthenticated && !isAuthRoute) {
-      debug.log('🔐 [Router] Redirecting to login - not authenticated')
-      // 未登录且不是认证页面，重定向到登录页
-      next('/auth/login')
-    } else if (isAuthenticated && isAuthRoute && to.path !== '/app/dashboard') {
-      debug.log('🔐 [Router] Redirecting to dashboard - already authenticated')
-      // 已登录用户访问认证页面，重定向到仪表板
-      next('/app/dashboard')
-    } else {
-      debug.log('🔐 [Router] Allowing navigation')
-      next()
-    }
-  })
+  // 认证恢复完毕后注册唯一守卫，避免 localStorage 与 store 判断分叉。
+  setupRouteGuards(router, authStore)
 
   debug.log('🔐 [Boot] Auth system initialized successfully')
 })

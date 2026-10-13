@@ -160,41 +160,6 @@ export class NodeRouteNavigator {
 }
 
 /**
- * 创建节点路由守卫
- */
-export const createNodeRouteGuards = (router: Router) => {
-  
-  /**
-   * 节点编辑页面守卫
-   */
-  router.beforeEach((to, from, next) => {
-    // 检查节点编辑页面的访问权限
-    if (to.path.includes('/nodes/') && to.path.includes('/edit')) {
-      const nodeId = to.params.id as string
-      
-      // 验证节点ID格式
-      if (!nodeId || nodeId.trim() === '') {
-        // 重定向到节点列表
-        next(NODE_ROUTES.NODES)
-        return
-      }
-    }
-    
-    next()
-  })
-
-  /**
-   * 页面标题设置
-   */
-  router.afterEach((to) => {
-    // 设置页面标题
-    if (to.meta?.title) {
-      document.title = `${to.meta.title} - MyNet`
-    }
-  })
-}
-
-/**
  * 面包屑导航数据
  */
 export const getNodeBreadcrumbs = (route: any) => {
