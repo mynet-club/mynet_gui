@@ -82,28 +82,7 @@ export class NodeKeysService {
     return response.data
   }
 
-  /**
-   * 撤销特定密钥
-   * @param nodeId 节点ID
-   * @param keyId 密钥ID
-   * @returns 撤销结果
-   */
-  async revokeSpecificKey(nodeId: string, keyId: string): Promise<ApiResponse<void>> {
-    const response = await api.delete(`/nodes/${nodeId}/keys/${keyId}`)
-    return response.data
-  }
 
-  /**
-   * 更新密钥状态
-   * @param nodeId 节点ID
-   * @param keyId 密钥ID
-   * @param active 是否活跃
-   * @returns 更新结果
-   */
-  async updateKeyStatus(nodeId: string, keyId: string, active: boolean): Promise<ApiResponse<NodeKey>> {
-    const response = await api.patch(`/nodes/${nodeId}/keys/${keyId}/status`, { active })
-    return response.data
-  }
 
   // --- 本地密钥生成和验证 ---
 

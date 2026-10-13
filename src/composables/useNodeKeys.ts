@@ -171,59 +171,10 @@ export function useNodeKeys(nodeId?: string) {
   /**
    * 撤销密钥
    */
-  const revokeKey = async (keyId: string): Promise<boolean> => {
-    if (!nodeId) {
-      error.value = '节点ID不能为空'
-      return false
-    }
-
-    try {
-      await nodeKeysService.revokeSpecificKey(nodeId, keyId)
-      await bundleEnvelopeService.publishAfterChange(nodeId, 'revokeKey')
-      notifySuccess('密钥撤销成功')
-      
-      // 更新本地状态
-      const keyIndex = keys.value.findIndex(k => k.id === keyId)
-      if (keyIndex !== -1 && keys.value[keyIndex]) {
-        keys.value[keyIndex].is_active = false
-      }
-      
-      return true
-    } catch (err) {
-      debug.error('撤销密钥失败:', err)
-      error.value = '撤销密钥失败'
-      notifyError('撤销密钥失败')
-      return false
-    }
-  }
 
   /**
    * 删除密钥 (设置为非活跃状态)
    */
-  const deleteKey = async (keyId: string): Promise<boolean> => {
-    if (!nodeId) {
-      error.value = '节点ID不能为空'
-      return false
-    }
-
-    try {
-      await nodeKeysService.updateKeyStatus(nodeId, keyId, false)
-      notifySuccess('密钥删除成功')
-      
-      // 从本地列表中移除
-      const keyIndex = keys.value.findIndex(k => k.id === keyId)
-      if (keyIndex !== -1) {
-        keys.value.splice(keyIndex, 1)
-      }
-      
-      return true
-    } catch (err) {
-      debug.error('删除密钥失败:', err)
-      error.value = '删除密钥失败'
-      notifyError('删除密钥失败')
-      return false
-    }
-  }
 
   /**
    * 下载公钥
@@ -412,8 +363,6 @@ export function useNodeKeys(nodeId?: string) {
     loadKeys,
     generateKeyPair,
     uploadKeyPair,
-    revokeKey,
-    deleteKey,
     downloadPublicKey,
     downloadPrivateKey,
     copyPublicKey,

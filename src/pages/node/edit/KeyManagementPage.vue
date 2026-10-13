@@ -175,16 +175,6 @@
           
           <q-card-actions v-if="selectedKey">
             <q-btn
-              color="negative"
-              outline
-              @click="confirmDeleteKey"
-              :disable="loading"
-            >
-              <q-icon name="delete" class="q-mr-sm" />
-              删除密钥
-            </q-btn>
-            
-            <q-btn
               color="primary"
               outline
               @click="downloadPublicKey"
@@ -243,26 +233,6 @@
             @click="createKey"
             :loading="creating"
             :disable="!isCreateFormValid"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- 删除确认对话框 -->
-    <q-dialog v-model="showDeleteDialog" persistent>
-      <q-card>
-        <q-card-section class="row items-center">
-          <q-avatar icon="warning" color="negative" text-color="white" />
-          <span class="q-ml-sm">确定要删除密钥 "{{ selectedKey?.id }}" 吗？</span>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat :label="$t('common.cancel')" v-close-popup />
-          <q-btn
-            flat
-            :label="$t('common.delete')"
-            color="negative"
-            @click="deleteKey"
-            :loading="deleting"
           />
         </q-card-actions>
       </q-card>
@@ -336,21 +306,18 @@ const { success: notifySuccess, error: notifyError } = useNotify()
 const nodeId = computed(() => route.params.id as string)
 
 // 使用组合式函数
-const { 
-  keys, 
-  loading, 
-  loadKeys, 
-  generateKeyPair, 
-  deleteKey: deleteNodeKey 
+const {
+  keys,
+  loading,
+  loadKeys,
+  generateKeyPair
 } = useNodeKeys(nodeId.value)
 
 // 状态
 const selectedKey = ref<NodeKey | null>(null)
 const showCreateDialog = ref(false)
-const showDeleteDialog = ref(false)
 const showRiskWarningDialog = ref(false)
 const creating = ref(false)
-const deleting = ref(false)
 const isUpdateMode = ref(false)
 
 // 新建密钥表单
@@ -532,37 +499,6 @@ const createKey = async () => {
     notifyError(errorMsg)
   } finally {
     creating.value = false
-  }
-}
-
-const confirmDeleteKey = () => {
-  if (selectedKey.value) {
-    showDeleteDialog.value = true
-  }
-}
-
-const deleteKey = async () => {
-  if (!selectedKey.value) return
-
-  try {
-    deleting.value = true
-    
-    // 调用实际的删除API
-    await deleteNodeKey(selectedKey.value.id)
-    
-    notifySuccess(t('nodes.edit.keys.keyDeleted'))
-    showDeleteDialog.value = false
-    selectedKey.value = null
-    
-    // 刷新密钥列表
-    await refreshKeys()
-    
-  } catch (error: any) {
-    debug.error('删除密钥失败:', error)
-    const errorMsg = error?.response?.data?.message || error?.message || t('nodes.edit.keys.deleteFailed')
-    notifyError(errorMsg)
-  } finally {
-    deleting.value = false
   }
 }
 
