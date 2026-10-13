@@ -591,28 +591,12 @@ const networkNavigationItems = computed((): NavigationItem[] => [
 const systemNavigationItems = computed((): NavigationItem[] => {
   const items: NavigationItem[] = [
     {
-      name: 'apitest',
-      label: 'navigation.apiTest',
-      icon: 'code',
-      path: '/app/api-test'
-    },
-    {
       name: 'help',
       label: 'navigation.help',
       icon: 'help',
       path: '/app/help'
     }
   ]
-  
-  // 在开发模式下添加 Token 调试页面
-  if (process.env.NODE_ENV === 'development') {
-    items.unshift({
-      name: 'token-debug',
-      label: 'Token Debug',
-      icon: 'token',
-      path: '/app/system/token-debug'
-    })
-  }
   
   return items
 })

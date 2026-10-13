@@ -56,10 +56,6 @@ const routes: RouteRecordRaw[] = [
     redirect: '/app/profile'
   },
   {
-    path: '/api-test',
-    redirect: '/app/api-test'
-  },
-  {
     path: '/routes/create/prev_1',
     redirect: '/app/routes/create/prev_1'
   },
@@ -282,26 +278,11 @@ const routes: RouteRecordRaw[] = [
       },
       
       // 系统模块路由
-      { path: 'api-test', component: () => import('../pages/system/ApiTestPage.vue') },
       { 
         path: 'help', 
         name: 'help',
         component: () => import('../pages/help/HelpPageSimple.vue'),
         meta: { title: '帮助文档' }
-      },
-      
-      // 示例页面路由
-      { 
-        path: 'examples/form-style-guide', 
-        name: 'form-style-guide',
-        component: () => import('../pages/examples/FormStyleGuidePage.vue'),
-        meta: { title: '表单风格指南' }
-      },
-      { 
-        path: 'system/token-debug', 
-        name: 'token-debug',
-        component: () => import('../pages/system/TokenDebugPage.vue'),
-        meta: { title: 'Token 调试', requiresAuth: true }
       },
       
       // 用户模块路由

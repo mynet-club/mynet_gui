@@ -1067,7 +1067,6 @@ export default {
       requests: 'Friend Requests',
       invitations: 'Invitations'
     },
-    apiTest: 'API Testing',
     help: 'Help Documentation'
   },
   routes: {
@@ -1890,10 +1889,6 @@ export default {
     tableView: 'Table View',
     noPools: 'No IP Pools',
     noPoolsHint: 'Click "Create Pool" button to create your first IP pool',
-  },
-  apiTest: {
-    subtitle: 'API interface testing and debugging tools',
-    comingSoonMessage: 'API testing tool is under development, stay tuned!'
   },
   websocket: {
     connected: 'Connected',

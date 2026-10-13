@@ -1134,7 +1134,6 @@ export default {
       requests: '好友请求',
       invitations: '邀请管理'
     },
-    apiTest: 'API测试',
     help: '帮助文档'
   },
   routes: {
@@ -2059,10 +2058,6 @@ export default {
     // 视图模式
     cardView: '卡片视图',
     tableView: '表格视图',
-  },
-  apiTest: {
-    subtitle: 'API接口测试和调试工具',
-    comingSoonMessage: 'API测试工具正在开发中，敬请期待！'
   },
   websocket: {
     connected: '已连接',
