@@ -133,23 +133,15 @@ const startCountdown = () => {
 const handleVerification = async () => {
   isLoading.value = true
   try {
-    const response = await apiService.validateResetToken({
-      email: email.value,
-      code: verificationCode.value
+    // 无 reset-token 预校验等价能力（G2 裁决）：不调用假端点，
+    // 把 code 交给 reset-password，由真重置接口校验 token。
+    await router.push({
+      path: '/auth/reset-password',
+      query: {
+        email: email.value,
+        code: verificationCode.value
+      }
     })
-    
-    if (response.data.success) {
-      // 验证成功，跳转到密码重置页面
-      await router.push({
-        path: '/auth/reset-password',
-        query: { 
-          email: email.value,
-          code: verificationCode.value
-        }
-      })
-    } else {
-      throw new Error(response.data.message || t('auth.verificationCodeInvalid'))
-    }
   } catch (error: any) {
     debug.error('Verification failed:', error)
     $q.notify({

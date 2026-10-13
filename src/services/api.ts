@@ -278,41 +278,35 @@ export const apiService = {
     return await api.post('/auth/reset-password', data);
   },
 
-  async validateResetToken(data: { email: string; token?: string; code?: string }) {
-    return await api.post('/auth/validate-reset-token', data);
-  },
-
   async cancelPasswordReset(email: string) {
     return await api.delete('/auth/cancel-password-reset', { data: { email } });
   },
 
-  // 修改密码
+  // 修改密码（迁 PUT /auth/password：载荷 current_password/password/password_confirmation
+  // 与框架 UserProfileController::changePassword 全等价，登录会话身份一致）
   async changePassword(data: {
     current_password: string;
     password: string;
     password_confirmation: string;
   }) {
-    return await api.post('/auth/change-password', data);
+    return await api.put('/auth/password', data);
   },
 
   // 账号激活相关
+  // 账号激活（迁 POST /auth/verify-email：token 类型=email 验证 token，登录前后身份一致）
+  // 载荷收束为 {email, token}；历史 UI 的 code 字段在此归一成 token。
   async activateAccount(data: {
-    email?: string;
-    user_id?: string;
+    email: string;
     token?: string;
     code?: string;
   }) {
-    const lang = getCurrentLanguage();
-    return await api.post(`/auth/activate-account?lang=${lang}`, data);
+    const token = data.token ?? data.code;
+    return await api.post('/auth/verify-email', { email: data.email, token });
   },
 
+  // 重发验证邮件（迁 POST /auth/resend-verification：仅 email；activation_url 服务端不收，去掉）
   async resendActivationEmail(data: { email: string; activation_url?: string }) {
-    const requestData = {
-      ...data,
-      activation_url: data.activation_url || `${window.location.origin}/auth/activate`
-    };
-    const lang = getCurrentLanguage();
-    return await api.post(`/auth/resend-activation-email?lang=${lang}`, requestData);
+    return await api.post('/auth/resend-verification', { email: data.email });
   },
 
   async checkActivationStatus(email: string) {

@@ -238,18 +238,14 @@ const startCountdown = () => {
 const autoActivate = async () => {
   isAutoActivating.value = true
   try {
-    const activationData: any = {
+    // verify-email 契约要 email+token；user_id 路径无等价能力，缺 email 明确失败
+    if (!email.value) {
+      throw new Error(t('auth.activationFailed'))
+    }
+    const response = await apiService.activateAccount({
+      email: email.value,
       token: token.value
-    }
-    
-    // 优先使用email，如果没有则使用user_id
-    if (email.value) {
-      activationData.email = email.value
-    } else if (userId.value) {
-      activationData.user_id = userId.value
-    }
-    
-    const response = await apiService.activateAccount(activationData)
+    })
     
     if (response.data.success) {
       isActivated.value = true
