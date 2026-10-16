@@ -245,18 +245,16 @@ const shouldShowTargetPool = computed(() => {
 })
 
 const targetPoolOptions = computed(() => {
-  // 按IP地址排序现有池
-  const sortedPools = [...props.existingPools].sort((a, b) => {
-    const aStart = ipToNumber(a.ip_range.start)
-    const bStart = ipToNumber(b.ip_range.start)
-    return aStart - bStart
-  })
+  // 按序号排序现有池（连续性只看序号，不看 IP 位置）
+  const sortedPools = [...props.existingPools].sort(
+    (a, b) => (a.sequence_number ?? 0) - (b.sequence_number ?? 0)
+  )
   
   return sortedPools.map((pool, index) => {
     const poolName = pool.name || `IP池 ${pool.sequence_number || pool.id}`
     const ipRange = `${pool.ip_range.start} - ${pool.ip_range.end}`
     
-    // 检查这个池是否与其他池连续
+    // 检查这个池是否与其他池连续（序号相接）
     let continuityInfo = ''
     if (sortedPools.length > 1) {
       const isFirstPool = index === 0
@@ -264,23 +262,15 @@ const targetPoolOptions = computed(() => {
       
       if (!isFirstPool) {
         const prevPool = sortedPools[index - 1]
-        if (prevPool) {
-          const prevEnd = ipToNumber(prevPool.ip_range.end)
-          const currentStart = ipToNumber(pool.ip_range.start)
-          if (currentStart === prevEnd + 1) {
-            continuityInfo += '↑连续'
-          }
+        if (prevPool && (pool.sequence_number ?? 0) === (prevPool.sequence_number ?? 0) + 1) {
+          continuityInfo += '↑连续'
         }
       }
       
       if (!isLastPool) {
         const nextPool = sortedPools[index + 1]
-        if (nextPool) {
-          const currentEnd = ipToNumber(pool.ip_range.end)
-          const nextStart = ipToNumber(nextPool.ip_range.start)
-          if (nextStart === currentEnd + 1) {
-            continuityInfo += continuityInfo ? ' ↓连续' : '↓连续'
-          }
+        if (nextPool && (nextPool.sequence_number ?? 0) === (pool.sequence_number ?? 0) + 1) {
+          continuityInfo += continuityInfo ? ' ↓连续' : '↓连续'
         }
       }
       
@@ -325,26 +315,18 @@ const targetPoolHint = computed(() => {
     return t('ippools.selectTargetPoolHint')
   }
   
-  // 检查现有池是否已经连续
-  const sortedPools = [...props.existingPools].sort((a, b) => {
-    const aStart = ipToNumber(a.ip_range.start)
-    const bStart = ipToNumber(b.ip_range.start)
-    return aStart - bStart
-  })
+  // 检查现有池是否已经连续（按序号相接）
+  const sortedPools = [...props.existingPools].sort(
+    (a, b) => (a.sequence_number ?? 0) - (b.sequence_number ?? 0)
+  )
   
   let hasContinuousRegion = false
-  if (sortedPools.length >= 2) {
-    for (let i = 1; i < sortedPools.length; i++) {
-      const prevPool = sortedPools[i-1]
-      const currentPool = sortedPools[i]
-      if (prevPool && currentPool) {
-        const prevEnd = ipToNumber(prevPool.ip_range.end)
-        const currentStart = ipToNumber(currentPool.ip_range.start)
-        if (currentStart === prevEnd + 1) {
-          hasContinuousRegion = true
-          break
-        }
-      }
+  for (let i = 1; i < sortedPools.length; i++) {
+    const prevPool = sortedPools[i-1]
+    const currentPool = sortedPools[i]
+    if (prevPool && currentPool && (currentPool.sequence_number ?? 0) === (prevPool.sequence_number ?? 0) + 1) {
+      hasContinuousRegion = true
+      break
     }
   }
   
@@ -354,11 +336,6 @@ const targetPoolHint = computed(() => {
     return t('ippools.selectTargetPoolHint')
   }
 })
-
-// 辅助函数：IP地址转数字
-const ipToNumber = (ip: string): number => {
-  return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet), 0)
-}
 
 // Methods
 const handleCreate = async () => {

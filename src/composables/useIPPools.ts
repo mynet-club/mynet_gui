@@ -251,11 +251,6 @@ export function useIPPools() {
     debug.log('calculated statistics:', statistics.value)
   }
 
-  // 工具方法
-  const ipToNumber = (ip: string): number => {
-    return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet), 0)
-  }
-
   // 清理方法
   const resetFilters = () => {
     filters.zone_id = ''
@@ -338,23 +333,25 @@ export function useIPPools() {
           return poolData
         })
         
-        // 检查两个IP池的IP范围是否连续
-        const checkIPRangeContinuity = (pool1: IPPool, pool2: IPPool): boolean => {
-          const pool1End = ipToNumber(pool1.ip_range.end)
-          const pool2Start = ipToNumber(pool2.ip_range.start)
-          return pool2Start === pool1End + 1
+        // 连续性只看**序号**（不看 IP 位置）：相邻池的序号必须首尾相接。
+        // 序号连续在同一 /24 内等价于 IP 段相接；跨 /24 边界（序号 40→41）IP 不相接，
+        // 但序号仍连续 —— 那是寻址方案本身的空洞，不该被当成「未连续」。
+        const checkSequenceContinuity = (pool1: IPPool, pool2: IPPool): boolean => {
+          return (pool2.sequence_number ?? 0) === (pool1.sequence_number ?? 0) + 1
         }
+
+        const bySequence = (a: IPPool, b: IPPool): number => (a.sequence_number ?? 0) - (b.sequence_number ?? 0)
 
         // 检查整体连续性（基于最新的池列表）
         const checkOverallContinuity = (targetSequence?: number, newlyCreatedPools: IPPool[] = []): boolean => {
           if (!targetSequence) {
             // 如果没有目标池，只检查新创建的池之间是否连续
             if (newlyCreatedPools.length <= 1) return true
-            const sortedNewPools = [...newlyCreatedPools].sort((a, b) => ipToNumber(a.ip_range.start) - ipToNumber(b.ip_range.start))
+            const sortedNewPools = [...newlyCreatedPools].sort(bySequence)
             for (let i = 1; i < sortedNewPools.length; i++) {
               const prevPool = sortedNewPools[i-1]
               const currentPool = sortedNewPools[i]
-              if (prevPool && currentPool && !checkIPRangeContinuity(prevPool, currentPool)) {
+              if (prevPool && currentPool && !checkSequenceContinuity(prevPool, currentPool)) {
                 return false
               }
             }
@@ -365,20 +362,20 @@ export function useIPPools() {
           const targetPool = pools.value.find(p => p.sequence_number === targetSequence)
           if (!targetPool || newlyCreatedPools.length === 0) return false
 
-          // 将目标池和新创建的池合并，按IP地址排序
-          const allPools = [targetPool, ...newlyCreatedPools].sort((a, b) => ipToNumber(a.ip_range.start) - ipToNumber(b.ip_range.start))
-          
+          // 将目标池和新创建的池合并，按序号排序
+          const allPools = [targetPool, ...newlyCreatedPools].sort(bySequence)
+
           // 检查相邻池之间是否连续
           for (let i = 1; i < allPools.length; i++) {
             const prevPool = allPools[i-1]
             const currentPool = allPools[i]
-            if (prevPool && currentPool && !checkIPRangeContinuity(prevPool, currentPool)) {
-              debug.log(`连续性检查失败: ${prevPool.ip_range.end} 与 ${currentPool.ip_range.start} 不连续`)
+            if (prevPool && currentPool && !checkSequenceContinuity(prevPool, currentPool)) {
+              debug.log(`连续性检查失败: 序号 ${prevPool.sequence_number} 与 ${currentPool.sequence_number} 不连续`)
               return false
             }
           }
-          
-          debug.log('连续性检查通过:', allPools.map(p => `${p.ip_range.start}-${p.ip_range.end}`).join(' -> '))
+
+          debug.log('连续性检查通过:', allPools.map(p => `序号 ${p.sequence_number}`).join(' -> '))
           return true
         }
 
