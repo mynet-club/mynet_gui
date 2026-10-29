@@ -1,0 +1,263 @@
+/**
+ * 本机 WebUI 元素规范 —— 唯一来源（合并自各页散落样式）
+ * 规范：mynet_agent/docs/webui-ui-spec-and-plan.md §二·五
+ * 本文件全局引入一次（app.css），页面不得再写这些类的样式。
+ */
+
+/* ── 按钮 ───────────────────────────────── */
+.local-layout .q-btn {
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 8px;
+}
+.local-layout .q-btn--dense {
+  padding-left: 14px;
+  padding-right: 14px;
+}
+.local-layout .q-btn--round {
+  padding-left: 0;
+  padding-right: 0;
+  width: 32px;
+  height: 32px;
+}
+
+/* ── Tab：Tab 条 → 内容 16px ────────────── */
+.local-layout .q-tab-panel,
+.local-layout .panel-pad {
+  padding: 16px 0 8px;
+}
+
+/* ── 表单控件 ───────────────────────────── */
+.local-layout .q-field__control {
+  min-height: 36px;
+  border-radius: 8px;
+}
+.local-layout .q-field--outlined .q-field__control {
+  border-color: var(--line, var(--color-border, #e5e7eb));
+}
+
+/* ── 表格 ───────────────────────────────── */
+.local-layout .q-table thead th {
+  font-size: 12px;
+  color: var(--ink-2, var(--color-text-secondary, #4b5563));
+  font-weight: 650;
+}
+.local-layout .q-table tbody td {
+  font-size: 13px;
+}
+.local-layout .q-table__bottom {
+  font-size: 12px;
+  color: var(--ink-2, var(--color-text-secondary, #4b5563));
+}
+
+/* ── Badge / Banner ─────────────────────── */
+.local-layout .q-badge {
+  font-size: 11px;
+  border-radius: 999px;
+}
+.local-layout .q-banner {
+  font-size: 13px;
+  border-radius: 8px;
+}
+/* 提示横幅：浅色/深色都用 muted 底 + 主文字，禁止 bg-grey-3（dark 下灰底浅字糊掉） */
+.local-layout .q-banner.banner-soft {
+  background: var(--bg-muted, var(--color-bg-secondary, #f3f4f6));
+  color: var(--ink-1, var(--color-text-primary, #111827));
+}
+/* Quasar 固定 grey 色在 dark 卡片上对比度不足，本地壳统一提亮 */
+.body--dark .local-layout .text-grey-7,
+.body--dark .local-layout .text-grey-6 {
+  color: var(--ink-2, var(--color-text-secondary, #9ca3af)) !important;
+}
+.body--dark .local-layout .text-grey-5 {
+  color: var(--ink-3, var(--color-text-tertiary, #9ca3af)) !important;
+}
+
+/* ── 卡片底（页面级 info-*）；mynet-* 组件自带 scoped ── */
+.local-layout .info-block,
+.local-layout .info-card {
+  border: 1px solid var(--line, var(--color-border, #e5e7eb));
+  border-radius: 12px;
+  background: var(--bg-card, var(--color-bg-card, #fff));
+}
+
+/* ── 信息卡（dl） ───────────────────────── */
+.local-layout .info-block,
+.local-layout .info-card {
+  padding: 16px;
+}
+.local-layout .info-block h3 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink-2, var(--color-text-secondary, #6b7280));
+}
+.local-layout .info-block dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 8px 12px;
+}
+.local-layout .info-block dt {
+  font-size: 12px;
+  color: var(--ink-3, var(--color-text-secondary, #9ca3af));
+}
+.local-layout .info-block dd {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-1, var(--color-text-primary, #111827));
+  word-break: break-all;
+}
+.local-layout .info-card .info-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.local-layout .info-card .info-main {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.local-layout .info-card .info-title {
+  font-size: 12px;
+  color: var(--ink-3, var(--color-text-secondary, #6b7280));
+}
+.local-layout .info-card .info-value {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 4px;
+  color: var(--ink-1, var(--color-text-primary, #111827));
+}
+.local-layout .info-card .info-sub {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--ink-3, var(--color-text-secondary, #9ca3af));
+}
+
+/* ── 加速页三张汇总卡：PC 等高等宽，mobile 自适应 ─────────── */
+.local-layout .accel-summary-row {
+  align-items: stretch;
+}
+@media (min-width: 1024px) {
+  .local-layout .accel-summary-row > [class*='col-'] {
+    display: flex;
+  }
+  .local-layout .accel-summary-row .info-card {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 112px;
+    max-height: 148px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .local-layout .accel-summary-row .info-value {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .local-layout .accel-summary-row .info-sub {
+    flex: 1 1 auto;
+    margin-top: auto;
+    padding-top: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+/* mobile：高度随内容，可换行 */
+@media (max-width: 1023.98px) {
+  .local-layout .accel-summary-row .info-card {
+    min-height: 0;
+    max-height: none;
+  }
+  .local-layout .accel-summary-row .info-value,
+  .local-layout .accel-summary-row .info-sub {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+}
+/* dark：副文案/标题在卡片上要够亮（ink-3 默认太暗，与截图糊字同源） */
+.body--dark .local-layout .info-card .info-title,
+.body--dark .local-layout .info-card .info-sub,
+.body--dark .local-layout .info-block dt,
+.body--dark .local-layout .kv dt,
+.body--dark .local-layout .fact-table td:first-child {
+  color: var(--ink-2, var(--color-text-secondary, #9ca3af));
+}
+.body--dark .local-layout .info-card .info-value,
+.body--dark .local-layout .info-block dd {
+  color: var(--ink-1, var(--color-text-primary, #f9fafb));
+}
+
+/* ── 事实表 ─────────────────────────────── */
+.local-layout .fact-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.local-layout .fact-table td {
+  padding: 6px 0;
+  font-size: 13px;
+  vertical-align: top;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+.local-layout .fact-table td:first-child {
+  color: var(--ink-3, var(--color-text-secondary, #6b7280));
+  width: 34%;
+  font-size: 12px;
+}
+
+/* ── kv 定义列表（信息卡内） ─────────────── */
+.local-layout .kv {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 8px 12px;
+  margin: 0;
+}
+.local-layout .kv dt {
+  font-size: 12px;
+  color: var(--ink-3, var(--color-text-secondary, #9ca3af));
+}
+.local-layout .kv dd {
+  margin: 0;
+  font-size: 13px;
+  word-break: break-all;
+}
+
+/* ── 原文块 ─────────────────────────────── */
+.local-layout .raw {
+  font-size: 12px;
+  background: var(--bg-muted, var(--color-bg-secondary, #f9fafb));
+  padding: 12px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  max-height: 220px;
+  overflow: auto;
+}
+.local-layout .raw.collapsed { max-height: 96px; }
+.local-layout .raw.compact { max-height: 420px; }
+
+/* ── 字阶 ───────────────────────────────── */
+.local-layout .text-h5 { font-size: 20px; font-weight: 650; color: var(--ink-1, var(--color-text-primary, #111827)); }
+.local-layout .text-body2 { font-size: 14px; }
+.local-layout .text-caption { font-size: 12px; }
+
+/* ── 信息网格（节点页） ──────────────────── */
+.local-layout .info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* ── 云端 iframe ────────────────────────── */
+.local-layout .console-frame {
+  width: 100%;
+  height: calc(100vh - 180px);
+  min-height: 480px;
+  border: 1px solid var(--line, var(--color-border, #e5e7eb));
+  border-radius: 8px;
+  background: var(--bg-card, var(--color-bg-card, #fff));
+}

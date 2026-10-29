@@ -204,6 +204,35 @@ $shadow-dark-xl: 0 12px 24px rgba(0, 0, 0, 0.7);
   --card-border-hover: #{$gray-200};
 }
 
+// ── 本机 WebUI 语义层（webui-ui-spec-and-plan.md §1）──
+:root {
+  --bg-page: #{$gray-50};
+  --bg-card: #ffffff;
+  --bg-muted: #{$gray-100};
+  --line: #{$gray-200};
+  --ink-1: #{$gray-900};
+  --ink-2: #{$gray-600};
+  --ink-3: #{$gray-500};
+  --brand: #{$color-primary};
+  --ok: #{$color-success};
+  --warn: #{$color-warning};
+  --err: #{$color-error};
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --r-card: 12px;
+  --r-input: 8px;
+
+  --font-title: 20px;
+  --font-card-title: 13px;
+  --font-body: 14px;
+  --font-caption: 12px;
+  --font-metric: 22px;
+}
+
 // Dark Mode
 body.body--dark {
   // 颜色变量
@@ -215,6 +244,15 @@ body.body--dark {
   --color-text-tertiary: #{$gray-dark-500};
   --color-border: #{$gray-dark-600};
   --color-divider: #{$gray-dark-600};
+
+  --bg-page: #{$gray-dark-800};
+  --bg-card: #{$gray-dark-700};
+  --bg-muted: #{$gray-dark-900};
+  --line: #{$gray-dark-600};
+  --ink-1: #{$gray-dark-50};
+  --ink-2: #{$gray-dark-400};
+  // 卡片副文案：dark 下用 400 而不是 500（500 在 #374151 卡上对比度不够，截图糊字）
+  --ink-3: #{$gray-dark-400};
 
   // 状态色（降饱和）
   --color-success: #{$color-success-dark};

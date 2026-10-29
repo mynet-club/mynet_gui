@@ -1,6 +1,7 @@
+@import '../styles/design-tokens.scss';
+@import '../styles/local-ui.scss';
 /* 导入分离的样式文件 */
 /* Design Tokens - 必须最先导入 */
-@import '../styles/design-tokens.scss';
 
 /* 柔和清新主题 */
 @import '../styles/soft-theme.scss';

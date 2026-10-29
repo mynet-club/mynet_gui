@@ -406,8 +406,8 @@
 
 <script setup lang="ts">
 // 图标跟着 publicPath 走 —— 收进 /gui/ 后写死 /icons/ 会 404
-const iconUrl = (import.meta.env.BASE_URL || "/") + "icons/icon.png"
-import { ref, computed, onMounted, reactive } from 'vue'
+const iconUrl = (import.meta.env.BASE_URL || '/') + 'icons/icon.png'
+import { ref, computed, onMounted, onUnmounted, reactive, watch } from 'vue'
 import debug from '../utils/debug'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar, date, LocalStorage } from 'quasar'
@@ -431,14 +431,14 @@ const router = useRouter()
 const route = useRoute()
 const expandedGroups = reactive<Record<string, boolean>>({})
 const authStore = useAuthStore()
-const { isConnected, connect } = useWebSocket()
+const { isConnected, connect, on: onWebSocket, off: offWebSocket } = useWebSocket()
 const { themeMode: currentThemeMode, setThemeMode, getThemeOptions, initializeTheme } = useTheme()
 const { stats: sidebarStats, init: initSidebarStats } = useSidebarStats()
 const { unreadCount, displayUnreadCount } = useNotifications()
 const { locale, t } = useI18n()
 
 // 响应式数据
-const leftDrawerOpen = ref(false)
+const leftDrawerOpen = ref(LocalStorage.getItem<boolean>('mynet_drawer_open') ?? true)
 const showConnectionDialog = ref(false)
 const showNotificationDialog = ref(false)
 const currentLanguage = ref(locale.value)
@@ -710,21 +710,42 @@ const formatTime = (timestamp: string) => {
   return date.formatDate(timestamp, 'YYYY-MM-DD HH:mm:ss')
 }
 
-// 确保 wsConnectionStats 正确声明
+// 连接状态必须跟随 WebSocket 事件更新，不能在布局创建时复制一次 ref 的值。
 const wsConnectionStats = reactive({
-  connected: isConnected,
+  connected: isConnected.value,
   lastHeartbeat: new Date().toISOString(),
   messagesReceived: 0,
   reconnectAttempts: 0
 });
 
-// 移除 reconnectWebSocket 的引用
+const handleWsConnected = () => {
+  wsConnectionStats.connected = true
+  wsConnectionStats.lastHeartbeat = new Date().toISOString()
+}
+const handleWsDisconnected = () => {
+  wsConnectionStats.connected = false
+  wsConnectionStats.reconnectAttempts += 1
+}
+const handleWsMessage = () => {
+  wsConnectionStats.messagesReceived += 1
+  wsConnectionStats.lastHeartbeat = new Date().toISOString()
+}
+
 const reconnectWebSocket = () => {
-  debug.warn('Reconnect WebSocket is not implemented yet.')
+  if (!authStore.token || !authStore.currentTenant) {
+    $q.notify({ type: 'warning', message: t('websocket.connectionFailed'), timeout: 2500 })
+    return
+  }
+  wsConnectionStats.reconnectAttempts += 1
+  connect(String(authStore.token), String(authStore.currentTenant.tenant_id))
 }
 
 // 生命周期
 onMounted(async () => {
+  onWebSocket('connected', handleWsConnected)
+  onWebSocket('disconnected', handleWsDisconnected)
+  onWebSocket('message', handleWsMessage)
+  watch(leftDrawerOpen, (open) => LocalStorage.set('mynet_drawer_open', open))
   // 初始化主题
   initializeTheme()
   
@@ -789,6 +810,12 @@ onMounted(async () => {
       onboardingStore.start()
     }
   }
+})
+
+onUnmounted(() => {
+  offWebSocket('connected', handleWsConnected)
+  offWebSocket('disconnected', handleWsDisconnected)
+  offWebSocket('message', handleWsMessage)
 })
 </script>
 

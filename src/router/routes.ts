@@ -1,17 +1,39 @@
 import { RouteRecordRaw } from 'vue-router';
 import { TERM_ZONE } from '../config/terms';
+import { isLocalMode } from '../config/localMode';
 
 const routes: RouteRecordRaw[] = [
-  // 根路径重定向到认证或应用（根据登录状态）
+  // 根路径：本机地址 → 本机首页；平台地址 → 社区域/登录
   {
     path: '/',
-    redirect: () => {
-      // 检查是否已登录
-      const token = localStorage.getItem('auth_token')
-      return token ? '/app/dashboard' : '/auth/login'
-    }
+    component: () => import('../layouts/LocalLayout.vue'),
+    children: [
+      {
+        path: '',
+        redirect: () => {
+          if (isLocalMode()) return '/home'
+          return localStorage.getItem('auth_token') ? '/app/dashboard' : '/auth/login'
+        }
+      },
+      // 本机面（地址即身份，路径不再带 local）
+      { path: 'home', name: 'home', component: () => import('../pages/local/LocalHomePage.vue'), meta: { title: '首页', local: true } },
+      { path: 'acceleration', name: 'acceleration', component: () => import('../pages/local/LocalAccelerationPage.vue'), meta: { title: '加速', local: true } },
+      { path: 'node', name: 'node-local', component: () => import('../pages/local/LocalNodePage.vue'), meta: { title: '节点', local: true } },
+      { path: 'settings', name: 'settings-local', component: () => import('../pages/local/LocalSettingsPage.vue'), meta: { title: '设置', local: true } },
+      { path: 'console', name: 'local-console', component: () => import('../pages/local/LocalConsolePage.vue'), meta: { title: '网络区', local: true } },
+      { path: 'onboarding', name: 'onboarding', component: () => import('../pages/local/LocalOnboardingPage.vue'), meta: { title: '初始化', local: true } },
+      // 网关（capability=form:gw）
+      { path: 'overview', name: 'overview', component: () => import('../pages/local/LocalOverviewPage.vue'), meta: { title: '总览', local: true, gatewayOnly: true } },
+      { path: 'peers', name: 'peers', component: () => import('../pages/local/LocalPeersPage.vue'), meta: { title: '节点与对端', local: true } },
+      { path: 'network', name: 'network', component: () => import('../pages/local/LocalNetworkPage.vue'), meta: { title: '网络与拓扑', local: true } },
+      { path: 'split', name: 'split', component: () => import('../pages/local/LocalSplitPage.vue'), meta: { title: '分流与 DNS', local: true, gatewayOnly: true } },
+      { path: 'exit', name: 'exit', component: () => import('../pages/local/LocalExitPage.vue'), meta: { title: '出口与 ACL', local: true, gatewayOnly: true } },
+      { path: 'services', name: 'services-local', component: () => import('../pages/local/LocalServicesPage.vue'), meta: { title: '服务与插件', local: true, gatewayOnly: true } },
+      { path: 'diagnostics', name: 'diagnostics', component: () => import('../pages/local/LocalDiagnosticsPage.vue'), meta: { title: '诊断', local: true, gatewayOnly: true } },
+      { path: 'logs', name: 'logs', component: () => import('../pages/local/LocalLogsPage.vue'), meta: { title: '日志', local: true, gatewayOnly: true } }
+    ]
   },
-  
+
   // 官网跳转页面（可选）
   {
     path: '/website',

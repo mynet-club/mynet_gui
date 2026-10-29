@@ -6,6 +6,17 @@ import { Router } from 'vue-router'
 import debug from 'src/utils/debug'
 import { resolveCallbackRedirect } from 'src/utils/callbackGuard'
 
+function localHost(): boolean {
+  // 内联判定，避免打包分块把 helper 抽走后语义漂移。
+  try {
+    const raw = typeof window !== 'undefined' && window.location ? window.location.hostname : ''
+    const h = String(raw || '').toLowerCase()
+    return h === '127.0.0.1' || h === 'localhost' || h === '[::1]' || h === '::1'
+  } catch {
+    return false
+  }
+}
+
 /**
  * 设置路由守卫
  */
@@ -31,7 +42,11 @@ export function setupRouteGuards(router: Router, auth: RouteAuthState) {
       return '/app/dashboard'
     }
 
+    // 本机地址即本机面：不强制云端登录。
     if (!auth.isAuthenticated && !isAuthRoute && to.path !== '/') {
+      if (localHost()) {
+        return true
+      }
       return { path: '/auth/login', query: { redirect: to.fullPath } }
     }
 
