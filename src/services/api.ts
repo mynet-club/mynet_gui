@@ -52,9 +52,10 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
 
-    // 添加X-Tenant-ID头部
+    // 添加X-Tenant-ID头部（显式带的不覆盖 —— 登录请求要点名目标区，
+    // 不能让 localStorage 里的旧用户信息把它顶掉）
     const userInfo = LocalStorage.getItem('user_info') as string | null
-    if (userInfo) {
+    if (userInfo && !config.headers['X-Tenant-ID']) {
       try {
         const user = JSON.parse(userInfo.toString())
         if (user.tenant_id) {
@@ -174,14 +175,26 @@ export const apiService = {
   },
 
   // 认证相关
-  async login(credentials: { email: string; password: string; device_name?: string }) {
+  // zone：S2 账号契约下登录必须点名网络区（框架 3.x 起无租户登录 fail-closed 403）。
+  // 数字 = 区 ID（走 X-Tenant-ID 头）；非数字 = 区码/邀请码（走 body invite_code，
+  // 由后端 ResolveTenantFromInviteCode 解析出区）。两者必给其一。
+  async login(credentials: { email: string; password: string; device_name?: string; zone?: string }) {
     try {
-      const loginData = {
-        ...credentials,
+      const zone = (credentials.zone || '').trim();
+      const isZoneId = /^\d+$/.test(zone);
+
+      const loginData: Record<string, unknown> = {
+        email: credentials.email,
+        password: credentials.password,
         device_name: credentials.device_name || 'Web Browser'
       };
+      if (zone && !isZoneId) {
+        loginData.invite_code = zone;
+      }
 
-      const response = await api.post('/auth/login', loginData);
+      const response = await api.post('/auth/login', loginData, isZoneId
+        ? { headers: { 'X-Tenant-ID': zone } }
+        : undefined);
 
       debug.log('🔧 [API] Raw login response:', response.data);
 

@@ -65,7 +65,7 @@ export const useAuthStore = defineStore('auth', () => {
     return tokenExpiry.value <= Date.now()
   })
   
-  const login = async (credentials: { email: string; password: string }) => {
+  const login = async (credentials: { email: string; password: string; zone?: string }) => {
     isLoading.value = true
     try {
       const response = await apiService.login(credentials)

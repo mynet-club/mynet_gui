@@ -18,7 +18,9 @@ export function useAuth() {
   const loginError = ref<string | null>(null)
 
   // 登录表单
+  // zone：S2 账号契约要求登录点名网络区（区 ID 或区码），首次登录后记住以便下次免填
   const loginForm = reactive({
+    zone: window.localStorage?.getItem('login_zone') || '',
     email: '',
     password: '',
     rememberMe: false
@@ -143,8 +145,10 @@ export function useAuth() {
     try {
       await authStore.login({
         email: loginForm.email,
-        password: loginForm.password
+        password: loginForm.password,
+        zone: loginForm.zone
       })
+      window.localStorage?.setItem('login_zone', loginForm.zone.trim())
 
       debug.log('🔧 [useAuth] Login successful, checking auth state:', {
         isAuthenticated: authStore.isAuthenticated,

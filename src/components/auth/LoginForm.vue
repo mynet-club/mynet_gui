@@ -36,7 +36,16 @@
           </template>
         </q-banner>
         
-        <q-input 
+        <q-input
+          v-model="loginForm.zone"
+          :placeholder="$t('auth.zoneCode')"
+          outlined
+          class="form-field"
+          :hint="$t('auth.zoneCodeHint')"
+          :rules="[val => !!val || $t('auth.zoneCodeRequired')]"
+        />
+
+        <q-input
           v-model="loginForm.email"
           :placeholder="$t('auth.email')"
           type="email"
