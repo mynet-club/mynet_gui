@@ -11,6 +11,8 @@
 #     这类错运行时不报错，只把键的字面量印在界面上 —— 装这道闸的当场就抓到一处
 #     （`layouts/MainLayout.vue` 曾引用两语都无此键的 `profile.preferences`，
 #     现已改指 `user.preferences`；留着这条是因为它说明了这道闸为什么值得装）。
+#   · lint 还跑 check:env（构建口径车道）：.env.prod = web / .env.embed = embed，
+#     曾被合并成一份 embed 口径导致 deployment.sh 打出 /gui/ 基路径包、站点路由全坏。
 #   · `vitest run` 在 "No test files found" 时 exit 1。首个套件落地前（2026-10-05
 #     src/utils/__tests__/ 起）不能拿它把 push 永久堵死，也不能加 `--passWithNoTests`
 #     装绿（AGENTS.md §2.6：「没东西可查」型门禁等于没有门禁）。所以这里自己数套件：
@@ -33,6 +35,8 @@ lint:
 	@npm run lint
 	@echo "▸ lint（i18n 键一致性）"
 	@npm run check:i18n
+	@echo "▸ lint（env 口径车道）"
+	@npm run check:env
 	@echo "▸ lint（类型检查 · 棘轮）"
 	@npm run check:types
 

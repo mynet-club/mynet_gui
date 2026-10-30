@@ -10,6 +10,7 @@
     "dev": "quasar dev",
     "build": "quasar build",
     "build:prod": "quasar build",
+    "build:embed": "node dev-tools/build-embed.mjs",
     "build:help": "npm run build:copy-help && quasar build",
     "build:copy-help": "mkdir -p dist/spa/docs && cp -r docs/help dist/spa/docs/",
     "build:pwa": "quasar build -m pwa",
@@ -20,6 +21,7 @@
     "lint": "eslint --ext .js,.ts,.vue ./src",
     "lint:fix": "eslint --ext .js,.ts,.vue ./src --fix",
     "check:i18n": "node dev-tools/check-i18n.js",
+    "check:env": "node dev-tools/check-env-lanes.js",
     "postinstall": "quasar prepare",
     "check:types": "node dev-tools/check-types.js",
     "check:types:update": "node dev-tools/check-types.js --update"

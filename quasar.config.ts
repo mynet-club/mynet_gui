@@ -11,27 +11,36 @@ import { resolve } from 'path';
 // 产物就锁定回开发 URL。
 // 文件名是 .env.prod 而不是 .env.production：Quasar 的 buildType 只有 dev|prod
 // （@quasar/app-vite/lib/utils/env.js:31），development/production 它不认。
-function loadEnvProduction() {
-  try {
-    const lines = readFileSync(resolve(process.cwd(), '.env.prod'), 'utf-8').split('\n');
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith('#')) continue;
-      const eq = trimmed.indexOf('=');
-      if (eq < 0) continue;
-      const key = trimmed.slice(0, eq).trim();
-      const val = trimmed.slice(eq + 1).trim();
-      // 只在 process.env 里没有（即未从 OS 环境注入）时才覆盖
-      if (key && !Object.prototype.hasOwnProperty.call(process.env, key)) {
-        process.env[key] = val;
+//
+// 口径分工（2026-10-30 拆开）：.env.prod = web（my.mynet.club），.env.embed = embed
+// （发行包内嵌 WebUI）。embed 构建不覆盖 .env.prod —— `npm run build:embed` 把
+// .env.embed 写进 **.env.local.prod**（gitignored，构建后清掉）作覆盖层，
+// 与 Quasar 自身查找序（.env.local.prod 后于 .env.prod、胜出）同一语义。
+function loadEnvFiles() {
+  // 两层文件里后读的胜出（覆盖层语义）；OS 环境注入（不是来自文件的）始终最优先。
+  const fromFiles = new Set<string>();
+  for (const file of ['.env.prod', '.env.local.prod']) {
+    try {
+      const lines = readFileSync(resolve(process.cwd(), file), 'utf-8').split('\n');
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+        const eq = trimmed.indexOf('=');
+        if (eq < 0) continue;
+        const key = trimmed.slice(0, eq).trim();
+        const val = trimmed.slice(eq + 1).trim();
+        if (key && (!Object.prototype.hasOwnProperty.call(process.env, key) || fromFiles.has(key))) {
+          process.env[key] = val;
+          fromFiles.add(key);
+        }
       }
-    }
-  } catch (_) { /* .env.prod 不存在时静默忽略 */ }
+    } catch (_) { /* 文件不存在时静默忽略 */ }
+  }
 }
 
 export default defineConfig((ctx) => {
   if (ctx.prod) {
-    loadEnvProduction();
+    loadEnvFiles();
   }
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
