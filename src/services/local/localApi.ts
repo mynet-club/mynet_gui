@@ -48,6 +48,45 @@ export const localHttp: AxiosInstance = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
+/**
+ * 从本机 identity 里挑出**后端雪花租户 ID**（X-Tenant-ID 只认数字）。
+ *
+ * 取值顺序：real_tenant_id → 活跃项（id 对上 tenant_id）的 real/id → tenant_id
+ * → 列表其余项。迁移残留的 `u_<user_id>` 目录键不是后端 ID，一律跳过；
+ * 挑不出数字就返回 ''，调用方回手填。
+ */
+export function pickLocalTenantId(raw: unknown): string {
+  const d = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const list = Array.isArray(d.tenants) ? (d.tenants as Record<string, unknown>[]) : [];
+  const activeId = String(d.tenant_id ?? '');
+  const active = list.find((t) => String(t?.id ?? '') === activeId);
+
+  const cands: unknown[] = [d.real_tenant_id];
+  if (active) cands.push(active.real_tenant_id, active.id);
+  cands.push(d.tenant_id);
+  for (const t of list) cands.push(t?.real_tenant_id, t?.id);
+
+  for (const v of cands) {
+    const s = String(v ?? '').trim();
+    if (/^\d+$/.test(s)) return s;
+  }
+  return '';
+}
+
+/**
+ * 本机模式的登录区 ID 探测：读同源 localapi 的 `/config/identity`（节点自身归属，
+ * 可信来源——web 面没有这个前提，别把自动带区用到 my.mynet.club 上）。
+ * agent 没起 / 非本机部署取不到时返回 ''，调用方回手填。
+ */
+export async function readLocalTenantId(): Promise<string> {
+  try {
+    const res = await localHttp.get('/config/identity');
+    return pickLocalTenantId((res.data as { data?: unknown })?.data ?? res.data);
+  } catch {
+    return '';
+  }
+}
+
 export class LocalApiError extends Error {
   readonly reasonCode: string | undefined
   readonly retryable: boolean

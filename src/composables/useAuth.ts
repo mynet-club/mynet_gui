@@ -6,6 +6,8 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { apiService } from '../services/api' // 修复导入路径
+import { isLocalMode } from '../config/localMode'
+import { readLocalTenantId } from '../services/local/localApi'
 
 export function useAuth() {
   const router = useRouter()
@@ -18,13 +20,25 @@ export function useAuth() {
   const loginError = ref<string | null>(null)
 
   // 登录表单
-  // zone：S2 账号契约要求登录点名网络区（区 ID 或区码），首次登录后记住以便下次免填
+  // zone：S2 账号契约要求登录点名网络区（区 ID 或区码），首次登录后记住以便下次免填。
+  // 本机模式（嵌入 agent / 本机地址）再叠一层：从 localapi 读节点归属的区 ID 自动预填
+  // —— 本机知道自己属于哪个区，不该让人手打；取不到（agent 未起 / dev 无代理）就留手填。
   const loginForm = reactive({
     zone: window.localStorage?.getItem('login_zone') || '',
     email: '',
     password: '',
     rememberMe: false
   })
+
+  const initialZone = loginForm.zone;
+  if (isLocalMode()) {
+    readLocalTenantId().then((id) => {
+      // 用户已改过输入就不覆盖（探测是异步的，可能晚于用户键入）
+      if (id && loginForm.zone === initialZone) {
+        loginForm.zone = id;
+      }
+    });
+  }
 
   // 注册表单
   const registerForm = reactive({
