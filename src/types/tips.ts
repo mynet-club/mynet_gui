@@ -146,6 +146,11 @@ export interface TipAction {
 export interface TipConfig {
   /** 唯一标识 */
   id: string
+  /**
+   * tips 深链到知识库 chunk，供小助手预置上下文
+   * （tips-kb 契约 §5：显式 kbChunkIds + title/tags 关键词检索）
+   */
+  kbChunkIds?: string[]
   /** Tips类型 */
   type: TipType
   /** 所属阶段 */

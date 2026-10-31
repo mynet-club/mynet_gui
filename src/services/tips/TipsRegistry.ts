@@ -51,6 +51,7 @@ function buildTipsRegistry(): TipConfig[] {
   // ========== 阶段0: 欢迎 ==========
   {
     id: 'welcome',
+    kbChunkIds: ['help-what-is-mynet', 'help-basic-concepts'],
     type: TipType.Banner,
     stage: OnboardingStage.Welcome,
     trigger: {
@@ -102,6 +103,7 @@ function buildTipsRegistry(): TipConfig[] {
   // ========== 阶段1: 创建IP资源池 ==========
   {
     id: 'create_ippool',
+    kbChunkIds: ['help-create-ip-pool'],
     type: TipType.Popover,
     stage: OnboardingStage.CreateIPPool,
     trigger: {
@@ -136,6 +138,7 @@ function buildTipsRegistry(): TipConfig[] {
   // ========== 阶段2: 添加第一个设备 ==========
   {
     id: 'add_first_node',
+    kbChunkIds: ['help-basic-concepts'],
     type: TipType.Popover,
     stage: OnboardingStage.AddFirstDevice,
     trigger: {
@@ -171,6 +174,7 @@ function buildTipsRegistry(): TipConfig[] {
   // ========== 路径A: 添加第二个设备 ==========
   {
     id: 'add_second_node',
+    kbChunkIds: ['help-basic-concepts'],
     type: TipType.Banner,
     stage: OnboardingStage.AddSecondDevice,
     trigger: {
@@ -196,6 +200,7 @@ function buildTipsRegistry(): TipConfig[] {
   // ========== 路径B: 添加邀请人为好友 ==========
   {
     id: 'add_inviter_friend',
+    kbChunkIds: ['help-registration'],
     type: TipType.Popover,
     stage: OnboardingStage.AddInviterFriend,
     trigger: {
@@ -230,6 +235,7 @@ function buildTipsRegistry(): TipConfig[] {
   // ========== 引导：邀请好友 ==========
   {
     id: 'invite_friends_guide',
+    kbChunkIds: ['help-registration'],
     type: TipType.Popover,
     stage: OnboardingStage.AddInviterFriend,
     trigger: {
@@ -264,6 +270,7 @@ function buildTipsRegistry(): TipConfig[] {
   // ========== 路径B: 查看邀请人设备 ==========
   {
     id: 'view_inviter_nodes',
+    kbChunkIds: ['help-registration'],
     type: TipType.Banner,
     stage: OnboardingStage.ViewInviterDevices,
     trigger: {
@@ -289,6 +296,7 @@ function buildTipsRegistry(): TipConfig[] {
   // ========== 引导：添加连接 ==========
   {
     id: 'add_route_guide',
+    kbChunkIds: ['tc-overview', 'nc-check-model'],
     type: TipType.Popover,
     stage: OnboardingStage.ManageConnections,
     trigger: {
@@ -323,6 +331,7 @@ function buildTipsRegistry(): TipConfig[] {
   // ========== 阶段6: 连接管理 ==========
   {
     id: 'manage_connections',
+    kbChunkIds: ['tc-overview', 'nc-check-model'],
     type: TipType.Banner,
     stage: OnboardingStage.ManageConnections,
     trigger: {
@@ -354,6 +363,7 @@ function buildTipsRegistry(): TipConfig[] {
   // ========== 完成引导 ==========
   {
     id: 'onboarding_complete',
+    kbChunkIds: ['help-basic-concepts', 'help-general-faq'],
     type: TipType.Modal,
     stage: OnboardingStage.Completed,
     trigger: {
@@ -393,6 +403,7 @@ function buildTipsRegistry(): TipConfig[] {
   // Dashboard 页面帮助
   {
     id: 'dashboard_overview',
+    kbChunkIds: ['help-what-is-mynet'],
     type: TipType.Banner,
     stage: OnboardingStage.Welcome,
     trigger: {
@@ -419,6 +430,7 @@ function buildTipsRegistry(): TipConfig[] {
   // IP 池管理帮助
   {
     id: 'ippool_management',
+    kbChunkIds: ['help-create-ip-pool'],
     type: TipType.Banner,
     stage: OnboardingStage.CreateIPPool,
     trigger: {
@@ -445,6 +457,7 @@ function buildTipsRegistry(): TipConfig[] {
   // 设备管理帮助
   {
     id: 'node_management',
+    kbChunkIds: ['help-create-ip-pool', 'nc-q6-commands'],
     type: TipType.Banner,
     stage: OnboardingStage.AddFirstDevice,
     trigger: {
@@ -470,6 +483,7 @@ function buildTipsRegistry(): TipConfig[] {
   // 连接管理帮助（路由）
   {
     id: 'route_management',
+    kbChunkIds: ['tc-overview', 'nc-check-model'],
     type: TipType.Banner,
     stage: OnboardingStage.Welcome,
     trigger: {
@@ -495,6 +509,7 @@ function buildTipsRegistry(): TipConfig[] {
   // 好友管理帮助
   {
     id: 'friend_management',
+    kbChunkIds: ['help-registration'],
     type: TipType.Banner,
     stage: OnboardingStage.Welcome,
     trigger: {
@@ -520,6 +535,7 @@ function buildTipsRegistry(): TipConfig[] {
   // 连接管理详细帮助
   {
     id: 'connection_details',
+    kbChunkIds: ['nc-check-model'],
     type: TipType.Banner,
     stage: OnboardingStage.ManageConnections,
     trigger: {
@@ -545,6 +561,7 @@ function buildTipsRegistry(): TipConfig[] {
   // 网络区管理帮助（用词见 config/terms.ts）
   {
     id: 'zone_management',
+    kbChunkIds: ['help-what-is-mynet', 'help-basic-concepts'],
     type: TipType.Banner,
     stage: OnboardingStage.Welcome,
     trigger: {
@@ -570,6 +587,7 @@ function buildTipsRegistry(): TipConfig[] {
   // 设置页面帮助
   {
     id: 'settings_overview',
+    kbChunkIds: ['help-general-faq'],
     type: TipType.Banner,
     stage: OnboardingStage.Welcome,
     trigger: {
