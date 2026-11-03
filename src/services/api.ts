@@ -90,6 +90,14 @@ api.interceptors.response.use(
       return Promise.reject(error)
     }
 
+    // 429 限流：后端 throttle:api 60/分。页面批量拉数据时容易撞上，
+    // 不能只弹「加载失败」——那会让人以为接口坏了。
+    if (error.response?.status === 429) {
+      debug.warn('🔧 [API] 429 Too Many Attempts:', originalRequest.url)
+      error.friendlyMessage = '请求过于频繁，请稍后再试'
+      return Promise.reject(error)
+    }
+
     // 排除登录、注册等不需要token刷新的请求
     const excludePaths = ['/auth/login', '/auth/register', '/auth/refresh-token']
     const shouldExclude = excludePaths.some(path => originalRequest.url?.includes(path))
@@ -146,9 +154,11 @@ api.interceptors.response.use(
         }
         return api(originalRequest)
       } catch (refreshError) {
-        debug.error('🔧 [API] Token refresh failed, clearing tokens:', refreshError)
+        // 不能无条件 clearTokens：网络抖动/429/「本来就没 refresh token」时一清，
+        // 并发页会连环报 No refresh token available。只有 tokenManager 判定
+        // refresh 已作废时它自己会清；这里只把错误传出去。
+        debug.error('🔧 [API] Token refresh failed:', refreshError)
         processQueue(refreshError, null)
-        tokenManager.clearTokens()
         // 移除自动跳转，让组件或页面处理登录失败
         // window.location.href = '/login'
         return Promise.reject(refreshError)

@@ -106,7 +106,7 @@ export function useZoneServices() {
       debug.error('Failed to load services:', error)
       $q.notify({
         type: 'negative',
-        message: t('zoneServices.errors.loadFailed')
+        message: (error as { friendlyMessage?: string })?.friendlyMessage || t('zoneServices.errors.loadFailed')
       })
     } finally {
       loading.value = false

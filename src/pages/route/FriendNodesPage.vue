@@ -448,7 +448,7 @@ const fetchAllFriendNodes = async () => {
     const response = await getAllFriendNodes()
     friendsData.value = response
   } catch (error) {
-    notify.error(t('routes.fetchAllFriendNodesError'))
+    notify.error((error as { friendlyMessage?: string })?.friendlyMessage || t('routes.fetchAllFriendNodesError'))
   } finally {
     loading.value = false
   }

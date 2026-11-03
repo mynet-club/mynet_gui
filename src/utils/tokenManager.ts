@@ -13,6 +13,7 @@ export interface TokenData {
 export class TokenManager {
   private static instance: TokenManager
   private refreshPromise: Promise<string> | null = null
+  private refreshPromise: Promise<string> | null = null
   private refreshTimer: number | null = null
   private isRefreshing: boolean = false;
   private requestQueue: Array<() => Promise<any>> = [];
@@ -93,35 +94,41 @@ export class TokenManager {
   }
   
   // 刷新 token
+  // 单飞（single-flight）：并发 401 只允许一次真实刷新，其余等同一个 Promise。
+  // 此前每个失败都会 clearTokens()，NodeDetail 的 Promise.all 一炸就是一串
+  // 「No refresh token available」并把会话抹掉（2026-11-03 实测）。
   async refreshToken(): Promise<string> {
-    if (this.isRefreshing) {
-      return new Promise((resolve, reject) => {
-        this.requestQueue.push(() => this.refreshToken().then(resolve).catch(reject));
-      });
+    if (this.refreshPromise) {
+      return this.refreshPromise
     }
 
     this.isRefreshing = true;
+    this.refreshPromise = (async () => {
+      try {
+        const refreshToken = this.getRefreshToken()
+        if (!refreshToken) {
+          // 本来就没有 refresh token：这是「需要重新登录」，不要当刷新失败再去 clear
+          throw new Error('No refresh token available')
+        }
 
-    try {
-      const refreshToken = this.getRefreshToken()
-      if (!refreshToken) {
-        throw new Error('No refresh token available')
+        debug.log('🔧 [TokenManager] Starting token refresh...')
+
+        const newAccessToken = await this.performTokenRefresh(refreshToken)
+        debug.log('🔧 [TokenManager] Token refresh successful')
+        return newAccessToken
+      } catch (error) {
+        debug.error('🔧 [TokenManager] Token refresh failed:', error)
+        throw error
+      } finally {
+        this.isRefreshing = false;
+        this.refreshPromise = null
+        this.processQueue();
       }
-      
-      debug.log('🔧 [TokenManager] Starting token refresh...')
-      
-      const newAccessToken = await this.performTokenRefresh(refreshToken)
-      debug.log('🔧 [TokenManager] Token refresh successful')
-      return newAccessToken
-    } catch (error) {
-      debug.error('🔧 [TokenManager] Token refresh failed:', error)
-      throw error
-    } finally {
-      this.isRefreshing = false;
-      this.processQueue();
-    }
+    })()
+
+    return this.refreshPromise
   }
-  
+
   // 执行 token 刷新请求
   private async performTokenRefresh(refreshToken: string): Promise<string> {
     try {
@@ -158,9 +165,28 @@ export class TokenManager {
       return newTokenData.auth_token;
     } catch (error) {
       debug.error('🔧 [TokenManager] Token refresh API call failed:', error);
-      this.clearTokens();
+      // 只有后端明确说 refresh 作废（401 / REFRESH_TOKEN_*）才清会话。
+      // 网络抖动、429 限流不能抹 token —— 一清就全站「No refresh token available」。
+      if (this.shouldClearOnRefreshFailure(error)) {
+        this.clearTokens();
+      }
       throw error;
     }
+  }
+
+  private shouldClearOnRefreshFailure(error: unknown): boolean {
+    const anyErr = error as {
+      response?: { status?: number; data?: { error_code?: string; code?: number; message?: string } }
+      friendlyMessage?: string
+    }
+    const status = anyErr?.response?.status
+    if (status == null) return false
+    // 429/5xx/网络类：保留 refresh token，下一轮还能续
+    if (status === 429 || status >= 500) return false
+    if (status !== 401 && status !== 403) return false
+    const body = anyErr?.response?.data
+    const code = String(body?.error_code || body?.code || body?.message || '')
+    return /REFRESH_TOKEN|Unauthenticated|invalid|expired/i.test(code) || status === 401
   }
   
   // 设置自动刷新定时器

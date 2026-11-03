@@ -1,7 +1,6 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import debug from 'src/utils/debug'
 import { useAuthStore } from '../stores/auth'
-import { useWebSocket } from '../services/websocket'
 import { useNodes } from './useNodes'
 import { useRoutes } from './useRoutes'
 import type { 
@@ -20,7 +19,8 @@ import { NODE_STATUS } from '../types/node'
 
 export function useDashboard() {
   const authStore = useAuthStore()
-  const { connect, disconnect, isConnected } = useWebSocket()
+  // 用户面 Echo 已下线；这里的 connected 表示「最近一次本机/平台拉数成功」
+  const isConnected = ref(false)
   const updateInterval = ref<number | null>(null)
   
   // 引入节点和路由数据
@@ -157,9 +157,10 @@ export function useDashboard() {
         },
         activities: recentActivities.value.length
       })
-      
+      isConnected.value = true
     } catch (error) {
       debug.error('Dashboard: 获取数据失败:', error)
+      isConnected.value = false
     } finally {
       isLoading.value = false
     }

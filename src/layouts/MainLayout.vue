@@ -54,19 +54,19 @@
           </q-list>
         </q-btn-dropdown>
 
-        <!-- 网络状态 -->
+        <!-- 网络状态：本机 mynetd 能力面（用户面实时推送不走 Echo/Reverb） -->
         <q-btn 
           flat 
           dense
           round
-          :icon="wsConnectionStats.connected ? 'wifi' : 'wifi_off'"
-          :aria-label="wsConnectionStats.connected ? $t('common.connected') : $t('common.disconnected')"
-          :color="wsConnectionStats.connected ? 'positive' : 'negative'"
+          :icon="localDaemon.online ? 'wifi' : 'wifi_off'"
+          :aria-label="localDaemon.online ? $t('common.connected') : $t('common.disconnected')"
+          :color="localDaemon.online ? 'positive' : 'negative'"
           @click="showConnectionDialog = true"
           class="q-mr-sm"
         >
           <q-tooltip>
-            {{ wsConnectionStats.connected ? $t('common.connected') : $t('common.disconnected') }}
+            {{ localDaemon.online ? $t('common.connected') : $t('common.disconnected') }}
           </q-tooltip>
         </q-btn>
 
@@ -350,7 +350,7 @@
     <q-dialog v-model="showConnectionDialog">
       <q-card style="min-width: 300px">
         <q-card-section class="row items-center q-pb-none">
-          <div class="text-h6">{{ wsConnectionStats.connected ? $t('websocket.connectionStatus') : $t('websocket.connectionFailed') }}</div>
+          <div class="text-h6">{{ localDaemon.online ? $t('websocket.connectionStatus') : $t('websocket.connectionFailed') }}</div>
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
@@ -360,22 +360,18 @@
             <div class="detail-row">
               <span>{{ $t('common.status') }}:</span>
               <q-chip 
-                :label="wsConnectionStats.connected ? $t('common.connected') : $t('common.disconnected')"
-                :color="wsConnectionStats.connected ? 'positive' : 'negative'"
+                :label="localDaemon.online ? $t('common.connected') : $t('common.disconnected')"
+                :color="localDaemon.online ? 'positive' : 'negative'"
                 text-color="white"
               />
             </div>
             <div class="detail-row">
+              <span>mynetd:</span>
+              <span>{{ localDaemon.role || '—' }}</span>
+            </div>
+            <div class="detail-row">
               <span>{{ $t('websocket.heartbeat') }}:</span>
-              <span>{{ formatTime(wsConnectionStats.lastHeartbeat) }}</span>
-            </div>
-            <div class="detail-row">
-              <span>Messages:</span>
-              <span>{{ wsConnectionStats.messagesReceived }}</span>
-            </div>
-            <div class="detail-row">
-              <span>Reconnect Attempts:</span>
-              <span>{{ wsConnectionStats.reconnectAttempts }}</span>
+              <span>{{ formatTime(localDaemon.checkedAt) }}</span>
             </div>
           </div>
         </q-card-section>
@@ -390,7 +386,7 @@
           <q-btn 
             :label="$t('common.refresh')" 
             color="primary" 
-            @click="reconnectWebSocket"
+            @click="refreshLocalDaemon"
           />
         </q-card-actions>
       </q-card>
@@ -412,7 +408,6 @@ import debug from '../utils/debug'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar, date, LocalStorage } from 'quasar'
 import { useAuthStore } from '../stores/auth'
-import { useWebSocket } from '../services/websocket'
 import { useTheme } from '../composables/useTheme'
 import { useSidebarStats } from '../composables/useSidebarStats'
 import { useNotifications } from '../composables/useNotifications'
@@ -431,7 +426,6 @@ const router = useRouter()
 const route = useRoute()
 const expandedGroups = reactive<Record<string, boolean>>({})
 const authStore = useAuthStore()
-const { isConnected, connect, on: onWebSocket, off: offWebSocket } = useWebSocket()
 const { themeMode: currentThemeMode, setThemeMode, getThemeOptions, initializeTheme } = useTheme()
 const { stats: sidebarStats, init: initSidebarStats } = useSidebarStats()
 const { unreadCount, displayUnreadCount } = useNotifications()
@@ -710,41 +704,32 @@ const formatTime = (timestamp: string) => {
   return date.formatDate(timestamp, 'YYYY-MM-DD HH:mm:ss')
 }
 
-// 连接状态必须跟随 WebSocket 事件更新，不能在布局创建时复制一次 ref 的值。
-const wsConnectionStats = reactive({
-  connected: isConnected.value,
-  lastHeartbeat: new Date().toISOString(),
-  messagesReceived: 0,
-  reconnectAttempts: 0
-});
+// 连接状态：本机 mynetd 能力面（用户面实时不走 Echo/Reverb，见架构裁定 2026-11-03）
+const localDaemon = reactive({
+  online: false,
+  role: '',
+  checkedAt: ''
+})
 
-const handleWsConnected = () => {
-  wsConnectionStats.connected = true
-  wsConnectionStats.lastHeartbeat = new Date().toISOString()
-}
-const handleWsDisconnected = () => {
-  wsConnectionStats.connected = false
-  wsConnectionStats.reconnectAttempts += 1
-}
-const handleWsMessage = () => {
-  wsConnectionStats.messagesReceived += 1
-  wsConnectionStats.lastHeartbeat = new Date().toISOString()
-}
-
-const reconnectWebSocket = () => {
-  if (!authStore.token || !authStore.currentTenant) {
-    $q.notify({ type: 'warning', message: t('websocket.connectionFailed'), timeout: 2500 })
-    return
+const refreshLocalDaemon = async () => {
+  try {
+    const { localHttp } = await import('../services/local/localApi')
+    const res = await localHttp.get('/status') as { data?: { daemon?: string; role?: string } }
+    const body = (res as any)?.data?.data ?? (res as any)?.data ?? res
+    localDaemon.online = true
+    localDaemon.role = String(body?.role || body?.daemon || 'mynetd')
+    localDaemon.checkedAt = new Date().toISOString()
+  } catch {
+    localDaemon.online = false
+    localDaemon.role = ''
+    localDaemon.checkedAt = new Date().toISOString()
   }
-  wsConnectionStats.reconnectAttempts += 1
-  connect(String(authStore.token), String(authStore.currentTenant.tenant_id))
 }
+
+let daemonTimer: number | undefined
 
 // 生命周期
 onMounted(async () => {
-  onWebSocket('connected', handleWsConnected)
-  onWebSocket('disconnected', handleWsDisconnected)
-  onWebSocket('message', handleWsMessage)
   watch(leftDrawerOpen, (open) => LocalStorage.set('mynet_drawer_open', open))
   // 初始化主题
   initializeTheme()
@@ -776,8 +761,10 @@ onMounted(async () => {
     }
   }
   
-  // WebSocket连接由boot/websocket.ts统一管理，这里不再重复连接
-  
+  // 本机 mynetd 存活探测（用户面实时不走 Echo）
+  await refreshLocalDaemon()
+  daemonTimer = window.setInterval(() => { void refreshLocalDaemon() }, 60_000)
+
   // 初始化边栏统计数据
   await initSidebarStats()
   
@@ -813,9 +800,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  offWebSocket('connected', handleWsConnected)
-  offWebSocket('disconnected', handleWsDisconnected)
-  offWebSocket('message', handleWsMessage)
+  if (daemonTimer) clearInterval(daemonTimer)
 })
 </script>
 

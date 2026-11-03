@@ -6,7 +6,6 @@
 import { ref, computed, reactive, readonly } from 'vue'
 import debug from 'src/utils/debug'
 import { nodeService } from '../services/node/nodeService'
-import { webSocketService, type NodeEventPayload } from '../services/websocket'
 // import { useNotify } from './useNotify'
 import type {
   Node,
@@ -426,63 +425,17 @@ export function useNodes() {
   }
 
   /**
-   * 启用 WebSocket 实时节点更新（订阅 private-zone.{tenantId}.nodes）
-   * 监听 node.created / node.updated / node.status_changed / node.deleted
+   * 节点实时更新：用户面 Echo/Reverb 已下架（2026-11-03）。
+   * 需要推送时走 mynetd 本机能力面，这里只保留 API 兼容占位。
    */
   let liveTenantId: number | null = null
-  const enableLiveUpdates = (tenantId: number | string) => {
-    const zid = Number(tenantId)
-    if (liveTenantId === zid) return
-    if (liveTenantId !== null) webSocketService.unsubscribeTenantNodes(liveTenantId)
-    liveTenantId = zid
-
-    webSocketService.subscribeTenantNodes(zid, {
-      onCreated: (payload: NodeEventPayload) => {
-        debug.log('[useNodes] node.created', payload)
-        if (!nodes.value.some(n => String(n.node_id) === payload.node_id)) {
-          // 仅当当前在第一页时插入，避免分页错位
-          if (pagination.page === 1) {
-            // 这里只有 id/name 等少量字段，触发一次轻量刷新更稳妥
-            loadNodes().catch((e) => debug.error('实时刷新失败', e))
-          } else {
-            pagination.rowsNumber += 1
-          }
-        }
-      },
-      onUpdated: (payload: NodeEventPayload) => {
-        debug.log('[useNodes] node.updated', payload)
-        const node = nodes.value.find(n => String(n.node_id) === payload.node_id)
-        if (node) {
-          node.updated_at = payload.timestamp
-        }
-      },
-      onStatusChanged: (payload: NodeEventPayload) => {
-        debug.log('[useNodes] node.status_changed', payload)
-        const node = nodes.value.find(n => String(n.node_id) === payload.node_id)
-        if (node && payload.new_status !== undefined) {
-          (node as any).node_status = payload.new_status
-          if (payload.new_status_name) {
-            (node as any).node_status_name = payload.new_status_name
-          }
-          node.updated_at = payload.timestamp
-        }
-      },
-      onDeleted: (payload: NodeEventPayload) => {
-        debug.log('[useNodes] node.deleted', payload)
-        const idx = nodes.value.findIndex(n => String(n.node_id) === payload.node_id)
-        if (idx !== -1) {
-          nodes.value.splice(idx, 1)
-          pagination.rowsNumber = Math.max(0, pagination.rowsNumber - 1)
-        }
-      }
-    })
+  const enableLiveUpdates = (_tenantId: number | string) => {
+    liveTenantId = Number(_tenantId)
+    debug.log('[useNodes] live updates disabled (Echo/Reverb removed)')
   }
 
   const disableLiveUpdates = () => {
-    if (liveTenantId !== null) {
-      webSocketService.unsubscribeTenantNodes(liveTenantId)
-      liveTenantId = null
-    }
+    liveTenantId = null
   }
 
   return {
