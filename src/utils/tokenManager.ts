@@ -13,7 +13,6 @@ export interface TokenData {
 export class TokenManager {
   private static instance: TokenManager
   private refreshPromise: Promise<string> | null = null
-  private refreshPromise: Promise<string> | null = null
   private refreshTimer: number | null = null
   private isRefreshing: boolean = false;
   private requestQueue: Array<() => Promise<any>> = [];

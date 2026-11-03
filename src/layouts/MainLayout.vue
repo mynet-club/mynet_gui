@@ -763,7 +763,7 @@ onMounted(async () => {
   
   // 本机 mynetd 存活探测（用户面实时不走 Echo）
   await refreshLocalDaemon()
-  daemonTimer = window.setInterval(() => { void refreshLocalDaemon() }, 60_000)
+  daemonTimer = window.setInterval(() => { refreshLocalDaemon().catch(() => undefined) }, 60_000)
 
   // 初始化边栏统计数据
   await initSidebarStats()
