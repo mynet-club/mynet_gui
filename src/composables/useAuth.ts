@@ -1,6 +1,6 @@
 import { ref, reactive } from 'vue'
 import debug from 'src/utils/debug'
-import { resolveCallbackRedirect } from 'src/utils/callbackGuard'
+import { resolveCallbackRedirect, resolveInternalRedirect } from 'src/utils/callbackGuard'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -186,7 +186,10 @@ export function useAuth() {
         }
 
         debug.log('🔧 [useAuth] Navigating to dashboard...')
-        await router.push('/app/dashboard')
+        // 回登录前的原页（守卫写入的 ?redirect=）。只收站内相对路径，
+        // `//evil` / `/\evil` 是协议相对/反斜杠伪装，会跳出站 —— 一律回控制台首页。
+        const target = resolveInternalRedirect(route.query.redirect) ?? '/app/dashboard'
+        await router.push(target)
         debug.log('🔧 [useAuth] Navigation to dashboard completed')
       } else {
         debug.error('🔧 [useAuth] Login succeeded but not authenticated')

@@ -2,7 +2,7 @@ import { setupRouteGuards } from '../router/middleware'
 import { boot } from 'quasar/wrappers'
 import debug from '../utils/debug'
 import { LocalStorage } from 'quasar'
-import { tokenManager } from '../utils/tokenManager'
+import { tokenManager, AUTH_EXPIRED_EVENT } from '../utils/tokenManager'
 import { TENANT_SELECTION_KEY, LEGACY_TENANT_SELECTION_KEY } from '../config/app'
 
 // 立即执行的日志，确认文件被加载
@@ -130,6 +130,21 @@ export default boot(async ({ router }) => {
 
   // 认证恢复完毕后注册唯一守卫，避免 localStorage 与 store 判断分叉。
   setupRouteGuards(router, authStore)
+
+  // 会话被服务端判死（refresh 被拒/无 refresh token）→ 收口跳登录。
+  // 会话过期后不能留在控制台看占位帐号；控制台页（/app/*）回登录页并带上原路径，
+  // 本机面板页（meta.local）不拦 —— 那边有 needs_login 横幅 + 登录框。
+  const onAuthExpired = () => {
+    authStore.user = null
+    authStore.token = null
+    authStore.tokenExpiry = 0
+    LocalStorage.remove('user_info')
+    const cur = router.currentRoute.value
+    const isConsole = cur.path === '/app' || cur.path.startsWith('/app/')
+    if (!isConsole) return
+    router.push({ path: '/auth/login', query: { redirect: cur.fullPath } })
+  }
+  window.addEventListener(AUTH_EXPIRED_EVENT, onAuthExpired)
 
   debug.log('🔐 [Boot] Auth system initialized successfully')
 })

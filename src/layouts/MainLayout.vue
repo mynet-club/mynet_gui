@@ -127,9 +127,10 @@
           </q-tooltip>
         </q-btn>
 
-        <!-- 用户菜单 -->
-        <q-btn-dropdown 
-          flat 
+        <!-- 用户菜单（未登录不伪造「User」占位帐号，改给登录入口）-->
+        <q-btn-dropdown
+          v-if="user"
+          flat
           dense
           class="user-menu-btn"
           :aria-label="$t('common.profile')"
@@ -142,12 +143,12 @@
                 size="sm"
                 class="q-mr-md"
               />
-              <span v-if="$q.screen.gt.sm">{{ user?.name || 'User' }}</span>
+              <span v-if="$q.screen.gt.sm">{{ user?.name }}</span>
             </div>
           </template>
           <q-list>
             <q-item-label header class="text-weight-bold">
-              {{ user?.name || 'User' }}
+              {{ user?.name }}
             </q-item-label>
             <q-separator />
             <q-item clickable @click="$router.push('/app/profile')">
@@ -177,6 +178,15 @@
             </q-item>
           </q-list>
         </q-btn-dropdown>
+        <q-btn
+          v-else
+          flat
+          dense
+          color="primary"
+          icon="login"
+          :label="$t('common.login')"
+          to="/auth/login"
+        />
       </q-toolbar>
     </q-header>
 

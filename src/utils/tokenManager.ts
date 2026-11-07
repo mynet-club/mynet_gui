@@ -10,6 +10,9 @@ export interface TokenData {
   refresh_token_expires_in: number;
 }
 
+/** 会话被判死（refresh token 被服务端作废）时的广播事件名。 */
+export const AUTH_EXPIRED_EVENT = 'mynet:auth-expired'
+
 export class TokenManager {
   private static instance: TokenManager
   private refreshPromise: Promise<string> | null = null
@@ -107,6 +110,7 @@ export class TokenManager {
         const refreshToken = this.getRefreshToken()
         if (!refreshToken) {
           // 本来就没有 refresh token：这是「需要重新登录」，不要当刷新失败再去 clear
+          this.announceSessionExpired()
           throw new Error('No refresh token available')
         }
 
@@ -168,6 +172,8 @@ export class TokenManager {
       // 网络抖动、429 限流不能抹 token —— 一清就全站「No refresh token available」。
       if (this.shouldClearOnRefreshFailure(error)) {
         this.clearTokens();
+        // 后端已判死刷新令牌：广播会话过期，让应用层收口（跳登录）
+        this.announceSessionExpired();
       }
       throw error;
     }
@@ -193,8 +199,16 @@ export class TokenManager {
     // 清除之前的定时器
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer)
+      this.refreshTimer = null
     }
-    
+
+    // 没有 refresh token 就没有续期可言 —— 排定时器只会白跑一次
+    // 「No refresh token available」，还可能提前误报会话过期。
+    if (!this.getRefreshToken()) {
+      debug.log('🔧 [TokenManager] No refresh token, skip auto-refresh scheduling')
+      return
+    }
+
     // 在过期前5分钟刷新
     const refreshTime = expiryTime - Date.now() - (5 * 60 * 1000)
     
@@ -240,13 +254,25 @@ export class TokenManager {
     LocalStorage.remove('auth_token')
     LocalStorage.remove('refresh_token')
     LocalStorage.remove('token_expiry')
-    
+
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer)
       this.refreshTimer = null
     }
-    
+
     debug.log('🔧 [TokenManager] All tokens cleared')
+  }
+
+  // 会话已被服务端判死 / 无法续期时广播，由 boot/auth 收口跳登录。
+  // 不能在这里直接跳路由 —— tokenManager 是纯工具层，不该认识 router。
+  announceSessionExpired() {
+    try {
+      if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+        window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT))
+      }
+    } catch {
+      // 非浏览器环境（单测 node 等）没有 window，静默即可
+    }
   }
   
   // 获取 token 剩余时间（分钟）

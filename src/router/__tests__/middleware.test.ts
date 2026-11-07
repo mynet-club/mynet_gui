@@ -14,7 +14,8 @@ function makeRouter(auth: RouteAuthState) {
       { path: '/auth/register', component },
       { path: '/app/dashboard', component },
       { path: '/app/nodes', component },
-      { path: '/app/nodes/:id/edit', component }
+      { path: '/app/nodes/:id/edit', component },
+      { path: '/home', component, meta: { local: true } }
     ]
   })
   setupRouteGuards(router, auth)
@@ -74,5 +75,28 @@ describe('single route guard', () => {
     const target = new URL(window.location.href)
     expect(target.searchParams.getAll('token')).toEqual(['session-token'])
     expect(target.hash).toBe('#status')
+  })
+
+  it('本机地址也不放行未登录的控制台页（会话过期要跳登录，不是顶着占位帐号）', async () => {
+    vi.stubGlobal('window', {
+      location: { hostname: '127.0.0.1', origin: 'http://127.0.0.1:8096', href: '', reload: vi.fn() },
+      scrollTo: vi.fn()
+    })
+    vi.stubGlobal('document', { title: '', body: { classList: { add: vi.fn() } } })
+    const router = makeRouter({ isAuthenticated: false, token: null })
+    await router.push('/app/dashboard')
+    expect(router.currentRoute.value.path).toBe('/auth/login')
+    expect(router.currentRoute.value.query.redirect).toBe('/app/dashboard')
+  })
+
+  it('本机地址仍放行本机面板路由（无需云端登录）', async () => {
+    vi.stubGlobal('window', {
+      location: { hostname: '127.0.0.1', origin: 'http://127.0.0.1:8096', href: '', reload: vi.fn() },
+      scrollTo: vi.fn()
+    })
+    vi.stubGlobal('document', { title: '', body: { classList: { add: vi.fn() } } })
+    const router = makeRouter({ isAuthenticated: false, token: null })
+    await router.push('/home')
+    expect(router.currentRoute.value.path).toBe('/home')
   })
 })

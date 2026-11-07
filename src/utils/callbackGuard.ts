@@ -49,3 +49,19 @@ export function resolveCallbackRedirect (callback: unknown, currentOrigin: strin
 
   return sameOrigin || registeredDomain ? url.href : null
 }
+
+/**
+ * 站内回跳目标（`?redirect=`）校验：只接受以**单个 `/`** 开头的站内相对路径。
+ *
+ * `//evil.example`、`/\evil` 会被浏览器当协议相对 URL 解析出外域 —— 一律拒；
+ * 非字符串（query 可重复成数组）与空值也拒。
+ * 通过返回路径原样；不通过返回 null（调用方落默认页）。
+ */
+export function resolveInternalRedirect (value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const path = value.trim()
+  if (path === '') return null
+  if (!path.startsWith('/')) return null
+  if (path.startsWith('//') || path.startsWith('/\\')) return null
+  return path
+}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { resolveCallbackRedirect } from '../callbackGuard'
+import { resolveCallbackRedirect, resolveInternalRedirect } from '../callbackGuard'
 
 // 防回归锁（S1 开放重定向）：callback 曾把 access token 拼进任意外域 URL。
 // 本套件锁死「同源 / 注册回调域」判据，任何放宽都会红。
@@ -54,5 +54,29 @@ describe('resolveCallbackRedirect：callback 目标白名单', () => {
     expect(resolveCallbackRedirect('   ', ORIGIN)).toBeNull()
     expect(resolveCallbackRedirect(undefined, ORIGIN)).toBeNull()
     expect(resolveCallbackRedirect(['https://evil.example/'], ORIGIN)).toBeNull()
+  })
+})
+
+describe('resolveInternalRedirect：登录后回跳目标（?redirect=）', () => {
+  it('放行站内相对路径', () => {
+    expect(resolveInternalRedirect('/app/nodes/123/edit?tab=keys')).toBe('/app/nodes/123/edit?tab=keys')
+    expect(resolveInternalRedirect('/app/dashboard')).toBe('/app/dashboard')
+  })
+
+  it('拒协议相对与反斜杠伪装（开放重定向）', () => {
+    expect(resolveInternalRedirect('//evil.example/steal')).toBeNull()
+    expect(resolveInternalRedirect('/\\evil.example/steal')).toBeNull()
+  })
+
+  it('拒绝对 URL 与站外形式', () => {
+    expect(resolveInternalRedirect('https://evil.example/steal')).toBeNull()
+    expect(resolveInternalRedirect('evil.example/steal')).toBeNull()
+  })
+
+  it('拒空值与非字符串（query 可重复，可能是数组）', () => {
+    expect(resolveInternalRedirect('')).toBeNull()
+    expect(resolveInternalRedirect('   ')).toBeNull()
+    expect(resolveInternalRedirect(undefined)).toBeNull()
+    expect(resolveInternalRedirect(['/app/dashboard'])).toBeNull()
   })
 })

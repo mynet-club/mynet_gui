@@ -42,9 +42,12 @@ export function setupRouteGuards(router: Router, auth: RouteAuthState) {
       return '/app/dashboard'
     }
 
-    // 本机地址即本机面：不强制云端登录。
+    // 本机地址即本机面：本机面板路由不强制云端登录。
+    // 但平台控制台（/app/*）是云端页面 —— 会话过期/未登录一律去登录页，
+    // 不许在本机地址上放行后顶着占位帐号留在控制台（2026-11-03）。
     if (!auth.isAuthenticated && !isAuthRoute && to.path !== '/') {
-      if (localHost()) {
+      const isConsole = to.path === '/app' || to.path.startsWith('/app/')
+      if (localHost() && !isConsole) {
         return true
       }
       return { path: '/auth/login', query: { redirect: to.fullPath } }

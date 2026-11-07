@@ -77,3 +77,52 @@ describe('tokenManager 刷新响应解包', () => {
     expect(saved?.auth_token_expires_in).toBeLessThanOrEqual(now + 60 * 60 * 1000 + 2000)
   })
 })
+
+describe('tokenManager 会话过期广播（auth-expired）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('window', {
+      setTimeout: (fn: () => void, ms: number) => setTimeout(fn, ms),
+      dispatchEvent: vi.fn()
+    })
+    vi.mocked(LocalStorage.getItem).mockImplementation((key: string) =>
+      key === 'refresh_token' ? 'old-refresh' : null
+    )
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('refresh 被服务端判死（401）时清 token 并广播 auth-expired', async () => {
+    vi.mocked(api.post).mockRejectedValue({
+      response: { status: 401, data: { code: 'REFRESH_TOKEN_EXPIRED', message: 'expired' } }
+    })
+
+    await expect(tokenManager.refreshToken()).rejects.toBeTruthy()
+
+    expect(LocalStorage.remove).toHaveBeenCalledWith('auth_token')
+    expect(window.dispatchEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'mynet:auth-expired' })
+    )
+  })
+
+  it('网络错误不清 token 也不广播（不能误伤会话）', async () => {
+    vi.mocked(api.post).mockRejectedValue(new Error('network down'))
+
+    await expect(tokenManager.refreshToken()).rejects.toBeTruthy()
+
+    expect(LocalStorage.remove).not.toHaveBeenCalled()
+    expect(window.dispatchEvent).not.toHaveBeenCalled()
+  })
+
+  it('没有 refresh token 时广播 auth-expired（需要重新登录）', async () => {
+    vi.mocked(LocalStorage.getItem).mockReturnValue(null)
+
+    await expect(tokenManager.refreshToken()).rejects.toThrow('No refresh token')
+
+    expect(window.dispatchEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'mynet:auth-expired' })
+    )
+  })
+})
