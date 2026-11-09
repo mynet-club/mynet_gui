@@ -588,6 +588,37 @@ const networkNavigationItems = computed((): NavigationItem[] => [
         path: '/app/services/my'
       }
     ]
+  },
+  {
+    name: 'utc',
+    label: 'navigation.utc',
+    icon: 'hub',
+    children: [
+      {
+        name: 'utc-nodes',
+        label: 'navigation.utc.nodes',
+        icon: 'dns',
+        path: '/app/utc/nodes'
+      },
+      {
+        name: 'utc-paths',
+        label: 'navigation.utc.paths',
+        icon: 'alt_route',
+        path: '/app/utc/paths'
+      },
+      {
+        name: 'utc-usage',
+        label: 'navigation.utc.usage',
+        icon: 'data_usage',
+        path: '/app/utc/usage'
+      },
+      {
+        name: 'utc-faults',
+        label: 'navigation.utc.faults',
+        icon: 'report_problem',
+        path: '/app/utc/faults'
+      }
+    ]
   }
 ])
 

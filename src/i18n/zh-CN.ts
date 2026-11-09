@@ -1131,6 +1131,13 @@ export default {
       myServices: '我的服务',
       myServicesDescription: '管理和分享你创建的服务'
     },
+    utc: {
+      title: 'UTC 网络',
+      nodes: '节点',
+      paths: '路径与分配',
+      usage: '用量',
+      faults: '故障状态'
+    },
     social: {
       title: '组网管理',
       friends: '好友列表',

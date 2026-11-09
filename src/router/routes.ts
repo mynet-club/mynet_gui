@@ -163,6 +163,32 @@ const routes: RouteRecordRaw[] = [
         ]
       },
       
+      // UTC 可见性（M4）：节点、路径/分配、用量、故障状态
+      {
+        path: 'utc/nodes',
+        name: 'utc-nodes',
+        component: () => import('../pages/utc/UtcNodesPage.vue'),
+        meta: { title: 'UTC 节点', requiresAuth: true }
+      },
+      {
+        path: 'utc/paths',
+        name: 'utc-paths',
+        component: () => import('../pages/utc/UtcPathsPage.vue'),
+        meta: { title: 'UTC 路径与分配', requiresAuth: true }
+      },
+      {
+        path: 'utc/usage',
+        name: 'utc-usage',
+        component: () => import('../pages/utc/UtcUsagePage.vue'),
+        meta: { title: 'UTC 用量', requiresAuth: true }
+      },
+      {
+        path: 'utc/faults',
+        name: 'utc-faults',
+        component: () => import('../pages/utc/UtcFaultsPage.vue'),
+        meta: { title: 'UTC 故障状态', requiresAuth: true }
+      },
+
       // 其他网络模块路由
       { 
         path: 'routes', 

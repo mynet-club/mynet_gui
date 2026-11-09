@@ -1064,6 +1064,13 @@ export default {
       myServices: 'My Services',
       myServicesDescription: 'Manage and share services you created'
     },
+    utc: {
+      title: 'UTC Network',
+      nodes: 'Nodes',
+      paths: 'Paths & Assignments',
+      usage: 'Usage',
+      faults: 'Fault Status'
+    },
     social: {
       title: 'Social Network',
       friends: 'Friends',
