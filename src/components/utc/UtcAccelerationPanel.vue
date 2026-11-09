@@ -70,9 +70,13 @@
           <q-item-label class="mono">{{ row.transport_id }}</q-item-label>
           <q-item-label caption>
             {{ t('utcAcceleration.account') }} {{ row.account_id }}
+            · {{ t('utcAcceleration.revision') }} {{ row.desired_revision }}
             <span v-if="row.updated_at">
               · {{ t('utcAcceleration.updatedAt') }} {{ formatUtcTime(row.updated_at) }}
             </span>
+          </q-item-label>
+          <q-item-label v-if="row.observed_detail" caption class="text-grey-6">
+            {{ t('utcAcceleration.observedDetail') }} {{ row.observed_detail }}
           </q-item-label>
         </q-item-section>
         <q-item-section side>

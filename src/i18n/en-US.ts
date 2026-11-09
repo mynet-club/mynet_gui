@@ -1084,6 +1084,8 @@ export default {
     subtitle: 'Enable UTC acceleration per transport; on by default, disabling requires confirmation',
     refresh: 'Refresh',
     account: 'Account',
+    revision: 'Revision',
+    observedDetail: 'Observed detail',
     updatedAt: 'Updated',
     pendingNotice: 'Actual status depends on the hub/agent reporting channel. Only the desired state is shown; "Pending" does not mean acceleration is active.',
     stateApplied: 'Applied',

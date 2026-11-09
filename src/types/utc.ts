@@ -54,7 +54,9 @@ export interface UtcAccelerationItem {
   transport_id: string
   account_id: string
   desired_enabled: boolean
+  desired_revision: number
   observed_state: UtcAccelerationObservedState
+  observed_detail: string | null
   updated_at: string | null
 }
 

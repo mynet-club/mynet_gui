@@ -1151,6 +1151,8 @@ export default {
     subtitle: '按 transport 启用 UTC 加速；默认开启，关闭需二次确认',
     refresh: '刷新',
     account: '账号',
+    revision: '版本',
+    observedDetail: '观测详情',
     updatedAt: '更新于',
     pendingNotice: '实际生效状态依赖 hub/agent 上报通道。当前仅展示目标状态，“待生效”不代表已加速。',
     stateApplied: '已生效',

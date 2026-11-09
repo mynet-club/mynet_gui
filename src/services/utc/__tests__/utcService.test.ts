@@ -15,7 +15,9 @@ const item = {
   transport_id: 't-1',
   account_id: 'acc-1',
   desired_enabled: true,
+  desired_revision: 1,
   observed_state: 'UNKNOWN' as const,
+  observed_detail: null,
   updated_at: '2026-11-09T00:00:00Z'
 }
 
