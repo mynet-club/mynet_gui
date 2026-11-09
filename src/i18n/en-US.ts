@@ -1079,6 +1079,25 @@ export default {
     },
     help: 'Help Documentation'
   },
+  utcAcceleration: {
+    title: 'TCP Acceleration',
+    subtitle: 'Enable UTC acceleration per transport; on by default, disabling requires confirmation',
+    refresh: 'Refresh',
+    account: 'Account',
+    updatedAt: 'Updated',
+    pendingNotice: 'Actual status depends on the hub/agent reporting channel. Only the desired state is shown; "Pending" does not mean acceleration is active.',
+    stateApplied: 'Applied',
+    statePending: 'Pending',
+    stateDisabled: 'Disabled',
+    toggleAria: 'Toggle TCP acceleration for {transport}',
+    empty: 'No transport is available for this account; there is nothing to configure.',
+    unauthorized: 'You are not allowed to view or change acceleration status. Check the signed-in account.',
+    enableFailed: 'Failed to enable acceleration; the previous state was kept.',
+    disableFailed: 'Failed to disable acceleration; the previous state was kept.',
+    confirmDisableTitle: 'Disable TCP Acceleration',
+    confirmDisableMessage: 'After disabling, {transport} will no longer use UTC acceleration. Disable it?',
+    confirmDisable: 'Disable'
+  },
   routes: {
     title: 'Route Management',
     subtitle: 'Network routing management and configuration',

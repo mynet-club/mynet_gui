@@ -1146,6 +1146,25 @@ export default {
     },
     help: '帮助文档'
   },
+  utcAcceleration: {
+    title: 'TCP 加速',
+    subtitle: '按 transport 启用 UTC 加速；默认开启，关闭需二次确认',
+    refresh: '刷新',
+    account: '账号',
+    updatedAt: '更新于',
+    pendingNotice: '实际生效状态依赖 hub/agent 上报通道。当前仅展示目标状态，“待生效”不代表已加速。',
+    stateApplied: '已生效',
+    statePending: '待生效',
+    stateDisabled: '已关闭',
+    toggleAria: '切换 {transport} 的 TCP 加速',
+    empty: '当前账号暂无可配置的 transport，无需设置加速。',
+    unauthorized: '无权限查看或修改加速状态，请确认登录账号。',
+    enableFailed: '开启加速失败，已保留原状态。',
+    disableFailed: '关闭加速失败，已保留原状态。',
+    confirmDisableTitle: '关闭 TCP 加速',
+    confirmDisableMessage: '关闭后 {transport} 将不再使用 UTC 加速，确认关闭？',
+    confirmDisable: '确认关闭'
+  },
   routes: {
     subtitle: '网络连接管理和配置',
     title: '连接管理',

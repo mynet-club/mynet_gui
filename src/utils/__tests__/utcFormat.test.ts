@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { faultTone, formatBytes, sideLabel, usagePercent } from '../utcFormat'
+import { accelerationState, faultTone, formatBytes, sideLabel, usagePercent } from '../utcFormat'
 
 describe('utcFormat', () => {
   it('formats byte values with binary units', () => {
@@ -23,5 +23,14 @@ describe('utcFormat', () => {
     expect(faultTone('open')).toBe('negative')
     expect(faultTone('retrying')).toBe('warning')
     expect(faultTone('closed')).toBe('info')
+  })
+
+  it('never reports desired ON with UNKNOWN observed as applied', () => {
+    expect(accelerationState(true, 'UNKNOWN')).toBe('pending')
+    expect(accelerationState(true, null)).toBe('pending')
+    expect(accelerationState(true, 'APPLIED')).toBe('applied')
+    expect(accelerationState(false, 'APPLIED')).toBe('disabled')
+    expect(accelerationState(false, 'UNKNOWN')).toBe('disabled')
+    expect(accelerationState(undefined, undefined)).toBe('disabled')
   })
 })

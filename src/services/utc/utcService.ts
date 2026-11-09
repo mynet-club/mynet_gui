@@ -1,5 +1,7 @@
 import { api } from '../api'
 import type {
+  UtcAccelerationItem,
+  UtcAccelerationList,
   UtcFaultFilters,
   UtcFaultList,
   UtcHubStatus,
@@ -29,6 +31,14 @@ async function getData<T>(path: string, params?: Record<string, unknown>): Promi
   return response.data.data as T
 }
 
+async function putData<T>(path: string, body: Record<string, unknown>): Promise<T> {
+  const response = await api.put(path, body)
+  if (!response.data?.success) {
+    throw new Error(response.data?.message || 'UTC 更新失败')
+  }
+  return response.data.data as T
+}
+
 export const utcService = {
   getIdentity: () => getData<UtcIdentity>('/utc/identity'),
 
@@ -44,7 +54,12 @@ export const utcService = {
     getData<UtcUsageList>('/utc/usage', filters as Record<string, unknown> | undefined),
 
   listFaults: (filters?: UtcFaultFilters) =>
-    getData<UtcFaultList>('/utc/faults', filters as Record<string, unknown> | undefined)
+    getData<UtcFaultList>('/utc/faults', filters as Record<string, unknown> | undefined),
+
+  getAcceleration: () => getData<UtcAccelerationList>('/utc/acceleration'),
+
+  setAcceleration: (transportId: string, enabled: boolean) =>
+    putData<UtcAccelerationItem>(`/utc/acceleration/${encodeURIComponent(transportId)}`, { enabled })
 }
 
 export function describeUtcError(error: unknown): string {

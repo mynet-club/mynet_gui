@@ -48,6 +48,21 @@ export interface UtcHubStatus {
   data_source: UtcDataSource
 }
 
+export type UtcAccelerationObservedState = 'UNKNOWN' | 'APPLIED'
+
+export interface UtcAccelerationItem {
+  transport_id: string
+  account_id: string
+  desired_enabled: boolean
+  observed_state: UtcAccelerationObservedState
+  updated_at: string | null
+}
+
+export interface UtcAccelerationList {
+  data_source: UtcDataSource
+  items: UtcAccelerationItem[]
+}
+
 export interface UtcPath {
   transport_id: string
   pair_id: number

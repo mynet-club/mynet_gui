@@ -39,3 +39,14 @@ export function faultTone(state?: string | null): 'negative' | 'warning' | 'info
   if (state === 'retrying' || state === 'degraded') return 'warning'
   return 'info'
 }
+
+export type UtcAccelerationState = 'applied' | 'pending' | 'disabled'
+
+/** desired 只是用户意图；只有 hub/agent 回传 APPLIED 才能算实际生效。 */
+export function accelerationState(
+  desiredEnabled?: boolean | null,
+  observedState?: string | null
+): UtcAccelerationState {
+  if (!desiredEnabled) return 'disabled'
+  return observedState === 'APPLIED' ? 'applied' : 'pending'
+}

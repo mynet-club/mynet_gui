@@ -44,6 +44,8 @@
         </div>
       </div>
 
+      <UtcAccelerationPanel />
+
       <div class="row q-col-gutter-md">
         <div class="col-12 col-lg-6">
           <q-card flat bordered>
@@ -126,6 +128,7 @@ import PageLayout from '../../components/layout/PageLayout.vue'
 import MynetMetricCard from '../../components/mynet/MynetMetricCard.vue'
 import MynetErrorPanel from '../../components/mynet/MynetErrorPanel.vue'
 import UtcSourceNotice from '../../components/utc/UtcSourceNotice.vue'
+import UtcAccelerationPanel from '../../components/utc/UtcAccelerationPanel.vue'
 import { describeUtcError, utcService } from '../../services/utc/utcService'
 import type { UtcDataSource, UtcHubStatus, UtcTransport } from '../../types/utc'
 import { formatUtcTime } from '../../utils/utcFormat'
