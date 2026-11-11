@@ -1136,7 +1136,8 @@ export default {
       nodes: '节点',
       paths: '路径与分配',
       usage: '用量',
-      faults: '故障状态'
+      faults: '故障状态',
+      relayAdmin: 'Relay 管理'
     },
     social: {
       title: '组网管理',

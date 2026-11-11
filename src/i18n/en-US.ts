@@ -1069,7 +1069,8 @@ export default {
       nodes: 'Nodes',
       paths: 'Paths & Assignments',
       usage: 'Usage',
-      faults: 'Fault Status'
+      faults: 'Fault Status',
+      relayAdmin: 'Relay Admin'
     },
     social: {
       title: 'Social Network',

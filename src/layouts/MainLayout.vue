@@ -617,6 +617,12 @@ const networkNavigationItems = computed((): NavigationItem[] => [
         label: 'navigation.utc.faults',
         icon: 'report_problem',
         path: '/app/utc/faults'
+      },
+      {
+        name: 'utc-relay-admin',
+        label: 'navigation.utc.relayAdmin',
+        icon: 'admin_panel_settings',
+        path: '/app/utc/relay-admin'
       }
     ]
   }

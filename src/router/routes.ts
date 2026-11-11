@@ -188,6 +188,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/utc/UtcFaultsPage.vue'),
         meta: { title: 'UTC 故障状态', requiresAuth: true }
       },
+      {
+        path: 'utc/relay-admin',
+        name: 'utc-relay-admin',
+        component: () => import('../pages/utc/UtcRelayAdminPage.vue'),
+        meta: { title: 'UTC Relay 管理', requiresAuth: true }
+      },
 
       // 其他网络模块路由
       { 
