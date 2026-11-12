@@ -28,6 +28,15 @@ npm run build
 npm run lint
 ```
 
+### 门禁与发布
+
+```bash
+make install-hooks
+make check           # guard + lint + test（人工全量入口）
+```
+
+推送按分层门禁执行：`pre-commit` 只跑 `make guard`；分支推送直接放行并记 `<git-dir>/gate-status=skipped`；tag 推送必须匹配 `<git-common-dir>/release-approvals/<tag>`，由 `mynet-club/mynet_release` 在 `make check` 与打包通过后写入。`release.json` 定义本仓的 build/test/package 命令。
+
 ## 📋 功能特性
 
 - ✅ **用户认证系统**: JWT Token认证，自动刷新

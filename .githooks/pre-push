@@ -1,26 +1,106 @@
 #!/bin/sh
-# pre-push：重量守护（lint + test）——「不推坏东西」的关口
-# DoD 要求「测试通过」，这里强制执行
-echo "▸ pre-push: make check"
+# pre-push（开发机）：分支推送放行；tag 推送必须带发布流水线批准。
+#
+# 批准记录由发布流水线在 make check/证据通过后写入
+#   <git-dir>/release-approvals/<tag>
+# 内容至少包含 sha=<tag 指向的 commit> 与 tag=<tag>。
+# 没有匹配批准的 tag 一律拒绝；不按主机名/IP 区分机器。
+set -u
+
+refs_file=$(mktemp "${TMPDIR:-/tmp}/mynet-prepush.XXXXXX" 2>/dev/null) || refs_file=
+trap 'rm -f "$refs_file" 2>/dev/null' EXIT
+[ -n "$refs_file" ] && cat > "$refs_file"
+
+zero=0000000000000000000000000000000000000000
+release_push=0
+ref_list=
+
+if [ -n "$refs_file" ]; then
+  while read -r local_ref local_sha _ _remote_sha; do
+    [ -n "${local_ref:-}" ] || continue
+    ref_list="$ref_list $local_ref=$local_sha"
+    case "$local_ref" in
+      refs/tags/*) release_push=1 ;;
+    esac
+  done < "$refs_file"
+fi
+
 ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-if [ -z "$ROOT" ]; then
-  # bare 仓没有工作树，--show-toplevel 必然失败（mynet_gnb 就是 bare + linked worktree）。
-  # ⚠️ 这里此前写的是 `ROOT=$(...) || exit 0` —— **静默通过**。
-  #    同 guard.sh 开头那条教训：「没东西可查」型门禁等于没有门禁，它把「没跑」
-  #    伪装成「通过」。2026-10-04 的事故里，含生产节点与公司网关私钥的 .tgz
-  #    正是从 bare 仓目录直接 push 上去的，pre-push 一次都没跑过。
-  #    所以：跳过**必须响**，让推送日志里看得见这次没查。
-  echo "  ⚠⚠ pre-push 跳过：当前在 bare 仓里（无工作树，取不到 --show-toplevel）"
-  echo "  ⚠⚠ 本次推送**没有跑过任何守护**（guard / lint / test 全部未执行）"
-  echo "  ⚠⚠ 要查请去任一 linked worktree 跑：git worktree list && make check"
+GIT_DIR=
+GIT_COMMON=
+STATUS=
+if [ -n "$ROOT" ]; then
+  cd "$ROOT" || exit 1
+  GIT_DIR=$(git rev-parse --git-dir 2>/dev/null) || GIT_DIR=.git
+  case "$GIT_DIR" in
+    /*) ;;
+    *) GIT_DIR="$ROOT/$GIT_DIR" ;;
+  esac
+  GIT_COMMON=$(git rev-parse --git-common-dir 2>/dev/null) || GIT_COMMON=$GIT_DIR
+  case "$GIT_COMMON" in
+    /*) ;;
+    *) GIT_COMMON="$ROOT/$GIT_COMMON" ;;
+  esac
+  STATUS="$GIT_DIR/gate-status"
+fi
+
+mark_status() {
+  [ -n "$STATUS" ] || return 0
+  result=$1
+  reason=$2
+  {
+    printf 'result=%s\n' "$result"
+    printf 'reason=%s\n' "$reason"
+    printf 'refs=%s\n' "${ref_list# }"
+    printf 'at=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  } > "$STATUS" 2>/dev/null || true
+}
+
+if [ "$release_push" -eq 0 ]; then
+  mark_status skipped "development push; full check not run"
+  echo "▸ pre-push: 开发分支推送，放行（全量检查请手动执行或走发布流水线）"
   exit 0
 fi
-cd "$ROOT" || exit 0
-if [ -f Makefile.guard ]; then
-  exec make -f Makefile.guard check
+
+if [ -z "$ROOT" ]; then
+  mark_status rejected "tag push without worktree cannot verify release approval"
+  echo "  ✗ bare 仓无法核对发布批准，拒绝 tag 推送"
+  exit 1
 fi
-if [ -f Makefile ] && grep -q '^check:' Makefile 2>/dev/null; then
-  exec make check
+
+rejected=0
+while read -r local_ref local_sha _ _remote_sha; do
+  case "$local_ref" in
+    refs/tags/*) ;;
+    *) continue ;;
+  esac
+  tag=${local_ref#refs/tags/}
+  if [ "$local_sha" = "$zero" ]; then
+    echo "  ✗ 拒绝 tag 删除：$tag（发布历史只能前进）"
+    rejected=1
+    continue
+  fi
+  target=$(git rev-parse "$local_sha^{commit}" 2>/dev/null) || {
+    echo "  ✗ 无法解析 tag 指向的 commit：$tag"
+    rejected=1
+    continue
+  }
+  approval="$GIT_COMMON/release-approvals/$tag"
+  if [ -f "$approval" ] && grep -qx "sha=$target" "$approval" &&
+     grep -qx "tag=$tag" "$approval"; then
+    echo "  ✓ tag 批准匹配：$tag -> $target"
+  else
+    echo "  ✗ 没有发布批准：$tag -> $target"
+    echo "    tag 只能由发布流水线在门禁通过后推送"
+    rejected=1
+  fi
+done < "$refs_file"
+
+if [ "$rejected" -ne 0 ]; then
+  mark_status rejected "tag push without matching release approval"
+  exit 1
 fi
-sh .githooks/guard.sh || exit 1
-echo "✓ pre-push: guard 通过（无 check 目标，跳过 lint/test）"
+
+mark_status approved "tag push matches release approval"
+echo "✓ pre-push: tag 推送与发布批准一致"
+exit 0
