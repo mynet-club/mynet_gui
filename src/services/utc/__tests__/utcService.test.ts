@@ -247,7 +247,7 @@ describe('utcService relay admin endpoints', () => {
 
     const items = await utcService.listPairApprovals()
     expect(apiGet).toHaveBeenCalledWith('/utc/admin/pair-approvals', { params: undefined })
-    expect(items.items[0].id).toBe(9)
+    expect(items.items[0]?.id).toBe(9)
 
     apiPost.mockResolvedValue(ok({ item: pair, delivery, data_source: dataSource }))
     await utcService.approvePair({ transport_id: 'tr-1', pair_id: 7, side: 0, reason: 'pilot', audit_ref: 'OPS-P' })
