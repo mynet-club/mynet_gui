@@ -3,7 +3,7 @@
   "platform": "web",
   "arch": "noarch",
   "commands": {
-    "build": ["sh", "scripts/release_build.sh"],
+    "build": ["sh", "scripts/release_build.sh", "{version}"],
     "test": ["make", "check"],
     "package": ["sh", "scripts/release_package.sh", "{artifacts}", "{version}"],
     "deploy": ["sh", "scripts/release_deploy.sh", "{artifacts}", "{version}"]

@@ -1,10 +1,10 @@
 #!/bin/sh
 # release_deploy.sh — 非交互部署已打包的 mynet_gui web 产物
 #
-#   sh scripts/release_deploy.sh <artifact-dir> <version>
+#   sh scripts/release_deploy.sh <artifact-dir> <version> [--dry-run]
 #   sh scripts/release_deploy.sh --rollback <version>
 #
-# 目标取自 deploy-target.sh；DEPLOY_USER/DEPLOY_HOST/DEPLOY_PATH 可覆盖。
+# 目标取自 deploy-target.sh（xiawo:admin）；DEPLOY_USER/DEPLOY_HOST/DEPLOY_PATH 可覆盖。
 # 本地演练：DEPLOY_MODE=local DEPLOY_PATH=/tmp/site sh scripts/release_deploy.sh ...
 #
 # 目录约定：
@@ -51,7 +51,7 @@ r_sync_between() {
 
 reload_nginx() {
   [ -n "$REMOTE_HOST" ] || return 0
-  r_run "nginx -t >/dev/null 2>&1 && (systemctl reload nginx || nginx -s reload)"
+  r_run "sudo -n nginx -t >/dev/null 2>&1 && sudo -n systemctl reload nginx"
 }
 
 fetch_url() {
@@ -67,11 +67,11 @@ fetch_url() {
 healthcheck() {
   _version=$1
   if [ -n "$REMOTE_HOST" ]; then
-    _body=$(fetch_url "$SITE_URL/version.json?ts=$(date +%s)") || return 1
-    printf '%s' "$_body" | grep -q "\"version\":\"$_version\""
+    _body=$(fetch_url "$SITE_URL/deployment-info.json?ts=$(date +%s)") || return 1
+    printf '%s' "$_body" | grep -q "\"version\": \"$_version\""
   else
-    [ -f "$REMOTE_PATH/version.json" ] || return 1
-    grep -q "\"version\":\"$_version\"" "$REMOTE_PATH/version.json"
+    [ -f "$REMOTE_PATH/deployment-info.json" ] || return 1
+    grep -q "\"version\": \"$_version\"" "$REMOTE_PATH/deployment-info.json"
   fi
 }
 
@@ -89,6 +89,16 @@ rollback_to() {
   healthcheck "$_version" || die "回滚后健康检查失败：$_version"
   info "✓ 已回滚到 $_version"
 }
+
+DRY_RUN=0
+if [ "${1:-}" = "--dry-run" ]; then
+  DRY_RUN=1
+  shift
+fi
+if [ "${3:-}" = "--dry-run" ]; then
+  DRY_RUN=1
+  set -- "$1" "$2"
+fi
 
 if [ "${1:-}" = "--rollback" ]; then
   [ "$#" -eq 2 ] || { echo "用法: $0 --rollback <version>" >&2; exit 2; }
@@ -114,11 +124,16 @@ if grep -q '/gui/assets/' "$TMP/index.html"; then
   die "产物是 embed 口径（/gui/assets/），拒绝部署到 web 根路径"
 fi
 
-COMMIT=$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || echo unknown)
-printf '{"version":"%s","commit":"%s","deployed_at":"%s"}\n' \
-  "$VERSION" "$COMMIT" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$TMP/version.json"
+[ -f "$TMP/deployment-info.json" ] || die "产物内缺 deployment-info.json"
+grep -q "\"version\": \"$VERSION\"" "$TMP/deployment-info.json" || \
+  die "deployment-info.json 与版本 $VERSION 不一致"
 
 info "部署 $VERSION -> ${REMOTE_HOST:-local}:$REMOTE_PATH"
+
+if [ "$DRY_RUN" = 1 ]; then
+  info "dry-run：产物校验通过，未写入目标"
+  exit 0
+fi
 
 PREV=$(r_run "cat '$RELEASES/current' 2>/dev/null || true")
 PREV=$(printf '%s' "$PREV" | tr -d '\r\n')
@@ -152,7 +167,7 @@ r_sync_between "$RELEASES/$VERSION" "$REMOTE_PATH"
 set_current "$VERSION"
 reload_nginx
 if ! healthcheck "$VERSION"; then
-  echo "✗ 健康检查失败：$SITE_URL/version.json" >&2
+  echo "✗ 健康检查失败：$SITE_URL/deployment-info.json" >&2
   restore_on_failure
   trap 'rm -rf "$TMP"' EXIT INT TERM
   exit 1

@@ -1,6 +1,8 @@
 #!/bin/sh
-# Release build: install locked dependencies, then produce a web-mode dist/spa.
+# Release build: locked deps, web-mode dist/spa, and a version stamp.
 set -eu
+
+VERSION=${1:?usage: release_build.sh VERSION}
 
 npm ci
 npm run build
@@ -23,5 +25,24 @@ asset=$(sed -n 's/.*src="\(\/assets\/[^"]*\.js\)".*/\1/p' dist/spa/index.html | 
 }
 [ -f "dist/spa$asset" ] || {
   echo "✗ index.html 引用的资源不存在：dist/spa$asset" >&2
+  exit 1
+}
+
+commit=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)
+built_at=$(date -u '+%Y-%m-%d %H:%M:%S')
+cat > dist/spa/deployment-info.json <<EOF
+{
+  "project": "MyNet Frontend",
+  "version": "$VERSION",
+  "buildTime": "$built_at",
+  "gitBranch": "$branch",
+  "gitCommit": "$commit",
+  "apiUrl": "",
+  "environment": "production"
+}
+EOF
+grep -q "\"version\": \"$VERSION\"" dist/spa/deployment-info.json || {
+  echo "✗ deployment-info.json 版本写入失败" >&2
   exit 1
 }
