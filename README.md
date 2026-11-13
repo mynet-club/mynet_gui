@@ -37,6 +37,8 @@ make check           # guard + lint + test（人工全量入口）
 
 推送按分层门禁执行：`pre-commit` 只跑 `make guard`；分支推送直接放行并记 `<git-dir>/gate-status=skipped`；tag 推送必须匹配 `<git-common-dir>/release-approvals/<tag>`，由 `mynet-club/mynet_release` 在 `make check` 与打包通过后写入。`release.json` 定义本仓的 build/test/package 命令。
 
+发布后再执行 `pipeline.py deploy --run-dir <run>`：`scripts/release_deploy.sh` 把已打包的 SPA 发到 `deploy-target.sh` 指定的目标，保留版本目录与切换前快照，健康检查失败自动回滚。部署机需要到源站的 SSH 权限；`my.mynet.club` 走 Cloudflare，SSH 需在部署机上配 `Host my.mynet.club → HostName <源站IP>` 或设置 `DEPLOY_HOST`。
+
 ## 📋 功能特性
 
 - ✅ **用户认证系统**: JWT Token认证，自动刷新

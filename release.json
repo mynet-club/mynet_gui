@@ -5,6 +5,7 @@
   "commands": {
     "build": ["sh", "scripts/release_build.sh"],
     "test": ["make", "check"],
-    "package": ["sh", "scripts/release_package.sh", "{artifacts}", "{version}"]
+    "package": ["sh", "scripts/release_package.sh", "{artifacts}", "{version}"],
+    "deploy": ["sh", "scripts/release_deploy.sh", "{artifacts}", "{version}"]
   }
 }
