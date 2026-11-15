@@ -116,6 +116,90 @@
           </template>
         </q-table>
       </q-card>
+
+      <q-card flat bordered class="q-mt-md">
+        <q-card-section class="row q-col-gutter-sm items-end">
+          <div class="col-12 col-md-4">
+            <div class="text-subtitle1">签名用量摘要</div>
+            <div class="text-caption text-grey-7">
+              Core 对账后用端点身份签名，API 验签入库；billable 不由前端重算。
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <q-input v-model.number="summaryPairId" dense outlined type="number" min="0" label="pair_id" clearable />
+          </div>
+          <div class="col-6 col-md-2">
+            <q-select
+              v-model="summaryDirection"
+              :options="summaryDirectionOptions"
+              dense
+              outlined
+              emit-value
+              map-options
+              clearable
+              label="方向"
+            />
+          </div>
+          <div class="col-6 col-md-2">
+            <q-select
+              v-model="summaryState"
+              :options="summaryStateOptions"
+              dense
+              outlined
+              emit-value
+              map-options
+              clearable
+              label="对账状态"
+            />
+          </div>
+          <div class="col-12 col-md-2">
+            <q-btn color="primary" unelevated label="查询摘要" :loading="summaryLoading" @click="loadSummaries" />
+          </div>
+        </q-card-section>
+        <q-card-section v-if="summaryError">
+          <MynetErrorPanel :message="summaryError" retryable @retry="loadSummaries" />
+        </q-card-section>
+        <q-card-section v-else class="row q-col-gutter-md">
+          <div class="col-6 col-md-3">
+            <MynetMetricCard label="billable 合计" :value="formatBytes(summaryTotals.billable)" tone="ok" />
+          </div>
+          <div class="col-6 col-md-3">
+            <MynetMetricCard label="端点 A 合计" :value="formatBytes(summaryTotals.endpoint_a)" />
+          </div>
+          <div class="col-6 col-md-3">
+            <MynetMetricCard label="端点 B 合计" :value="formatBytes(summaryTotals.endpoint_b)" />
+          </div>
+          <div class="col-6 col-md-3">
+            <MynetMetricCard label="独立锚合计" :value="formatBytes(summaryTotals.anchor)" />
+          </div>
+        </q-card-section>
+        <q-table
+          :rows="summaryItems"
+          :columns="summaryColumns"
+          row-key="summary_sha256"
+          dense
+          flat
+          :pagination="{ rowsPerPage: 20 }"
+          no-data-label="没有已投递的签名用量摘要"
+        >
+          <template #body-cell-state="props">
+            <q-td :props="props">
+              <q-badge :color="summaryStateMeta(props.row.state).color">
+                {{ summaryStateMeta(props.row.state).label }}
+              </q-badge>
+            </q-td>
+          </template>
+          <template #body-cell-pair="props">
+            <q-td :props="props">{{ props.row.pair_id }} / {{ props.row.pair_gen }}</q-td>
+          </template>
+          <template #body-cell-billable="props">
+            <q-td :props="props">{{ formatBytes(props.row.billable) }}</q-td>
+          </template>
+          <template #body-cell-window_end="props">
+            <q-td :props="props">{{ formatWindow(props.row.window_end) }}</q-td>
+          </template>
+        </q-table>
+      </q-card>
     </template>
   </PageLayout>
 </template>
@@ -127,7 +211,13 @@ import MynetMetricCard from '../../components/mynet/MynetMetricCard.vue'
 import MynetErrorPanel from '../../components/mynet/MynetErrorPanel.vue'
 import UtcSourceNotice from '../../components/utc/UtcSourceNotice.vue'
 import { describeUtcError, utcService } from '../../services/utc/utcService'
-import type { UtcDataSource, UtcUsageRecord, UtcUsageTotals } from '../../types/utc'
+import type {
+  UtcDataSource,
+  UtcUsageRecord,
+  UtcUsageSummaryItem,
+  UtcUsageSummaryTotals,
+  UtcUsageTotals
+} from '../../types/utc'
 import { formatBytes, formatUtcTime, sideLabel, usagePercent } from '../../utils/utcFormat'
 
 type UsageRow = UtcUsageRecord & { rowKey: string }
@@ -151,6 +241,44 @@ const pairId = ref<number | null>(null)
 const side = ref<number | null>(null)
 const direction = ref<string | null>(null)
 
+const summaryLoading = ref(false)
+const summaryError = ref('')
+const summaryItems = ref<UtcUsageSummaryItem[]>([])
+const summaryTotals = ref<UtcUsageSummaryTotals>({
+  billable: 0,
+  endpoint_a: 0,
+  endpoint_b: 0,
+  anchor: 0
+})
+const summaryPairId = ref<number | null>(null)
+const summaryDirection = ref<string | null>(null)
+const summaryState = ref<string | null>(null)
+
+const summaryDirectionOptions = [
+  { label: 'AB', value: 'AB' },
+  { label: 'BA', value: 'BA' }
+]
+
+const summaryStateOptions = [
+  { label: 'reconciled', value: 'reconciled' },
+  { label: 'unproven', value: 'unproven' },
+  { label: 'disputed', value: 'disputed' }
+]
+
+const SUMMARY_STATE_META: Record<string, { color: string; label: string }> = {
+  reconciled: { color: 'positive', label: '已对账' },
+  unproven: { color: 'warning', label: '未证实' },
+  disputed: { color: 'negative', label: '有争议' }
+}
+
+function summaryStateMeta(state: string): { color: string; label: string } {
+  return SUMMARY_STATE_META[state] || { color: 'grey', label: state }
+}
+
+function formatWindow(value: number): string {
+  return value > 0 ? formatUtcTime(new Date(value).toISOString()) : '-'
+}
+
 const sideOptions = [
   { label: 'A (0)', value: 0 },
   { label: 'B (1)', value: 1 }
@@ -171,6 +299,18 @@ const columns = [
   { name: 'remaining', label: '剩余', field: 'remaining_bytes', align: 'left' as const },
   { name: 'quota_slice_id', label: 'quota slice', field: 'quota_slice_id', align: 'left' as const },
   { name: 'updated_at', label: '更新时间', field: 'updated_at', align: 'left' as const }
+]
+
+const summaryColumns = [
+  { name: 'transport_id', label: 'transport', field: 'transport_id', align: 'left' as const },
+  { name: 'pair', label: 'pair / gen', field: 'pair_id', align: 'left' as const },
+  { name: 'direction', label: '方向', field: 'direction', align: 'left' as const },
+  { name: 'state', label: '对账状态', field: 'state', align: 'left' as const },
+  { name: 'billable', label: 'billable', field: 'billable', align: 'left' as const },
+  { name: 'endpoint_a', label: '端点 A', field: 'endpoint_a', align: 'left' as const },
+  { name: 'endpoint_b', label: '端点 B', field: 'endpoint_b', align: 'left' as const },
+  { name: 'anchor', label: '独立锚', field: 'anchor', align: 'left' as const },
+  { name: 'window_end', label: '窗口结束', field: 'window_end', align: 'left' as const }
 ]
 
 function remainingOf(row: UtcUsageRecord): number {
@@ -208,6 +348,26 @@ async function load(): Promise<void> {
   }
 }
 
+async function loadSummaries(): Promise<void> {
+  summaryLoading.value = true
+  summaryError.value = ''
+  try {
+    const data = await utcService.listUsageSummaries({
+      pair_id: typeof summaryPairId.value === 'number' && summaryPairId.value >= 0
+        ? summaryPairId.value
+        : undefined,
+      direction: summaryDirection.value ?? undefined,
+      state: summaryState.value ?? undefined
+    })
+    summaryItems.value = data.items
+    summaryTotals.value = data.totals
+  } catch (e) {
+    summaryError.value = describeUtcError(e)
+  } finally {
+    summaryLoading.value = false
+  }
+}
+
 function reset(): void {
   transportId.value = ''
   pairId.value = null
@@ -216,5 +376,8 @@ function reset(): void {
   load()
 }
 
-onMounted(load)
+onMounted(() => {
+  load()
+  loadSummaries()
+})
 </script>

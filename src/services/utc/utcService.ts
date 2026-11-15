@@ -17,7 +17,9 @@ import type {
   UtcRelayInventoryResult,
   UtcTransportList,
   UtcUsageFilters,
-  UtcUsageList
+  UtcUsageList,
+  UtcUsageSummaryFilters,
+  UtcUsageSummaryList
 } from '../../types/utc'
 
 function compact(params?: Record<string, unknown>): Record<string, unknown> | undefined {
@@ -67,6 +69,13 @@ export const utcService = {
 
   listUsage: (filters?: UtcUsageFilters) =>
     getData<UtcUsageList>('/utc/usage', filters as Record<string, unknown> | undefined),
+
+  // 租户可见的 Core 签名对账摘要（ADR-0033）；billable 由 Core 计算。
+  listUsageSummaries: (filters?: UtcUsageSummaryFilters) =>
+    getData<UtcUsageSummaryList>(
+      '/utc/usage/summaries',
+      filters as Record<string, unknown> | undefined
+    ),
 
   listFaults: (filters?: UtcFaultFilters) =>
     getData<UtcFaultList>('/utc/faults', filters as Record<string, unknown> | undefined),

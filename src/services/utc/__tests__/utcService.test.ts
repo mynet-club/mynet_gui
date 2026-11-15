@@ -286,4 +286,27 @@ describe('utcService relay admin endpoints', () => {
     }
     expect(describeUtcError(conflict)).toBe('stale（STALE_REVISION）')
   })
+
+  it('GET /utc/usage/summaries compacts tenant filters', async () => {
+    const payload = {
+      scope: 'default',
+      count: 1,
+      items: [],
+      totals: { billable: 0, endpoint_a: 0, endpoint_b: 0, anchor: 0 },
+      data_source: { mode: 'database', durable: true, note: '' }
+    }
+    apiGet.mockResolvedValueOnce(ok(payload))
+
+    const result = await utcService.listUsageSummaries({
+      pair_id: 7,
+      direction: 'AB',
+      state: 'reconciled',
+      transport_id: ''
+    })
+
+    expect(apiGet).toHaveBeenCalledWith('/utc/usage/summaries', {
+      params: { pair_id: 7, direction: 'AB', state: 'reconciled' }
+    })
+    expect(result).toEqual(payload)
+  })
 })

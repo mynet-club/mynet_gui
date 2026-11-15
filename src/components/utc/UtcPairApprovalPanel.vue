@@ -30,9 +30,9 @@
 
     <q-banner dense rounded class="utc-pair-approvals__notice q-mx-md q-mt-md">
       <template #avatar>
-        <q-icon name="sync_problem" />
+        <q-icon :name="deliveryIcon" />
       </template>
-      {{ delivery?.note || 'Hub 管理面下发未接通：名单只用于管理面预置，未改变 Hub 的静态派单。' }}
+      {{ delivery?.note || deliveryLabel }}
     </q-banner>
 
     <q-banner v-if="actionError" dense rounded class="utc-pair-approvals__error q-mx-md q-mt-md">
@@ -171,7 +171,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import MynetErrorPanel from '../mynet/MynetErrorPanel.vue'
 import { describeUtcError, utcService } from '../../services/utc/utcService'
 import type { UtcPairApprovalItem, UtcRelayDelivery } from '../../types/utc'
@@ -184,6 +184,32 @@ const actionError = ref('')
 const forbidden = ref(false)
 const items = ref<UtcPairApprovalItem[]>([])
 const delivery = ref<UtcRelayDelivery | null>(null)
+
+const deliveryLabel = computed(() => {
+  switch (delivery.value?.state) {
+    case 'wired':
+      return '已投递到 Hub，纳入派单。'
+    case 'pending':
+      return '变更已进入 outbox，等待投递或重试。'
+    case 'failed':
+      return '最近一次投递失败，下一轮自动重试。'
+    default:
+      return '未接入 Hub 下发（not_wired）。'
+  }
+})
+
+const deliveryIcon = computed(() => {
+  switch (delivery.value?.state) {
+    case 'wired':
+      return 'cloud_done'
+    case 'pending':
+      return 'schedule'
+    case 'failed':
+      return 'error_outline'
+    default:
+      return 'sync_problem'
+  }
+})
 const counts = reactive({ approved: 0, cap: 4096 })
 
 const approveOpen = ref(false)

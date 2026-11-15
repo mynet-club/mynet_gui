@@ -27,9 +27,9 @@
 
     <q-banner dense rounded class="utc-relay-inventory__notice q-mx-md q-mt-md">
       <template #avatar>
-        <q-icon name="sync_problem" />
+        <q-icon :name="deliveryIcon" />
       </template>
-      {{ delivery?.note || 'Hub 管理面下发未接通：以下记录只是管理面配置，不产生 placement，也未在 Hub 生效。' }}
+      {{ delivery?.note || deliveryLabel }}
     </q-banner>
 
     <q-banner v-if="actionError" dense rounded class="utc-relay-inventory__error q-mx-md q-mt-md">
@@ -362,6 +362,32 @@ const actionError = ref('')
 const forbidden = ref(false)
 const items = ref<UtcRelayInventoryItem[]>([])
 const delivery = ref<UtcRelayDelivery | null>(null)
+
+const deliveryLabel = computed(() => {
+  switch (delivery.value?.state) {
+    case 'wired':
+      return '已投递到 Hub，纳入派单。'
+    case 'pending':
+      return '变更已进入 outbox，等待投递或重试。'
+    case 'failed':
+      return '最近一次投递失败，下一轮自动重试。'
+    default:
+      return '未接入 Hub 下发（not_wired）。'
+  }
+})
+
+const deliveryIcon = computed(() => {
+  switch (delivery.value?.state) {
+    case 'wired':
+      return 'cloud_done'
+    case 'pending':
+      return 'schedule'
+    case 'failed':
+      return 'error_outline'
+    default:
+      return 'sync_problem'
+  }
+})
 
 const formOpen = ref(false)
 const editing = ref<UtcRelayInventoryItem | null>(null)
