@@ -303,3 +303,15 @@ export interface LocalUtcPairsPayload {
   count: number
   peers: LocalUtcPeerState[]
 }
+
+export interface LocalUtcSyncPeer {
+  name: string
+  transport_id: number
+  udp_bind?: string
+  udp_target?: string
+}
+
+export interface LocalUtcSyncPayload {
+  edge_candidates?: string[]
+  peers: LocalUtcSyncPeer[]
+}

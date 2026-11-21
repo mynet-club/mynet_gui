@@ -11,7 +11,7 @@
         <q-toggle
           :model-value="status?.enabled ?? false"
           color="primary"
-          :disable="loading || toggling || !configured"
+          :disable="loading || toggling || syncing || !configured"
           @update:model-value="onToggle"
         />
         <span class="text-caption">
@@ -20,12 +20,22 @@
       </div>
       <q-space />
       <q-btn
+        outline
+        dense
+        color="primary"
+        icon="cloud_download"
+        label="同步配置"
+        :loading="syncing"
+        :disable="loading || toggling"
+        @click="onSyncConfig"
+      />
+      <q-btn
         flat
         dense
         icon="refresh"
         label="刷新"
         :loading="loading"
-        :disable="toggling"
+        :disable="toggling || syncing"
         @click="refresh"
       />
     </div>
@@ -36,6 +46,14 @@
       class="q-mb-md bg-negative text-white"
     >
       {{ errorMsg }}
+    </q-banner>
+
+    <q-banner
+      v-else-if="successMsg"
+      dense
+      class="q-mb-md bg-positive text-white"
+    >
+      {{ successMsg }}
     </q-banner>
 
     <q-banner
@@ -51,7 +69,7 @@
       dense
       class="q-mb-md banner-soft"
     >
-      本机未检测到 utcd.conf，配置下发后可在此开启 UTC 加速。
+      本机未检测到 utcd.conf，点击右上「同步配置」从云端拉取后即可开启 UTC 加速。
     </q-banner>
 
     <div v-if="status && configured" class="utc-meta-box q-mb-md">
@@ -106,12 +124,15 @@
 import { computed, onMounted, ref } from 'vue'
 import MynetConfigCard from '../mynet/MynetConfigCard.vue'
 import { localApi } from '../../services/local/localApi'
+import { describeUtcError, utcService } from '../../services/utc/utcService'
 import type { LocalUtcStatus } from '../../types/local'
 
 const status = ref<LocalUtcStatus | null>(null)
 const loading = ref(false)
 const toggling = ref(false)
+const syncing = ref(false)
 const errorMsg = ref('')
+const successMsg = ref('')
 
 const configured = computed(() => Boolean(status.value?.configured))
 const peers = computed(() => status.value?.peers || [])
@@ -143,10 +164,36 @@ async function refresh() {
   }
 }
 
+async function onSyncConfig() {
+  syncing.value = true
+  errorMsg.value = ''
+  successMsg.value = ''
+  try {
+    const remote = await utcService.getClientConfig()
+    if (!remote.peers || remote.peers.length === 0) {
+      errorMsg.value = '云端暂无已批准的 UTC 配对，请先在配对审批中完成配对'
+      return
+    }
+    status.value = await localApi.syncUtcConfig({
+      edge_candidates: remote.edge_candidates,
+      peers: remote.peers.map((p) => ({
+        name: p.name,
+        transport_id: p.transport_id
+      }))
+    })
+    successMsg.value = `已同步 utcd.conf（${status.value.peers.length} 个对端）`
+  } catch (e) {
+    errorMsg.value = describeUtcError(e)
+  } finally {
+    syncing.value = false
+  }
+}
+
 async function onToggle(val: boolean | number | null) {
   const next = Boolean(val)
   toggling.value = true
   errorMsg.value = ''
+  successMsg.value = ''
   try {
     status.value = await localApi.putUtcAcceleration(next)
   } catch (e) {

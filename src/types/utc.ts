@@ -353,3 +353,19 @@ export interface UtcPairApprovalDraft {
   reason: string
   audit_ref: string
 }
+
+export interface UtcClientConfigPeer {
+  name: string
+  transport_id: number
+  pair_id: number
+}
+
+export interface UtcClientConfig {
+  scope: string
+  config_version: number
+  transport_id: string
+  node_id: string | null
+  edge_candidates: string[]
+  peers: UtcClientConfigPeer[]
+  data_source: UtcDataSource
+}

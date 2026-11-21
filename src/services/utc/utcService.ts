@@ -2,6 +2,7 @@ import { api } from '../api'
 import type {
   UtcAccelerationItem,
   UtcAccelerationList,
+  UtcClientConfig,
   UtcFaultFilters,
   UtcFaultList,
   UtcHubStatus,
@@ -59,6 +60,9 @@ async function postData<T>(path: string, body?: object): Promise<T> {
 
 export const utcService = {
   getIdentity: () => getData<UtcIdentity>('/utc/identity'),
+
+  getClientConfig: (params?: { transport_id?: string; node_id?: string }) =>
+    getData<UtcClientConfig>('/utc/client-config', params),
 
   listTransports: (params?: { node_id?: string }) =>
     getData<UtcTransportList>('/utc/transports', params),

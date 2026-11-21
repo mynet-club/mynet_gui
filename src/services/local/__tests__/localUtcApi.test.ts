@@ -119,4 +119,38 @@ describe('localApi UTC endpoints', () => {
       message: 'UTC 未配置：未找到 utcd.conf'
     } satisfies Partial<LocalApiError>)
   })
+
+  it('syncs utcd.conf via POST /utc/sync', async () => {
+    const requestSpy = vi.spyOn(localHttp, 'request').mockResolvedValue({
+      status: 200,
+      data: {
+        success: true,
+        data: {
+          enabled: false,
+          configured: true,
+          running: false,
+          config_path: 'conf/utc/utcd.conf',
+          config_version: 3,
+          edge_candidates: ['edge-a:4433'],
+          peers: [{ name: 'peer_102', transport_id: 102 }]
+        }
+      }
+    } as never)
+
+    const next = await localApi.syncUtcConfig({
+      edge_candidates: ['edge-a:4433'],
+      peers: [{ name: 'peer_102', transport_id: 102 }]
+    })
+
+    expect(requestSpy).toHaveBeenCalledWith({
+      method: 'post',
+      url: '/utc/sync',
+      data: {
+        edge_candidates: ['edge-a:4433'],
+        peers: [{ name: 'peer_102', transport_id: 102 }]
+      }
+    })
+    expect(next.configured).toBe(true)
+    expect(next.peers).toHaveLength(1)
+  })
 })
