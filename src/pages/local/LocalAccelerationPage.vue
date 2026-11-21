@@ -231,6 +231,8 @@
 
       <div v-if="dirty" class="text-caption text-warning q-mt-sm">有未保存更改（点右上「保存加速配置」）</div>
     </MynetAsyncState>
+
+    <LocalUtcCard class="q-mt-md" />
   </div>
 </template>
 
@@ -244,6 +246,7 @@ import type { AccelerationConfig, LocalPeer } from '../../types/local'
 import MynetAsyncState from '../../components/mynet/MynetAsyncState.vue'
 import MynetConfigCard from '../../components/mynet/MynetConfigCard.vue'
 import MynetFieldRow from '../../components/mynet/MynetFieldRow.vue'
+import LocalUtcCard from '../../components/local/LocalUtcCard.vue'
 
 const store = useExperienceStore()
 const ops = ref<'exit' | 'dns' | 'domains' | ''>('')

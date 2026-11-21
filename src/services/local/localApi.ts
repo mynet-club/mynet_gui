@@ -8,6 +8,8 @@ import type {
   LocalLogLine,
   LocalNodeStatus,
   LocalResponse,
+  LocalUtcPairsPayload,
+  LocalUtcStatus,
   PluginProxyStatus
 } from '../../types/local'
 
@@ -313,7 +315,12 @@ export const localApi = {
     request<{ custom_blocked: string[]; blocked_enabled: boolean }>('put', '/acceleration/blocked', {
       domains,
       ...(enabled === undefined ? {} : { enabled })
-    })
+    }),
+  getUtcStatus: () => request<LocalUtcStatus>('get', '/utc/status'),
+  getUtcPairs: () => request<LocalUtcPairsPayload>('get', '/utc/pairs'),
+  getUtcAcceleration: () => request<LocalUtcStatus>('get', '/utc/acceleration'),
+  putUtcAcceleration: (enabled: boolean) =>
+    request<LocalUtcStatus>('put', '/utc/acceleration', { enabled })
 }
 
 /** 云端节点清单（平台面经本机 relay）；401 → LocalApiError.needLogin */
