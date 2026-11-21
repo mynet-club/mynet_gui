@@ -6,6 +6,7 @@ import type {
   UtcFaultList,
   UtcHubStatus,
   UtcIdentity,
+  UtcPairApprovalCreateResult,
   UtcPairApprovalDraft,
   UtcPairApprovalList,
   UtcPairApprovalResult,
@@ -119,7 +120,7 @@ export const utcService = {
     getData<UtcPairApprovalList>('/utc/admin/pair-approvals', filters),
 
   approvePair: (draft: UtcPairApprovalDraft) =>
-    postData<UtcPairApprovalResult>('/utc/admin/pair-approvals', draft),
+    postData<UtcPairApprovalCreateResult>('/utc/admin/pair-approvals', draft),
 
   revokePairApproval: (id: number, expectedRevision: number, reason: string, auditRef: string) =>
     postData<UtcPairApprovalResult>(`/utc/admin/pair-approvals/${id}/revoke`, {

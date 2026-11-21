@@ -334,6 +334,13 @@ export interface UtcPairApprovalList {
   data_source: UtcDataSource
 }
 
+export interface UtcPairApprovalCreateResult {
+  pair_id: number
+  items: UtcPairApprovalItem[]
+  delivery: UtcRelayDelivery
+  data_source: UtcDataSource
+}
+
 export interface UtcPairApprovalResult {
   item: UtcPairApprovalItem
   delivery: UtcRelayDelivery
@@ -341,9 +348,8 @@ export interface UtcPairApprovalResult {
 }
 
 export interface UtcPairApprovalDraft {
-  transport_id: string
-  pair_id: number
-  side: number
+  transport_a: string
+  transport_b: string
   reason: string
   audit_ref: string
 }

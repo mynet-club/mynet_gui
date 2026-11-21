@@ -118,25 +118,10 @@
         <q-separator />
         <q-card-section class="q-gutter-sm">
           <div class="text-caption text-grey-7">
-            只接受本租户、本 scope 已登记的 transport；同一 pair/side 重复批准是幂等的。
+            只接受本租户、本 scope 已登记的两个 transport；由 Core 统一派发 16 位随机 pair_id 并归一化 A/B 侧，重复批准幂等。
           </div>
-          <q-input v-model="form.transport_id" dense outlined label="transport_id" />
-          <div class="row q-col-gutter-sm">
-            <div class="col-6">
-              <q-input v-model.number="form.pair_id" type="number" min="0" dense outlined label="pair_id" />
-            </div>
-            <div class="col-6">
-              <q-select
-                v-model.number="form.side"
-                :options="sideOptions"
-                dense
-                outlined
-                emit-value
-                map-options
-                label="side"
-              />
-            </div>
-          </div>
+          <q-input v-model.trim="form.transport_a" dense outlined label="transport_a" />
+          <q-input v-model.trim="form.transport_b" dense outlined label="transport_b" />
           <q-input v-model="form.reason" dense outlined label="批准原因" />
           <q-input v-model="form.audit_ref" dense outlined label="audit_ref" />
         </q-card-section>
@@ -218,11 +203,6 @@ const revokeRow = ref<UtcPairApprovalItem | null>(null)
 const revokeReason = ref('')
 const revokeAuditRef = ref('')
 
-const sideOptions = [
-  { label: 'A (0)', value: 0 },
-  { label: 'B (1)', value: 1 }
-]
-
 const columns = [
   { name: 'transport_id', label: 'transport', field: 'transport_id', align: 'left' as const },
   { name: 'pair', label: 'pair / side', field: 'pair_id', align: 'left' as const },
@@ -233,9 +213,8 @@ const columns = [
 ]
 
 const form = reactive({
-  transport_id: '',
-  pair_id: 1,
-  side: 0,
+  transport_a: '',
+  transport_b: '',
   reason: '',
   audit_ref: ''
 })
@@ -246,7 +225,7 @@ function isForbidden(e: unknown): boolean {
 }
 
 function openApprove(): void {
-  Object.assign(form, { transport_id: '', pair_id: 1, side: 0, reason: '', audit_ref: '' })
+  Object.assign(form, { transport_a: '', transport_b: '', reason: '', audit_ref: '' })
   actionError.value = ''
   approveOpen.value = true
 }
@@ -261,8 +240,12 @@ function openRevoke(row: UtcPairApprovalItem): void {
 
 async function submitApprove(): Promise<void> {
   if (submitting.value) return
-  if (!form.transport_id || !form.reason || !form.audit_ref) {
-    actionError.value = 'transport_id / 原因 / audit_ref 必填'
+  if (!form.transport_a || !form.transport_b || !form.reason || !form.audit_ref) {
+    actionError.value = 'transport_a / transport_b / 原因 / audit_ref 必填'
+    return
+  }
+  if (form.transport_a === form.transport_b) {
+    actionError.value = 'transport_a 与 transport_b 不能相同'
     return
   }
 
@@ -270,9 +253,8 @@ async function submitApprove(): Promise<void> {
   actionError.value = ''
   try {
     await utcService.approvePair({
-      transport_id: form.transport_id,
-      pair_id: form.pair_id,
-      side: form.side,
+      transport_a: form.transport_a,
+      transport_b: form.transport_b,
       reason: form.reason,
       audit_ref: form.audit_ref
     })

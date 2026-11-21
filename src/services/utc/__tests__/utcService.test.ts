@@ -229,8 +229,8 @@ describe('utcService relay admin endpoints', () => {
     const pair = {
       id: 9,
       tenant_id: '1001',
-      transport_id: 'tr-1',
-      pair_id: 7,
+      transport_id: '101',
+      pair_id: 1234567890123456,
       side: 0,
       state: 'approved' as const,
       revision: 1,
@@ -249,16 +249,17 @@ describe('utcService relay admin endpoints', () => {
     expect(apiGet).toHaveBeenCalledWith('/utc/admin/pair-approvals', { params: undefined })
     expect(items.items[0]?.id).toBe(9)
 
-    apiPost.mockResolvedValue(ok({ item: pair, delivery, data_source: dataSource }))
-    await utcService.approvePair({ transport_id: 'tr-1', pair_id: 7, side: 0, reason: 'pilot', audit_ref: 'OPS-P' })
+    apiPost.mockResolvedValueOnce(ok({ pair_id: 1234567890123456, items: [pair], delivery, data_source: dataSource }))
+    const created = await utcService.approvePair({ transport_a: '101', transport_b: '102', reason: 'pilot', audit_ref: 'OPS-P' })
+    expect(created.pair_id).toBe(1234567890123456)
     expect(apiPost).toHaveBeenLastCalledWith('/utc/admin/pair-approvals', {
-      transport_id: 'tr-1',
-      pair_id: 7,
-      side: 0,
+      transport_a: '101',
+      transport_b: '102',
       reason: 'pilot',
       audit_ref: 'OPS-P'
     })
 
+    apiPost.mockResolvedValueOnce(ok({ item: pair, delivery, data_source: dataSource }))
     await utcService.revokePairApproval(9, 1, 'done', 'OPS-R')
     expect(apiPost).toHaveBeenLastCalledWith('/utc/admin/pair-approvals/9/revoke', {
       expected_revision: 1,
