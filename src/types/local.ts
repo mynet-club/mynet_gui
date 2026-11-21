@@ -275,47 +275,31 @@ export interface LocalLogLine {
   message?: string
 }
 
-export interface LocalUtcPairState {
-  pair_id: number
-  peer_id: string
-  side: string
-  mode: string
-  applied: boolean
-  pair_gen?: number
-  lease_epoch?: number
-  placement_epoch?: number
-  edge_id?: string
-  valid_until?: number
-  observed_at?: number
-}
-
-export interface LocalUtcEndpointState {
-  configured: boolean
-  running: boolean
-  config_path?: string
-}
-
-export interface LocalUtcHubState {
-  configured: boolean
-  running: boolean
-  config_path?: string
-  scope?: string
-  transport_id?: string
-  account_id?: string
-  pairs: LocalUtcPairState[]
-  last_error?: string
+export interface LocalUtcPeerState {
+  name: string
+  transport_id?: number
+  udp_bind?: string
+  udp_target?: string
+  pair_id?: number
+  side?: string
 }
 
 export interface LocalUtcStatus {
   enabled: boolean
-  endpoint: LocalUtcEndpointState
-  hub: LocalUtcHubState
+  configured: boolean
+  running: boolean
+  config_path?: string
+  config_version?: number
+  state_dir?: string
+  edge_candidates: string[]
+  peers: LocalUtcPeerState[]
+  last_error?: string
 }
 
 export interface LocalUtcPairsPayload {
   enabled: boolean
-  scope: string
-  transport_id: string
+  configured: boolean
+  running: boolean
   count: number
-  pairs: LocalUtcPairState[]
+  peers: LocalUtcPeerState[]
 }

@@ -1,7 +1,7 @@
 <template>
   <MynetConfigCard
     title="UTC 加速（本机）"
-    subtitle="控制本机 utcd / hubd 运行态，并展示已下发与已生效的 Core 配对水位"
+    subtitle="基于单一 utcd.conf 控制本机 utcd 运行态并展示已配置的 Peer 接线"
     :badge="statusBadge.label"
     :badge-tone="statusBadge.tone"
   >
@@ -39,11 +39,11 @@
     </q-banner>
 
     <q-banner
-      v-else-if="status?.hub.last_error"
+      v-else-if="status?.last_error"
       dense
       class="q-mb-md bg-warning text-dark"
     >
-      Hub 配置读取异常：{{ status.hub.last_error }}
+      utcd.conf 读取异常：{{ status.last_error }}
     </q-banner>
 
     <q-banner
@@ -51,79 +51,50 @@
       dense
       class="q-mb-md banner-soft"
     >
-      本机未检测到 UTC 配置文件（utcd.conf 或 hub.json），配置下发后可在此开启加速。
+      本机未检测到 utcd.conf，配置下发后可在此开启 UTC 加速。
     </q-banner>
 
-    <div v-if="status" class="row q-col-gutter-md q-mb-md">
-      <div class="col-12 col-md-6">
-        <div class="utc-meta-box">
-          <div class="row items-center justify-between q-mb-xs">
-            <span class="text-weight-medium">Endpoint (utcd)</span>
-            <q-badge :color="status.endpoint.running ? 'positive' : status.endpoint.configured ? 'grey-7' : 'grey-5'">
-              {{ status.endpoint.running ? '运行中' : status.endpoint.configured ? '已停止' : '未配置' }}
-            </q-badge>
-          </div>
-          <div class="text-caption text-grey-7 mono">
-            {{ status.endpoint.config_path || '未找到 utcd.conf' }}
-          </div>
-        </div>
+    <div v-if="status && configured" class="utc-meta-box q-mb-md">
+      <div class="row items-center justify-between q-mb-xs">
+        <span class="text-weight-medium">
+          utcd 运行态<span v-if="status.config_version"> · v{{ status.config_version }}</span>
+        </span>
+        <q-badge :color="status.running ? 'positive' : 'grey-7'">
+          {{ status.running ? '运行中' : '已停止' }}
+        </q-badge>
       </div>
-
-      <div class="col-12 col-md-6">
-        <div class="utc-meta-box">
-          <div class="row items-center justify-between q-mb-xs">
-            <span class="text-weight-medium">Hub (hubd)</span>
-            <q-badge :color="status.hub.running ? 'positive' : status.hub.configured ? 'grey-7' : 'grey-5'">
-              {{ status.hub.running ? '运行中' : status.hub.configured ? '已停止' : '未配置' }}
-            </q-badge>
-          </div>
-          <div class="text-caption text-grey-7 mono">
-            <span v-if="status.hub.transport_id">
-              {{ status.hub.transport_id }}<span v-if="status.hub.scope"> · {{ status.hub.scope }}</span>
-            </span>
-            <span v-else>{{ status.hub.config_path || '未找到 hub.json' }}</span>
-          </div>
-          <div class="text-caption text-grey-7 q-mt-xs">
-            配对：{{ appliedCount }} / {{ pairs.length }} 已生效
-          </div>
-        </div>
+      <div class="text-caption text-grey-7 mono">
+        配置：{{ status.config_path }}
+      </div>
+      <div v-if="status.state_dir" class="text-caption text-grey-7 mono q-mt-xs">
+        状态目录：{{ status.state_dir }}
+      </div>
+      <div v-if="status.edge_candidates.length > 0" class="text-caption text-grey-7 mono q-mt-xs">
+        Edge 候选：{{ status.edge_candidates.join(', ') }}
       </div>
     </div>
 
-    <div v-if="pairs.length > 0">
+    <div v-if="peers.length > 0">
       <div class="text-caption text-grey-7 q-mb-xs">
-        本机 UTC 配对（{{ pairs.length }}）
+        本机 Peer 接线（{{ peers.length }}）
       </div>
       <q-markup-table dense flat bordered separator="horizontal" class="utc-pairs-table">
         <thead>
           <tr>
+            <th class="text-left">Peer 名称</th>
+            <th class="text-left">Transport ID</th>
+            <th class="text-left">UDP Bind</th>
+            <th class="text-left">UDP Target</th>
             <th class="text-left">Pair ID</th>
-            <th class="text-left">Peer ID</th>
-            <th class="text-left">Side / Mode</th>
-            <th class="text-left">状态</th>
-            <th class="text-left">水位 (Gen / Lease / Place)</th>
-            <th class="text-left">Edge</th>
-            <th class="text-left">有效期至</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="pair in pairs" :key="`${pair.pair_id}-${pair.peer_id}-${pair.side}`">
-            <td class="mono">{{ pair.pair_id }}</td>
-            <td class="mono">{{ pair.peer_id }}</td>
-            <td class="mono">{{ pair.side }} · {{ pair.mode }}</td>
-            <td>
-              <q-badge :color="pair.applied ? 'positive' : 'grey-6'">
-                {{ pair.applied ? 'APPLIED' : '未生效' }}
-              </q-badge>
-            </td>
-            <td class="mono">
-              <span v-if="pair.applied">
-                {{ pair.pair_gen ?? 0 }} / {{ pair.lease_epoch ?? 0 }} / {{ pair.placement_epoch ?? 0 }}
-              </span>
-              <span v-else class="text-grey-6">—</span>
-            </td>
-            <td class="mono">{{ pair.edge_id || '—' }}</td>
-            <td class="mono">{{ formatUnixTs(pair.valid_until) }}</td>
+          <tr v-for="peer in peers" :key="peer.name">
+            <td class="mono">{{ peer.name }}</td>
+            <td class="mono">{{ peer.transport_id ?? '—' }}</td>
+            <td class="mono">{{ peer.udp_bind || '—' }}</td>
+            <td class="mono">{{ peer.udp_target || '—' }}</td>
+            <td class="mono">{{ peer.pair_id ?? 'Core 派发' }}</td>
           </tr>
         </tbody>
       </q-markup-table>
@@ -142,12 +113,8 @@ const loading = ref(false)
 const toggling = ref(false)
 const errorMsg = ref('')
 
-const configured = computed(() =>
-  Boolean(status.value?.endpoint.configured || status.value?.hub.configured)
-)
-
-const pairs = computed(() => status.value?.hub.pairs || [])
-const appliedCount = computed(() => pairs.value.filter((p) => p.applied).length)
+const configured = computed(() => Boolean(status.value?.configured))
+const peers = computed(() => status.value?.peers || [])
 
 const statusBadge = computed<{
   label: string
@@ -155,22 +122,14 @@ const statusBadge = computed<{
 }>(() => {
   if (!status.value) return { label: loading.value ? '加载中' : '未知', tone: 'grey' }
   if (!configured.value) return { label: '未配置', tone: 'grey' }
-  if (status.value.hub.last_error) return { label: '配置异常', tone: 'warning' }
+  if (status.value.last_error) return { label: '配置异常', tone: 'warning' }
   if (status.value.enabled) {
-    const anyRunning = status.value.endpoint.running || status.value.hub.running
-    return anyRunning
+    return status.value.running
       ? { label: '已开启', tone: 'positive' }
       : { label: '已开启（等待运行）', tone: 'warning' }
   }
   return { label: '已关闭', tone: 'grey' }
 })
-
-function formatUnixTs(ts?: number): string {
-  if (!ts || ts <= 0) return '—'
-  const d = new Date(ts * 1000)
-  if (Number.isNaN(d.getTime())) return String(ts)
-  return d.toLocaleString('zh-CN', { hour12: false })
-}
 
 async function refresh() {
   loading.value = true

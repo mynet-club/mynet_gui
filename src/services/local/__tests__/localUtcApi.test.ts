@@ -14,27 +14,20 @@ describe('localApi UTC endpoints', () => {
         success: true,
         data: {
           enabled: true,
-          endpoint: { configured: true, running: true, config_path: '/etc/mynet/utcd.conf' },
-          hub: {
-            configured: true,
-            running: true,
-            scope: 'tenant-1',
-            transport_id: 'tr-a',
-            pairs: [
-              {
-                pair_id: 7345678901234567,
-                peer_id: 'tr-b',
-                side: 'A',
-                mode: 'A-D',
-                applied: true,
-                pair_gen: 3,
-                lease_epoch: 12,
-                placement_epoch: 4,
-                edge_id: 'edge-sg-1',
-                valid_until: 1795000000
-              }
-            ]
-          }
+          configured: true,
+          running: true,
+          config_path: 'conf/utc/utcd.conf',
+          config_version: 3,
+          state_dir: 'utc-state',
+          edge_candidates: ['edge-a:4433'],
+          peers: [
+            {
+              name: 'n182',
+              transport_id: 1234567890123456,
+              udp_bind: '127.0.0.1:19001',
+              udp_target: '127.0.0.1:9001'
+            }
+          ]
         }
       }
     } as never)
@@ -43,9 +36,10 @@ describe('localApi UTC endpoints', () => {
 
     expect(requestSpy).toHaveBeenCalledWith({ method: 'get', url: '/utc/status' })
     expect(status.enabled).toBe(true)
-    expect(status.hub.pairs).toHaveLength(1)
-    expect(status.hub.pairs[0]?.pair_id).toBe(7345678901234567)
-    expect(status.hub.pairs[0]?.applied).toBe(true)
+    expect(status.configured).toBe(true)
+    expect(status.config_version).toBe(3)
+    expect(status.peers).toHaveLength(1)
+    expect(status.peers[0]?.transport_id).toBe(1234567890123456)
   })
 
   it('fetches local UTC pairs via GET /utc/pairs', async () => {
@@ -55,16 +49,15 @@ describe('localApi UTC endpoints', () => {
         success: true,
         data: {
           enabled: true,
-          scope: 'tenant-1',
-          transport_id: 'tr-a',
+          configured: true,
+          running: true,
           count: 1,
-          pairs: [
+          peers: [
             {
-              pair_id: 7345678901234567,
-              peer_id: 'tr-b',
-              side: 'A',
-              mode: 'A-D',
-              applied: false
+              name: 'n182',
+              transport_id: 1234567890123456,
+              udp_bind: '127.0.0.1:19001',
+              udp_target: '127.0.0.1:9001'
             }
           ]
         }
@@ -75,7 +68,7 @@ describe('localApi UTC endpoints', () => {
 
     expect(requestSpy).toHaveBeenCalledWith({ method: 'get', url: '/utc/pairs' })
     expect(payload.count).toBe(1)
-    expect(payload.pairs[0]?.pair_id).toBe(7345678901234567)
+    expect(payload.peers[0]?.name).toBe('n182')
   })
 
   it('toggles local UTC acceleration via PUT /utc/acceleration', async () => {
@@ -85,8 +78,10 @@ describe('localApi UTC endpoints', () => {
         success: true,
         data: {
           enabled: true,
-          endpoint: { configured: true, running: true },
-          hub: { configured: false, running: false, pairs: [] }
+          configured: true,
+          running: true,
+          edge_candidates: [],
+          peers: []
         }
       }
     } as never)
@@ -99,6 +94,7 @@ describe('localApi UTC endpoints', () => {
       data: { enabled: true }
     })
     expect(next.enabled).toBe(true)
+    expect(next.running).toBe(true)
   })
 
   it('surfaces LocalApiError with reasonCode on 409 UTC_TOGGLE_FAILED', async () => {
@@ -111,7 +107,7 @@ describe('localApi UTC endpoints', () => {
       data: {
         success: false,
         reason_code: 'UTC_TOGGLE_FAILED',
-        message: 'UTC 未配置：未找到 utcd.conf 或 hub.json'
+        message: 'UTC 未配置：未找到 utcd.conf'
       }
     }
     vi.spyOn(localHttp, 'request').mockRejectedValue(err)
@@ -120,7 +116,7 @@ describe('localApi UTC endpoints', () => {
       name: 'LocalApiError',
       reasonCode: 'UTC_TOGGLE_FAILED',
       status: 409,
-      message: 'UTC 未配置：未找到 utcd.conf 或 hub.json'
+      message: 'UTC 未配置：未找到 utcd.conf'
     } satisfies Partial<LocalApiError>)
   })
 })
