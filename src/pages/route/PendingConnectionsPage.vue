@@ -178,7 +178,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useRoutes } from '../../composables/useRoutes'
@@ -277,9 +277,20 @@ const formatDate = (dateString: string) => {
   return date.toLocaleString()
 }
 
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible' && !loading.value) {
+    fetchPendingConnections()
+  }
+}
+
 // 初始化
 onMounted(async () => {
   await fetchPendingConnections()
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 </script>
 

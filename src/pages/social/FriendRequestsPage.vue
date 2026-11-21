@@ -112,7 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import { useSocial } from '../../composables/useSocial'
@@ -170,8 +170,19 @@ const formatDate = (dateString: string) => {
   return date.toLocaleDateString()
 }
 
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible' && !loading.value) {
+    fetchFriendRequests(requestType.value)
+  }
+}
+
 onMounted(() => {
   fetchFriendRequests('received')
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 </script>
 

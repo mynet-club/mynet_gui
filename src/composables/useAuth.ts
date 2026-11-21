@@ -20,18 +20,19 @@ export function useAuth() {
   const loginError = ref<string | null>(null)
 
   // 登录表单
-  // zone：S2 账号契约要求登录点名网络区（区 ID 或区码），首次登录后记住以便下次免填。
-  // 本机模式（嵌入 agent / 本机地址）再叠一层：从 localapi 读节点归属的区 ID 自动预填
-  // —— 本机知道自己属于哪个区，不该让人手打；取不到（agent 未起 / dev 无代理）就留手填。
+  // zone：S2 账号契约要求登录点名网络区（区 ID 或区码），优先读取 URL query（?zone= / ?invite_code=），
+  // 其次读上次登录记住的值；本机模式（嵌入 agent / 本机地址）无显式 query 时再从 localapi 读节点归属区 ID。
+  const queryZoneRaw = route.query.zone ?? route.query.invite_code
+  const queryZone = typeof queryZoneRaw === 'string' ? queryZoneRaw.trim() : ''
   const loginForm = reactive({
-    zone: window.localStorage?.getItem('login_zone') || '',
+    zone: queryZone || window.localStorage?.getItem('login_zone') || '',
     email: '',
     password: '',
     rememberMe: false
   })
 
   const initialZone = loginForm.zone;
-  if (isLocalMode()) {
+  if (!queryZone && isLocalMode()) {
     readLocalTenantId().then((id) => {
       // 用户已改过输入就不覆盖（探测是异步的，可能晚于用户键入）
       if (id && loginForm.zone === initialZone) {
