@@ -188,40 +188,48 @@ export const localApi = {
   getExperienceState: () => request<ExperienceStatePayload>('get', '/experience/state'),
   getCapabilities: () => request<LocalCapabilities>('get', '/experience/capabilities'),
   getAccelerationStatus: async () => {
-    // 后端回 {config, runtime}；摊平为 AccelerationStatus（enabled/lifecycle/dns…）
-    const d = await request<{
-      config?: {
-        enabled?: boolean
-        dns_enabled?: boolean
-        dns_sources?: string[]
-        custom_dns?: string[]
-        custom_domains?: string[]
-        exit_peer?: string
-      }
-      runtime?: {
-        state?: string
-        active?: boolean
-        wanted?: boolean
-        domains?: number
-        pins?: number
-        routes?: number
-        pid?: number
-        listen?: string
-        exit_probe?: {
-          node_id?: string
-          target?: string
-          driver?: string
-          method?: string
-          link?: string
-          reachable?: boolean
-          rtt_ms?: number
-          age_ms?: number
-          consecutive_fails?: number
-          monitoring?: boolean
-          error?: string
+    // 后端回 {config, runtime}；并行拉 /plugin/proxy 兜底出口，避免 3 跳串行等待。
+    const [accRes, proxyRes] = await Promise.allSettled([
+      request<{
+        config?: {
+          enabled?: boolean
+          dns_enabled?: boolean
+          dns_sources?: string[]
+          custom_dns?: string[]
+          custom_domains?: string[]
+          exit_peer?: string
         }
-      }
-    }>('get', '/acceleration/status')
+        runtime?: {
+          state?: string
+          active?: boolean
+          wanted?: boolean
+          domains?: number
+          pins?: number
+          routes?: number
+          pid?: number
+          listen?: string
+          exit_probe?: {
+            node_id?: string
+            target?: string
+            driver?: string
+            method?: string
+            link?: string
+            reachable?: boolean
+            rtt_ms?: number
+            age_ms?: number
+            consecutive_fails?: number
+            monitoring?: boolean
+            error?: string
+          }
+        }
+      }>('get', '/acceleration/status'),
+      request<{
+        effective?: { policy?: { exits?: { node_id?: string; enabled?: boolean }[] } }
+        local?: { policy?: { exits?: { node_id?: string; enabled?: boolean }[] } }
+      }>('get', '/plugin/proxy')
+    ])
+    if (accRes.status === 'rejected') throw accRes.reason
+    const d = accRes.value
     const c = d.config || {}
     const rt = d.runtime || {}
     const state = rt.state || ''
@@ -230,32 +238,36 @@ export const localApi = {
     else if (rt.active) lifecycle = 'active'
     else if (rt.wanted || c.enabled) lifecycle = 'waiting_tunnel'
     else if (state === 'applying') lifecycle = 'applying'
-    // 出口与加速页 loadExits 同源：config 没有则读插件壳 Effective/Local exits
+    // 出口与加速页同源：config 没有则读并行返回的插件壳 Effective/Local exits
     let exitPeer = c.exit_peer || ''
-    if (!exitPeer) {
-      try {
-        const p = await request<{
-          effective?: { policy?: { exits?: { node_id?: string; enabled?: boolean }[] } }
-          local?: { policy?: { exits?: { node_id?: string; enabled?: boolean }[] } }
-        }>('get', '/plugin/proxy')
-        const exits = p.effective?.policy?.exits || p.local?.policy?.exits || []
-        const first = exits.find((e) => e.enabled !== false && e.node_id)
-        if (first?.node_id) exitPeer = String(first.node_id)
-      } catch {
-        /* 无插件壳时保持空 */
-      }
+    if (!exitPeer && proxyRes.status === 'fulfilled') {
+      const p = proxyRes.value
+      const exits = p.effective?.policy?.exits || p.local?.policy?.exits || []
+      const first = exits.find((e) => e.enabled !== false && e.node_id)
+      if (first?.node_id) exitPeer = String(first.node_id)
     }
     let exitLabel = exitPeer
     if (exitPeer) {
+      let cachedName = ''
       try {
-        const names = await request<{ names?: Record<string, string> }>(
-          'get',
-          `/peers/names?ids=${encodeURIComponent(exitPeer)}`
-        )
-        const n = names?.names?.[exitPeer]
-        if (n) exitLabel = `${n} · ${exitPeer}`
+        const { loadPersistedNames } = await import('../../utils/nodeDisplay')
+        cachedName = loadPersistedNames()[exitPeer] || ''
       } catch {
-        /* 无名字缓存时只显示 id */
+        /* 非浏览器或存储不可用时跳过本地缓存 */
+      }
+      if (cachedName) {
+        exitLabel = `${cachedName} · ${exitPeer}`
+      } else {
+        try {
+          const names = await request<{ names?: Record<string, string> }>(
+            'get',
+            `/peers/names?ids=${encodeURIComponent(exitPeer)}`
+          )
+          const n = names?.names?.[exitPeer]
+          if (n) exitLabel = `${n} · ${exitPeer}`
+        } catch {
+          /* 无名字缓存时只显示 id */
+        }
       }
     }
     const dnsSources = c.dns_sources || []

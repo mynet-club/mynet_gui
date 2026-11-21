@@ -1,6 +1,5 @@
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import debug from 'src/utils/debug'
-import { apiService } from '../services/api'
 
 export interface SidebarStats {
   nodes: number
@@ -20,6 +19,7 @@ export function useSidebarStats() {
   })
 
   const isLoading = ref(false)
+  let pollTimer: ReturnType<typeof setInterval> | null = null
 
   // 获取统计数据
   const fetchStats = async () => {
@@ -62,13 +62,21 @@ export function useSidebarStats() {
     return totalItems.value > 0
   })
 
-  // 初始化
-  const init = async () => {
-    await fetchStats()
-    
-    // 增加更新间隔到60秒，减少频繁更新
-    setInterval(fetchStats, 60000)
+  const stop = () => {
+    if (pollTimer !== null) {
+      clearInterval(pollTimer)
+      pollTimer = null
+    }
   }
+
+  // 初始化（幂等：重复调用前先清旧定时器）
+  const init = async () => {
+    stop()
+    await fetchStats()
+    pollTimer = setInterval(fetchStats, 60000)
+  }
+
+  onUnmounted(stop)
 
   return {
     stats,
@@ -76,6 +84,7 @@ export function useSidebarStats() {
     totalItems,
     hasData,
     fetchStats,
-    init
+    init,
+    stop
   }
 }

@@ -417,47 +417,61 @@ function resetDraft() {
   savedJson.value = JSON.stringify(normalize(draft.value))
 }
 
-async function loadCustomDirect() {
+async function loadPluginProxyData() {
   try {
-    const { localGatewayApi } = await import('../../services/local/localApi')
     const d = await localGatewayApi.getPluginProxy() as {
-      local?: { policy?: { domain_rules?: { custom_direct?: string[] } } }
+      effective?: { policy?: { exits?: { node_id?: string; via?: string; enabled?: boolean }[] } }
+      local?: {
+        policy?: {
+          exits?: { node_id?: string; via?: string; enabled?: boolean }[]
+          domain_rules?: { custom_direct?: string[] }
+        }
+      }
     }
     const list = d.local?.policy?.domain_rules?.custom_direct || []
     customDirectText.value = list.join('\n')
+    const exits = d.effective?.policy?.exits || d.local?.policy?.exits || []
+    const first = exits.find((e) => e.enabled !== false && e.node_id)
+    if (first?.node_id && !draft.value.exit_peer) {
+      draft.value.exit_peer = String(first.node_id)
+    }
   } catch {
     /* 保留当前框 */
   }
 }
 
-async function saveCustomDirect() {
-  const { localGatewayApi } = await import('../../services/local/localApi')
+async function savePluginProxyPatch(opts: { customDirect?: string[]; exitPeer?: string }) {
   const d = await localGatewayApi.getPluginProxy() as {
     local?: { policy?: Record<string, unknown> }
   }
   const policy = { ...(d.local?.policy || {}) }
-  const dr = { ...((policy.domain_rules as Record<string, unknown>) || {}) }
-  dr.custom_direct = customDirectText.value
-    .split('\n').map((s) => s.trim()).filter(Boolean)
-  policy.domain_rules = dr
+  if (opts.customDirect !== undefined) {
+    const dr = { ...((policy.domain_rules as Record<string, unknown>) || {}) }
+    dr.custom_direct = opts.customDirect
+    policy.domain_rules = dr
+  }
+  if (opts.exitPeer !== undefined) {
+    policy.exits = opts.exitPeer ? [{ node_id: opts.exitPeer, enabled: true }] : []
+  }
   await localGatewayApi.postPluginProxy(policy)
 }
 
-async function loadBlocked() {
+async function loadDomainsData() {
   try {
-    const { localApi } = await import('../../services/local/localApi')
     const res = await localApi.getDomains()
+    cloudDomains.value = res.cloud_domains ?? []
     blockedText.value = (res.custom_blocked || []).join('\n')
     blockEnabled.value = res.blocked_enabled !== false
     cloudDirect.value = res.cloud_direct || []
     blockedCount.value = res.blocked_count || 0
-  } catch { /* 保留当前框 */ }
+  } catch {
+    cloudDomains.value = []
+  }
 }
 
 async function onSaveBlocked() {
   savingBlocked.value = true
   try {
-    const { localApi } = await import('../../services/local/localApi')
     await localApi.putBlocked(
       blockedText.value.split('\n').map((s) => s.trim()).filter(Boolean),
       blockEnabled.value
@@ -473,32 +487,9 @@ async function onSaveBlocked() {
   }
 }
 
-async function loadExits() {
-  try {
-    const { localGatewayApi } = await import('../../services/local/localApi')
-    const d = await localGatewayApi.getPluginProxy() as {
-      effective?: { policy?: { exits?: { node_id?: string; via?: string; enabled?: boolean }[] } }
-      local?: { policy?: { exits?: { node_id?: string; via?: string; enabled?: boolean }[] } }
-    }
-    const exits = d.effective?.policy?.exits || d.local?.policy?.exits || []
-    const first = exits.find((e) => e.enabled !== false && e.node_id)
-    if (first?.node_id) draft.value.exit_peer = String(first.node_id)
-  } catch { /* optional */ }
-}
-
-async function saveExits() {
-  const { localGatewayApi } = await import('../../services/local/localApi')
-  const d = await localGatewayApi.getPluginProxy() as { local?: { policy?: Record<string, unknown> } }
-  const policy = { ...(d.local?.policy || {}) }
-  const id = draft.value.exit_peer
-  policy.exits = id ? [{ node_id: id, enabled: true }] : []
-  await localGatewayApi.postPluginProxy(policy)
-}
-
 async function loadDnsConfig() {
   loadingDns.value = true
   try {
-    const { localGatewayApi } = await import('../../services/local/localApi')
     const r = await localGatewayApi.runCommand(['proxy', 'dns-hook', 'dns', 'status', '--json'], 10000)
     const d = JSON.parse(r.stdout || '{}') as { configured?: string[]; source?: string; upstreams?: string[] }
     dnsUpstreams.value = d.upstreams || []
@@ -514,7 +505,6 @@ async function loadDnsConfig() {
 async function onSaveCleanDns() {
   savingDns.value = true
   try {
-    const { localGatewayApi } = await import('../../services/local/localApi')
     const ips = cleanDnsText.value.split(/[\n,\s]+/).map((s) => s.trim()).filter(Boolean)
     if (!ips.length) throw new Error('至少填一个解析器 IP')
     await localGatewayApi.runCommand(['proxy', 'dns-hook', 'dns', 'set', ...ips], 15000)
@@ -532,7 +522,6 @@ async function onSaveCleanDns() {
 async function onClearCleanDns() {
   savingDns.value = true
   try {
-    const { localGatewayApi } = await import('../../services/local/localApi')
     await localGatewayApi.runCommand(['proxy', 'dns-hook', 'dns', 'clear'], 15000)
     cmdOk.value = true
     cmdMsg.value = '已恢复默认（跟随出口）'
@@ -542,15 +531,6 @@ async function onClearCleanDns() {
     cmdMsg.value = e instanceof Error ? e.message : String(e)
   } finally {
     savingDns.value = false
-  }
-}
-
-async function loadCachedDomains() {
-  try {
-    const res = await localApi.getDomains()
-    cloudDomains.value = res.cloud_domains ?? []
-  } catch {
-    cloudDomains.value = []
   }
 }
 
@@ -578,25 +558,54 @@ function onExitMulti(v: unknown) {
 async function onToggleEnabled(v: boolean | number | null) {
   draft.value.enabled = !!v
   if (!draft.value.enabled) draft.value.dns_enabled = false // 加速关则 DNS 必关
-  await store.applyAcceleration(draft.value)
-  try { await saveExits() } catch { /* 出口写入失败不挡总开关 */ }
-  savedJson.value = JSON.stringify(normalize(draft.value))
+  try {
+    await store.applyAcceleration(draft.value)
+    try { await savePluginProxyPatch({ exitPeer: draft.value.exit_peer || '' }) } catch { /* 出口写入失败不挡总开关 */ }
+    savedJson.value = JSON.stringify(normalize(draft.value))
+  } catch (e) {
+    cmdOk.value = false
+    cmdMsg.value = e instanceof Error ? e.message : String(e)
+  }
 }
 
 async function onToggleDns(v: boolean | number | null) {
   // 开 DNS 必开加速
   if (v && !draft.value.enabled) draft.value.enabled = true
   draft.value.dns_enabled = !!v
-  await store.applyAcceleration(draft.value)
-  savedJson.value = JSON.stringify(normalize(draft.value))
+  try {
+    await store.applyAcceleration(draft.value)
+    savedJson.value = JSON.stringify(normalize(draft.value))
+  } catch (e) {
+    cmdOk.value = false
+    cmdMsg.value = e instanceof Error ? e.message : String(e)
+  }
 }
 
 async function onSave() {
   draft.value.custom_domains = customDomainsText.value.split('\n').map((s) => s.trim()).filter(Boolean)
   draft.value.custom_dns = customDnsText.value.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean)
-  await store.applyAcceleration(draft.value)
-  await saveCustomDirect()
-  await saveExits()
+  const customDirect = customDirectText.value.split('\n').map((s) => s.trim()).filter(Boolean)
+
+  try {
+    await store.applyAcceleration(draft.value)
+  } catch (e) {
+    cmdOk.value = false
+    cmdMsg.value = `保存加速核心配置失败：${e instanceof Error ? e.message : String(e)}`
+    return
+  }
+
+  try {
+    // 合并直连名单与出口配置为单次 /plugin/proxy 写入，避免两次读改写竞态
+    await savePluginProxyPatch({
+      customDirect,
+      exitPeer: draft.value.exit_peer || ''
+    })
+  } catch (e) {
+    cmdOk.value = false
+    cmdMsg.value = `加速核心配置已应用，但同步出口/直连名单失败：${e instanceof Error ? e.message : String(e)}`
+    return
+  }
+
   savedJson.value = JSON.stringify(normalize(draft.value))
   cmdOk.value = true
   cmdMsg.value = '已保存并应用'
@@ -629,22 +638,14 @@ async function onAdblock(v: boolean | number | null) {
 }
 
 onMounted(() => {
-  store.refreshAll().then(resetDraft).catch(() => resetDraft())
+  Promise.allSettled([store.refreshAll(), loadPluginProxyData()]).then(() => resetDraft())
   localGatewayApi.getNodeStatus().then((st) => { peerList.value = st.peers || [] }).catch(() => undefined)
-  import('../../services/local/localApi').then(async (m) => {
-    try {
-      const res = await m.localApi.getNodeNames()
-      nodeNames.value = mergePersistedNames(res.names || {})
-    } catch {
-      nodeNames.value = loadPersistedNames()
-    }
-  })
-  loadExits()
+  localApi.getNodeNames()
+    .then((res) => { nodeNames.value = mergePersistedNames(res.names || {}) })
+    .catch(() => { nodeNames.value = loadPersistedNames() })
   loadAdblock()
   loadDnsConfig()
-  loadCachedDomains()
-  loadCustomDirect()
-  loadBlocked()
+  loadDomainsData()
 })
 </script>
 

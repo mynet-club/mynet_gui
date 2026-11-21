@@ -419,7 +419,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useQuasar, date, LocalStorage } from 'quasar'
 import { useAuthStore } from '../stores/auth'
 import { useTheme } from '../composables/useTheme'
-import { useSidebarStats } from '../composables/useSidebarStats'
 import { useNotifications } from '../composables/useNotifications'
 import { useI18n } from 'vue-i18n'
 import TenantSelector from '../components/common/TenantSelector.vue'
@@ -427,7 +426,6 @@ import TipsHelper from '../components/tips/TipsHelper.vue'
 import UserAvatar from '../components/avatar/UserAvatar.vue'
 import NotificationDialog from '../components/notification/NotificationDialog.vue'
 import TipsContainer from '../components/tips/TipsContainer.vue'
-import { DEFAULT_PLATFORM_TENANT } from '../config/app'
 import { useOnboardingStore } from '../stores/onboarding'
 import { getTipsEngine } from '../services/tips/TipsEngine'
 
@@ -437,7 +435,6 @@ const route = useRoute()
 const expandedGroups = reactive<Record<string, boolean>>({})
 const authStore = useAuthStore()
 const { themeMode: currentThemeMode, setThemeMode, getThemeOptions, initializeTheme } = useTheme()
-const { stats: sidebarStats, init: initSidebarStats } = useSidebarStats()
 const { unreadCount, displayUnreadCount } = useNotifications()
 const { locale, t } = useI18n()
 
@@ -799,21 +796,9 @@ onMounted(async () => {
     }
   }
 
-  // 归属列表为空时兜底到平台租户（2026-10-04 用户裁定 B：与服务端 platform_tenant_id 同源）
-  if (authStore.isAuthenticated && authStore.availableTenants.length === 0) {
-    debug.log('🔧 [MainLayout] No tenants loaded, falling back to platform tenant')
-    authStore.availableTenants = [DEFAULT_PLATFORM_TENANT]
-    if (!authStore.currentTenant) {
-      authStore.currentTenant = DEFAULT_PLATFORM_TENANT
-    }
-  }
-  
   // 本机 mynetd 存活探测（用户面实时不走 Echo）
   await refreshLocalDaemon()
   daemonTimer = window.setInterval(() => { refreshLocalDaemon().catch(() => undefined) }, 60_000)
-
-  // 初始化边栏统计数据
-  await initSidebarStats()
   
   // 初始化引导系统
   if (authStore.isAuthenticated && authStore.user) {

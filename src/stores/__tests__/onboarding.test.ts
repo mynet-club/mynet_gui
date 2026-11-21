@@ -66,4 +66,17 @@ describe('device first onboarding', () => {
     expect(store.canOfferFirstDevice).toBe(false)
   })
 
+  it('flushes backend sync immediately on skipAll without waiting for debounce', async () => {
+    vi.mocked(api.put).mockClear()
+    const store = useOnboardingStore()
+    await store.initialize('flush-user')
+    vi.mocked(api.put).mockClear()
+    store.skipAll()
+    expect(api.put).toHaveBeenCalledTimes(1)
+    expect(api.put).toHaveBeenCalledWith(
+      '/users/onboarding',
+      expect.objectContaining({ completed: true })
+    )
+  })
+
 })

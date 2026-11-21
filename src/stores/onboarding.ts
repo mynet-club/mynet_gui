@@ -165,13 +165,10 @@ export const useOnboardingStore = defineStore('onboarding', () => {
   })
 
   /**
-   * 是否可以选择路径B（需要有邀请人）
+   * 是否可以选择路径B（好友连接）
+   * 后端用户对象已无 inviter_id 字段（旧邀请表已下架），默认允许用户自主选择该路径。
    */
-  const canSelectFriendPath = computed(() => {
-    // 这里需要从auth store获取用户信息
-    // 暂时返回true，实际应该检查 user.inviter_id
-    return true
-  })
+  const canSelectFriendPath = computed(() => true)
 
   /**
    * 是否应该跳过引导
@@ -350,7 +347,7 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     completed.value = true
     completedAt.value = new Date().toISOString()
     currentStage.value = OnboardingStage.Completed
-    save()
+    save(true)
 
     console.log('[Onboarding] Completed!', {
       duration: startedAt.value 
@@ -402,8 +399,9 @@ export const useOnboardingStore = defineStore('onboarding', () => {
 
   /**
    * 保存状态
+   * @param immediate true 时立即同步后端（用于 complete / skipAll，避免关页丢同步）
    */
-  const save = () => {
+  const save = (immediate = false) => {
     if (!userId.value) {
       console.warn('[Onboarding] Cannot save: userId not set')
       return
@@ -423,7 +421,15 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     }
 
     saveStateToStorage(userId.value, state)
-    scheduleSyncToBackend(state)
+    if (immediate) {
+      if (syncTimer) {
+        clearTimeout(syncTimer)
+        syncTimer = null
+      }
+      void syncToBackend(state)
+    } else {
+      scheduleSyncToBackend(state)
+    }
   }
 
   /**
@@ -432,6 +438,7 @@ export const useOnboardingStore = defineStore('onboarding', () => {
   const scheduleSyncToBackend = (state: OnboardingState) => {
     if (syncTimer) clearTimeout(syncTimer)
     syncTimer = setTimeout(() => {
+      syncTimer = null
       syncToBackend(state)
     }, SYNC_DEBOUNCE_MS)
   }
