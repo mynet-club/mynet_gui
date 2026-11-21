@@ -12,6 +12,13 @@ export interface UtcTransport {
   registered_at: string
 }
 
+/** 登记 transport 的请求体；身份由服务端会话决定，不在这里自报。 */
+export interface UtcTransportDraft {
+  transport_id: string
+  node_id?: string | null
+  spki_sha256: string
+}
+
 export interface UtcIdentity {
   account_id: string
   tenant_id: string | null

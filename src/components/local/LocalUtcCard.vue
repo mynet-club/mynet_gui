@@ -205,7 +205,7 @@ async function onToggle(val: boolean | number | null) {
 }
 
 onMounted(() => {
-  void refresh()
+  refresh()
 })
 </script>
 

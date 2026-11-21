@@ -18,6 +18,7 @@ import type {
   UtcRelayInventoryList,
   UtcRelayInventoryResult,
   UtcTransportList,
+  UtcTransportDraft,
   UtcUsageFilters,
   UtcUsageList,
   UtcUsageSummaryFilters,
@@ -66,6 +67,10 @@ export const utcService = {
 
   listTransports: (params?: { node_id?: string }) =>
     getData<UtcTransportList>('/utc/transports', params),
+
+  // 终端引导：登记节点 transport（transport_id + node_id + SPKI）。
+  registerTransport: (draft: UtcTransportDraft) =>
+    postData<UtcTransport>('/utc/transports', draft),
 
   getHubStatus: () => getData<UtcHubStatus>('/utc/hub/status'),
 

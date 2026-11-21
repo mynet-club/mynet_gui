@@ -311,3 +311,49 @@ describe('utcService relay admin endpoints', () => {
     expect(result).toEqual(payload)
   })
 })
+
+describe('utcService transport registration', () => {
+  beforeEach(() => {
+    apiGet.mockReset()
+    apiPut.mockReset()
+    apiPost.mockReset()
+  })
+
+  it('POST /utc/transports sends transport_id/node_id/SPKI and unwraps the record', async () => {
+    const record = {
+      transport_id: '8283289760467957',
+      node_id: '8283289760467957',
+      spki_sha256: 'a'.repeat(64),
+      account_id: 'acc-1',
+      registered_at: '2026-11-21T00:00:00Z'
+    }
+    apiPost.mockResolvedValueOnce(ok(record))
+
+    const result = await utcService.registerTransport({
+      transport_id: '8283289760467957',
+      node_id: '8283289760467957',
+      spki_sha256: 'a'.repeat(64)
+    })
+
+    expect(apiPost).toHaveBeenCalledWith('/utc/transports', {
+      transport_id: '8283289760467957',
+      node_id: '8283289760467957',
+      spki_sha256: 'a'.repeat(64)
+    })
+    expect(result).toEqual(record)
+  })
+
+  it('registration failure surfaces the backend message', async () => {
+    apiPost.mockResolvedValueOnce({
+      data: { success: false, message: 'UTC_REGISTRATION_CONFLICT' }
+    })
+
+    await expect(
+      utcService.registerTransport({
+        transport_id: '1',
+        node_id: null,
+        spki_sha256: 'b'.repeat(64)
+      })
+    ).rejects.toThrow('UTC_REGISTRATION_CONFLICT')
+  })
+})
