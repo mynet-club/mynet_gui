@@ -1182,6 +1182,7 @@ export default {
     stateApplied: '已生效',
     statePending: '待生效',
     stateDisabled: '已关闭',
+    stateBlocked: '已受限',
     toggleAria: '切换 {transport} 的 TCP 加速',
     empty: '当前账号暂无可配置的 transport，无需设置加速。',
     unauthorized: '无权限查看或修改加速状态，请确认登录账号。',

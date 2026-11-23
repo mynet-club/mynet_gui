@@ -67,7 +67,10 @@
     <q-list v-else separator>
       <q-item v-for="row in rows" :key="row.transport_id">
         <q-item-section>
-          <q-item-label class="mono">{{ row.transport_id }}</q-item-label>
+          <q-item-label class="row items-center q-gutter-xs mono">
+            <span class="mynet-status-dot" :class="dotClassOf(row)" />
+            <span>{{ row.transport_id }}</span>
+          </q-item-label>
           <q-item-label caption>
             {{ t('utcAcceleration.account') }} {{ row.account_id }}
             · {{ t('utcAcceleration.revision') }} {{ row.desired_revision }}
@@ -75,13 +78,20 @@
               · {{ t('utcAcceleration.updatedAt') }} {{ formatUtcTime(row.updated_at) }}
             </span>
           </q-item-label>
+          <q-item-label
+            v-if="isUpstreamBlocked(row) && row.blocked_reason"
+            caption
+            class="text-negative"
+          >
+            {{ row.blocked_reason }}
+          </q-item-label>
           <q-item-label v-if="row.observed_detail" caption class="text-grey-6">
             {{ t('utcAcceleration.observedDetail') }} {{ row.observed_detail }}
           </q-item-label>
         </q-item-section>
         <q-item-section side>
           <div class="row items-center q-gutter-sm">
-            <q-chip dense size="sm" :color="metaOf(row).color">
+            <q-chip dense size="sm" :color="metaOf(row).color" text-color="white">
               {{ t(metaOf(row).labelKey) }}
             </q-chip>
             <q-toggle
@@ -111,10 +121,11 @@ import { accelerationState, formatUtcTime, type UtcAccelerationState } from '../
 
 type Row = UtcAccelerationItem & { saving: boolean }
 
-const STATE_META: Record<UtcAccelerationState, { color: string; labelKey: string }> = {
+const STATE_META: Record<UtcAccelerationState | 'blocked', { color: string; labelKey: string }> = {
   applied: { color: 'positive', labelKey: 'utcAcceleration.stateApplied' },
   pending: { color: 'warning', labelKey: 'utcAcceleration.statePending' },
-  disabled: { color: 'grey', labelKey: 'utcAcceleration.stateDisabled' }
+  disabled: { color: 'grey', labelKey: 'utcAcceleration.stateDisabled' },
+  blocked: { color: 'negative', labelKey: 'utcAcceleration.stateBlocked' }
 }
 
 const { t } = useI18n()
@@ -126,8 +137,23 @@ const actionError = ref('')
 const rows = ref<Row[]>([])
 const source = ref<UtcDataSource | null>(null)
 
+function isUpstreamBlocked(row: Row): boolean {
+  return row.effective_enabled === false && Boolean(row.blocked_by) && row.blocked_by !== 'user'
+}
+
 function metaOf(row: Row) {
+  if (isUpstreamBlocked(row)) {
+    return STATE_META.blocked
+  }
   return STATE_META[accelerationState(row.desired_enabled, row.observed_state)]
+}
+
+function dotClassOf(row: Row): string {
+  if (isUpstreamBlocked(row)) return 'is-err'
+  const state = accelerationState(row.desired_enabled, row.observed_state)
+  if (state === 'applied') return 'is-ok'
+  if (state === 'pending') return 'is-warn'
+  return 'is-muted'
 }
 
 function isUnauthorized(e: unknown): boolean {

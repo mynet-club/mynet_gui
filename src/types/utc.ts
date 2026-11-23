@@ -37,10 +37,15 @@ export interface UtcTransportList {
 
 export type UtcAccelerationObservedState = 'UNKNOWN' | 'APPLIED'
 
+export type CapabilityBlockedBy = 'platform' | 'tenant' | 'user' | 'node' | 'quota' | null
+
 export interface UtcAccelerationItem {
   transport_id: string
   account_id: string
   desired_enabled: boolean
+  effective_enabled?: boolean
+  blocked_by?: CapabilityBlockedBy
+  blocked_reason?: string | null
   desired_revision: number
   observed_state: UtcAccelerationObservedState
   observed_detail: string | null

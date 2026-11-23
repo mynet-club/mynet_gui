@@ -1115,6 +1115,7 @@ export default {
     stateApplied: 'Applied',
     statePending: 'Pending',
     stateDisabled: 'Disabled',
+    stateBlocked: 'Blocked',
     toggleAria: 'Toggle TCP acceleration for {transport}',
     empty: 'No transport is available for this account; there is nothing to configure.',
     unauthorized: 'You are not allowed to view or change acceleration status. Check the signed-in account.',
