@@ -57,13 +57,17 @@ fi
 print_info "构建项目..."
 npm run build
 
-# 同步文件
-print_info "同步文件到服务器..."
-rsync -avz --delete "$BUILD_DIR/" ${REMOTE_USER}@${REMOTE_HOST}:"${REMOTE_PATH}/"
+# 同步文件（保持运行目录 root:www-data + 755/644，Nginx www-data 只读不写）
+print_info "同步文件到服务器（root:www-data 755/644 只读运行态）..."
+rsync -avz --delete \
+    --rsync-path="sudo rsync" \
+    --chown=root:www-data \
+    --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
+    "$BUILD_DIR/" ${REMOTE_USER}@${REMOTE_HOST}:"${REMOTE_PATH}/"
 
 # 重载Nginx
 print_info "重载Nginx..."
-ssh ${REMOTE_USER}@${REMOTE_HOST} "nginx -t && systemctl reload nginx"
+ssh ${REMOTE_USER}@${REMOTE_HOST} "sudo nginx -t && sudo systemctl reload nginx"
 
 print_success "🎉 快速部署完成!"
 echo "访问地址: ${API_URL}"
