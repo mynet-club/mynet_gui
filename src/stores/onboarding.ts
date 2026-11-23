@@ -193,7 +193,10 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     if (stored) {
       version.value = stored.version || STATE_VERSION
       completed.value = stored.completed || false
-      currentStage.value = stored.currentStage || OnboardingStage.Welcome
+      const parsedStage = Number(stored.currentStage)
+      currentStage.value = Number.isFinite(parsedStage)
+        ? (parsedStage as OnboardingStage)
+        : OnboardingStage.Welcome
       selectedPath.value = stored.selectedPath || OnboardingPath.None
       stages.value = { ...defaultStages(), ...stored.stages }
       preferences.value = { ...defaultPreferences(), ...stored.preferences }
@@ -213,8 +216,16 @@ export const useOnboardingStore = defineStore('onboarding', () => {
         selectedPath: selectedPath.value
       })
     } else {
-      // 首次使用，初始化状态
-      reset()
+      // 首次使用，仅初始化本地默认态，不触发无意义的后端 PUT
+      version.value = STATE_VERSION
+      completed.value = false
+      currentStage.value = OnboardingStage.Welcome
+      selectedPath.value = OnboardingPath.None
+      stages.value = defaultStages()
+      preferences.value = defaultPreferences()
+      startedAt.value = undefined
+      completedAt.value = undefined
+      updatedAt.value = new Date().toISOString()
       console.log('[Onboarding] Initialized new state')
     }
     // Recover milestones from the actual inventory, including devices created
@@ -226,11 +237,24 @@ export const useOnboardingStore = defineStore('onboarding', () => {
         deviceCount.value = total
       }
       if (typeof total === 'number' && total > 0) {
-        stages.value.first_device_added = true
-        stages.value.first_ippool_created = true
-        if (total > 1) stages.value.second_device_added = true
+        let changed = false
+        if (!stages.value.first_device_added) {
+          stages.value.first_device_added = true
+          changed = true
+        }
+        if (!stages.value.first_ippool_created) {
+          stages.value.first_ippool_created = true
+          changed = true
+        }
+        if (total > 1 && !stages.value.second_device_added) {
+          stages.value.second_device_added = true
+          changed = true
+        }
+        const wasCompleted = completed.value
         checkCompletion()
-        save()
+        if (changed || (!wasCompleted && completed.value)) {
+          save()
+        }
       }
     } catch {
       // Temporary inventory failures must not erase the saved milestones.
