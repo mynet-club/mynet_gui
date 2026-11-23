@@ -82,6 +82,22 @@
     </q-page-container>
 
     <MynetLoginDialog v-model="loginOpen" @success="onLoggedIn" />
+
+    <!-- 本机客户端漂浮 AI 机器人（与 APP 一致的悬浮球；支持自选 Flash 模型 + 自带 Key） -->
+    <q-btn
+      class="ai-fab"
+      round
+      unelevated
+      color="primary"
+      icon="smart_toy"
+      size="lg"
+      aria-label="本机 AI 助手"
+      @click="showLocalAi = true"
+    >
+      <q-tooltip anchor="top middle" self="bottom middle">本机 AI 助手（自选模型 / Key）</q-tooltip>
+    </q-btn>
+
+    <LocalByokAiAssistant v-model="showLocalAi" />
   </q-layout>
 </template>
 
@@ -92,9 +108,11 @@ import { useQuasar } from 'quasar'
 import { useExperienceStore } from '../stores/experience'
 import MynetStatusBanner from '../components/mynet/MynetStatusBanner.vue'
 import MynetLoginDialog from '../components/mynet/MynetLoginDialog.vue'
+import LocalByokAiAssistant from '../components/ai/LocalByokAiAssistant.vue'
 
 const left = ref(false)
 const loginOpen = ref(false)
+const showLocalAi = ref(false)
 const store = useExperienceStore()
 const router = useRouter()
 const $q = useQuasar()
@@ -303,5 +321,24 @@ onMounted(() => {
   min-height: 44px;
 }
 
+.ai-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 3000;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.3);
+  }
+}
+
+@media (max-width: 599px) {
+  .ai-fab {
+    right: 16px;
+    bottom: 16px;
+  }
+}
 </style>
