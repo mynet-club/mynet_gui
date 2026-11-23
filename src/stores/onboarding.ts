@@ -450,7 +450,7 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     try {
       await api.put('/users/onboarding', {
         completed: state.completed,
-        currentStage: state.currentStage,
+        currentStage: String(state.currentStage),
         selectedPath: state.selectedPath,
         stages: state.stages,
         preferences: state.preferences,
