@@ -1696,8 +1696,11 @@ export default {
     // Friends management
     friends: {
       title: 'Friends List',
+      subtitle: 'Manage your friends and cross-user networking permissions',
+      addFriend: 'Add Friend',
       searchPlaceholder: 'Search friends...',
       noFriends: 'No friends yet',
+      noFriendsDesc: 'Add friends to view shared nodes and establish cross-user connections',
       online: 'Online',
       offline: 'Offline',
       nodes: 'Nodes',

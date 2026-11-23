@@ -14,7 +14,7 @@
   padding-left: 14px;
   padding-right: 14px;
 }
-.local-layout .q-btn--round {
+.local-layout .q-btn--round:not(.ai-fab) {
   padding-left: 0;
   padding-right: 0;
   width: 32px;

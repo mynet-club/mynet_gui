@@ -1847,9 +1847,12 @@ export default {
     // 好友管理
     friends: {
       title: '好友列表',
+      subtitle: '管理已建立的好友关系与跨用户组网权限',
+      addFriend: '添加好友',
       searchPlaceholder: '搜索好友...',
       mutualFriends: '共同好友',
       noFriends: '暂无好友',
+      noFriendsDesc: '添加好友后，即可相互查看授权设备并建立跨用户连接',
       empty: '还没有好友，去邀请一些朋友加入吧！',
       online: '在线',
       offline: '离线',
