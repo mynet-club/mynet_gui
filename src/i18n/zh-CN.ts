@@ -32,6 +32,31 @@ export default {
     name: 'MyNet',
     tagline: '自主可控 · 私域组网'
   },
+  ai: {
+    title: 'MyNet 智能助手',
+    subtitle: '只读取你的节点、连接、服务与 UTC 状态',
+    clear: '新对话',
+    needLogin: '请先登录后再使用智能助手',
+    fallbackNotice: '流式服务暂不可用，已切换为普通问答',
+    emptyTitle: '有什么可以帮你？',
+    emptyHint: '助手只会读取你自己的数据；涉及修改会给出确认卡片。',
+    thinking: '思考中…',
+    placeholder: '问点什么…（Enter 发送，Shift+Enter 换行）',
+    send: '发送',
+    stop: '停止',
+    sources: '参考资料',
+    errorGeneric: 'AI 暂时不可用，请稍后再试',
+    toolRunning: '正在{name}…',
+    toolDone: '已{name}',
+    toolError: '{name}失败',
+    quick: {
+      nodes: '我的节点都在线吗？',
+      utc: 'UTC 加速开了吗？用量还剩多少？',
+      troubleshoot: 'ping 通但 SSH 不通怎么办？'
+    },
+    localTitle: '本地排障助手',
+    localSubtitle: '基于本机脱敏诊断摘要回答；修改建议需你确认后执行'
+  },
   common: {
     login: '登录',
     logout: '注销',

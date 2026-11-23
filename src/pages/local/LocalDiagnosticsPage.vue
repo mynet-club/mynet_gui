@@ -4,6 +4,7 @@
       <div class="text-h5">诊断</div>
       <q-space />
       <span v-if="lastRun" class="text-caption text-grey-7 q-mr-sm">最近运行 {{ lastRun }}</span>
+      <q-btn class="q-mr-sm" color="primary" unelevated dense icon="smart_toy" label="AI 排障" @click="aiOpen = true" />
       <q-btn outline color="primary" dense label="全部重跑" :loading="busy" @click="runAll" />
     </div>
 
@@ -95,12 +96,36 @@
       </q-tab-panel>
     </q-tab-panels>
   </div>
+
+    <!-- 本地 AI 排障：只送脱敏摘要；任何修改仍需用户确认后走 localapi -->
+    <UserAiAssistant
+      v-model="aiOpen"
+      :title-override="t('ai.localTitle')"
+      :subtitle-override="t('ai.localSubtitle')"
+      :context-snapshot="aiSnapshot"
+    />
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { localGatewayApi, LocalApiError } from '../../services/local/localApi'
 import type { LocalNodeStatus } from '../../types/local'
+import UserAiAssistant from '../../components/ai/UserAiAssistant.vue'
+import { buildLocalDiagnosticSnapshot } from '../../services/ai/localContext'
+
+const { t } = useI18n()
+
+const aiOpen = ref(false)
+
+// 只送「已脱敏 + 白名单字段」的摘要：不读磁盘、不带 token/私钥（见 localContext.ts）
+const aiSnapshot = computed(() => buildLocalDiagnosticSnapshot({
+  scope: typeof statusObj.value.scope === 'string' ? statusObj.value.scope : null,
+  state: typeof status.value.state === 'string' ? status.value.state : null,
+  status: statusObj.value,
+  parity: parity.value,
+  checkOutput: checkOut.value,
+}))
 
 const tab = ref<'check' | 'parity' | 'facts' | 'raw'>('check')
 const statusObj = ref<Record<string, unknown>>({})

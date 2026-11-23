@@ -106,6 +106,20 @@
 
 
 
+        <!-- AI 助手（Phase 5：C 端流式，只读工具 + 内置知识库） -->
+        <q-btn
+          v-if="user"
+          flat
+          dense
+          round
+          icon="smart_toy"
+          :aria-label="$t('ai.title')"
+          class="q-mr-sm"
+          @click="showAi = true"
+        >
+          <q-tooltip>{{ $t('ai.title') }}</q-tooltip>
+        </q-btn>
+
         <!-- 消息提醒 -->
         <q-btn 
           flat 
@@ -404,6 +418,9 @@
 
     <!-- Notification Dialog -->
     <NotificationDialog v-model="showNotificationDialog" />
+
+    <!-- C 端 AI 助手（user-ai + ai-streaming；本地排障复用同一组件并注入脱敏摘要） -->
+    <UserAiAssistant v-model="showAi" />
     
     <!-- Tips系统容器 -->
     <TipsContainer />
@@ -425,6 +442,7 @@ import TenantSelector from '../components/common/TenantSelector.vue'
 import TipsHelper from '../components/tips/TipsHelper.vue'
 import UserAvatar from '../components/avatar/UserAvatar.vue'
 import NotificationDialog from '../components/notification/NotificationDialog.vue'
+import UserAiAssistant from '../components/ai/UserAiAssistant.vue'
 import TipsContainer from '../components/tips/TipsContainer.vue'
 import { useOnboardingStore } from '../stores/onboarding'
 import { getTipsEngine } from '../services/tips/TipsEngine'
@@ -442,6 +460,7 @@ const { locale, t } = useI18n()
 const leftDrawerOpen = ref(LocalStorage.getItem<boolean>('mynet_drawer_open') ?? true)
 const showConnectionDialog = ref(false)
 const showNotificationDialog = ref(false)
+const showAi = ref(false)
 const currentLanguage = ref(locale.value)
 const isDev = ref(true) // 开发模式调试
 

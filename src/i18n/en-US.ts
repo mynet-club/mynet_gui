@@ -27,6 +27,31 @@ export default {
     name: 'MyNet',
     tagline: 'Self-sovereign Private Networking'
   },
+  ai: {
+    title: 'MyNet Assistant',
+    subtitle: 'Read-only access to your nodes, connections, services and UTC',
+    clear: 'New chat',
+    needLogin: 'Sign in to use the assistant',
+    fallbackNotice: 'Streaming is unavailable; switched to plain Q&A',
+    emptyTitle: 'How can I help?',
+    emptyHint: 'The assistant only reads your own data; changes always require your confirmation.',
+    thinking: 'Thinking…',
+    placeholder: 'Ask something… (Enter to send, Shift+Enter for a new line)',
+    send: 'Send',
+    stop: 'Stop',
+    sources: 'Sources',
+    errorGeneric: 'AI is temporarily unavailable, please retry later',
+    toolRunning: 'Running {name}…',
+    toolDone: 'Done: {name}',
+    toolError: '{name} failed',
+    quick: {
+      nodes: 'Are my nodes online?',
+      utc: 'Is UTC acceleration on? How much quota is left?',
+      troubleshoot: 'Ping works but SSH does not — what should I check?'
+    },
+    localTitle: 'Local Diagnostics Assistant',
+    localSubtitle: 'Answers from a redacted local diagnostic summary; changes need your confirmation'
+  },
   common: {
     login: 'Login',
     logout: 'Logout',
