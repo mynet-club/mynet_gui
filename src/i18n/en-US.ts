@@ -1067,10 +1067,7 @@ export default {
     utc: {
       title: 'UTC Network',
       nodes: 'Nodes',
-      paths: 'Paths & Assignments',
       usage: 'Usage',
-      faults: 'Fault Status',
-      relayAdmin: 'Relay Admin'
     },
     social: {
       title: 'Social Network',

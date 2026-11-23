@@ -1134,10 +1134,7 @@ export default {
     utc: {
       title: 'UTC 网络',
       nodes: '节点',
-      paths: '路径与分配',
       usage: '用量',
-      faults: '故障状态',
-      relayAdmin: 'Relay 管理'
     },
     social: {
       title: '组网管理',

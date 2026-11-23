@@ -35,42 +35,6 @@ export interface UtcTransportList {
   data_source: UtcDataSource
 }
 
-export interface UtcCoreStatus {
-  issuer: string
-  key_id: string
-  version: string
-  uptime_sec: number
-  applied_revision: number
-  revocation_epoch: number
-  live_generation: number
-  active_pairs: number
-  observed_at: string | null
-}
-
-export interface UtcEdge {
-  edge_id: string
-  endpoint: string
-  port?: number
-  family?: string
-  region?: string
-  pool_id?: string
-  shard?: number | null
-  online?: boolean
-  eligible: boolean
-  last_seen_at: string | null
-}
-
-export interface UtcHubStatus {
-  scope: string
-  core_online?: boolean
-  core?: UtcCoreStatus | null
-  eligible: number
-  edge_count: number
-  observed_at: string | null
-  edges: UtcEdge[]
-  data_source: UtcDataSource
-}
-
 export type UtcAccelerationObservedState = 'UNKNOWN' | 'APPLIED'
 
 export interface UtcAccelerationItem {
@@ -86,28 +50,6 @@ export interface UtcAccelerationItem {
 export interface UtcAccelerationList {
   data_source: UtcDataSource
   items: UtcAccelerationItem[]
-}
-
-export interface UtcPath {
-  transport_id: string
-  pair_id: number
-  side: number
-  mode: string
-  edge_id: string
-  shard: number | null
-  reactor: number | null
-  pair_gen: number
-  lease_epoch: number
-  placement_epoch: number
-  status: string
-  assigned_at: string | null
-}
-
-export interface UtcPathList {
-  scope: string
-  count: number
-  items: UtcPath[]
-  data_source: UtcDataSource
 }
 
 export interface UtcUsageRecord {
@@ -182,44 +124,11 @@ export interface UtcUsageSummaryFilters {
   state?: string | undefined
 }
 
-export interface UtcFault {
-  transport_id: string
-  pair_id: number | null
-  side: number | null
-  state: string
-  reason_code: string
-  retryable: boolean
-  first_seen_at: string | null
-  last_seen_at: string | null
-  detail: string | null
-}
-
-export interface UtcFaultList {
-  scope: string
-  count: number
-  items: UtcFault[]
-  data_source: UtcDataSource
-}
-
-export interface UtcPathFilters {
-  transport_id?: string | undefined
-  pair_id?: number | undefined
-  side?: number | undefined
-  edge_id?: string | undefined
-}
-
 export interface UtcUsageFilters {
   transport_id?: string | undefined
   pair_id?: number | undefined
   side?: number | undefined
   direction?: string | undefined
-}
-
-export interface UtcFaultFilters {
-  transport_id?: string | undefined
-  pair_id?: number | undefined
-  state?: string | undefined
-  reason_code?: string | undefined
 }
 
 // ── Relay 管理面（M5-03 产品化表层）────────────────────────────
@@ -233,149 +142,7 @@ export type UtcRelayDeclaredState = 'active' | 'draining' | 'revoked'
 
 export type UtcRelayDeliveryState = 'not_wired' | 'pending' | 'wired' | 'failed'
 
-export interface UtcRelayDelivery {
-  state: UtcRelayDeliveryState | string
-  note: string
-}
-
-export interface UtcRelayInventoryItem {
-  edge_id: string
-  tenant_id: string
-  inventory_revision: number
-  pool_id: string
-  region: string
-  zone: string | null
-  visibility: string
-  address: string
-  port: number
-  family: number
-  modes: string[]
-  shard_count: number
-  reactor_count: number
-  max_streams: number
-  max_mbps: number
-  headroom_pct: number
-  weight: number
-  trust_tier: string
-  cost_tier: number
-  valid_from: string
-  valid_until: string
-  descriptor_digest: string
-  spki_sha256_current: string
-  cert_epoch: number
-  declared_state: UtcRelayDeclaredState
-  approval_state: UtcRelayApprovalState
-  approved_at: string | null
-  approved_by: string | null
-  revoked_at: string | null
-  revoked_by: string | null
-  revocation_reason: string | null
-  audit_ref: string
-  created_by: string
-  updated_by: string
-  eligible: boolean
-  eligibility_reasons: string[]
-  delivery_state: string
-  created_at: string
-  updated_at: string
-}
-
-export interface UtcRelayInventoryList {
-  scope: string
-  count: number
-  delivery: UtcRelayDelivery
-  items: UtcRelayInventoryItem[]
-  data_source: UtcDataSource
-}
-
-export interface UtcRelayInventoryResult {
-  item: UtcRelayInventoryItem
-  delivery: UtcRelayDelivery
-  data_source: UtcDataSource
-}
-
-export interface UtcRelayInventoryFilters {
-  approval_state?: string | undefined
-  declared_state?: string | undefined
-  eligible?: 0 | 1 | undefined
-  pool_id?: string | undefined
-  region?: string | undefined
-}
-
-export interface UtcRelayInventoryDraft {
-  edge_id?: number | undefined
-  pool_id: string
-  region: string
-  zone?: string | null | undefined
-  visibility: string
-  address: string
-  port: number
-  family: number
-  modes: string[]
-  shard_count: number
-  reactor_count: number
-  max_streams: number
-  max_mbps: number
-  headroom_pct?: number | undefined
-  weight?: number | undefined
-  trust_tier: string
-  cost_tier: number
-  valid_from?: string | undefined
-  valid_until: string
-  descriptor_digest: string
-  spki_sha256_current: string
-  cert_epoch: number
-  audit_ref: string
-  declared_state?: 'active' | 'draining' | undefined
-}
-
 export type UtcPairApprovalState = 'approved' | 'revoked'
-
-export interface UtcPairApprovalItem {
-  id: number
-  tenant_id: string
-  transport_id: string
-  pair_id: number
-  side: number
-  state: UtcPairApprovalState
-  revision: number
-  reason: string
-  audit_ref: string
-  approved_by: string
-  approved_at: string
-  revoked_by: string | null
-  revoked_at: string | null
-  updated_at: string
-}
-
-export interface UtcPairApprovalList {
-  scope: string
-  count: number
-  counts: { approved: number; cap: number }
-  delivery: UtcRelayDelivery
-  items: UtcPairApprovalItem[]
-  data_source: UtcDataSource
-}
-
-export interface UtcPairApprovalCreateResult {
-  pair_id: number
-  items: UtcPairApprovalItem[]
-  delivery: UtcRelayDelivery
-  data_source: UtcDataSource
-}
-
-export interface UtcPairApprovalResult {
-  item: UtcPairApprovalItem
-  delivery: UtcRelayDelivery
-  data_source: UtcDataSource
-}
-
-export interface UtcPairApprovalDraft {
-  transport_a: string
-  transport_b: string
-  reason: string
-  audit_ref: string
-}
 
 export interface UtcClientConfigPeer {
   name: string

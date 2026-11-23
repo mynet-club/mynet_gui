@@ -167,7 +167,10 @@ const routes: RouteRecordRaw[] = [
         ]
       },
       
-      // UTC 可见性（M4）：节点、路径/分配、用量、故障状态
+      // UTC 可见性（M4，Phase 3 瘦身）：**只留 C 端视角** —— 本人 transport、加速开关与用量。
+      // paths / faults / relay-admin 已迁到平台后台（`/api/v1/admin/utc/*` +
+      // mynet_api `src/Modules/Utc/resources/admin/`）：它们是基础设施治理视图，
+      // 放在用户导航里既越权又是噪音。别再往这里加回去。
       {
         path: 'utc/nodes',
         name: 'utc-nodes',
@@ -175,28 +178,10 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'UTC 节点', requiresAuth: true }
       },
       {
-        path: 'utc/paths',
-        name: 'utc-paths',
-        component: () => import('../pages/utc/UtcPathsPage.vue'),
-        meta: { title: 'UTC 路径与分配', requiresAuth: true }
-      },
-      {
         path: 'utc/usage',
         name: 'utc-usage',
         component: () => import('../pages/utc/UtcUsagePage.vue'),
         meta: { title: 'UTC 用量', requiresAuth: true }
-      },
-      {
-        path: 'utc/faults',
-        name: 'utc-faults',
-        component: () => import('../pages/utc/UtcFaultsPage.vue'),
-        meta: { title: 'UTC 故障状态', requiresAuth: true }
-      },
-      {
-        path: 'utc/relay-admin',
-        name: 'utc-relay-admin',
-        component: () => import('../pages/utc/UtcRelayAdminPage.vue'),
-        meta: { title: 'UTC Relay 管理', requiresAuth: true }
       },
 
       // 其他网络模块路由

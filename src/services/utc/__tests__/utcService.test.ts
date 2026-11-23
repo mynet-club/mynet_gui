@@ -79,213 +79,11 @@ describe('utcService acceleration endpoints', () => {
   })
 })
 
-const relayItem = {
-  edge_id: '1001',
-  tenant_id: '1001',
-  inventory_revision: 2,
-  pool_id: 'pool-east',
-  region: 'cn-east',
-  zone: null,
-  visibility: 'tenant',
-  address: '203.0.113.10',
-  port: 4433,
-  family: 4,
-  modes: ['A-D'],
-  shard_count: 4,
-  reactor_count: 2,
-  max_streams: 2048,
-  max_mbps: 500,
-  headroom_pct: 10,
-  weight: 10,
-  trust_tier: 'verified',
-  cost_tier: 3,
-  valid_from: '2026-11-11T00:00:00Z',
-  valid_until: '2026-11-12T00:00:00Z',
-  descriptor_digest: 'a'.repeat(64),
-  spki_sha256_current: 'b'.repeat(64),
-  cert_epoch: 1,
-  declared_state: 'active' as const,
-  approval_state: 'approved' as const,
-  approved_at: '2026-11-11T00:00:00Z',
-  approved_by: '42',
-  revoked_at: null,
-  revoked_by: null,
-  revocation_reason: null,
-  audit_ref: 'OPS-1',
-  created_by: '42',
-  updated_by: '42',
-  eligible: true,
-  eligibility_reasons: [],
-  delivery_state: 'not_wired',
-  created_at: '2026-11-11T00:00:00Z',
-  updated_at: '2026-11-11T00:00:00Z'
-}
-
-const delivery = { state: 'not_wired', note: 'not wired' }
-const dataSource = { mode: 'database', durable: true, note: '' }
-
-describe('utcService relay admin endpoints', () => {
+describe('utcService usage summaries', () => {
   beforeEach(() => {
     apiGet.mockReset()
     apiPut.mockReset()
     apiPost.mockReset()
-  })
-
-  it('GET /utc/admin/relay-inventory forwards filters and unwraps items', async () => {
-    const payload = { scope: 'default', count: 1, delivery, items: [relayItem], data_source: dataSource }
-    apiGet.mockResolvedValueOnce(ok(payload))
-
-    const result = await utcService.listRelayInventory({ approval_state: 'approved', eligible: 1 })
-
-    expect(apiGet).toHaveBeenCalledWith('/utc/admin/relay-inventory', {
-      params: { approval_state: 'approved', eligible: 1 }
-    })
-    expect(result).toEqual(payload)
-  })
-
-  it('POST create sends the declaration and returns the wrapped item', async () => {
-    const payload = { item: relayItem, delivery, data_source: dataSource }
-    apiPost.mockResolvedValueOnce(ok(payload))
-
-    const result = await utcService.createRelayInventory({
-      edge_id: 1001,
-      address: '203.0.113.10',
-      port: 4433,
-      family: 4,
-      pool_id: 'pool-east',
-      region: 'cn-east',
-      visibility: 'tenant',
-      modes: ['A-D'],
-      shard_count: 4,
-      reactor_count: 2,
-      max_streams: 2048,
-      max_mbps: 500,
-      trust_tier: 'verified',
-      cost_tier: 3,
-      valid_until: '2026-11-12T00:00:00Z',
-      descriptor_digest: 'a'.repeat(64),
-      spki_sha256_current: 'b'.repeat(64),
-      cert_epoch: 1,
-      audit_ref: 'OPS-1'
-    })
-
-    expect(apiPost).toHaveBeenCalledWith('/utc/admin/relay-inventory', expect.objectContaining({
-      edge_id: 1001,
-      audit_ref: 'OPS-1'
-    }))
-    expect(result).toEqual(payload)
-  })
-
-  it('PUT update carries expected_revision and encodes the edge id', async () => {
-    apiPut.mockResolvedValueOnce(ok({ item: relayItem, delivery, data_source: dataSource }))
-
-    await utcService.updateRelayInventory('1001', {
-      address: '203.0.113.10',
-      port: 4433,
-      family: 4,
-      pool_id: 'pool-east',
-      region: 'cn-east',
-      visibility: 'tenant',
-      modes: ['A-D'],
-      shard_count: 4,
-      reactor_count: 2,
-      max_streams: 2048,
-      max_mbps: 500,
-      trust_tier: 'verified',
-      cost_tier: 3,
-      valid_until: '2026-11-12T00:00:00Z',
-      descriptor_digest: 'a'.repeat(64),
-      spki_sha256_current: 'b'.repeat(64),
-      cert_epoch: 1,
-      audit_ref: 'OPS-1',
-      declared_state: 'active',
-      expected_revision: 2
-    })
-
-    expect(apiPut).toHaveBeenCalledWith(
-      '/utc/admin/relay-inventory/1001',
-      expect.objectContaining({ expected_revision: 2, declared_state: 'active' })
-    )
-  })
-
-  it('approve and revoke post the revision guard', async () => {
-    apiPost.mockResolvedValue(ok({ item: relayItem, delivery, data_source: dataSource }))
-
-    await utcService.approveRelayInventory('1001', 2, 'OPS-A')
-    expect(apiPost).toHaveBeenLastCalledWith('/utc/admin/relay-inventory/1001/approve', {
-      expected_revision: 2,
-      audit_ref: 'OPS-A'
-    })
-
-    await utcService.revokeRelayInventory('1001', 2, 'retired', 'OPS-R')
-    expect(apiPost).toHaveBeenLastCalledWith('/utc/admin/relay-inventory/1001/revoke', {
-      expected_revision: 2,
-      reason: 'retired',
-      audit_ref: 'OPS-R'
-    })
-  })
-
-  it('pair approvals map to the cohort endpoints', async () => {
-    const pair = {
-      id: 9,
-      tenant_id: '1001',
-      transport_id: '101',
-      pair_id: 1234567890123456,
-      side: 0,
-      state: 'approved' as const,
-      revision: 1,
-      reason: 'pilot',
-      audit_ref: 'OPS-P',
-      approved_by: '42',
-      approved_at: '2026-11-11T00:00:00Z',
-      revoked_by: null,
-      revoked_at: null,
-      updated_at: '2026-11-11T00:00:00Z'
-    }
-    const list = { scope: 'default', count: 1, counts: { approved: 1, cap: 4096 }, delivery, items: [pair], data_source: dataSource }
-    apiGet.mockResolvedValueOnce(ok(list))
-
-    const items = await utcService.listPairApprovals()
-    expect(apiGet).toHaveBeenCalledWith('/utc/admin/pair-approvals', { params: undefined })
-    expect(items.items[0]?.id).toBe(9)
-
-    apiPost.mockResolvedValueOnce(ok({ pair_id: 1234567890123456, items: [pair], delivery, data_source: dataSource }))
-    const created = await utcService.approvePair({ transport_a: '101', transport_b: '102', reason: 'pilot', audit_ref: 'OPS-P' })
-    expect(created.pair_id).toBe(1234567890123456)
-    expect(apiPost).toHaveBeenLastCalledWith('/utc/admin/pair-approvals', {
-      transport_a: '101',
-      transport_b: '102',
-      reason: 'pilot',
-      audit_ref: 'OPS-P'
-    })
-
-    apiPost.mockResolvedValueOnce(ok({ item: pair, delivery, data_source: dataSource }))
-    await utcService.revokePairApproval(9, 1, 'done', 'OPS-R')
-    expect(apiPost).toHaveBeenLastCalledWith('/utc/admin/pair-approvals/9/revoke', {
-      expected_revision: 1,
-      reason: 'done',
-      audit_ref: 'OPS-R'
-    })
-  })
-
-  it('surface validation detail and error code instead of the generic message', () => {
-    const error = {
-      response: {
-        status: 422,
-        data: {
-          message: 'The given data was invalid.',
-          error_code: 'VALIDATION_ERROR',
-          errors: { valid_until: ['valid_until must be at most 7 days after valid_from'] }
-        }
-      }
-    }
-
-    expect(describeUtcError(error)).toContain('valid_until must be at most 7 days after valid_from')
-
-    const conflict = {
-      response: { status: 409, data: { message: 'stale', error_code: 'STALE_REVISION' } }
-    }
-    expect(describeUtcError(conflict)).toBe('stale（STALE_REVISION）')
   })
 
   it('GET /utc/usage/summaries compacts tenant filters', async () => {
@@ -355,5 +153,27 @@ describe('utcService transport registration', () => {
         spki_sha256: 'b'.repeat(64)
       })
     ).rejects.toThrow('UTC_REGISTRATION_CONFLICT')
+  })
+})
+
+describe('utcService error descriptions', () => {
+  it('prefers the backend message', () => {
+    const error = { response: { status: 500, data: { message: 'boom' } } }
+    expect(describeUtcError(error)).toBe('boom')
+  })
+
+  it('surfaces field detail and error code for validation/conflict responses', () => {
+    const validation = {
+      response: {
+        status: 422,
+        data: { message: 'invalid', errors: { transport_id: ['required'] } }
+      }
+    }
+    expect(describeUtcError(validation)).toBe('invalid：transport_id: required')
+
+    const conflict = {
+      response: { status: 409, data: { message: 'stale', error_code: 'STALE_REVISION' } }
+    }
+    expect(describeUtcError(conflict)).toBe('stale（STALE_REVISION）')
   })
 })
