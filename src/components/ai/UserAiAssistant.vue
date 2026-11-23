@@ -323,13 +323,15 @@ async function send(): Promise<void> {
     }
   } catch (cause: any) {
     const status = Number(cause?.status ?? 0)
-    if (status !== 0 && shouldFallback(status)) {
-      // Node 未部署/未开通：退到同步 ask（需要 tenant_slug 定位租户）
+    const isNetworkError = status === 0 && cause?.name !== 'AbortError'
+    if (isNetworkError || (status !== 0 && shouldFallback(status))) {
+      // Node 未部署/未开通/网络不可达：退到同步 ask（需要 tenant_slug 定位租户）
       try {
         const slug = await resolveTenantSlug()
         if (!slug) throw new Error(t('ai.errorGeneric'))
         fallbackNotice.value = true
-        const result = await askUserAi(question, slug)
+        const fallbackQuestion = contextPrefix !== '' ? `${contextPrefix}${question}` : question
+        const result = await askUserAi(fallbackQuestion, slug)
         reply.content = result.answer
         reply.pending = false
         sources.value = result.sources

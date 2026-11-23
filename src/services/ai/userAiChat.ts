@@ -224,7 +224,8 @@ export async function resolveTenantSlug(tenantId?: string | null): Promise<strin
   if (!id) return null
   if (tenantSlugCache?.id === id) return tenantSlugCache.slug
 
-  const response = await api.get('/tenants', { params: { per_page: 100 } })
+  // 用户面归属列表唯一真源是 GET /api/v1/user/tenants/（旧 /tenants 组已下架）
+  const response = await api.get('/user/tenants/')
   const rows = response.data?.data?.items ?? response.data?.data ?? []
   const found = (Array.isArray(rows) ? rows : []).find(
     (row: Record<string, unknown>) => String(row.tenant_id) === String(id),

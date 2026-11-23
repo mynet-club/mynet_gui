@@ -147,13 +147,14 @@ describe('askUserAi / tenant slug', () => {
     expect(result).toEqual({ answer: '答案', sources: [{ title: '手册' }], denied: false })
   })
 
-  it('resolves and caches tenant slug by tenant id', async () => {
+  it('resolves and caches tenant slug by tenant id via /user/tenants/', async () => {
     apiGet.mockResolvedValueOnce({ data: { data: [{ tenant_id: 1001, slug: 'demo' }] } })
 
     expect(await resolveTenantSlug()).toBe('demo')
-    // 第二次命中缓存，不再打 /tenants
+    // 第二次命中缓存，不再打 /user/tenants/
     expect(await resolveTenantSlug()).toBe('demo')
     expect(apiGet).toHaveBeenCalledTimes(1)
+    expect(apiGet).toHaveBeenCalledWith('/user/tenants/')
   })
 
   it('returns null when the tenant has no slug', async () => {
