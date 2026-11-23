@@ -220,11 +220,11 @@ function askQuick(question: string): void {
 }
 
 const TOOL_LABELS: Record<string, string> = {
-  'mynet.user.nodes.list': '查询你的节点',
-  'mynet.user.connections.list': '查询你的连接',
-  'mynet.user.services.list': '查询你的服务',
-  'mynet.user.utc.status': '查询 UTC 状态',
-  'mynet.user.kb.search': '查阅使用手册',
+  'mynet_user_nodes_list': '查询你的节点',
+  'mynet_user_connections_list': '查询你的连接',
+  'mynet_user_services_list': '查询你的服务',
+  'mynet_user_utc_status': '查询 UTC 状态',
+  'mynet_user_kb_search': '查阅使用手册',
   knowledge_search: '查阅资料',
 }
 
