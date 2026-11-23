@@ -5,6 +5,8 @@ import {
   faultTone,
   formatBytes,
   formatEndpoint,
+  formatHubEdgeEndpoint,
+  formatUptime,
   relayDeliveryIsWired,
   relayInventoryState,
   sideLabel,
@@ -71,5 +73,24 @@ describe('utcFormat', () => {
     expect(cohortPercent(2048, 4096)).toBe(50)
     expect(cohortPercent(5000, 4096)).toBe(100)
     expect(cohortPercent(10, 0)).toBe(0)
+  })
+})
+
+describe('formatHubEdgeEndpoint', () => {
+  it('avoids duplicating port when endpoint already carries :port', () => {
+    expect(formatHubEdgeEndpoint('222.131.68.131:19447', 19447)).toBe('222.131.68.131:19447')
+    expect(formatHubEdgeEndpoint('222.131.68.131:19447', undefined)).toBe('222.131.68.131:19447')
+    expect(formatHubEdgeEndpoint('222.131.68.131', 19447)).toBe('222.131.68.131:19447')
+    expect(formatHubEdgeEndpoint(null, 19447)).toBe('—')
+  })
+})
+
+describe('formatUptime', () => {
+  it('formats seconds into compact readable units', () => {
+    expect(formatUptime(20)).toBe('20s')
+    expect(formatUptime(125)).toBe('2m 5s')
+    expect(formatUptime(5327)).toBe('1h 28m')
+    expect(formatUptime(90000)).toBe('1d 1h')
+    expect(formatUptime(null)).toBe('—')
   })
 })

@@ -5,17 +5,10 @@
     icon="admin_panel_settings"
   >
     <template #actions>
-      <q-btn class="btn-ghost" icon="refresh" label="刷新" @click="reloadKey += 1" />
+      <q-btn class="btn-ghost" icon="refresh" label="刷新" @click="refreshAll" />
     </template>
 
-    <q-banner dense rounded class="utc-relay-admin__notice q-mb-md">
-      <template #avatar>
-        <q-icon name="info" />
-      </template>
-      本页只写管理面配置：新增记录默认“待批准”，批准与声明分离；Hub 管理面下发/动态派单尚未接通，
-      因此任何记录都不会产生 placement，也不会改变 Hub 当前按静态
-      <span class="mono">edge=</span> 的派单。管理员身份由服务端白名单判定，默认全部拒绝。
-    </q-banner>
+    <UtcCoreStatusCard :hub="hubStatus" class="q-mb-md" />
 
     <!-- key 变化即重新挂载并拉取；两个面板各自独立加载，互不阻塞 -->
     <UtcRelayInventoryPanel :key="`inventory-${reloadKey}`" />
@@ -24,12 +17,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import PageLayout from '../../components/layout/PageLayout.vue'
+import UtcCoreStatusCard from '../../components/utc/UtcCoreStatusCard.vue'
 import UtcRelayInventoryPanel from '../../components/utc/UtcRelayInventoryPanel.vue'
 import UtcPairApprovalPanel from '../../components/utc/UtcPairApprovalPanel.vue'
+import { utcService } from '../../services/utc/utcService'
+import type { UtcHubStatus } from '../../types/utc'
 
 const reloadKey = ref(0)
+const hubStatus = ref<UtcHubStatus | null>(null)
+
+async function loadHubStatus(): Promise<void> {
+  try {
+    hubStatus.value = await utcService.getHubStatus()
+  } catch {
+    hubStatus.value = null
+  }
+}
+
+function refreshAll(): void {
+  reloadKey.value += 1
+  void loadHubStatus()
+}
+
+onMounted(() => {
+  void loadHubStatus()
+})
 </script>
 
 <style scoped>

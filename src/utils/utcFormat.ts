@@ -87,6 +87,33 @@ export function formatEndpoint(address?: string | null, port?: number | null): s
   return port ? `${host}:${port}` : host
 }
 
+/** hub/status 返回的 endpoint 可能已自带 `:port`（如 222.131.68.131:19447），避免重复拼接。 */
+export function formatHubEdgeEndpoint(endpoint?: string | null, port?: number | null): string {
+  if (!endpoint) return '—'
+  if (port && !endpoint.includes(':')) {
+    return `${endpoint}:${port}`
+  }
+  return endpoint
+}
+
+/** Core 运行时长格式化（秒 → 可读文本）。 */
+export function formatUptime(seconds?: number | null): string {
+  if (seconds === undefined || seconds === null || !Number.isFinite(seconds) || seconds < 0) {
+    return '—'
+  }
+  const s = Math.floor(seconds)
+  if (s < 60) return `${s}s`
+  const m = Math.floor(s / 60)
+  const remS = s % 60
+  if (m < 60) return remS > 0 ? `${m}m ${remS}s` : `${m}m`
+  const h = Math.floor(m / 60)
+  const remM = m % 60
+  if (h < 24) return remM > 0 ? `${h}h ${remM}m` : `${h}h`
+  const d = Math.floor(h / 24)
+  const remH = h % 24
+  return remH > 0 ? `${d}d ${remH}h` : `${d}d`
+}
+
 /** cohort 占比（用于进度条/文案）；空名单固定 0（不是 100）。 */
 export function cohortPercent(approved?: number | null, cap?: number | null): number {
   if (!approved || approved <= 0 || !cap || cap <= 0) return 0

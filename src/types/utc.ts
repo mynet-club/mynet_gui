@@ -35,19 +35,35 @@ export interface UtcTransportList {
   data_source: UtcDataSource
 }
 
+export interface UtcCoreStatus {
+  issuer: string
+  key_id: string
+  version: string
+  uptime_sec: number
+  applied_revision: number
+  revocation_epoch: number
+  live_generation: number
+  active_pairs: number
+  observed_at: string | null
+}
+
 export interface UtcEdge {
   edge_id: string
   endpoint: string
-  port: number
-  family: string
-  shard: number | null
-  online: boolean
+  port?: number
+  family?: string
+  region?: string
+  pool_id?: string
+  shard?: number | null
+  online?: boolean
   eligible: boolean
   last_seen_at: string | null
 }
 
 export interface UtcHubStatus {
   scope: string
+  core_online?: boolean
+  core?: UtcCoreStatus | null
   eligible: number
   edge_count: number
   observed_at: string | null

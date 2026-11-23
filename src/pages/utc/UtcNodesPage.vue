@@ -28,7 +28,12 @@
     <template v-else>
       <div class="row q-col-gutter-md q-mb-md">
         <div class="col-12 col-sm-6 col-md-3">
-          <MynetMetricCard label="scope" :value="scope || '—'" />
+          <MynetMetricCard
+            label="Core 状态"
+            :value="hub?.core_online ? '在线' : '离线'"
+            :sub="scope || '—'"
+            :tone="hub?.core_online ? 'ok' : 'warn'"
+          />
         </div>
         <div class="col-12 col-sm-6 col-md-3">
           <MynetMetricCard
@@ -39,16 +44,22 @@
           />
         </div>
         <div class="col-12 col-sm-6 col-md-3">
-          <MynetMetricCard label="我的 transport" :value="String(transports.length)" />
+          <MynetMetricCard
+            label="我的 transport"
+            :value="String(transports.length)"
+            :sub="hub?.core ? `Core 活跃配对 ${hub.core.active_pairs}` : undefined"
+          />
         </div>
         <div class="col-12 col-sm-6 col-md-3">
           <MynetMetricCard
-            label="最近上报"
+            label="最近心跳"
             :value="formatUtcTime(hub?.observed_at)"
-            sub="Edge 自报时间"
+            :sub="hub?.core ? `运行 ${formatUptime(hub.core.uptime_sec)}` : 'Core / Edge 上报时间'"
           />
         </div>
       </div>
+
+      <UtcCoreStatusCard :hub="hub" class="q-mb-md" />
 
       <UtcAccelerationPanel />
 
@@ -73,13 +84,19 @@
             >
               <template #body-cell-endpoint="props">
                 <q-td :props="props">
-                  <span class="mono">{{ props.row.endpoint || '—' }}:{{ props.row.port || '—' }}</span>
+                  <span class="mono">{{ formatHubEdgeEndpoint(props.row.endpoint, props.row.port) }}</span>
                 </q-td>
+              </template>
+              <template #body-cell-region="props">
+                <q-td :props="props">{{ props.row.region || props.row.family || '—' }}</q-td>
+              </template>
+              <template #body-cell-pool_id="props">
+                <q-td :props="props">{{ props.row.pool_id || (props.row.shard ?? '—') }}</q-td>
               </template>
               <template #body-cell-online="props">
                 <q-td :props="props">
-                  <q-chip dense size="sm" :color="props.row.online ? 'positive' : 'grey'">
-                    {{ props.row.online ? '在线' : '离线' }}
+                  <q-chip dense size="sm" :color="(props.row.online ?? props.row.eligible) ? 'positive' : 'grey'">
+                    {{ (props.row.online ?? props.row.eligible) ? '在线' : '离线' }}
                   </q-chip>
                 </q-td>
               </template>
@@ -166,10 +183,11 @@ import PageLayout from '../../components/layout/PageLayout.vue'
 import MynetMetricCard from '../../components/mynet/MynetMetricCard.vue'
 import MynetErrorPanel from '../../components/mynet/MynetErrorPanel.vue'
 import UtcSourceNotice from '../../components/utc/UtcSourceNotice.vue'
+import UtcCoreStatusCard from '../../components/utc/UtcCoreStatusCard.vue'
 import UtcAccelerationPanel from '../../components/utc/UtcAccelerationPanel.vue'
 import { describeUtcError, utcService } from '../../services/utc/utcService'
 import type { UtcDataSource, UtcHubStatus, UtcTransport, UtcTransportDraft } from '../../types/utc'
-import { formatUtcTime } from '../../utils/utcFormat'
+import { formatHubEdgeEndpoint, formatUptime, formatUtcTime } from '../../utils/utcFormat'
 
 const loading = ref(false)
 const error = ref('')
@@ -226,8 +244,8 @@ async function submitRegister(): Promise<void> {
 const edgeColumns = [
   { name: 'edge_id', label: 'Edge', field: 'edge_id', align: 'left' as const, sortable: true },
   { name: 'endpoint', label: '端点', field: 'endpoint', align: 'left' as const },
-  { name: 'family', label: '地址族', field: 'family', align: 'left' as const },
-  { name: 'shard', label: 'shard', field: 'shard', align: 'left' as const },
+  { name: 'region', label: '区域', field: 'region', align: 'left' as const },
+  { name: 'pool_id', label: '池 / shard', field: 'pool_id', align: 'left' as const },
   { name: 'online', label: '在线', field: 'online', align: 'left' as const },
   { name: 'eligible', label: '可调度', field: 'eligible', align: 'left' as const },
   { name: 'last_seen_at', label: '最近上报', field: 'last_seen_at', align: 'left' as const }
