@@ -51,6 +51,7 @@
               <q-spinner-dots size="18px" />
               <span class="q-ml-sm text-caption">{{ t('ai.thinking') }}</span>
             </div>
+            <div v-else-if="message.role === 'assistant'" class="content markdown-body" v-html="renderMd(displayContent(message))"></div>
             <div v-else class="content">{{ displayContent(message) }}</div>
             <div v-if="actionMarkers && message.role === 'assistant'" class="action-row">
               <q-btn
@@ -116,6 +117,7 @@ import { useI18n } from 'vue-i18n'
 import { askUserAi, resolveTenantSlug, streamUserAiChat, shouldFallback, type ChatMessage, type ChatToolTrace } from '../../services/ai/userAiChat'
 import { tokenManager } from '../../utils/tokenManager'
 import { extractActionIds, stripActionMarkers } from '../../services/ai/actionMarkers'
+import { renderAssistantMarkdown } from '../../services/ai/markdown'
 
 interface UiMessage extends ChatMessage {
   pending?: boolean
@@ -145,6 +147,8 @@ const emit = defineEmits<{
 }>()
 
 const knownActionIds = computed(() => props.actions.map((action) => action.id))
+
+const renderMd = (text: string): string => renderAssistantMarkdown(text)
 
 function displayContent(message: UiMessage): string {
   return props.actionMarkers && message.role === 'assistant'
@@ -377,6 +381,20 @@ watch(() => props.modelValue, (value) => {
 .bubble.assistant { background: #f1f5f9; color: #0f172a; border-bottom-left-radius: 4px; }
 .body--dark .bubble.assistant { background: #1e293b; color: #e2e8f0; }
 .typing { display: flex; align-items: center; }
+.markdown-body :deep(p) { margin: 0 0 8px; }
+.markdown-body :deep(p:last-child) { margin-bottom: 0; }
+.markdown-body :deep(strong) { font-weight: 600; }
+.markdown-body :deep(ul), .markdown-body :deep(ol) { margin: 6px 0 8px; padding-left: 20px; }
+.markdown-body :deep(li) { margin: 2px 0; }
+.markdown-body :deep(code) { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92em; background: rgba(15, 23, 42, 0.08); padding: 1px 4px; border-radius: 4px; }
+.markdown-body :deep(pre) { background: #0f172a; color: #e2e8f0; padding: 10px 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
+.markdown-body :deep(pre code) { background: transparent; padding: 0; color: inherit; }
+.markdown-body :deep(blockquote) { margin: 8px 0; padding-left: 10px; border-left: 3px solid #cbd5e1; color: #475569; }
+.markdown-body :deep(a) { color: var(--q-primary); text-decoration: underline; }
+.markdown-body :deep(table) { border-collapse: collapse; margin: 8px 0; width: 100%; }
+.markdown-body :deep(th), .markdown-body :deep(td) { border: 1px solid #cbd5e1; padding: 4px 8px; text-align: left; }
+.body--dark .markdown-body :deep(th), .body--dark .markdown-body :deep(td) { border-color: #334155; }
+.body--dark .markdown-body :deep(blockquote) { color: #94a3b8; border-color: #475569; }
 .tools { display: flex; flex-direction: column; gap: 4px; margin: 4px 0 8px; color: #64748b; }
 .tool-row { display: flex; align-items: center; }
 .sources { border-top: 1px dashed #cbd5e1; padding-top: 8px; }

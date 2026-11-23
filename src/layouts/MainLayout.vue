@@ -106,20 +106,6 @@
 
 
 
-        <!-- AI 助手（Phase 5：C 端流式，只读工具 + 内置知识库） -->
-        <q-btn
-          v-if="user"
-          flat
-          dense
-          round
-          icon="smart_toy"
-          :aria-label="$t('ai.title')"
-          class="q-mr-sm"
-          @click="showAi = true"
-        >
-          <q-tooltip>{{ $t('ai.title') }}</q-tooltip>
-        </q-btn>
-
         <!-- 消息提醒 -->
         <q-btn 
           flat 
@@ -418,6 +404,21 @@
 
     <!-- Notification Dialog -->
     <NotificationDialog v-model="showNotificationDialog" />
+
+    <!-- AI 助手悬浮入口（与 console 一致的漂浮机器人） -->
+    <q-btn
+      v-if="user"
+      class="ai-fab"
+      round
+      unelevated
+      color="primary"
+      icon="smart_toy"
+      size="lg"
+      :aria-label="$t('ai.title')"
+      @click="showAi = true"
+    >
+      <q-tooltip anchor="top middle" self="bottom middle">{{ $t('ai.title') }}</q-tooltip>
+    </q-btn>
 
     <!-- C 端 AI 助手（user-ai + ai-streaming；本地排障复用同一组件并注入脱敏摘要） -->
     <UserAiAssistant v-model="showAi" />
@@ -1038,6 +1039,27 @@ onUnmounted(() => {
     .nav-item:hover {
       background-color: rgba(255, 255, 255, 0.1);
     }
+  }
+}
+
+.ai-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 3000;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.3);
+  }
+}
+
+@media (max-width: 599px) {
+  .ai-fab {
+    right: 16px;
+    bottom: 16px;
   }
 }
 </style>
