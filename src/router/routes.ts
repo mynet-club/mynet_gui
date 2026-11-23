@@ -183,6 +183,10 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/utc/UtcUsagePage.vue'),
         meta: { title: 'UTC 用量', requiresAuth: true }
       },
+      // 兼容 Phase 3 下线的旧 UTC 基础设施页书签，平滑跳转至 UTC 节点页
+      { path: 'utc/paths', redirect: '/app/utc/nodes' },
+      { path: 'utc/faults', redirect: '/app/utc/nodes' },
+      { path: 'utc/relay-admin', redirect: '/app/utc/nodes' },
 
       // 其他网络模块路由
       { 
