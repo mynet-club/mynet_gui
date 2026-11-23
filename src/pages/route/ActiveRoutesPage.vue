@@ -389,7 +389,7 @@ const handleRefresh = async () => {
 }
 
 const handleCreateRoute = () => {
-  router.push('/app/routes/create/prev_1')
+  router.push('/app/routes/create')
 }
 
 // 批量获取节点统计信息

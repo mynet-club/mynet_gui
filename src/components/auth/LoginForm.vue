@@ -6,18 +6,18 @@
       <div class="logo-text">MyNet</div>
       <div class="logo-tagline">{{ $t('app.tagline') }}</div>
     </div>
-    
+
     <q-card-section class="auth-header">
       <div class="auth-title">{{ $t('auth.loginTitle') }}</div>
       <div class="auth-subtitle">{{ $t('auth.loginSubtitle') }}</div>
     </q-card-section>
-    
+
     <q-card-section>
       <q-form @submit="login" class="auth-form">
         <!-- 错误提示区域 -->
-        <q-banner 
-          v-if="loginError" 
-          class="text-white bg-negative q-mb-md" 
+        <q-banner
+          v-if="loginError"
+          class="text-white bg-negative q-mb-md"
           dense
           inline-actions
         >
@@ -26,23 +26,47 @@
           </template>
           {{ loginError }}
           <template v-slot:action>
-            <q-btn 
-              flat 
-              dense 
-              icon="close" 
+            <q-btn
+              flat
+              dense
+              icon="close"
               @click="clearError"
               color="white"
             />
           </template>
         </q-banner>
-        
+
+        <!-- 当前网关二级域名识别出的网络区信息（免手输区域 ID） -->
+        <div v-if="resolvedZoneLabel" class="q-mb-md">
+          <q-banner dense rounded class="bg-blue-1 text-primary">
+            <template v-slot:avatar>
+              <q-icon name="public" color="primary" />
+            </template>
+            <div class="text-body2 text-weight-medium">
+              当前网络区：{{ resolvedZoneLabel }}
+            </div>
+            <template v-slot:action>
+              <q-btn
+                flat
+                dense
+                size="sm"
+                color="primary"
+                :label="showManualZoneInput ? '使用当前网关区' : '手动指定'"
+                @click="toggleManualZone"
+              />
+            </template>
+          </q-banner>
+        </div>
+
+        <!-- 仅在域名未识别或用户主动点击“手动指定”时显示区域输入 -->
         <q-input
+          v-if="showManualZoneInput || (!zoneContextLoading && !zoneContext?.resolved)"
           v-model="loginForm.zone"
           :placeholder="$t('auth.zoneCode')"
           outlined
           class="form-field"
-          :hint="$t('auth.zoneCodeHint')"
-          :rules="[val => !!val || $t('auth.zoneCodeRequired')]"
+          :hint="zoneContext?.default_gateway ? `默认网关 ${zoneContext.default_gateway.host}（留空将尝试按当前网关域名识别）` : $t('auth.zoneCodeHint')"
+          :rules="[val => (zoneContext?.resolved && !showManualZoneInput) || !!val || $t('auth.zoneCodeRequired')]"
         />
 
         <q-input
@@ -53,8 +77,8 @@
           class="form-field"
           :rules="[val => !!val || $t('auth.emailRequired')]"
         />
-        
-        <q-input 
+
+        <q-input
           v-model="loginForm.password"
           :placeholder="$t('auth.password')"
           type="password"
@@ -62,18 +86,18 @@
           class="form-field"
           :rules="[val => !!val || $t('auth.passwordRequired')]"
         />
-        
+
         <div class="form-actions">
           <q-checkbox v-model="loginForm.rememberMe" :label="$t('auth.rememberMe')" />
-          <q-btn 
-            flat 
-            dense 
-            :label="$t('auth.forgotPassword')" 
+          <q-btn
+            flat
+            dense
+            :label="$t('auth.forgotPassword')"
             color="primary"
             to="/auth/forgot-password"
           />
         </div>
-        
+
         <q-btn
           type="submit"
           color="primary"
@@ -83,14 +107,14 @@
         />
       </q-form>
     </q-card-section>
-    
+
     <q-card-section class="auth-footer">
       <div class="text-caption">
         {{ $t('auth.noAccount') }}
-        <q-btn 
-          flat 
-          dense 
-          :label="$t('auth.registerLink')" 
+        <q-btn
+          flat
+          dense
+          :label="$t('auth.registerLink')"
           color="primary"
           to="/auth/register"
         />
@@ -101,12 +125,29 @@
 
 <script setup lang="ts">
 // 图标跟着 publicPath 走 —— 收进 /gui/ 后写死 /icons/ 会 404
-const iconUrl = (import.meta.env.BASE_URL || "/") + "icons/icon.png"
+const iconUrl = (import.meta.env.BASE_URL || '/') + 'icons/icon.png'
 import { useAuth } from '../../composables/useAuth'
 
-const { loginForm, isLoading, loginError, login, clearError } = useAuth()
+const {
+  loginForm,
+  isLoading,
+  loginError,
+  zoneContext,
+  zoneContextLoading,
+  showManualZoneInput,
+  resolvedZoneLabel,
+  login,
+  clearError
+} = useAuth()
+
+const toggleManualZone = () => {
+  showManualZoneInput.value = !showManualZoneInput.value
+  if (!showManualZoneInput.value) {
+    loginForm.zone = ''
+  }
+}
 </script>
 
 <style lang="scss" scoped>
 @import '../../styles/auth.scss';
-</style> 
+</style>

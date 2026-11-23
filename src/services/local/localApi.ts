@@ -335,7 +335,26 @@ export const localApi = {
   putUtcAcceleration: (enabled: boolean) =>
     request<LocalUtcStatus>('put', '/utc/acceleration', { enabled }),
   syncUtcConfig: (payload: LocalUtcSyncPayload) =>
-    request<LocalUtcStatus>('post', '/utc/sync', payload)
+    request<LocalUtcStatus>('post', '/utc/sync', payload),
+  // 本机网关域名配置（conf/gateways.json）
+  getGatewayConfig: () =>
+    request<{
+      gateway: string
+      host: string
+      gateways: string[]
+      source: string
+      env_override: boolean
+      default_host: string
+    }>('get', '/config/gateway'),
+  putGatewayConfig: (gateway: string) =>
+    request<{
+      gateway: string
+      host: string
+      gateways: string[]
+      source: string
+      env_override: boolean
+      default_host: string
+    }>('put', '/config/gateway', { gateway })
 }
 
 /** 云端节点清单（平台面经本机 relay）；401 → LocalApiError.needLogin */

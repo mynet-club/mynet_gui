@@ -1,5 +1,5 @@
 import { api } from '../api'
-import type { IndexServicesResponse, Tenant } from '../../types'
+import type { IndexServicesResponse, Tenant, TenantServiceSwitches } from '../../types'
 
 /**
  * 用户面的网络区服务（代码层 = Tenant，中文界面叫「网络区」）。
@@ -17,6 +17,14 @@ import type { IndexServicesResponse, Tenant } from '../../types'
 export interface SwitchTenantResult {
   tenant_id: number
   name: string
+  gateway_domain?: string
+  service_switches?: TenantServiceSwitches
+}
+
+export interface TenantServiceSwitchesResult {
+  tenant_id: string
+  can_manage: boolean
+  switches: TenantServiceSwitches
 }
 
 /**
@@ -62,6 +70,18 @@ export const tenantService = {
    */
   async joinTenant(code: string): Promise<SwitchTenantResult> {
     const response = await api.post('/user/tenants/join', { code })
+    return unwrap(response)
+  },
+
+  // 读取当前网络区的租户服务开关（Proxy / UTC 加速）
+  async getServiceSwitches(): Promise<TenantServiceSwitchesResult> {
+    const response = await api.get('/user/tenants/current/service-switches')
+    return unwrap(response)
+  },
+
+  // 更新当前网络区的租户服务开关（Proxy / UTC 加速）
+  async updateServiceSwitches(payload: { proxy?: boolean; utc_acceleration?: boolean }): Promise<TenantServiceSwitchesResult> {
+    const response = await api.put('/user/tenants/current/service-switches', payload)
     return unwrap(response)
   },
 

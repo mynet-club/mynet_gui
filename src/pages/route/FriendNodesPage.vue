@@ -7,6 +7,14 @@
     <template #actions>
       <div class="row q-gutter-sm items-center">
         <q-btn
+          unelevated
+          color="primary"
+          icon="hub"
+          label="批量申请连接"
+          to="/app/routes/create"
+        />
+        <q-btn
+          flat
           color="primary"
           icon="sync"
           :label="$t('common.refresh')"

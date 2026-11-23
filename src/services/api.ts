@@ -184,10 +184,16 @@ export const apiService = {
     return requestFn();
   },
 
+  // 查询当前网关二级域名对应的网络区上下文（免手输区域 ID）
+  async getZoneContext(hostOverride?: string) {
+    const params = hostOverride ? { host: hostOverride } : undefined
+    const response = await api.get('/system/zone-context', { params })
+    return response.data?.data
+  },
+
   // 认证相关
-  // zone：S2 账号契约下登录必须点名网络区（框架 3.x 起无租户登录 fail-closed 403）。
-  // 数字 = 区 ID（走 X-Tenant-ID 头）；非数字 = 区码/邀请码（走 body invite_code，
-  // 由后端 ResolveTenantFromInviteCode 解析出区）。两者必给其一。
+  // zone：未传时由后端按网关二级域名自动识别（如 gw.mynet.club -> 9007199254740991，
+  // luoyueliang.mynet.club -> 对应租户）；若显式输入数字区 ID 或邀请码则覆盖。
   async login(credentials: { email: string; password: string; device_name?: string; zone?: string }) {
     try {
       const zone = (credentials.zone || '').trim();
@@ -254,10 +260,6 @@ export const apiService = {
     return api.post('/auth/logout')
   },
 
-  async verifyToken() {
-    return api.get('/auth/verify-token')
-  },
-
   /**
    * 注册。字段名跟随框架 `UserAuthController::register` 的验证规则：
    * `invite_code`（不是后端旧实现的 `invitation`）、`password` 必须带
@@ -301,10 +303,6 @@ export const apiService = {
     return await api.post('/auth/reset-password', data);
   },
 
-  async cancelPasswordReset(email: string) {
-    return await api.delete('/auth/cancel-password-reset', { data: { email } });
-  },
-
   // 修改密码（迁 PUT /auth/password：载荷 current_password/password/password_confirmation
   // 与框架 UserProfileController::changePassword 全等价，登录会话身份一致）
   async changePassword(data: {
@@ -330,29 +328,6 @@ export const apiService = {
   // 重发验证邮件（迁 POST /auth/resend-verification：仅 email；activation_url 服务端不收，去掉）
   async resendActivationEmail(data: { email: string; activation_url?: string }) {
     return await api.post('/auth/resend-verification', { email: data.email });
-  },
-
-  async checkActivationStatus(email: string) {
-    return await api.get('/auth/check-activation-status', { params: { email } });
-  },
-
-  // 会话和令牌管理
-  async validateSession(data: {
-    user_id: string;
-    token_hash: string;
-    last_sync: number;
-    client_version: string;
-    timestamp: number;
-  }) {
-    return await api.post('/auth/validate-session', data);
-  },
-
-  async generateToken() {
-    return await api.post('/auth/token/generate');
-  },
-
-  async getAuthStatus() {
-    return await api.get('/auth/status');
   },
 
   // 向后兼容的方法

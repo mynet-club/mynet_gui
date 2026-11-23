@@ -1,13 +1,14 @@
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import debug from 'src/utils/debug'
 import { resolveCallbackRedirect, resolveInternalRedirect } from 'src/utils/callbackGuard'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
-import { apiService } from '../services/api' // 修复导入路径
+import { apiService } from '../services/api'
 import { isLocalMode } from '../config/localMode'
 import { readLocalTenantId } from '../services/local/localApi'
+import type { ZoneContext } from '../types'
 
 export function useAuth() {
   const router = useRouter()
@@ -18,28 +19,66 @@ export function useAuth() {
 
   const isLoading = ref(false)
   const loginError = ref<string | null>(null)
+  const zoneContext = ref<ZoneContext | null>(null)
+  const zoneContextLoading = ref(false)
 
-  // 登录表单
-  // zone：S2 账号契约要求登录点名网络区（区 ID 或区码），优先读取 URL query（?zone= / ?invite_code=），
-  // 其次读上次登录记住的值；本机模式（嵌入 agent / 本机地址）无显式 query 时再从 localapi 读节点归属区 ID。
+  // 登录表单：优先通过网关二级域名自动解析网络区，免手输区域 ID
   const queryZoneRaw = route.query.zone ?? route.query.invite_code
   const queryZone = typeof queryZoneRaw === 'string' ? queryZoneRaw.trim() : ''
+  const showManualZoneInput = ref(Boolean(queryZone))
   const loginForm = reactive({
-    zone: queryZone || window.localStorage?.getItem('login_zone') || '',
+    zone: queryZone || '',
     email: '',
     password: '',
     rememberMe: false
   })
 
-  const initialZone = loginForm.zone;
-  if (!queryZone && isLocalMode()) {
-    readLocalTenantId().then((id) => {
-      // 用户已改过输入就不覆盖（探测是异步的，可能晚于用户键入）
-      if (id && loginForm.zone === initialZone) {
-        loginForm.zone = id;
+  const resolvedZoneLabel = computed(() => {
+    if (zoneContext.value?.resolved) {
+      const name = zoneContext.value.name || (zoneContext.value.is_default_gateway ? '默认网络区' : '网络区')
+      const host = zoneContext.value.gateway_host
+      return host ? `${name}（${host}）` : name
+    }
+    return ''
+  })
+
+  const loadZoneContext = async () => {
+    zoneContextLoading.value = true
+    try {
+      const ctx = await apiService.getZoneContext()
+      if (ctx) {
+        zoneContext.value = ctx
+        if (!ctx.resolved && !queryZone) {
+          if (isLocalMode()) {
+            const localId = await readLocalTenantId()
+            if (localId && !loginForm.zone) {
+              loginForm.zone = localId
+            }
+          }
+          if (!loginForm.zone) {
+            const saved = window.localStorage?.getItem('login_zone') || ''
+            loginForm.zone = saved || ctx.default_gateway?.tenant_id || ''
+            showManualZoneInput.value = !loginForm.zone
+          }
+        }
       }
-    });
+    } catch (error) {
+      debug.warn('🔧 [useAuth] Failed to resolve gateway zone context:', error)
+      if (!queryZone && isLocalMode()) {
+        const localId = await readLocalTenantId()
+        if (localId && !loginForm.zone) {
+          loginForm.zone = localId
+        }
+      }
+      if (!loginForm.zone) {
+        loginForm.zone = window.localStorage?.getItem('login_zone') || ''
+        showManualZoneInput.value = true
+      }
+    } finally {
+      zoneContextLoading.value = false
+    }
   }
+  void loadZoneContext()
 
   // 注册表单
   const registerForm = reactive({
@@ -158,12 +197,17 @@ export function useAuth() {
     isLoading.value = true
     loginError.value = null // 清除之前的错误
     try {
+      const explicitZone = showManualZoneInput.value || !zoneContext.value?.resolved
+        ? loginForm.zone.trim()
+        : ''
       await authStore.login({
         email: loginForm.email,
         password: loginForm.password,
-        zone: loginForm.zone
+        ...(explicitZone ? { zone: explicitZone } : {})
       })
-      window.localStorage?.setItem('login_zone', loginForm.zone.trim())
+      if (explicitZone) {
+        window.localStorage?.setItem('login_zone', explicitZone)
+      }
 
       debug.log('🔧 [useAuth] Login successful, checking auth state:', {
         isAuthenticated: authStore.isAuthenticated,
@@ -434,6 +478,10 @@ export function useAuth() {
     // 状态
     isLoading,
     loginError,
+    zoneContext,
+    zoneContextLoading,
+    showManualZoneInput,
+    resolvedZoneLabel,
     loginForm,
     registerForm,
     forgotPasswordForm,

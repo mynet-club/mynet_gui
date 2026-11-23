@@ -1,76 +1,129 @@
 <template>
-  <q-page padding>
-    <div class="page-header q-mb-lg">
-      <h4 class="text-h4 q-ma-none">{{ $t('social.friends.title') }}</h4>
-      <p class="text-grey-6 q-ma-none q-mt-sm">{{ $t('social.subtitle') }}</p>
+  <q-page class="q-pa-md">
+    <!-- 页面标题 -->
+    <div class="page-header q-mb-md">
+      <div class="row items-center justify-between">
+        <div>
+          <div class="text-h5 text-weight-bold">{{ $t('social.friends.title') }}</div>
+          <div class="text-caption text-grey-6">{{ $t('social.friends.subtitle') }}</div>
+        </div>
+        <div class="row q-gutter-sm">
+          <q-btn
+            color="primary"
+            icon="hub"
+            label="发起连接申请"
+            to="/app/routes/create"
+          />
+          <q-btn
+            outline
+            color="primary"
+            icon="person_add"
+            :label="$t('social.friends.addFriend')"
+            to="/app/social/requests"
+          />
+        </div>
+      </div>
     </div>
 
-    <!-- 搜索框 -->
-    <div class="row q-mb-md">
-      <div class="col-12 col-md-6">
-        <q-input
-          v-model="searchQuery"
-          :placeholder="$t('social.friends.searchPlaceholder')"
-          outlined
-          dense
-          clearable
-          @update:model-value="handleSearch"
-        >
-          <template v-slot:prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </div>
+    <!-- 搜索栏 -->
+    <div class="q-mb-md">
+      <q-input
+        v-model="searchQuery"
+        outlined
+        dense
+        clearable
+        :placeholder="$t('social.friends.searchPlaceholder')"
+        @update:model-value="handleSearch"
+      >
+        <template v-slot:prepend>
+          <q-icon name="search" />
+        </template>
+      </q-input>
     </div>
 
     <!-- 好友列表 -->
     <ResponsiveCardGrid
-      data-tip-target="friends-list"
       :items="friends"
       :loading="loading"
-      :loading-count="12"
-      variant="standard"
-      spacing="normal"
-      :empty-icon="'group'"
+      :empty-icon="'people'"
       :empty-title="$t('social.friends.noFriends')"
-      :clickable="false"
+      :empty-description="$t('social.friends.noFriendsDesc')"
     >
       <template #default="{ item: friend }">
         <FriendCardContent
           :friend="friend"
-          @view-nodes="viewFriendNodes(friend.id)"
-          @view-details="viewFriendDetails(friend.id)"
-          @edit-remark="editRemark(friend.id)"
-          @edit-tags="editTags(friend.id)"
+          @view-nodes="goCreateConnection(friend.id)"
+          @view-details="openFriendDetails(friend)"
           @remove-friend="removeFriend(friend.id, friend.name)"
         />
       </template>
     </ResponsiveCardGrid>
+
+    <!-- 好友详情弹窗 -->
+    <q-dialog v-model="detailDialog.show">
+      <q-card style="min-width: 360px; max-width: 480px">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">{{ detailDialog.friend?.name || '好友详情' }}</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section v-if="detailDialog.friend" class="q-gutter-sm">
+          <div class="row justify-between">
+            <span class="text-grey-7">好友 ID</span>
+            <span class="text-weight-medium">{{ detailDialog.friend.id }}</span>
+          </div>
+          <div class="row justify-between">
+            <span class="text-grey-7">节点总数</span>
+            <span class="text-weight-medium">{{ detailDialog.friend.node_count ?? 0 }}</span>
+          </div>
+          <div class="row justify-between">
+            <span class="text-grey-7">可用节点</span>
+            <span class="text-weight-medium">{{ detailDialog.friend.available_node_count ?? 0 }}</span>
+          </div>
+          <div v-if="detailDialog.friend.created_at" class="row justify-between">
+            <span class="text-grey-7">成为好友时间</span>
+            <span class="text-weight-medium">{{ detailDialog.friend.created_at }}</span>
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="关闭" v-close-popup />
+          <q-btn
+            v-if="detailDialog.friend"
+            color="primary"
+            icon="hub"
+            label="发起连接申请"
+            @click="goCreateConnection(detailDialog.friend.id)"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import FriendCardContent from '../../components/social/FriendCardContent.vue'
 import { useSocial } from '../../composables/useSocial'
 import type { Friend } from '../../types'
 
-const { t } = useI18n()
 const router = useRouter()
-const $q = useQuasar()
 
-const { 
-  friends, 
-  loading, 
-  fetchFriends, 
-  removeFriend: removeFriendFromSocial 
+const {
+  friends,
+  loading,
+  fetchFriends,
+  removeFriend: removeFriendFromSocial
 } = useSocial()
 
 const searchQuery = ref('')
+const detailDialog = ref<{ show: boolean; friend: Friend | null }>({
+  show: false,
+  friend: null
+})
 
 const handleSearch = (search: string | number | null) => {
   fetchFriends(1, String(search || ''))
@@ -80,32 +133,13 @@ const removeFriend = async (friendId: string, friendName: string) => {
   await removeFriendFromSocial(friendId, friendName)
 }
 
-const viewFriendNodes = (friendId: string) => {
-  router.push({ name: 'friend-nodes', params: { friendId } })
+const goCreateConnection = (friendId: string | number) => {
+  detailDialog.value.show = false
+  router.push({ path: '/app/routes/create', query: { friendId: String(friendId) } })
 }
 
-const viewFriendDetails = (friendId: string) => {
-  // TODO: 实现查看好友详情逻辑
-  $q.notify({
-    type: 'info',
-    message: t('common.featureInDevelopment')
-  })
-}
-
-const editRemark = (friendId: string) => {
-  // TODO: 实现编辑备注逻辑
-  $q.notify({
-    type: 'info',
-    message: t('common.featureInDevelopment')
-  })
-}
-
-const editTags = (friendId: string) => {
-  // TODO: 实现编辑标签逻辑
-  $q.notify({
-    type: 'info',
-    message: t('common.featureInDevelopment')
-  })
+const openFriendDetails = (friend: Friend) => {
+  detailDialog.value = { show: true, friend }
 }
 
 onMounted(() => {

@@ -102,34 +102,18 @@
             <q-list dense style="min-width: 160px">
               <q-item clickable v-close-popup @click="handleViewNodes">
                 <q-item-section avatar>
-                  <q-icon name="router" size="20px" />
+                  <q-icon name="hub" size="20px" color="primary" />
                 </q-item-section>
-                <q-item-section>{{ $t('social.viewNodes') }}</q-item-section>
+                <q-item-section>发起连接申请</q-item-section>
               </q-item>
-              
+
               <q-item clickable v-close-popup @click="handleViewDetails">
                 <q-item-section avatar>
                   <q-icon name="visibility" size="20px" />
                 </q-item-section>
                 <q-item-section>{{ $t('common.viewDetails') }}</q-item-section>
               </q-item>
-              
-              <q-separator />
-              
-              <q-item clickable v-close-popup @click="handleEditRemark">
-                <q-item-section avatar>
-                  <q-icon name="edit_note" size="20px" />
-                </q-item-section>
-                <q-item-section>{{ $t('social.editRemark') }}</q-item-section>
-              </q-item>
-              
-              <q-item clickable v-close-popup @click="handleEditTags">
-                <q-item-section avatar>
-                  <q-icon name="label" size="20px" />
-                </q-item-section>
-                <q-item-section>{{ $t('social.editTags') }}</q-item-section>
-              </q-item>
-              
+
               <q-separator />
               
               <q-item clickable v-close-popup @click="handleRemoveFriend">
@@ -237,16 +221,14 @@ const handleSendMessage = () => {
   // router.push(`/app/messages/${props.friend.id}`)
 }
 
-// 查看详情
+// 查看详情（由父组件打开详情弹窗，不再跳转 404 路由）
 const handleViewDetails = () => {
   emit('view-details', props.friend.id)
-  router.push(`/app/social/friends/${props.friend.id}`)
 }
 
-// 查看节点
+// 发起连接申请（由父组件跳转单页连接申请并预选该好友）
 const handleViewNodes = () => {
   emit('view-nodes', props.friend.id)
-  router.push(`/app/routes/friend-nodes?friend_id=${props.friend.id}`)
 }
 
 // 编辑备注

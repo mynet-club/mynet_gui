@@ -27,11 +27,12 @@ export const socialService = {
     return response.data.data
   },
 
-  // 获取好友请求
+  // 获取好友请求（统一走 /social/data，避免调用后端不存在的 /social/friend-requests 端点）
   async getFriendRequests(type: 'received' | 'sent' = 'received'): Promise<FriendRequest[]> {
-    const endpoint = type === 'received' ? '/social/friend-requests' : '/social/sent-friend-requests'
-    const response = await api.get(endpoint)
-    return response.data.data
+    const overview = await this.getOverview()
+    return type === 'received'
+      ? (overview.pending_requests || [])
+      : (overview.outgoing_requests || [])
   },
 
   // 发送好友请求

@@ -480,7 +480,7 @@ const mainNavigationItems = computed((): NavigationItem[] => [
     name: 'dashboard',
     label: 'navigation.dashboard',
     icon: 'dashboard',
-    path: '/dashboard'
+    path: '/app/dashboard'
   },
   {
     name: 'social',

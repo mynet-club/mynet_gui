@@ -36,18 +36,49 @@ export interface AuthTokens {
  * 注意：`tenant_users` 表没有 is_admin 列，所以这里没有权限语义——用户面只做
  * 「我归属哪些网络区、当前选哪个」，管理面在 console（operator）。
  */
+export interface TenantServiceSwitch {
+  code: 'proxy' | 'utc_acceleration'
+  enabled: boolean
+  label: string
+  description: string
+}
+
+export interface TenantServiceSwitches {
+  proxy: TenantServiceSwitch
+  utc_acceleration: TenantServiceSwitch
+}
+
+export interface ZoneContext {
+  resolved: boolean
+  tenant_id: string | null
+  name: string | null
+  slug: string | null
+  gateway_host: string
+  is_default_gateway: boolean
+  source: string | null
+  default_gateway?: {
+    host: string
+    tenant_id: string
+    subdomain: string
+  }
+}
+
 export interface Tenant {
   tenant_id: number
   name: string
+  slug?: string | null
   domain?: string
+  gateway_domain?: string
   status: 'active' | 'inactive'
   description?: string
   admin_id?: number
   admin_name?: string
+  service_switches?: TenantServiceSwitches
+  can_manage_services?: boolean
   created_at?: string
   updated_at?: string
   deleted_at?: string | null
-  pivot: {
+  pivot?: {
     user_id: number
     tenant_id: number
   }

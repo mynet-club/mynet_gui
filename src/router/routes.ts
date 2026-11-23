@@ -78,20 +78,24 @@ const routes: RouteRecordRaw[] = [
     redirect: '/app/profile'
   },
   {
+    path: '/routes/create',
+    redirect: '/app/routes/create'
+  },
+  {
     path: '/routes/create/prev_1',
-    redirect: '/app/routes/create/prev_1'
+    redirect: '/app/routes/create'
   },
   {
     path: '/routes/create/prev_2',
-    redirect: '/app/routes/create/prev_2'
+    redirect: '/app/routes/create'
   },
   {
     path: '/routes/create/prev_3',
-    redirect: '/app/routes/create/prev_3'
+    redirect: '/app/routes/create'
   },
   {
     path: '/routes/create/prev_4',
-    redirect: '/app/routes/create/prev_4'
+    redirect: '/app/routes/create'
   },
   
   {
@@ -245,28 +249,26 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '好友节点', requiresAuth: true }
       },
       {
+        path: 'routes/create',
+        name: 'route-create',
+        component: () => import('../pages/route/CreateRouteRequestPage.vue'),
+        meta: { title: '发起连接申请', requiresAuth: true }
+      },
+      {
         path: 'routes/create/prev_1',
-        name: 'route-create-step1',
-        component: () => import('../pages/route/create/Step1FriendSelection.vue'),
-        meta: { title: '创建路由 - 选择好友', requiresAuth: true }
+        redirect: '/app/routes/create'
       },
       {
         path: 'routes/create/prev_2',
-        name: 'route-create-step2',
-        component: () => import('../pages/route/create/Step2FriendNodeSelection.vue'),
-        meta: { title: '创建路由 - 选择好友节点', requiresAuth: true }
+        redirect: '/app/routes/create'
       },
       {
         path: 'routes/create/prev_3',
-        name: 'route-create-step3',
-        component: () => import('../pages/route/create/Step3MyNodeSelection.vue'),
-        meta: { title: '创建路由 - 选择我的节点', requiresAuth: true }
+        redirect: '/app/routes/create'
       },
       {
         path: 'routes/create/prev_4',
-        name: 'route-create-step4',
-        component: () => import('../pages/route/create/Step4RequestForm.vue'),
-        meta: { title: '创建路由 - 提交申请', requiresAuth: true }
+        redirect: '/app/routes/create'
       },
       { 
         path: 'ippools', 
