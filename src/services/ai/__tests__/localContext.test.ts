@@ -86,6 +86,17 @@ describe('buildLocalDiagnosticSnapshot', () => {
     expect(snapshot).toContain('[hex]')
   })
 
+  it('appends the action catalog without leaking secrets', () => {
+    const snapshot = buildLocalDiagnosticSnapshot({
+      state: 'ONLINE',
+      actionCatalog: '### 可用修复动作\n- restart-gnb: 重启 gnb 隧道',
+    })
+
+    expect(snapshot).toContain('### 可用修复动作')
+    expect(snapshot).toContain('restart-gnb')
+    expect(snapshot).not.toMatch(/private|password|token/i)
+  })
+
   it('truncates to the configured budget', () => {
     const snapshot = buildLocalDiagnosticSnapshot({
       checkOutput: 'x'.repeat(9000),

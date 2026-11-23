@@ -8,6 +8,7 @@ import {
   AGENT_ALLOWED_SUBCOMMANDS,
   REPAIR_ACTIONS,
   RepairActionError,
+  actionCatalogForPrompt,
   assertActionAllowed,
   getRepairAction,
   runRepairAction,
@@ -36,6 +37,17 @@ describe('repair action catalog', () => {
   it('marks only read-only probes as non-mutating', () => {
     const readOnly = REPAIR_ACTIONS.filter((action) => !action.mutating).map((action) => action.id)
     expect(readOnly.sort()).toEqual(['check', 'parity', 'status'])
+  })
+
+  it('renders a prompt catalog containing every action id and its risk', () => {
+    const catalog = actionCatalogForPrompt()
+
+    for (const action of REPAIR_ACTIONS) {
+      expect(catalog).toContain(`- ${action.id}: ${action.title}`)
+    }
+    expect(catalog).toContain('[[action:<id>]]')
+    expect(catalog).toContain('需用户确认')
+    expect(catalog).toContain('只读')
   })
 
   it('documents an impact for every action', () => {

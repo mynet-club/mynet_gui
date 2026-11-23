@@ -165,3 +165,22 @@ export async function runRepairAction(
     stderr: result.stderr ?? '',
   }
 }
+
+/**
+ * 给 AI 的动作目录（本地排障模式专用）。
+ *
+ * 模型不执行任何命令，只被允许在回答里用 `[[action:<id>]]` 引用目录内的 id；
+ * 前端解析后渲染「执行此动作」按钮，点击仍走确认卡片与三道闸。
+ * 这样 AI 的「建议」与「执行」之间始终隔着用户的一次点击。
+ */
+export function actionCatalogForPrompt(): string {
+  const lines = REPAIR_ACTIONS.map((action) => {
+    const kind = action.mutating ? '会改动本机，需用户确认' : '只读'
+    return `- ${action.id}: ${action.title} —— ${action.description}（${kind}；影响：${action.impact}）`
+  })
+
+  return [
+    '### 可用修复动作（只能引用下面这些 id；格式 [[action:<id>]]）',
+    ...lines,
+  ].join('\n')
+}

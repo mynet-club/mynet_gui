@@ -54,6 +54,7 @@ export default {
       utc: 'UTC 加速开了吗？用量还剩多少？',
       troubleshoot: 'ping 通但 SSH 不通怎么办？'
     },
+    runAction: '执行：{title}',
     localTitle: '本地排障助手',
     localSubtitle: '基于本机脱敏诊断摘要回答；修改建议需你确认后执行'
   },

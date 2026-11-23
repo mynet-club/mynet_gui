@@ -158,6 +158,9 @@
       :title-override="t('ai.localTitle')"
       :subtitle-override="t('ai.localSubtitle')"
       :context-snapshot="aiSnapshot"
+      :actions="actionOptions"
+      action-markers
+      @action-request="onActionRequest"
     />
   </div>
 </template>
@@ -169,7 +172,13 @@ import { localGatewayApi, LocalApiError } from '../../services/local/localApi'
 import type { LocalNodeStatus } from '../../types/local'
 import UserAiAssistant from '../../components/ai/UserAiAssistant.vue'
 import { buildLocalDiagnosticSnapshot } from '../../services/ai/localContext'
-import { REPAIR_ACTIONS as repairActions, runRepairAction, type RepairAction } from '../../services/local/repairActions'
+import {
+  REPAIR_ACTIONS as repairActions,
+  actionCatalogForPrompt,
+  getRepairAction,
+  runRepairAction,
+  type RepairAction,
+} from '../../services/local/repairActions'
 
 const { t } = useI18n()
 
@@ -221,7 +230,16 @@ const aiSnapshot = computed(() => buildLocalDiagnosticSnapshot({
   status: statusObj.value,
   parity: parity.value,
   checkOutput: checkOut.value,
+  // 模型只能引用这些 id；执行仍要用户点按钮 + 确认卡片
+  actionCatalog: actionCatalogForPrompt(),
 }))
+
+const actionOptions = repairActions.map((action) => ({ id: action.id, title: action.title }))
+
+function onActionRequest(id: string): void {
+  const action = getRepairAction(id)
+  if (action) openRepair(action)
+}
 
 const tab = ref<'check' | 'parity' | 'facts' | 'raw' | 'repair'>('check')
 const statusObj = ref<Record<string, unknown>>({})

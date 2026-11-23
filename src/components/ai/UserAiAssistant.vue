@@ -51,7 +51,20 @@
               <q-spinner-dots size="18px" />
               <span class="q-ml-sm text-caption">{{ t('ai.thinking') }}</span>
             </div>
-            <div v-else class="content">{{ message.content }}</div>
+            <div v-else class="content">{{ displayContent(message) }}</div>
+            <div v-if="actionMarkers && message.role === 'assistant'" class="action-row">
+              <q-btn
+                v-for="id in messageActionIds(message)"
+                :key="id"
+                dense
+                unelevated
+                color="primary"
+                icon="build"
+                :label="t('ai.runAction', { title: actionTitle(id) })"
+                class="q-mr-sm q-mt-sm"
+                @click="emit('action-request', id)"
+              />
+            </div>
           </div>
         </div>
 
@@ -102,6 +115,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { askUserAi, resolveTenantSlug, streamUserAiChat, shouldFallback, type ChatMessage, type ChatToolTrace } from '../../services/ai/userAiChat'
 import { tokenManager } from '../../utils/tokenManager'
+import { extractActionIds, stripActionMarkers } from '../../services/ai/actionMarkers'
 
 interface UiMessage extends ChatMessage {
   pending?: boolean
@@ -113,13 +127,40 @@ const props = withDefaults(defineProps<{
   contextSnapshot?: string
   titleOverride?: string
   subtitleOverride?: string
+  /** 可执行动作目录（本地模式）：回答里的 [[action:id]] 会渲染成按钮 */
+  actions?: Array<{ id: string; title: string }>
+  /** 是否解析动作标记（云端助手不开） */
+  actionMarkers?: boolean
 }>(), {
   contextSnapshot: '',
   titleOverride: '',
   subtitleOverride: '',
+  actions: () => [],
+  actionMarkers: false,
 })
 
-const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
+  'action-request': [id: string]
+}>()
+
+const knownActionIds = computed(() => props.actions.map((action) => action.id))
+
+function displayContent(message: UiMessage): string {
+  return props.actionMarkers && message.role === 'assistant'
+    ? stripActionMarkers(message.content)
+    : message.content
+}
+
+function messageActionIds(message: UiMessage): string[] {
+  return props.actionMarkers && message.role === 'assistant'
+    ? extractActionIds(message.content, knownActionIds.value)
+    : []
+}
+
+function actionTitle(id: string): string {
+  return props.actions.find((action) => action.id === id)?.title ?? id
+}
 
 const { t } = useI18n()
 

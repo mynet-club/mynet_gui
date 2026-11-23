@@ -59,6 +59,8 @@ export interface LocalDiagnosticInput {
   status?: Record<string, unknown> | null
   parity?: { ok?: boolean; critical_miss?: string[]; warnings?: string[]; hint?: string; items?: Array<Record<string, unknown>> } | null
   checkOutput?: string | null
+  /** 动作目录（本地模式专用；模型只能用 [[action:<id>]] 引用，不能执行） */
+  actionCatalog?: string | null
   maxChars?: number
 }
 
@@ -92,6 +94,10 @@ export function buildLocalDiagnosticSnapshot(input: LocalDiagnosticInput): strin
 
   if (input.checkOutput) {
     parts.push('', '### 健康检查输出', '```', input.checkOutput, '```')
+  }
+
+  if (input.actionCatalog) {
+    parts.push('', input.actionCatalog)
   }
 
   return clip(redactDiagnosticText(parts.join('\n')), max)

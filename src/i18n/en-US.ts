@@ -49,6 +49,7 @@ export default {
       utc: 'Is UTC acceleration on? How much quota is left?',
       troubleshoot: 'Ping works but SSH does not — what should I check?'
     },
+    runAction: 'Run: {title}',
     localTitle: 'Local Diagnostics Assistant',
     localSubtitle: 'Answers from a redacted local diagnostic summary; changes need your confirmation'
   },
