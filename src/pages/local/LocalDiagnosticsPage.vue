@@ -13,6 +13,7 @@
       <q-tab name="parity" label="一致性" />
       <q-tab name="facts" label="运行事实" />
       <q-tab name="raw" label="原始状态 / 导出" />
+      <q-tab name="repair" label="修复动作" />
     </q-tabs>
     <q-separator />
 
@@ -94,8 +95,62 @@
         </div>
         <pre class="raw mono compact">{{ statusRaw }}</pre>
       </q-tab-panel>
+
+      <q-tab-panel name="repair" class="panel-pad">
+        <div class="text-caption text-grey-7 q-mb-md">
+          目录内动作才可执行（命令是常量，AI 不参与构造）。会改动本机状态的动作需在确认卡片上勾选后才能执行。
+        </div>
+        <div class="row q-col-gutter-md">
+          <div v-for="action in repairActions" :key="action.id" class="col-12 col-md-6">
+            <q-card flat bordered class="info-card">
+              <q-card-section class="q-pb-xs">
+                <div class="row items-center no-wrap">
+                  <div class="text-subtitle2">{{ action.title }}</div>
+                  <q-space />
+                  <q-chip dense size="sm" :color="action.mutating ? 'warning' : 'positive'" text-color="white">
+                    {{ action.mutating ? '会改动本机' : '只读' }}
+                  </q-chip>
+                </div>
+                <div class="text-caption text-grey-7 q-mt-xs">{{ action.description }}</div>
+              </q-card-section>
+              <q-card-section class="q-pt-none">
+                <div class="text-caption text-grey-8 q-mb-xs">影响：{{ action.impact }}</div>
+                <div class="mono text-caption command-preview">mynet {{ action.argv.join(' ') }}</div>
+              </q-card-section>
+              <q-card-actions align="right">
+                <q-btn outline :color="action.mutating ? 'warning' : 'primary'" dense
+                  :label="action.mutating ? '执行（需确认）' : '执行'" @click="openRepair(action)" />
+              </q-card-actions>
+            </q-card>
+          </div>
+        </div>
+      </q-tab-panel>
     </q-tab-panels>
-  </div>
+
+    <!-- 修复动作确认卡片：argv 来自服务层目录常量，不是 AI 生成 -->
+    <q-dialog v-model="repairOpen">
+      <q-card style="min-width: 420px; max-width: 92vw">
+        <q-card-section class="text-subtitle1">{{ repairTarget?.title }}</q-card-section>
+        <q-card-section class="q-pt-none">
+          <div class="text-caption text-grey-7 q-mb-sm">{{ repairTarget?.description }}</div>
+          <div class="mono text-caption command-preview q-mb-sm">mynet {{ repairTarget?.argv.join(' ') }}</div>
+          <div class="text-body2 q-mb-sm">影响：{{ repairTarget?.impact }}</div>
+          <q-checkbox v-if="repairTarget?.mutating" v-model="repairAcknowledged" dense
+            label="我已了解影响，并确认现在执行" />
+          <div v-if="repairResult" class="q-mt-sm">
+            <div class="text-caption text-grey-7">执行结果</div>
+            <pre class="raw mono compact">{{ repairResult }}</pre>
+          </div>
+          <div v-if="repairError" class="text-negative text-caption q-mt-sm">{{ repairError }}</div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="取消" v-close-popup :disable="repairRunning" />
+          <q-btn unelevated :color="repairTarget?.mutating ? 'warning' : 'primary'"
+            :label="repairRunning ? '执行中…' : '确认执行'" :loading="repairRunning"
+            :disable="repairTarget?.mutating ? !repairAcknowledged : false" @click="confirmRepair" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
     <!-- 本地 AI 排障：只送脱敏摘要；任何修改仍需用户确认后走 localapi -->
     <UserAiAssistant
@@ -104,6 +159,7 @@
       :subtitle-override="t('ai.localSubtitle')"
       :context-snapshot="aiSnapshot"
     />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -113,10 +169,50 @@ import { localGatewayApi, LocalApiError } from '../../services/local/localApi'
 import type { LocalNodeStatus } from '../../types/local'
 import UserAiAssistant from '../../components/ai/UserAiAssistant.vue'
 import { buildLocalDiagnosticSnapshot } from '../../services/ai/localContext'
+import { REPAIR_ACTIONS as repairActions, runRepairAction, type RepairAction } from '../../services/local/repairActions'
 
 const { t } = useI18n()
 
 const aiOpen = ref(false)
+
+// 修复动作（Phase 5b）：目录常量 + 确认闸；写动作不经过 AI 工具面
+const repairOpen = ref(false)
+const repairRunning = ref(false)
+const repairAcknowledged = ref(false)
+const repairTarget = ref<RepairAction | null>(null)
+const repairResult = ref('')
+const repairError = ref('')
+
+function openRepair(action: RepairAction): void {
+  repairTarget.value = action
+  repairAcknowledged.value = false
+  repairResult.value = ''
+  repairError.value = ''
+  repairOpen.value = true
+}
+
+async function confirmRepair(): Promise<void> {
+  const action = repairTarget.value
+  if (!action) return
+  repairRunning.value = true
+  repairError.value = ''
+  repairResult.value = ''
+  try {
+    const result = await runRepairAction(action.id, {
+      confirmed: action.mutating ? repairAcknowledged.value : true,
+    })
+    repairResult.value = ((result.stdout || '') + (result.stderr ? `\n${result.stderr}` : '')).trim() || '执行完成'
+    // 动作可能改变节点状态：刷新本页事实，并重跑健康检查
+    await loadStatus()
+    await runCheck().catch(() => undefined)
+  } catch (e) {
+    repairError.value = e instanceof LocalApiError
+      ? (e.stdout || e.stderr || e.message)
+      : (e as Error).message
+  } finally {
+    repairRunning.value = false
+  }
+}
 
 // 只送「已脱敏 + 白名单字段」的摘要：不读磁盘、不带 token/私钥（见 localContext.ts）
 const aiSnapshot = computed(() => buildLocalDiagnosticSnapshot({
@@ -127,7 +223,7 @@ const aiSnapshot = computed(() => buildLocalDiagnosticSnapshot({
   checkOutput: checkOut.value,
 }))
 
-const tab = ref<'check' | 'parity' | 'facts' | 'raw'>('check')
+const tab = ref<'check' | 'parity' | 'facts' | 'raw' | 'repair'>('check')
 const statusObj = ref<Record<string, unknown>>({})
 const status = ref<LocalNodeStatus>({})
 const checking = ref(false)
