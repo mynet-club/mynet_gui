@@ -302,6 +302,44 @@ export interface LocalUtcPairsPayload {
   running: boolean
   count: number
   peers: LocalUtcPeerState[]
+  pairs: LocalUtcPairView[]
+}
+
+/**
+ * 单对端 TCP 视图：intent 是本地意愿，mode/bridge_up 是云端投影与运行态。
+ * state 取值：tcp | fallback | pending | degraded | rejected | revoking | off。
+ */
+export type LocalUtcPairState =
+  | 'tcp'
+  | 'fallback'
+  | 'pending'
+  | 'degraded'
+  | 'rejected'
+  | 'revoking'
+  | 'off'
+
+export interface LocalUtcPairView {
+  peer_id: number
+  pair_id?: number
+  pair_gen?: number
+  intent?: 'on' | 'off' | ''
+  intent_state?: 'pending' | 'active' | 'rejected' | 'off' | ''
+  mode: number
+  bridge_up: boolean
+  lease_valid: boolean
+  expires_at?: number
+  state: LocalUtcPairState
+  reason?: string
+  updated_at?: number
+}
+
+export interface LocalUtcPairIntentResult {
+  status: LocalUtcStatus
+  pairs: LocalUtcPairView[]
+}
+
+export interface LocalUtcPairResultPayload {
+  pairs: LocalUtcPairView[]
 }
 
 export interface LocalUtcSyncPeer {

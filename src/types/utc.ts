@@ -164,3 +164,35 @@ export interface UtcClientConfig {
   peers: UtcClientConfigPeer[]
   data_source: UtcDataSource
 }
+
+// ── approved-pair 管理面（本地发起的云端写回）──────────────────
+
+export interface UtcPairApprovalItem {
+  id: number
+  transport_id: string
+  pair_id: number
+  side: number
+  state: string
+  revision: number
+  reason?: string
+  audit_ref?: string
+}
+
+export interface UtcPairApprovalList {
+  scope: string
+  count: number
+  counts?: { approved: number; cap: number }
+  items: UtcPairApprovalItem[]
+  data_source: UtcDataSource
+}
+
+export interface UtcPairApprovalCreateResult {
+  pair_id: number
+  items: UtcPairApprovalItem[]
+  data_source: UtcDataSource
+}
+
+export interface UtcPairApprovalRevokeResult {
+  item: UtcPairApprovalItem
+  data_source: UtcDataSource
+}

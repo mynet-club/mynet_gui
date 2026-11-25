@@ -4,6 +4,9 @@ import type {
   UtcAccelerationList,
   UtcClientConfig,
   UtcIdentity,
+  UtcPairApprovalCreateResult,
+  UtcPairApprovalList,
+  UtcPairApprovalRevokeResult,
   UtcTransport,
   UtcTransportList,
   UtcTransportDraft,
@@ -71,6 +74,21 @@ export const utcService = {
     ),
 
   getAcceleration: () => getData<UtcAccelerationList>('/utc/acceleration'),
+
+  // pair：用户面自配对，无需管理员审批；服务端只校验两端 transport 都属于本租户。
+  listPairApprovals: (params?: { transport_id?: string; state?: 'approved' | 'revoked' }) =>
+    getData<UtcPairApprovalList>('/utc/pair-requests', params),
+  createPairApproval: (transportA: string, transportB: string, reason: string) =>
+    postData<UtcPairApprovalCreateResult>('/utc/pair-requests', {
+      transport_id: transportA,
+      peer_transport_id: transportB,
+      reason
+    }),
+  revokePairApproval: (pairId: number, expectedRevision: number, reason: string) =>
+    postData<UtcPairApprovalRevokeResult>(`/utc/pair-requests/${pairId}/revoke`, {
+      expected_revision: expectedRevision,
+      reason
+    }),
 
   setAcceleration: (transportId: string, enabled: boolean) =>
     putData<UtcAccelerationItem>(`/utc/acceleration/${encodeURIComponent(transportId)}`, { enabled }),

@@ -8,6 +8,8 @@ import type {
   LocalLogLine,
   LocalNodeStatus,
   LocalResponse,
+  LocalUtcPairIntentResult,
+  LocalUtcPairResultPayload,
   LocalUtcPairsPayload,
   LocalUtcStatus,
   LocalUtcSyncPayload,
@@ -331,6 +333,10 @@ export const localApi = {
     }),
   getUtcStatus: () => request<LocalUtcStatus>('get', '/utc/status'),
   getUtcPairs: () => request<LocalUtcPairsPayload>('get', '/utc/pairs'),
+  putUtcPairIntent: (peerID: number, intent: 'on' | 'off') =>
+    request<LocalUtcPairIntentResult>('put', `/utc/pairs/${peerID}`, { intent }),
+  putUtcPairResult: (peerID: number, result: 'pending' | 'rejected', reason: string) =>
+    request<LocalUtcPairResultPayload>('put', `/utc/pairs/${peerID}/result`, { result, reason }),
   getUtcAcceleration: () => request<LocalUtcStatus>('get', '/utc/acceleration'),
   putUtcAcceleration: (enabled: boolean) =>
     request<LocalUtcStatus>('put', '/utc/acceleration', { enabled }),

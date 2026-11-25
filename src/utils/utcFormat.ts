@@ -58,9 +58,9 @@ export type UtcRelayState = 'eligible' | 'pending' | 'draining' | 'revoked' | 'e
 /**
  * 配置层面的可调度状态。
  *
- * 注意：`eligible` 只代表「声明有效 + 已批准」，**不代表 Hub 已生效** ——
+ * 注意：`eligible` 只代表「声明有效 + 已建立」，**不代表 Hub 已生效** ——
  * 管理面下发通道未接通，展示时必须同时出现 delivery 的「仅配置」提示。
- * 撤销/过期优先于 pending，避免把终态显示成「等待批准」。
+ * 撤销/过期优先于 pending，避免把终态显示成「等待建立」。
  */
 export function relayInventoryState(
   approvalState?: string | null,
@@ -118,4 +118,88 @@ export function formatUptime(seconds?: number | null): string {
 export function cohortPercent(approved?: number | null, cap?: number | null): number {
   if (!approved || approved <= 0 || !cap || cap <= 0) return 0
   return Math.min(100, Math.round((approved / cap) * 100))
+}
+
+// ── 单对端 TCP 状态（intent 可见性）────────────────────────────
+
+export type UtcPairState = 'tcp' | 'fallback' | 'pending' | 'degraded' | 'rejected' | 'revoking' | 'off'
+
+/**
+ * 把后端的 pair state 映射成用户可读标签与色调。
+ *
+ * 关键：`fallback` 必须写成“原生 UDP”，不能写成“已开启” —— 用户看到总开关是开的，
+ * 但如果这对没有 pair，实际就是走 UDP，必须显式说明。
+ */
+export function utcPairStateMeta(state?: string | null): {
+  label: string
+  tone: 'positive' | 'grey' | 'warning' | 'negative' | 'primary'
+} {
+  switch (state) {
+    case 'tcp':
+      return { label: 'TCP 已连通', tone: 'positive' }
+    case 'fallback':
+      return { label: '原生 UDP', tone: 'grey' }
+    case 'pending':
+      return { label: '等待云端确认', tone: 'warning' }
+    case 'degraded':
+      return { label: '链路异常', tone: 'warning' }
+    case 'rejected':
+      return { label: '云端拒绝', tone: 'negative' }
+    case 'revoking':
+      return { label: '断开中', tone: 'warning' }
+    case 'off':
+      return { label: '未选择 TCP', tone: 'grey' }
+    default:
+      return { label: '未知', tone: 'grey' }
+  }
+}
+
+// ── approved-pair 查找（本地动作 → 云端撤销用）────────────────
+
+/** 在 approved-pair 列表里找同时包含两个 transport 的 approved 记录。 */
+export function findApprovedPair(
+  items: Array<{ id?: number; pair_id: number; transport_id: string; state: string; revision: number }>,
+  transportA: string,
+  transportB: string
+): { id: number; pair_id: number; revision: number } | null {
+  const a = String(transportA)
+  const b = String(transportB)
+  const byPair = new Map<number, { id?: number; transport_id: string; state: string; revision: number }[]>()
+  for (const item of items) {
+    if (item.state !== 'approved') continue
+    const list = byPair.get(item.pair_id) || []
+    list.push({
+      id: item.id,
+      transport_id: String(item.transport_id),
+      state: item.state,
+      revision: item.revision
+    })
+    byPair.set(item.pair_id, list)
+  }
+  for (const [pairId, sides] of byPair) {
+    if (sides.length < 2) continue
+    const ids = sides.map((s) => s.transport_id).sort()
+    if (ids[0] === [a, b].sort()[0] && ids[1] === [a, b].sort()[1]) {
+      const chosen = sides.reduce((best, s) => (s.revision >= best.revision ? s : best))
+      if (typeof chosen.id !== 'number') return null
+      return { id: chosen.id, pair_id: pairId, revision: chosen.revision }
+    }
+  }
+  return null
+}
+
+// ── UTC 投影 mode 标签（gnb utc-v2）──────────────────────────
+
+/** 0=DIRECT 原生 UDP；1=A-S 中继导出；2=A-D 本地 utcd 导出（TCP）。 */
+export function utcModeLabel(mode?: number | null): string {
+  switch (mode) {
+    case 0:
+      return '原生 UDP'
+    case 1:
+      return '中继导出（A-S）'
+    case 2:
+      return 'TCP 导出（A-D）'
+    default:
+      return '未知模式'
+  }
 }

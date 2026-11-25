@@ -6,11 +6,14 @@ import {
   formatBytes,
   formatEndpoint,
   formatHubEdgeEndpoint,
+  findApprovedPair,
   formatUptime,
   relayDeliveryIsWired,
   relayInventoryState,
   sideLabel,
-  usagePercent
+  usagePercent,
+  utcModeLabel,
+  utcPairStateMeta
 } from '../utcFormat'
 
 describe('utcFormat', () => {
@@ -92,5 +95,45 @@ describe('formatUptime', () => {
     expect(formatUptime(5327)).toBe('1h 28m')
     expect(formatUptime(90000)).toBe('1d 1h')
     expect(formatUptime(null)).toBe('—')
+  })
+})
+
+describe('utcPairStateMeta', () => {
+  it('never labels a direct/fallback pair as tcp', () => {
+    expect(utcPairStateMeta('fallback').label).toBe('原生 UDP')
+    expect(utcPairStateMeta('fallback').tone).toBe('grey')
+    expect(utcPairStateMeta('pending').label).toBe('等待云端确认')
+    expect(utcPairStateMeta('tcp').label).toBe('TCP 已连通')
+    expect(utcPairStateMeta('tcp').tone).toBe('positive')
+    expect(utcPairStateMeta('rejected').tone).toBe('negative')
+    expect(utcPairStateMeta('unknown-state').label).toBe('未知')
+  })
+})
+
+describe('findApprovedPair', () => {
+  const items = [
+    { id: 1, pair_id: 9001, transport_id: '111', state: 'approved', revision: 2 },
+    { id: 2, pair_id: 9001, transport_id: '222', state: 'approved', revision: 3 },
+    { id: 3, pair_id: 9002, transport_id: '111', state: 'revoked', revision: 4 },
+    { id: 4, pair_id: 9002, transport_id: '333', state: 'approved', revision: 4 }
+  ]
+
+  it('finds the approved pair regardless of argument order', () => {
+    expect(findApprovedPair(items, '111', '222')).toEqual({ id: 2, pair_id: 9001, revision: 3 })
+    expect(findApprovedPair(items, '222', '111')).toEqual({ id: 2, pair_id: 9001, revision: 3 })
+  })
+
+  it('never returns a revoked pair or a half pair', () => {
+    expect(findApprovedPair(items, '111', '333')).toBeNull()
+    expect(findApprovedPair(items, '111', '444')).toBeNull()
+  })
+})
+
+describe('utcModeLabel', () => {
+  it('maps gnb projection modes to readable labels', () => {
+    expect(utcModeLabel(0)).toBe('原生 UDP')
+    expect(utcModeLabel(1)).toContain('A-S')
+    expect(utcModeLabel(2)).toContain('A-D')
+    expect(utcModeLabel(undefined)).toBe('未知模式')
   })
 })
