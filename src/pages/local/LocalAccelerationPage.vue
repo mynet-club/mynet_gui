@@ -103,10 +103,9 @@
       <MynetConfigCard v-if="ops === 'exit' && draft.enabled" title="出口配置" class="q-mb-md">
         <MynetFieldRow
           label="加速出口"
-          :help="store.isGateway ? '可多选；按顺序作为出口候选' : 'PC 形态单选一个出口'"
+          help="可多选，按选择顺序作为出口优先级：第一个是主出口，其余为兜底"
         >
           <q-select
-            v-if="store.isGateway"
             v-model="exitMulti"
             :options="exitOptions"
             dense outlined emit-value map-options multiple use-chips
@@ -114,17 +113,9 @@
             :disable="store.applying"
             @update:model-value="onExitMulti"
           />
-          <q-select
-            v-else
-            v-model="draft.exit_peer"
-            :options="exitOptions"
-            dense outlined emit-value map-options
-            style="max-width:420px"
-            :disable="store.applying"
-          />
         </MynetFieldRow>
-        <div v-if="store.isGateway && exitMulti.length > 1" class="text-caption text-grey-7">
-          已选 {{ exitMulti.length }} 个出口；PC 形态若表现异常请只留一个。
+        <div v-if="exitMulti.length > 1" class="text-caption text-grey-7">
+          已选 {{ exitMulti.length }} 个出口；前一个不可用时自动落到下一个。
         </div>
         <div class="row q-gutter-sm">
           <q-btn flat label="收起" @click="ops = ''" />
@@ -278,7 +269,13 @@ const emptyDraft = (): AccelerationConfig & { custom_dns?: string[] } => ({
 })
 const draft = ref(emptyDraft())
 const savedJson = ref('')
-const dirty = computed(() => JSON.stringify(normalize(draft.value)) !== savedJson.value)
+const savedExits = ref('[]')
+function markSaved() {
+  savedJson.value = JSON.stringify(normalize(draft.value))
+  savedExits.value = JSON.stringify(exitMulti.value)
+}
+
+const dirty = computed(() => JSON.stringify(normalize(draft.value)) !== savedJson.value || JSON.stringify(exitMulti.value) !== savedExits.value)
 const customDomainsText = ref('')
 const customDirectText = ref('')
 const customDnsText = ref('')
@@ -414,33 +411,41 @@ function resetDraft() {
   exitMulti.value = draft.value.exit_peer ? [draft.value.exit_peer] : []
   customDomainsText.value = draft.value.custom_domains.join('\n')
   customDnsText.value = (draft.value.custom_dns || []).join('\n')
-  savedJson.value = JSON.stringify(normalize(draft.value))
+  markSaved()
 }
 
 async function loadPluginProxyData() {
   try {
     const d = await localGatewayApi.getPluginProxy() as {
-      effective?: { policy?: { exits?: { node_id?: string; via?: string; enabled?: boolean }[] } }
+      effective?: { policy?: { exits?: { node_id?: string; via?: string; enabled?: boolean; order?: number }[] } }
       local?: {
         policy?: {
-          exits?: { node_id?: string; via?: string; enabled?: boolean }[]
+          exits?: { node_id?: string; via?: string; enabled?: boolean; order?: number }[]
           domain_rules?: { custom_direct?: string[] }
         }
       }
+      plugin_exits?: { node_id?: string; via?: string; enabled?: boolean; order?: number }[]
     }
     const list = d.local?.policy?.domain_rules?.custom_direct || []
     customDirectText.value = list.join('\n')
-    const exits = d.effective?.policy?.exits || d.local?.policy?.exits || []
-    const first = exits.find((e) => e.enabled !== false && e.node_id)
-    if (first?.node_id && !draft.value.exit_peer) {
-      draft.value.exit_peer = String(first.node_id)
+    const source = (d.local?.policy?.exits?.length && d.local.policy.exits)
+      || (d.effective?.policy?.exits?.length && d.effective.policy.exits)
+      || d.plugin_exits
+      || []
+    const exits = source
+      .filter((e) => e.enabled !== false && e.node_id)
+      .slice()
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+    if (exits.length) {
+      exitMulti.value = exits.map((e) => String(e.node_id))
+      draft.value.exit_peer = exitMulti.value[0]
     }
   } catch {
     /* 保留当前框 */
   }
 }
 
-async function savePluginProxyPatch(opts: { customDirect?: string[]; exitPeer?: string }) {
+async function savePluginProxyPatch(opts: { customDirect?: string[]; exits?: string[] }) {
   const d = await localGatewayApi.getPluginProxy() as {
     local?: { policy?: Record<string, unknown> }
   }
@@ -450,8 +455,8 @@ async function savePluginProxyPatch(opts: { customDirect?: string[]; exitPeer?: 
     dr.custom_direct = opts.customDirect
     policy.domain_rules = dr
   }
-  if (opts.exitPeer !== undefined) {
-    policy.exits = opts.exitPeer ? [{ node_id: opts.exitPeer, enabled: true }] : []
+  if (opts.exits !== undefined) {
+    policy.exits = opts.exits.map((id, i) => ({ node_id: id, enabled: true, weight: 10, order: i + 1 }))
   }
   await localGatewayApi.postPluginProxy(policy)
 }
@@ -560,8 +565,8 @@ async function onToggleEnabled(v: boolean | number | null) {
   if (!draft.value.enabled) draft.value.dns_enabled = false // 加速关则 DNS 必关
   try {
     await store.applyAcceleration(draft.value)
-    try { await savePluginProxyPatch({ exitPeer: draft.value.exit_peer || '' }) } catch { /* 出口写入失败不挡总开关 */ }
-    savedJson.value = JSON.stringify(normalize(draft.value))
+    try { await savePluginProxyPatch({ exits: exitMulti.value }) } catch { /* 出口写入失败不挡总开关 */ }
+    markSaved()
   } catch (e) {
     cmdOk.value = false
     cmdMsg.value = e instanceof Error ? e.message : String(e)
@@ -574,7 +579,7 @@ async function onToggleDns(v: boolean | number | null) {
   draft.value.dns_enabled = !!v
   try {
     await store.applyAcceleration(draft.value)
-    savedJson.value = JSON.stringify(normalize(draft.value))
+    markSaved()
   } catch (e) {
     cmdOk.value = false
     cmdMsg.value = e instanceof Error ? e.message : String(e)
@@ -598,7 +603,7 @@ async function onSave() {
     // 合并直连名单与出口配置为单次 /plugin/proxy 写入，避免两次读改写竞态
     await savePluginProxyPatch({
       customDirect,
-      exitPeer: draft.value.exit_peer || ''
+      exits: exitMulti.value
     })
   } catch (e) {
     cmdOk.value = false
@@ -606,7 +611,7 @@ async function onSave() {
     return
   }
 
-  savedJson.value = JSON.stringify(normalize(draft.value))
+  markSaved()
   cmdOk.value = true
   cmdMsg.value = '已保存并应用'
 }
