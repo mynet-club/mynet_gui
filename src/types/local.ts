@@ -222,6 +222,8 @@ export interface ProxyACLView {
 export interface ProxyExitView {
   node_id?: string
   enabled?: boolean
+  ingress_open?: boolean | null
+  proxy_role?: string | null
   acl?: ProxyACLView
 }
 

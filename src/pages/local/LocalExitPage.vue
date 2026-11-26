@@ -12,7 +12,17 @@
                 {{ displayExit(ex.node_id) }}
                 <span class="text-caption text-grey-7 mono q-ml-sm">{{ ex.node_id }}</span>
               </span>
-              <q-badge :color="ex.enabled ? 'positive' : 'grey'">{{ ex.enabled ? '启用' : '停用' }}</q-badge>
+              <div class="row items-center q-gutter-xs">
+                <q-badge
+                  v-if="ex.ingress_open === false"
+                  color="negative"
+                  data-testid="exit-ingress-closed-badge"
+                >
+                  对端未开放出口 (ingress_open=off)
+                  <q-tooltip>对端节点未开启 proxy.conf ingress_open，经该出口转发的外部流量会被 GNB 丢弃</q-tooltip>
+                </q-badge>
+                <q-badge :color="ex.enabled ? 'positive' : 'grey'">{{ ex.enabled ? '启用' : '停用' }}</q-badge>
+              </div>
             </div>
             <MynetFieldRow label="新增出口 node_id">
               <div class="row q-gutter-sm">
