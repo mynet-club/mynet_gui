@@ -1,351 +1,68 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="main-layout theme-transition">
-    <!-- Header -->
-    <q-header class="soft-header">
-      <q-toolbar>
+    <!-- Header（与本机一致的 56px 骨架；顶部 2px 品牌蓝语义色条区分云端模式） -->
+    <q-header class="soft-header soft-header--cloud">
+      <q-toolbar class="shell-toolbar">
         <q-btn
           flat
           dense
           round
-          icon="menu"
+          size="sm"
+          :icon="leftDrawerOpen ? 'menu_open' : 'menu'"
           :aria-label="$t('common.navigation')"
           :aria-expanded="leftDrawerOpen"
           @click="toggleLeftDrawer"
-          class="q-mr-sm"
-        />
+          class="drawer-toggle-btn"
+        >
+          <q-tooltip>{{ leftDrawerOpen ? '收起侧边栏' : '展开侧边栏' }}</q-tooltip>
+        </q-btn>
 
-        <div class="toolbar-brand">MyNet</div>
+        <ModeSwitcher v-if="inLocalHost" class="q-ml-xs" />
+
+        <div class="header-divider gt-xs" />
+
+        <!-- 云端上下文：当前网络区 -->
+        <TenantSelector show-name class="gt-xs" />
+
         <q-space />
 
-        <!-- 区域切换 -->
-        <TenantSelector />
-
-        <!-- Tips 帮助 -->
-        <TipsHelper class="q-mr-sm" />
-
-        <!-- 语言切换 -->
-        <q-btn-dropdown 
-          flat
-          dense
-          :icon="'language'"
-          :aria-label="$t('settings.language')"
-          :label="$q.screen.gt.sm ? getCurrentLanguageLabel() : ''"
-          class="q-mr-sm"
-        >
-          <q-list>
-            <q-item-label header class="text-weight-bold">
-              {{ $t('settings.language') }}
-            </q-item-label>
-            <q-item 
-              v-for="lang in supportedLanguages"
-              :key="lang.code"
-              clickable
-              @click="changeLanguage(lang.code)"
-              :active="currentLanguage === lang.code"
-            >
-              <q-item-section>
-                <q-item-label>{{ lang.nativeName }}</q-item-label>
-                <q-item-label caption>{{ lang.name }}</q-item-label>
-              </q-item-section>
-              <q-item-section side v-if="currentLanguage === lang.code">
-                <q-icon name="check" color="positive" />
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>
-
-        <!-- 网络状态：本机 mynetd 能力面（用户面实时推送不走 Echo/Reverb） -->
-        <q-btn 
-          flat 
-          dense
-          round
-          :icon="localDaemon.online ? 'wifi' : 'wifi_off'"
-          :aria-label="localDaemon.online ? $t('common.connected') : $t('common.disconnected')"
-          :color="localDaemon.online ? 'positive' : 'negative'"
-          @click="showConnectionDialog = true"
-          class="q-mr-sm"
-        >
-          <q-tooltip>
-            {{ localDaemon.online ? $t('common.connected') : $t('common.disconnected') }}
-          </q-tooltip>
-        </q-btn>
-
-        <!-- 主题切换 -->
-        <q-btn-dropdown 
-          flat 
-          dense
-          :icon="getThemeIcon()"
-          :aria-label="$t('settings.theme')"
-          :label="$q.screen.gt.sm ? getThemeLabel() : ''"
-          class="q-mr-sm"
-        >
-          <q-list>
-            <q-item-label header class="text-weight-bold">
-              {{ $t('settings.theme') }}
-            </q-item-label>
-            <q-item 
-              v-for="theme in themeOptions"
-              :key="theme.value"
-              clickable
-              @click="changeTheme(theme.value)"
-              :active="currentThemeMode === theme.value"
-            >
-              <q-item-section avatar>
-                <q-icon :name="theme.icon" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ $t(`settings.themes.${theme.value}`) }}</q-item-label>
-                <q-item-label caption>{{ theme.description }}</q-item-label>
-              </q-item-section>
-              <q-item-section side v-if="currentThemeMode === theme.value">
-                <q-icon name="check" color="positive" />
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>
-
-
-
-        <!-- 消息提醒 -->
-        <q-btn 
-          flat 
-          dense
-          round
-          icon="notifications"
-          :aria-label="$t('common.notifications')"
-          @click="showNotificationDialog = true"
-          class="q-mr-sm"
-        >
-          <q-badge 
-            v-if="unreadCount > 0"
-            color="negative"
-            floating
-            :label="displayUnreadCount"
-          />
-          <q-tooltip>
-            {{ $t('common.notifications') }}
-          </q-tooltip>
-        </q-btn>
-
-        <!-- 用户菜单（未登录不伪造「User」占位帐号，改给登录入口）-->
-        <q-btn-dropdown
-          v-if="user"
-          flat
-          dense
-          class="user-menu-btn"
-          :aria-label="$t('common.profile')"
-        >
-          <template v-slot:label>
-            <div class="row items-center no-wrap q-gutter-xs">
-                            <UserAvatar
-                v-if="user?.user_id"
-                :userId="user.user_id"
-                size="sm"
-                class="q-mr-md"
-              />
-              <span v-if="$q.screen.gt.sm">{{ user?.name }}</span>
-            </div>
-          </template>
-          <q-list>
-            <q-item-label header class="text-weight-bold">
-              {{ user?.name }}
-            </q-item-label>
-            <q-separator />
-            <q-item clickable @click="$router.push('/app/profile')">
-              <q-item-section avatar>
-                <q-icon name="person" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ $t('common.profile') }}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item clickable @click="goToProfileSettings">
-              <q-item-section avatar>
-                <q-icon name="settings" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ $t('user.preferences') }}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-separator />
-            <q-item clickable @click="logout">
-              <q-item-section avatar>
-                <q-icon name="logout" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ $t('common.logout') }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>
-        <q-btn
-          v-else
-          flat
-          dense
-          color="primary"
-          icon="login"
-          :label="$t('common.login')"
-          to="/auth/login"
-        />
+        <!-- 与本机完全一致的右侧公共操作区 -->
+        <HeaderUtilityBar mode="cloud" />
       </q-toolbar>
     </q-header>
 
-    <!-- Left Drawer -->
+    <!-- Left Drawer（与本机完全一致的 256px 宽 + 56px 品牌顶栏） -->
     <q-drawer
       v-model="leftDrawerOpen"
       show-if-above
       bordered
       class="sidebar-menu"
-      :width="280"
+      :width="256"
       :breakpoint="1024"
     >
       <!-- Drawer Header -->
-      <div class="drawer-header q-pa-md">
-        <div class="row items-center no-wrap">
-          <div class="col">
-            <div class="text-h6 text-weight-bold brand-title">{{ $t('app.name') }}</div>
-            <div class="text-caption brand-tagline">{{ $t('app.tagline') }}</div>
-          </div>
-          <div class="col-auto">
-            <img :src="iconUrl" alt="MyNet" class="brand-logo" />
-          </div>
-        </div>
+      <div class="drawer-brand">
+        <img :src="iconUrl" alt="MyNet" class="brand-logo" />
+        <span class="brand-title">{{ $t('app.name') }}</span>
+        <span class="mode-tag mode-tag--cloud">云端</span>
       </div>
 
-      <q-separator />
-
-      <!-- Navigation Menu -->
-      <q-list padding>
-        <!-- 主要功能 -->
-        <q-item-label header class="text-weight-bold">
-          {{ $t('navigation.mainFeatures') }}
-        </q-item-label>
-
-        <template v-for="item in mainNavigationItems" :key="item.name">
-          <!-- 有子菜单的项目 -->
-          <q-expansion-item
-            v-if="item.children"
-            :icon="item.icon"
-            :label="$t(item.label + '.title')"
-            header-class="nav-item"
-            :model-value="expandedGroups[item.name] ?? isNavigationGroupActive(item)"
-            @update:model-value="expandedGroups[item.name] = $event"
-          >
-            <q-item 
-              v-for="child in item.children"
-              :key="child.name"
-              clickable 
-              :to="child.path"
-              exact
-              class="nav-item nav-child-item"
-            >
-              <q-item-section avatar>
-                <q-icon :name="child.icon" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ $t(child.label) }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-expansion-item>
-
-          <!-- 普通菜单项 -->
-          <q-item 
-            v-else
-            clickable 
-            :to="item.path"
-            exact
-            class="nav-item"
-          >
-            <q-item-section avatar>
-              <q-icon :name="item.icon" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>{{ $t(item.label) }}</q-item-label>
-              <q-item-label caption v-if="item.description">
-                {{ $t(item.description) }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </template>
-
-        <q-separator class="q-my-md" />
-
-        <!-- 网络配置 -->
-        <q-item-label header class="text-weight-bold">
-          {{ $t('navigation.networkConfig') }}
-        </q-item-label>
-
-        <template v-for="item in networkNavigationItems" :key="item.name">
-          <!-- 有子菜单的项目 -->
-          <q-expansion-item
-            v-if="item.children"
-            :icon="item.icon"
-            :label="$t(item.label + '.title')"
-            header-class="nav-item"
-            :model-value="expandedGroups[item.name] ?? isNavigationGroupActive(item)"
-            @update:model-value="expandedGroups[item.name] = $event"
-          >
-            <q-item 
-              v-for="child in item.children"
-              :key="child.name"
-              clickable 
-              :to="child.path"
-              exact
-              class="nav-item nav-child-item"
-            >
-              <q-item-section avatar>
-                <q-icon :name="child.icon" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ $t(child.label) }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-expansion-item>
-
-          <!-- 普通菜单项 -->
-          <q-item 
-            v-else
-            clickable 
-            :to="item.path"
-            exact
-            class="nav-item"
-          >
-            <q-item-section avatar>
-              <q-icon :name="item.icon" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>{{ $t(item.label) }}</q-item-label>
-              <q-item-label caption v-if="item.description">
-                {{ $t(item.description) }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </template>
-
-        <q-separator class="q-my-md" />
-
-        <!-- 系统工具 -->
-        <q-item-label header class="text-weight-bold">
-          {{ $t('navigation.systemTools') }}
-        </q-item-label>
-
-        <q-item 
-          v-for="item in systemNavigationItems"
+      <!-- Navigation Menu（7 项扁平主入口） -->
+      <q-list padding class="nav-list">
+        <q-item
+          v-for="item in cloudNavigationItems"
           :key="item.name"
-          clickable 
+          clickable
           :to="item.path"
-          exact
+          :active="isNavActive(item)"
+          active-class="q-router-link--active"
           class="nav-item"
-          :class="{ 'disabled-item': item.comingSoon }"
         >
           <q-item-section avatar>
-            <q-icon :name="item.icon" />
+            <q-icon :name="item.icon" size="20px" />
           </q-item-section>
           <q-item-section>
             <q-item-label>{{ $t(item.label) }}</q-item-label>
-            <q-item-label caption v-if="item.description">
-              {{ $t(item.description) }}
-            </q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -355,55 +72,6 @@
     <q-page-container>
       <router-view />
     </q-page-container>
-
-    <!-- Connection Status Dialog -->
-    <q-dialog v-model="showConnectionDialog">
-      <q-card style="min-width: 300px">
-        <q-card-section class="row items-center q-pb-none">
-          <div class="text-h6">{{ localDaemon.online ? $t('websocket.connectionStatus') : $t('websocket.connectionFailed') }}</div>
-          <q-space />
-          <q-btn icon="close" flat round dense v-close-popup />
-        </q-card-section>
-
-        <q-card-section>
-          <div class="connection-details">
-            <div class="detail-row">
-              <span>{{ $t('common.status') }}:</span>
-              <q-chip 
-                :label="localDaemon.online ? $t('common.connected') : $t('common.disconnected')"
-                :color="localDaemon.online ? 'positive' : 'negative'"
-                text-color="white"
-              />
-            </div>
-            <div class="detail-row">
-              <span>mynetd:</span>
-              <span>{{ localDaemon.role || '—' }}</span>
-            </div>
-            <div class="detail-row">
-              <span>{{ $t('websocket.heartbeat') }}:</span>
-              <span>{{ formatTime(localDaemon.checkedAt) }}</span>
-            </div>
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn 
-            flat 
-            :label="$t('common.close')" 
-            color="primary" 
-            v-close-popup 
-          />
-          <q-btn 
-            :label="$t('common.refresh')" 
-            color="primary" 
-            @click="refreshLocalDaemon"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- Notification Dialog -->
-    <NotificationDialog v-model="showNotificationDialog" />
 
     <!-- AI 助手悬浮入口（与 console 一致的漂浮机器人） -->
     <q-btn
@@ -422,374 +90,104 @@
 
     <!-- C 端 AI 助手（user-ai + ai-streaming；本地排障复用同一组件并注入脱敏摘要） -->
     <UserAiAssistant v-model="showAi" />
-    
-    <!-- Tips系统容器 -->
-    <TipsContainer />
   </q-layout>
 </template>
 
 <script setup lang="ts">
 // 图标跟着 publicPath 走 —— 收进 /gui/ 后写死 /icons/ 会 404
 const iconUrl = (import.meta.env.BASE_URL || '/') + 'icons/icon.png'
-import { ref, computed, onMounted, onUnmounted, reactive, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import debug from '../utils/debug'
-import { useRoute, useRouter } from 'vue-router'
-import { useQuasar, date, LocalStorage } from 'quasar'
+import { useRoute } from 'vue-router'
+import { LocalStorage } from 'quasar'
 import { useAuthStore } from '../stores/auth'
-import { useTheme } from '../composables/useTheme'
-import { useNotifications } from '../composables/useNotifications'
-import { useI18n } from 'vue-i18n'
 import TenantSelector from '../components/common/TenantSelector.vue'
-import TipsHelper from '../components/tips/TipsHelper.vue'
-import UserAvatar from '../components/avatar/UserAvatar.vue'
-import NotificationDialog from '../components/notification/NotificationDialog.vue'
 import UserAiAssistant from '../components/ai/UserAiAssistant.vue'
-import TipsContainer from '../components/tips/TipsContainer.vue'
-import { useOnboardingStore } from '../stores/onboarding'
-import { getTipsEngine } from '../services/tips/TipsEngine'
+import ModeSwitcher from '../components/common/ModeSwitcher.vue'
+import HeaderUtilityBar from '../components/common/HeaderUtilityBar.vue'
+import { isLocalMode } from '../config/localMode'
 
-const $q = useQuasar()
-const router = useRouter()
 const route = useRoute()
-const expandedGroups = reactive<Record<string, boolean>>({})
 const authStore = useAuthStore()
-const { themeMode: currentThemeMode, setThemeMode, getThemeOptions, initializeTheme } = useTheme()
-const { unreadCount, displayUnreadCount } = useNotifications()
-const { locale, t } = useI18n()
+const inLocalHost = isLocalMode()
 
-// 响应式数据
+// 与本机共用同一个侧边栏折叠状态，切换模式时零跳动
 const leftDrawerOpen = ref(LocalStorage.getItem<boolean>('mynet_drawer_open') ?? true)
-const showConnectionDialog = ref(false)
-const showNotificationDialog = ref(false)
 const showAi = ref(false)
-const currentLanguage = ref(locale.value)
-const isDev = ref(true) // 开发模式调试
 
-// 计算属性
 const user = computed(() => authStore.user)
-
-const supportedLanguages = computed(() => [
-  { code: 'en-US', name: 'English', nativeName: 'English' },
-  { code: 'zh-CN', name: 'Chinese', nativeName: '简体中文' }
-])
-const themeOptions = computed(() => getThemeOptions())
 
 interface NavigationItem {
   name: string
   label: string
   icon: string
-  path?: string
-  description?: string
-  badge?: string | number
-  badgeColor?: string
-  comingSoon?: boolean
-  children?: NavigationItem[]
+  path: string
+  matchPrefix: string
 }
 
-// Keep the current section visible on direct links; allow manual collapse.
-const isNavigationGroupActive = (item: NavigationItem) =>
-  item.children?.some(child => child.path &&
-    (route.path === child.path || route.path.startsWith(`${child.path}/`))) ?? false
+const isNavActive = (item: NavigationItem) =>
+  route.path === item.matchPrefix || route.path.startsWith(`${item.matchPrefix}/`)
 
-// 创建一个composable来管理sidebar统计数据
-// 现在使用 useSidebarStats composable
-
-// 主要功能导航项
-const mainNavigationItems = computed((): NavigationItem[] => [
+// C 端云端空间 7 项扁平主入口（无二级折叠）
+const cloudNavigationItems = computed((): NavigationItem[] => [
   {
     name: 'dashboard',
     label: 'navigation.dashboard',
     icon: 'dashboard',
-    path: '/app/dashboard'
+    path: '/cloud/dashboard',
+    matchPrefix: '/cloud/dashboard'
+  },
+  {
+    name: 'nodes',
+    label: 'navigation.nodes',
+    icon: 'devices',
+    path: '/cloud/nodes',
+    matchPrefix: '/cloud/nodes'
+  },
+  {
+    name: 'ippools',
+    label: 'navigation.ippools',
+    icon: 'layers',
+    path: '/cloud/ip-resources',
+    matchPrefix: '/cloud/ip-resources'
   },
   {
     name: 'social',
-    label: 'navigation.social',
-    icon: 'group',
-    children: [
-      {
-        name: 'social-friends',
-        label: 'navigation.social.friends',
-        icon: 'people',
-        path: '/app/social/friends'
-      },
-      {
-        name: 'social-requests',
-        label: 'navigation.social.requests',
-        icon: 'person_add',
-        path: '/app/social/requests'
-      },
-      {
-        name: 'social-invitations',
-        label: 'navigation.social.invitations',
-        icon: 'send',
-        path: '/app/social/invitations'
-      }
-    ]
-  }
-])
-
-// 网络配置导航项
-const networkNavigationItems = computed((): NavigationItem[] => [
-{
-  name: 'ippools',
-  label: 'navigation.ippools',
-  icon: 'dns',
-  path: '/app/ippools'
-},
-{
-    name: 'nodes',
-    label: 'navigation.nodes',
-    icon: 'dns',
-    path: '/app/nodes'
+    label: 'navigation.social.title',
+    icon: 'people',
+    path: '/cloud/social/friends',
+    matchPrefix: '/cloud/social'
   },
   {
     name: 'routes',
-    label: 'navigation.routes',
+    label: 'navigation.routes.title',
     icon: 'alt_route',
-    children: [
-      {
-        name: 'routes-overview',
-        label: 'navigation.routes.overview',
-        icon: 'dashboard',
-        path: '/app/routes'
-      },
-      {
-        name: 'routes-active',
-        label: 'navigation.routes.active',
-        icon: 'route',
-        path: '/app/routes/active'
-      },
-      {
-        name: 'routes-pending',
-        label: 'navigation.routes.pending',
-        icon: 'schedule',
-        path: '/app/routes/pending'
-      },
-      {
-        name: 'routes-friends',
-        label: 'navigation.routes.friends',
-        icon: 'lan',
-        path: '/app/routes/friends'
-      }
-    ]
+    path: '/cloud/routes',
+    matchPrefix: '/cloud/routes'
   },
   {
     name: 'services',
-    label: 'navigation.services',
+    label: 'navigation.services.title',
     icon: 'apps',
-    path: '/app/services',
-    children: [
-      {
-        name: 'services-overview',
-        label: 'navigation.services.overview',
-        icon: 'dashboard',
-        path: '/app/services'
-      },
-      {
-        name: 'services-public',
-        label: 'navigation.services.publicServices',
-        icon: 'public',
-        path: '/app/services/public'
-      },
-      {
-        name: 'services-friends',
-        label: 'navigation.services.friendServices',
-        icon: 'group',
-        path: '/app/services/friends'
-      },
-      {
-        name: 'services-my',
-        label: 'navigation.services.myServices',
-        icon: 'person_add',
-        path: '/app/services/my'
-      }
-    ]
+    path: '/cloud/services',
+    matchPrefix: '/cloud/services'
   },
   {
     name: 'utc',
-    label: 'navigation.utc',
-    icon: 'hub',
-    children: [
-      {
-        name: 'utc-nodes',
-        label: 'navigation.utc.nodes',
-        icon: 'dns',
-        path: '/app/utc/nodes'
-      },
-      {
-        name: 'utc-usage',
-        label: 'navigation.utc.usage',
-        icon: 'data_usage',
-        path: '/app/utc/usage'
-      }
-    ]
+    label: 'navigation.utc.title',
+    icon: 'speed',
+    path: '/cloud/utc/nodes',
+    matchPrefix: '/cloud/utc'
   }
 ])
 
-// 系统工具导航项
-const systemNavigationItems = computed((): NavigationItem[] => {
-  const items: NavigationItem[] = [
-    {
-      name: 'help',
-      label: 'navigation.help',
-      icon: 'help',
-      path: '/app/help'
-    }
-  ]
-  
-  return items
-})
-
-// 方法
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 
-const getCurrentLanguageLabel = () => {
-  const lang = supportedLanguages.value.find((l: any) => l.code === currentLanguage.value)
-  return lang?.nativeName || 'Language'
-}
-
-const getThemeIcon = () => {
-  const theme = themeOptions.value.find((t: any) => t.value === currentThemeMode.value)
-  return theme?.icon || 'brightness_auto'
-}
-
-const getThemeLabel = () => {
-  return t(`settings.themes.${currentThemeMode.value}`)
-}
-
-const changeLanguage = async (newLocale: string) => {
-  try {
-    // 使用统一的 setLocale 函数
-    const { setLocale } = await import('../boot/i18n')
-    await setLocale(newLocale as 'zh-CN' | 'en-US')
-    
-    // 更新当前语言状态
-    currentLanguage.value = newLocale
-    
-    // 同步到服务端
-    try {
-      const { apiService } = await import('../services/api')
-      await apiService.updateUserProfile({ language: newLocale })
-      debug.log('🌐 [MainLayout] Language synced to server:', newLocale)
-    } catch (apiError) {
-      debug.warn('🌐 [MainLayout] Failed to sync language to server:', apiError)
-    }
-    
-    // 使用 $q.notify
-    $q.notify({
-      type: 'positive',
-      message: t('settings.languageChanged', { locale: newLocale }),
-      timeout: 2000
-    })
-  } catch (error) {
-    debug.error('Failed to change language:', error)
-    $q.notify({
-      type: 'negative',
-      message: t('settings.languageChangeFailed')
-    })
-  }
-}
-
-const changeTheme = async (mode: string) => {
-  try {
-    setThemeMode(mode as any)
-    
-    // 保存到本地存储
-    LocalStorage.set('user_theme', mode)
-    
-    // 同步到服务端
-    try {
-      const { apiService } = await import('../services/api')
-      await apiService.updateUserProfile({ theme: mode })
-      debug.log('🎨 [MainLayout] Theme synced to server:', mode)
-    } catch (apiError) {
-      debug.warn('🎨 [MainLayout] Failed to sync theme to server (API may not support theme field yet):', apiError)
-      // 服务端可能还不支持theme字段，不影响本地使用
-    }
-    
-    $q.notify({
-      type: 'positive',
-      message: t('settings.themeChanged', { theme: mode }),
-      timeout: 2000
-    })
-  } catch (error) {
-    debug.error('🎨 [MainLayout] Unexpected error in changeTheme:', error)
-    $q.notify({
-      type: 'warning',
-      message: t('settings.themeChanged', { theme: mode }),
-      timeout: 2000
-    })
-  }
-}
-
-const goToProfileSettings = () => {
-  router.push('/app/profile?tab=preferences')
-}
-
-const logout = async () => {
-  try {
-    await authStore.logout()
-    $q.notify({
-      type: 'positive',
-      message: 'Logged out successfully',
-      timeout: 2000
-    })
-    // 登录路由是 /auth/login（routes.ts）——/login 不存在，登出失败路径会落 404 页
-    router.push('/auth/login')
-  } catch (error) {
-    debug.error('Logout failed:', error)
-    router.push('/auth/login')
-  }
-}
-
-const formatTime = (timestamp: string) => {
-  if (!timestamp) return 'N/A'
-  return date.formatDate(timestamp, 'YYYY-MM-DD HH:mm:ss')
-}
-
-// 连接状态：本机 mynetd 能力面（用户面实时不走 Echo/Reverb，见架构裁定 2026-11-03）
-const localDaemon = reactive({
-  online: false,
-  role: '',
-  checkedAt: ''
-})
-
-const refreshLocalDaemon = async () => {
-  try {
-    const { localHttp } = await import('../services/local/localApi')
-    const res = await localHttp.get('/status') as { data?: { daemon?: string; role?: string } }
-    const body = (res as any)?.data?.data ?? (res as any)?.data ?? res
-    localDaemon.online = true
-    localDaemon.role = String(body?.role || body?.daemon || 'mynetd')
-    localDaemon.checkedAt = new Date().toISOString()
-  } catch {
-    localDaemon.online = false
-    localDaemon.role = ''
-    localDaemon.checkedAt = new Date().toISOString()
-  }
-}
-
-let daemonTimer: number | undefined
-
-// 生命周期
 onMounted(async () => {
   watch(leftDrawerOpen, (open) => LocalStorage.set('mynet_drawer_open', open))
-  // 初始化主题
-  initializeTheme()
-  
-  // 确保语言设置正确
-  const savedLocale = LocalStorage.getItem('app-locale') as string || 'zh-CN'
-  if (locale.value !== savedLocale) {
-    locale.value = savedLocale
-    currentLanguage.value = savedLocale
-  }
-  
-  // 已认证则确保「归属网络区列表 + 当前选中」就绪。
-  // 恢复逻辑只有一份实现（authStore.restoreCurrentTenant）——此前 boot/auth.ts 与
-  // 这里各写了一遍 4 层兜底，两边行为会悄悄分叉。
+
   if (authStore.isAuthenticated) {
     try {
       await authStore.restoreCurrentTenant()
@@ -798,244 +196,155 @@ onMounted(async () => {
     }
   }
 
-  // 本机 mynetd 存活探测（用户面实时不走 Echo）
-  await refreshLocalDaemon()
-  daemonTimer = window.setInterval(() => { refreshLocalDaemon().catch(() => undefined) }, 60_000)
-  
-  // 初始化引导系统
-  if (authStore.isAuthenticated && authStore.user) {
-    debug.log('🎓 [Onboarding] Initializing onboarding system...')
-    const onboardingStore = useOnboardingStore()
-    
-    // 初始化引导状态（使用user_id而不是id）
-    const uniqueUserId = authStore.user.user_id?.toString() || authStore.user.id.toString()
-    await onboardingStore.initialize(uniqueUserId)
-    debug.log('🎓 [Onboarding] Initialized with userId:', uniqueUserId)
-    
-    // 启动Tips引擎（开发环境启用调试）
-    const engine = getTipsEngine({
-      enabled: true,
-      autoStart: true,
-      debug: import.meta.env.DEV
-    })
-    
-    debug.log('🎓 [Onboarding] Current status:', {
-      isStarted: onboardingStore.isStarted,
-      completed: onboardingStore.completed,
-      progress: onboardingStore.progress,
-      currentStage: onboardingStore.currentStage
-    })
-    
-    // 空设备列表可提供引导；没有引导记录不代表新账号。登录保留目的页面。
-    if (onboardingStore.canOfferFirstDevice && !onboardingStore.isStarted) {
-      onboardingStore.start()
-    }
-  }
-})
-
-onUnmounted(() => {
-  if (daemonTimer) clearInterval(daemonTimer)
 })
 </script>
 
 <style lang="scss" scoped>
 .main-layout {
   .soft-header {
-    background: var(--header-bg);
-    border-bottom: 1px solid var(--header-border);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    
-    .q-toolbar {
-      min-height: 64px;
+    background: var(--header-bg, #ffffff);
+    border-top: 2px solid #2563eb;
+    border-bottom: 1px solid var(--header-border, #e2e8f0);
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.05);
+
+    .shell-toolbar {
+      min-height: 54px;
+      padding: 0 14px;
       color: var(--text-primary);
-      
+
       .q-btn-dropdown,
       .q-btn {
         color: var(--text-primary);
-        transition: all 0.2s ease;
+        transition: all 0.15s ease;
         border-radius: 8px;
-        
+
         &:hover {
           background-color: var(--page-bg);
         }
-        
-        .q-btn__content {
-          gap: 6px;
-          font-weight: 500;
-        }
-      }
-      
-      .user-menu-btn {
-        .text-white {
-          color: var(--text-primary) !important;
-        }
       }
     }
   }
-  
-  .q-header {
-    .q-toolbar {
-      .q-btn-dropdown,
-      .q-btn {
-        transition: all 0.2s ease;
-        border-radius: 6px;
-        
-        &:hover {
-          background-color: rgba(255, 255, 255, 0.1);
-        }
-        
-        .q-btn__content {
-          gap: 6px;
-          font-weight: 500;
-        }
-      }
+
+  .drawer-toggle-btn {
+    width: 28px;
+    height: 28px;
+    color: #475569 !important;
+    border-radius: 6px !important;
+
+    &:hover {
+      background: rgba(37, 99, 235, 0.08) !important;
+      color: #2563eb !important;
     }
   }
-  
-  .drawer-header {
-    background: var(--sidebar-bg, #FFFFFF);
-    border-bottom: 1px solid var(--sidebar-border, #E2E8F0);
-    color: var(--text-primary, #0F172A);
 
-    .brand-title {
-      color: var(--text-primary, #0F172A);
-      letter-spacing: 0.2px;
-    }
+  .header-divider {
+    width: 1px;
+    height: 18px;
+    background: #cbd5e1;
+    margin: 0 12px;
+    flex-shrink: 0;
+  }
 
-    .brand-tagline {
-      color: var(--text-muted, #94A3B8);
-      font-size: 0.75rem;
-      margin-top: 2px;
-    }
+  .drawer-brand {
+    height: 56px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--sidebar-bg, #ffffff);
+    border-bottom: 1px solid var(--sidebar-border, #e2e8f0);
 
     .brand-logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
       box-shadow: 0 2px 6px rgba(37, 99, 235, 0.18);
     }
-  }
-  
-  // 侧边栏菜单容器
-  .sidebar-menu {
-    .q-list {
-      .q-item {
-        position: relative;
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: var(--text-primary, #0f172a);
+    }
+
+    .mode-tag {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 999px;
+
+      &--cloud {
+        background: rgba(37, 99, 235, 0.1);
+        color: #2563eb;
       }
     }
   }
-  
-  .nav-item {
-    margin: 4px 8px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    
-    &:hover {
-      background-color: rgba(var(--q-primary-rgb), 0.1);
+
+  .sidebar-menu {
+    .nav-list {
+      padding: 10px 8px;
     }
-    
+  }
+
+  .nav-item {
+    margin: 3px 0;
+    border-radius: 8px;
+    min-height: 40px;
+    font-size: 13.5px;
+    transition: all 0.15s ease;
+
+    :deep(.q-item__section--avatar) {
+      min-width: 36px;
+    }
+
+    &:hover {
+      background-color: rgba(37, 99, 235, 0.08);
+    }
+
     &.q-router-link--active {
-      background-color: var(--q-primary);
+      background-color: #2563eb;
       color: white;
-      
+      font-weight: 500;
+
       .q-icon {
         color: white;
       }
     }
-    
-    &.disabled-item {
-      opacity: 0.6;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-  }
-  
-  // 子菜单项样式
-  .nav-child-item {
-    padding-left: 56px; // 增加左边距以显示层级关系
-    
-    .q-item__section--avatar {
-      min-width: 40px;
-    }
-  }
-  
-  .connection-details {
-    .detail-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
   }
 }
 
-// 移动端优化
-@media (max-width: 768px) {
-  .main-layout {
-    .q-toolbar {
-      .q-btn-dropdown {
-        .q-btn__content {
-          .q-btn__label {
-            display: none;
-          }
-        }
-      }
-    }
-  }
-}
-
-// 用户头像样式
-.user-menu-btn {
-  .user-avatar-header {
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    transition: border-color 0.3s ease;
-  }
-  
-  &:hover .user-avatar-header {
-    border-color: rgba(255, 255, 255, 0.6);
-  }
-}
-
-// 深色模式优化
 .body--dark {
   .main-layout {
     .soft-header {
       background: var(--soft-bg-primary-dark, #1a1a1a);
       border-bottom-color: var(--soft-border-dark, rgba(255, 255, 255, 0.08));
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      
-      .q-toolbar {
+
+      .shell-toolbar {
         color: var(--soft-text-primary-dark, #e0e0e0);
-        
-        .q-btn-dropdown,
-        .q-btn {
-          color: var(--soft-text-primary-dark, #e0e0e0);
-          
-          &:hover {
-            background-color: var(--soft-bg-secondary-dark, rgba(255, 255, 255, 0.08));
-          }
-        }
-        
-        .user-menu-btn {
-          .text-white {
-            color: var(--soft-text-primary-dark, #e0e0e0) !important;
-          }
-        }
       }
     }
-    
-    .drawer-header {
+
+    .header-divider {
+      background: #334155;
+    }
+
+    .drawer-brand {
       background: #0F172A;
       border-bottom-color: #1E293B;
 
-      .brand-title { color: #F8FAFC; }
-      .brand-tagline { color: #64748B; }
+      .brand-title {
+        color: #F8FAFC;
+      }
+
+      .mode-tag--cloud {
+        background: rgba(59, 130, 246, 0.18);
+        color: #93c5fd;
+      }
     }
-    
+
     .nav-item:hover {
       background-color: rgba(255, 255, 255, 0.1);
     }

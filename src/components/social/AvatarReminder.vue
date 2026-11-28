@@ -97,7 +97,7 @@ const shouldShowReminder = computed(() => {
 
 // 跳转到个人资料页
 const goToProfile = () => {
-  router.push('/app/profile')
+  router.push('/cloud/profile')
 }
 
 // 关闭提醒

@@ -11,7 +11,7 @@
           :icon="index + 1 < step ? 'check_circle' : item.icon"
           :label="$t(item.key)"
           :disable="busy || index + 1 > step"
-          :to="index + 1 < step ? `/app/routes/create/prev_${index + 1}` : undefined"
+          :to="index + 1 < step ? `/cloud/routes/create/prev_${index + 1}` : undefined"
           :class="{ 'current-step': step === index + 1 }"
         />
       </li>

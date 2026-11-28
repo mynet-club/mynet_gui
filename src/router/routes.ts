@@ -3,29 +3,32 @@ import { TERM_ZONE } from '../config/terms';
 import { isLocalMode } from '../config/localMode';
 
 const routes: RouteRecordRaw[] = [
-  // 根路径：本机地址 → 本机首页；平台地址 → 社区域/登录
+  // 根路径：本机地址 → /local/home；平台地址 → /cloud/dashboard 或登录页
   {
     path: '/',
+    redirect: () => {
+      if (isLocalMode()) return '/local/home'
+      return localStorage.getItem('auth_token') ? '/cloud/dashboard' : '/auth/login'
+    }
+  },
+
+  // 本机面（/local/*，本机嵌入式部署下为 /gui/local/*，与 /cloud/* 对称）
+  {
+    path: '/local',
     component: () => import('../layouts/LocalLayout.vue'),
     children: [
-      {
-        path: '',
-        redirect: () => {
-          if (isLocalMode()) return '/home'
-          return localStorage.getItem('auth_token') ? '/app/dashboard' : '/auth/login'
-        }
-      },
-      // 本机面（地址即身份，路径不再带 local）
-      { path: 'home', name: 'home', component: () => import('../pages/local/LocalHomePage.vue'), meta: { title: '首页', local: true } },
-      { path: 'acceleration', name: 'acceleration', component: () => import('../pages/local/LocalAccelerationPage.vue'), meta: { title: '加速', local: true } },
-      { path: 'node', name: 'node-local', component: () => import('../pages/local/LocalNodePage.vue'), meta: { title: '节点', local: true } },
-      { path: 'settings', name: 'settings-local', component: () => import('../pages/local/LocalSettingsPage.vue'), meta: { title: '设置', local: true } },
-      { path: 'console', name: 'local-console', component: () => import('../pages/local/LocalConsolePage.vue'), meta: { title: '网络区', local: true } },
+      { path: '', redirect: 'home' },
+      { path: 'home', name: 'home', component: () => import('../pages/local/LocalHomePage.vue'), meta: { title: '本机状态', local: true } },
+      { path: 'acceleration', name: 'acceleration', component: () => import('../pages/local/LocalAccelerationPage.vue'), meta: { title: '本机加速', local: true } },
+      { path: 'node', name: 'node-local', component: () => import('../pages/local/LocalNodePage.vue'), meta: { title: '本机节点', local: true } },
+      { path: 'settings', name: 'settings-local', component: () => import('../pages/local/LocalSettingsPage.vue'), meta: { title: '本机设置', local: true } },
+      // 旧 /console（iframe 套娃页）废弃，统一顶层跳转至云端空间
+      { path: 'console', name: 'local-console', redirect: '/cloud/dashboard' },
       { path: 'onboarding', name: 'onboarding', component: () => import('../pages/local/LocalOnboardingPage.vue'), meta: { title: '初始化', local: true } },
       // 网关（capability=form:gw）
-      { path: 'overview', name: 'overview', component: () => import('../pages/local/LocalOverviewPage.vue'), meta: { title: '总览', local: true, gatewayOnly: true } },
+      { path: 'overview', name: 'overview', component: () => import('../pages/local/LocalOverviewPage.vue'), meta: { title: '网关总览', local: true, gatewayOnly: true } },
       { path: 'peers', name: 'peers', component: () => import('../pages/local/LocalPeersPage.vue'), meta: { title: '节点与对端', local: true } },
-      { path: 'network', name: 'network', component: () => import('../pages/local/LocalNetworkPage.vue'), meta: { title: '网络与拓扑', local: true } },
+      { path: 'network', name: 'network', component: () => import('../pages/local/LocalNetworkPage.vue'), meta: { title: '网络与路由', local: true } },
       { path: 'split', name: 'split', component: () => import('../pages/local/LocalSplitPage.vue'), meta: { title: '分流与 DNS', local: true, gatewayOnly: true } },
       { path: 'exit', name: 'exit', component: () => import('../pages/local/LocalExitPage.vue'), meta: { title: '出口与 ACL', local: true, gatewayOnly: true } },
       { path: 'services', name: 'services-local', component: () => import('../pages/local/LocalServicesPage.vue'), meta: { title: '服务与插件', local: true, gatewayOnly: true } },
@@ -34,101 +37,99 @@ const routes: RouteRecordRaw[] = [
     ]
   },
 
+  // 兼容历史本机裸路径，平滑重定向至 /local/*
+  { path: '/home', redirect: '/local/home' },
+  { path: '/acceleration', redirect: '/local/acceleration' },
+  { path: '/node', redirect: '/local/node' },
+  { path: '/settings', redirect: '/local/settings' },
+  { path: '/console', redirect: '/cloud/dashboard' },
+  { path: '/onboarding', redirect: '/local/onboarding' },
+  { path: '/overview', redirect: '/local/overview' },
+  { path: '/peers', redirect: '/local/peers' },
+  { path: '/network', redirect: '/local/network' },
+  { path: '/split', redirect: '/local/split' },
+  { path: '/exit', redirect: '/local/exit' },
+  { path: '/services', redirect: '/local/services' },
+  { path: '/diagnostics', redirect: '/local/diagnostics' },
+  { path: '/logs', redirect: '/local/logs' },
+
   // 官网跳转页面（可选）
   {
     path: '/website',
     component: () => import('../pages/IndexPage.vue')
   },
-  
-  // 重定向旧的路径到新的 /app 结构
-  {
-    path: '/dashboard',
-    redirect: '/app/dashboard'
-  },
-  {
-    path: '/nodes',
-    redirect: '/app/nodes'
-  },
-  {
-    path: '/routes',
-    redirect: '/app/routes'
-  },
-  {
-    path: '/ippools',
-    redirect: '/app/ippools'
-  },
-  {
-    path: '/tenants',
-    redirect: '/app/tenants'
-  },
-  {
-    path: '/services',
-    redirect: '/app/services'
-  },
-  {
-    path: '/social',
-    redirect: '/app/social'
-  },
-  {
-    path: '/help',
-    redirect: '/app/help'
-  },
-  {
-    path: '/profile',
-    redirect: '/app/profile'
-  },
-  {
-    path: '/routes/create',
-    redirect: '/app/routes/create'
-  },
-  {
-    path: '/routes/create/prev_1',
-    redirect: '/app/routes/create'
-  },
-  {
-    path: '/routes/create/prev_2',
-    redirect: '/app/routes/create'
-  },
-  {
-    path: '/routes/create/prev_3',
-    redirect: '/app/routes/create'
-  },
-  {
-    path: '/routes/create/prev_4',
-    redirect: '/app/routes/create'
-  },
-  
+
+  // 兼容旧 /app/* 路径，平滑重定向至 /cloud/*（保留 query 与 hash）
   {
     path: '/app',
+    redirect: '/cloud/dashboard'
+  },
+  {
+    path: '/app/:pathMatch(.*)*',
+    redirect: (to) => {
+      const raw = to.params.pathMatch
+      const rest = Array.isArray(raw) ? raw.join('/') : String(raw || '')
+      if (!rest) {
+        return { path: '/cloud/dashboard', query: to.query, hash: to.hash }
+      }
+      if (rest === 'ippools' || rest.startsWith('ippools/')) {
+        return {
+          path: '/cloud/ip-resources' + rest.slice('ippools'.length),
+          query: to.query,
+          hash: to.hash
+        }
+      }
+      return { path: `/cloud/${rest}`, query: to.query, hash: to.hash }
+    }
+  },
+
+  // 重定向历史裸路径到 /cloud 结构
+  { path: '/dashboard', redirect: '/cloud/dashboard' },
+  { path: '/nodes', redirect: '/cloud/nodes' },
+  { path: '/routes', redirect: '/cloud/routes' },
+  { path: '/ippools', redirect: '/cloud/ip-resources' },
+  { path: '/ip-resources', redirect: '/cloud/ip-resources' },
+  { path: '/tenants', redirect: '/cloud/tenants' },
+  { path: '/social', redirect: '/cloud/social/friends' },
+  { path: '/profile', redirect: '/cloud/profile' },
+  { path: '/routes/create', redirect: '/cloud/routes/create' },
+  { path: '/routes/create/prev_1', redirect: '/cloud/routes/create' },
+  { path: '/routes/create/prev_2', redirect: '/cloud/routes/create' },
+  { path: '/routes/create/prev_3', redirect: '/cloud/routes/create' },
+  { path: '/routes/create/prev_4', redirect: '/cloud/routes/create' },
+
+  // 云端空间（/cloud/*，本机 relay 下为 /gui/cloud/*）
+  {
+    path: '/cloud',
     component: () => import('../layouts/MainLayout.vue'),
     children: [
       { path: '', redirect: 'dashboard' },
-      { path: 'dashboard', component: () => import('../pages/dashboard/DashboardPage.vue') },
-      
-      // 节点管理模块路由
-      { 
-        path: 'nodes', 
+      { path: 'dashboard', name: 'dashboard', component: () => import('../pages/dashboard/DashboardPage.vue'), meta: { title: '概览', requiresAuth: true } },
+
+      // 设备管理模块路由
+      {
+        path: 'nodes',
         name: 'nodes',
         component: () => import('../pages/node/NodeListPage.vue'),
-        meta: { title: '节点管理', requiresAuth: true }
+        meta: { title: '我的设备', requiresAuth: true }
       },
-      { 
-        path: 'nodes/create', 
+      {
+        path: 'nodes/create',
         name: 'node-create',
         component: () => import('../pages/node/NodeCreatePage.vue'),
-        meta: { title: '创建节点', requiresAuth: true }
+        meta: { title: '创建设备', requiresAuth: true }
       },
-      { 
-        path: 'nodes/:id', 
+      {
+        path: 'nodes/:id',
         name: 'node-detail',
         component: () => import('../pages/node/NodeDetailPage.vue'),
-        meta: { title: '节点详情', requiresAuth: true },
+        meta: { title: '设备详情', requiresAuth: true },
         props: true
       },
-      { 
-        path: 'nodes/:id/edit', 
+      {
+        path: 'nodes/:id/edit',
         component: () => import('../pages/node/edit/NodeEditPage.vue'),
-        meta: { title: '编辑节点', requiresAuth: true },
+        meta: { title: '编辑设备', requiresAuth: true },
         props: true,
         children: [
           {
@@ -154,7 +155,7 @@ const routes: RouteRecordRaw[] = [
             path: 'config',
             name: 'node-edit-config',
             component: () => import('../pages/node/edit/NodeConfigPage.vue'),
-            meta: { title: '节点配置', requiresAuth: true },
+            meta: { title: '设备配置', requiresAuth: true },
             props: true
           },
           {
@@ -166,52 +167,59 @@ const routes: RouteRecordRaw[] = [
           }
         ]
       },
-      
-      // UTC 可见性（M4，Phase 3 瘦身）：**只留 C 端视角** —— 本人 transport、加速开关与用量。
-      // paths / faults / relay-admin 已迁到平台后台（`/api/v1/admin/utc/*` +
-      // mynet_api `src/Modules/Utc/resources/admin/`）：它们是基础设施治理视图，
-      // 放在用户导航里既越权又是噪音。别再往这里加回去。
+
+      // IP 资源（IP 资源包，兼容旧 /cloud/ippools）
+      {
+        path: 'ip-resources',
+        name: 'ippools',
+        component: () => import('../pages/ippool/IpPoolListPage.vue'),
+        meta: { title: 'IP 资源', requiresAuth: true }
+      },
+      { path: 'ippools', redirect: '/cloud/ip-resources' },
+
+      // 网络加速 / UTC 可见性（只留 C 端视角：本人 transport、加速开关与用量）
+      { path: 'utc', redirect: '/cloud/utc/nodes' },
       {
         path: 'utc/nodes',
         name: 'utc-nodes',
         component: () => import('../pages/utc/UtcNodesPage.vue'),
-        meta: { title: 'UTC 节点', requiresAuth: true }
+        meta: { title: '网络加速', requiresAuth: true }
       },
       {
         path: 'utc/usage',
         name: 'utc-usage',
         component: () => import('../pages/utc/UtcUsagePage.vue'),
-        meta: { title: 'UTC 用量', requiresAuth: true }
+        meta: { title: '加速用量', requiresAuth: true }
       },
-      // 兼容 Phase 3 下线的旧 UTC 基础设施页书签，平滑跳转至 UTC 节点页
-      { path: 'utc/paths', redirect: '/app/utc/nodes' },
-      { path: 'utc/faults', redirect: '/app/utc/nodes' },
-      { path: 'utc/relay-admin', redirect: '/app/utc/nodes' },
+      // 兼容 Phase 3 下线的旧 UTC 基础设施页书签，平滑跳转至网络加速页
+      { path: 'utc/paths', redirect: '/cloud/utc/nodes' },
+      { path: 'utc/faults', redirect: '/cloud/utc/nodes' },
+      { path: 'utc/relay-admin', redirect: '/cloud/utc/nodes' },
 
-      // 其他网络模块路由
-      { 
-        path: 'routes', 
+      // 连接与路由模块
+      {
+        path: 'routes',
         name: 'routes',
         component: () => import('../pages/route/RouteListPage.vue'),
-        meta: { title: '路由管理', requiresAuth: true }
+        meta: { title: '连接与路由', requiresAuth: true }
       },
       {
         path: 'routes/active',
         name: 'routes-active',
         component: () => import('../pages/route/ActiveRoutesPage.vue'),
-        meta: { title: '活跃路由', requiresAuth: true }
+        meta: { title: '活跃连接', requiresAuth: true }
       },
       {
         path: 'routes/active/:nodeId',
         name: 'routes-active-node',
         component: () => import('../pages/route/ActiveRoutesPage.vue'),
-        meta: { title: '节点路由', requiresAuth: true }
+        meta: { title: '设备连接', requiresAuth: true }
       },
       {
         path: 'routes/active/:nodeId/list',
         name: 'routes-active-node-list',
         component: () => import('../pages/route/ActiveRoutesPage.vue'),
-        meta: { title: '节点路由列表', requiresAuth: true }
+        meta: { title: '设备连接列表', requiresAuth: true }
       },
       {
         path: 'routes/active/:nodeId/topology',
@@ -235,7 +243,7 @@ const routes: RouteRecordRaw[] = [
         path: 'routes/friends',
         name: 'routes-friends',
         component: () => import('../pages/route/FriendNodesPage.vue'),
-        meta: { title: '好友节点', requiresAuth: true }
+        meta: { title: '好友设备', requiresAuth: true }
       },
       {
         path: 'routes/create',
@@ -243,39 +251,25 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/route/CreateRouteRequestPage.vue'),
         meta: { title: '发起连接申请', requiresAuth: true }
       },
+      { path: 'routes/create/prev_1', redirect: '/cloud/routes/create' },
+      { path: 'routes/create/prev_2', redirect: '/cloud/routes/create' },
+      { path: 'routes/create/prev_3', redirect: '/cloud/routes/create' },
+      { path: 'routes/create/prev_4', redirect: '/cloud/routes/create' },
+
+      // 网络区管理
       {
-        path: 'routes/create/prev_1',
-        redirect: '/app/routes/create'
-      },
-      {
-        path: 'routes/create/prev_2',
-        redirect: '/app/routes/create'
-      },
-      {
-        path: 'routes/create/prev_3',
-        redirect: '/app/routes/create'
-      },
-      {
-        path: 'routes/create/prev_4',
-        redirect: '/app/routes/create'
-      },
-      { 
-        path: 'ippools', 
-        name: 'ippools',
-        component: () => import('../pages/ippool/IpPoolListPage.vue'),
-        meta: { title: 'IP池管理', requiresAuth: true }
-      },
-      { 
-        path: 'tenants', 
+        path: 'tenants',
         name: 'tenants',
         component: () => import('../pages/tenant/TenantListPage.vue'),
         meta: { title: `${TERM_ZONE}管理`, requiresAuth: true }
       },
-      { 
-        path: 'services', 
+
+      // 服务与出口模块
+      {
+        path: 'services',
         name: 'services',
         component: () => import('../pages/services/ServiceListPage.vue'),
-        meta: { title: '服务管理', requiresAuth: true }
+        meta: { title: '服务与出口', requiresAuth: true }
       },
       {
         path: 'services/public',
@@ -285,7 +279,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'services/friends',
-        name: 'services-friends', 
+        name: 'services-friends',
         component: () => import('../pages/services/FriendServicesPage.vue'),
         meta: { title: '好友服务', requiresAuth: true }
       },
@@ -295,43 +289,30 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/services/MyServicesPage.vue'),
         meta: { title: '我的服务', requiresAuth: true }
       },
-      
-      // 组网基础路由重定向
-      { 
-        path: 'social', 
-        redirect: '/app/social/friends'
-      },
-      
-      // 组网子路由
-      { 
-        path: 'social/friends', 
+
+      // 好友与社交模块
+      { path: 'social', redirect: '/cloud/social/friends' },
+      {
+        path: 'social/friends',
         name: 'social-friends',
         component: () => import('../pages/social/FriendsPage.vue'),
-        meta: { title: '好友列表', requiresAuth: true }
+        meta: { title: '好友', requiresAuth: true }
       },
-      { 
-        path: 'social/requests', 
+      {
+        path: 'social/requests',
         name: 'social-requests',
         component: () => import('../pages/social/FriendRequestsPage.vue'),
         meta: { title: '好友请求', requiresAuth: true }
       },
-      { 
-        path: 'social/invitations', 
+      {
+        path: 'social/invitations',
         name: 'social-invitations',
         component: () => import('../pages/social/InvitationsPage.vue'),
-        meta: { title: '邀请管理', requiresAuth: true }
+        meta: { title: '邀请码', requiresAuth: true }
       },
-      
-      // 系统模块路由
-      { 
-        path: 'help', 
-        name: 'help',
-        component: () => import('../pages/help/HelpPageSimple.vue'),
-        meta: { title: '帮助文档' }
-      },
-      
-      // 用户模块路由
-      { path: 'profile', component: () => import('../pages/user/ProfilePage.vue') }
+
+      // 个人资料
+      { path: 'profile', name: 'profile', component: () => import('../pages/user/ProfilePage.vue'), meta: { title: '个人资料', requiresAuth: true } }
     ],
   },
   {

@@ -11,14 +11,14 @@
           color="grey-7"
           icon="schedule"
           label="待处理连接"
-          to="/app/routes/pending"
+          to="/cloud/routes/pending"
         />
         <q-btn
           flat
           color="grey-7"
           icon="arrow_back"
           label="返回路由总览"
-          to="/app/routes"
+          to="/cloud/routes"
         />
       </div>
     </template>
@@ -61,7 +61,7 @@
                 color="primary"
                 size="sm"
                 label="去添加好友"
-                to="/app/social/friends"
+                to="/cloud/social/friends"
                 class="q-mt-sm"
               />
             </div>
@@ -189,7 +189,7 @@
                 color="primary"
                 size="sm"
                 label="去创建节点"
-                to="/app/nodes/create"
+                to="/cloud/nodes/create"
                 class="q-mt-sm"
               />
             </div>
@@ -290,7 +290,7 @@
             </div>
           </div>
           <template #action>
-            <q-btn flat color="primary" label="查看待处理连接" to="/app/routes/pending" />
+            <q-btn flat color="primary" label="查看待处理连接" to="/cloud/routes/pending" />
           </template>
         </q-banner>
       </q-card-section>

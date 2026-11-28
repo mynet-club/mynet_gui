@@ -132,7 +132,7 @@ export default boot(async ({ router }) => {
   setupRouteGuards(router, authStore)
 
   // 会话被服务端判死（refresh 被拒/无 refresh token）→ 收口跳登录。
-  // 会话过期后不能留在控制台看占位帐号；控制台页（/app/*）回登录页并带上原路径，
+  // 会话过期后不能留在云端空间看占位帐号；云端页（/cloud/* 或兼容 /app/*）回登录页并带上原路径，
   // 本机面板页（meta.local）不拦 —— 那边有 needs_login 横幅 + 登录框。
   const onAuthExpired = () => {
     authStore.user = null
@@ -140,8 +140,12 @@ export default boot(async ({ router }) => {
     authStore.tokenExpiry = 0
     LocalStorage.remove('user_info')
     const cur = router.currentRoute.value
-    const isConsole = cur.path === '/app' || cur.path.startsWith('/app/')
-    if (!isConsole) return
+    const isCloud =
+      cur.path === '/cloud' ||
+      cur.path.startsWith('/cloud/') ||
+      cur.path === '/app' ||
+      cur.path.startsWith('/app/')
+    if (!isCloud) return
     router.push({ path: '/auth/login', query: { redirect: cur.fullPath } })
   }
   window.addEventListener(AUTH_EXPIRED_EVENT, onAuthExpired)

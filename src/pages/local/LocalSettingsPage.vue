@@ -21,9 +21,15 @@
           subtitle="本机页面运行在 127.0.0.1:8096，实际归属网络区由这里配置的网关二级域名决定（如 gw.mynet.club 或自定义二级域名）"
           class="q-mb-md"
         >
-          <q-banner v-if="gwConfig.env_override" dense rounded class="bg-orange-1 text-warning q-mb-sm">
-            当前由环境变量 MYNET_GATEWAYS 覆盖（{{ gwConfig.host || gwConfig.gateway }}），修改已写入 conf/gateways.json，移除环境变量后生效。
-          </q-banner>
+          <div v-if="isGatewayLockedByEnv" class="gw-env-lock q-mb-md">
+            <q-icon name="lock" size="18px" class="gw-env-lock__icon" />
+            <div>
+              <div class="gw-env-lock__title">当前网关由启动环境锁定，此页面暂不可修改</div>
+              <div class="gw-env-lock__detail">
+                当前运行中的 mynetd 正由环境变量 <code class="mono">MYNET_GATEWAYS</code>（{{ gwConfig.host || gwConfig.gateway }}）接管；升级到新版 mynetd 或移除该环境变量后，即可在页面直接保存生效。
+              </div>
+            </div>
+          </div>
 
           <MynetFieldRow label="网关域名" help="直接填写域名（例如 gw.mynet.club 或 xxx.mynet.club），程序自动补全 wss:// 与中继路径">
             <div class="row items-center q-gutter-sm">
@@ -34,21 +40,24 @@
                 class="col"
                 style="max-width: 380px"
                 placeholder="gw.mynet.club"
-                :disable="gwSaving"
+                :disable="gwSaving || isGatewayLockedByEnv"
                 @keyup.enter="onSaveGateway"
               />
               <q-btn
-                color="primary"
-                label="保存网关"
+                :unelevated="isGatewayDirty && !isGatewayLockedByEnv"
+                :outline="!isGatewayDirty || isGatewayLockedByEnv"
+                :color="gwJustSaved ? 'positive' : (isGatewayDirty && !isGatewayLockedByEnv ? 'primary' : 'grey-6')"
+                :icon="gwJustSaved ? 'check' : undefined"
+                :label="gwJustSaved ? '已保存' : '保存网关'"
                 :loading="gwSaving"
-                :disable="!gatewayInput.trim()"
+                :disable="gwSaving || isGatewayLockedByEnv || !isGatewayDirty || !gatewayInput.trim()"
                 @click="onSaveGateway"
               />
               <q-btn
                 flat
                 color="grey-7"
                 label="恢复默认"
-                :disable="gwSaving || gatewayInput.trim() === (gwConfig.default_host || 'gw.mynet.club')"
+                :disable="gwSaving || isGatewayLockedByEnv || normalizedInputHost === (gwConfig.default_host || 'gw.mynet.club')"
                 @click="onResetDefaultGateway"
               />
             </div>
@@ -62,7 +71,7 @@
               <span v-else class="text-grey-6">未识别（请检查网关域名或网络连接）</span>
             </dd>
             <dt>完整网关地址</dt><dd class="mono">{{ gwConfig.gateway || '—' }}</dd>
-            <dt>配置来源</dt><dd class="mono">{{ gwConfig.source || '—' }}</dd>
+            <dt>配置来源</dt><dd>{{ gatewaySourceLabel }}</dd>
           </dl>
 
           <div v-if="gwMsg" class="text-caption q-mt-xs" :class="gwOk ? 'text-positive' : 'text-negative'">
@@ -77,7 +86,7 @@
             <dt>网络区</dt><dd>{{ identity.tenant_name || '—' }}</dd>
             <dt>账号</dt><dd>{{ identity.user_email || '—' }}</dd>
           </dl>
-          <q-btn class="q-mt-md" outline color="primary" dense label="去节点页管理" to="/node" />
+          <q-btn class="q-mt-md" outline color="primary" dense label="去节点页管理" to="/local/node" />
         </MynetConfigCard>
       </q-tab-panel>
 
@@ -134,7 +143,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { localApi, localGatewayApi, LocalApiError } from '../../services/local/localApi'
 import { useLocalCommand } from '../../composables/useLocalCommand'
@@ -162,15 +171,44 @@ const gwConfig = ref({
 })
 const gatewayInput = ref('')
 const gwSaving = ref(false)
+const gwJustSaved = ref(false)
 const gwMsg = ref('')
 const gwOk = ref(true)
 const gwZoneLoading = ref(false)
 const gwZoneLabel = ref('')
+let savedTimer: number | undefined
 
 const formOptions = [
   { label: 'PC：加速本机应用', value: 'pc' },
   { label: 'GW：为下游设备分流', value: 'gw' }
 ]
+
+function normalizeHost(raw: string): string {
+  const trimmed = raw.trim().toLowerCase()
+  if (!trimmed) return ''
+  try {
+    const withProto = trimmed.includes('://') ? trimmed : `wss://${trimmed}`
+    return new URL(withProto).host
+  } catch {
+    return trimmed.replace(/^https?:\/\/|^wss?:\/\//, '').split('/')[0] || ''
+  }
+}
+
+const isGatewayLockedByEnv = computed(() => Boolean(gwConfig.value.env_override))
+const normalizedInputHost = computed(() => normalizeHost(gatewayInput.value))
+const normalizedCurrentHost = computed(() => normalizeHost(gwConfig.value.host || gwConfig.value.gateway))
+const isGatewayDirty = computed(() => {
+  if (!normalizedInputHost.value) return false
+  return normalizedInputHost.value !== normalizedCurrentHost.value
+})
+
+const gatewaySourceLabel = computed(() => {
+  const src = gwConfig.value.source
+  if (src === 'gateways.json') return '用户配置（gateways.json）'
+  if (src === 'env') return '启动默认（MYNET_GATEWAYS）'
+  if (src === 'agent.json') return '机器默认（agent.json）'
+  return src || '—'
+})
 
 async function loadGatewayZoneContext() {
   gwZoneLoading.value = true
@@ -204,15 +242,20 @@ async function loadGatewayConfig() {
 
 async function onSaveGateway() {
   const val = gatewayInput.value.trim()
-  if (!val || gwSaving.value) return
+  if (!val || gwSaving.value || isGatewayLockedByEnv.value || !isGatewayDirty.value) return
   gwSaving.value = true
   gwMsg.value = ''
+  gwJustSaved.value = false
   try {
     const data = await localApi.putGatewayConfig(val)
     gwConfig.value = data
     gatewayInput.value = data.host || val
     gwOk.value = true
     gwMsg.value = '网关域名已保存并生效'
+    gwJustSaved.value = true
+    if (savedTimer) window.clearTimeout(savedTimer)
+    savedTimer = window.setTimeout(() => { gwJustSaved.value = false }, 2500)
+    $q.notify({ type: 'positive', message: '网关域名已保存并生效', timeout: 2200 })
     await loadGatewayZoneContext()
   } catch (e) {
     gwOk.value = false
@@ -223,6 +266,7 @@ async function onSaveGateway() {
 }
 
 async function onResetDefaultGateway() {
+  if (isGatewayLockedByEnv.value) return
   gatewayInput.value = gwConfig.value.default_host || 'gw.mynet.club'
   await onSaveGateway()
 }
@@ -275,4 +319,52 @@ onMounted(() => {
   loadRuntime()
   loadIdentity()
 })
+
+onUnmounted(() => {
+  if (savedTimer) window.clearTimeout(savedTimer)
+})
 </script>
+
+<style lang="scss" scoped>
+.gw-env-lock {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+}
+
+.gw-env-lock__icon {
+  margin-top: 2px;
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+.gw-env-lock__title {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.gw-env-lock__detail {
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-top: 2px;
+  color: #78350f;
+}
+
+.body--dark {
+  .gw-env-lock {
+    background: rgba(245, 158, 11, 0.14);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #fde68a;
+  }
+
+  .gw-env-lock__detail {
+    color: #fcd34d;
+  }
+}
+</style>

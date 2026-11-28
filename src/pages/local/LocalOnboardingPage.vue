@@ -3,7 +3,7 @@
     <div class="row items-center q-mb-md">
       <div class="text-h5">配置向导</div>
       <q-space />
-      <q-btn flat dense label="关闭" to="/home" />
+      <q-btn flat dense label="关闭" to="/local/home" />
     </div>
 
     <!-- 步骤条 -->
@@ -54,7 +54,7 @@
       </MynetFieldRow>
       <div class="row q-gutter-sm">
         <q-btn color="primary" label="登录" :loading="busy" :disable="!email || !password" @click="onLogin" />
-        <q-btn flat label="稍后再说" to="/home" />
+        <q-btn flat label="稍后再说" to="/local/home" />
         <q-btn v-if="logged" flat label="已登录，下一步" @click="step = 3" />
       </div>
       <p class="text-caption text-grey-7 q-mt-sm">登录经本机服务 → gateway → 云端，无需填写 API 地址。</p>
@@ -85,7 +85,7 @@
             <q-space />
             <q-btn dense flat icon="close" v-close-popup />
           </q-bar>
-          <iframe class="console-frame" src="/gui/app/nodes/create" title="创建设备"></iframe>
+          <iframe class="console-frame" src="/gui/cloud/nodes/create" title="创建设备"></iframe>
         </q-card>
       </q-dialog>
 
@@ -121,8 +121,8 @@
       <p class="text-body2">{{ doneText }}</p>
       <div class="row q-gutter-sm">
         <q-btn color="primary" label="启动网络" :loading="busy" @click="onStart" />
-        <q-btn outline color="primary" label="稍后启动" to="/home" />
-        <q-btn flat label="查看概览" to="/home" />
+        <q-btn outline color="primary" label="稍后启动" to="/local/home" />
+        <q-btn flat label="查看概览" to="/local/home" />
       </div>
     </MynetConfigCard>
   </div>
@@ -197,12 +197,23 @@ async function chooseLocal() {
 
 async function onLogin() {
   busy.value = true
+  const trimmedEmail = email.value.trim()
+  const rawPassword = password.value
   try {
     await localHttp.post('/wizard/login', {
-      email: email.value.trim(),
-      password: password.value
+      email: trimmedEmail,
+      password: rawPassword
     })
     password.value = ''
+    try {
+      const { useAuthStore } = await import('../../stores/auth')
+      await useAuthStore().login(
+        { email: trimmedEmail, password: rawPassword },
+        { skipLocalSync: true }
+      )
+    } catch {
+      /* 本机向导登录已成功，云端侧同步失败不阻断向导 */
+    }
     toast(true, '登录成功')
     logged.value = true
     step.value = 3
@@ -317,7 +328,7 @@ function onStart() {
   cmd.run(['service', 'start', 'gnb'], '启动网络', 60000).then((ok) => {
     if (ok) {
       toast(true, '网络已启动')
-      location.href = '/gui/home'
+      location.href = '/gui/local/home'
     } else {
       toast(false, cmd.message.value)
     }

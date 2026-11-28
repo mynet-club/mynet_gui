@@ -1,29 +1,37 @@
 <template>
-  <q-page class="q-pa-md">
-    <!-- 页面标题 -->
-    <div class="page-header q-mb-md">
-      <div class="row items-center justify-between">
-        <div>
-          <div class="text-h5 text-weight-bold">{{ $t('social.friends.title') }}</div>
-          <div class="text-caption text-grey-6">{{ $t('social.friends.subtitle') }}</div>
-        </div>
-        <div class="row q-gutter-sm">
-          <q-btn
-            color="primary"
-            icon="hub"
-            label="发起连接申请"
-            to="/app/routes/create"
-          />
-          <q-btn
-            outline
-            color="primary"
-            icon="person_add"
-            :label="$t('social.friends.addFriend')"
-            to="/app/social/requests"
-          />
-        </div>
-      </div>
-    </div>
+  <PageLayout
+    :title="$t('social.friends.title')"
+    :subtitle="$t('social.friends.subtitle')"
+    icon="people"
+  >
+    <template #actions>
+      <q-btn
+        unelevated
+        dense
+        no-caps
+        color="primary"
+        icon="hub"
+        label="发起连接申请"
+        to="/cloud/routes/create"
+        class="q-px-md"
+      />
+      <q-btn
+        dense
+        no-caps
+        class="btn-ghost"
+        icon="person_add"
+        :label="$t('navigation.social.requests')"
+        to="/cloud/social/requests"
+      />
+      <q-btn
+        dense
+        no-caps
+        class="btn-ghost"
+        icon="send"
+        :label="$t('navigation.social.invitations')"
+        to="/cloud/social/invitations"
+      />
+    </template>
 
     <!-- 搜索栏 -->
     <div class="q-mb-md">
@@ -99,12 +107,13 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </q-page>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import PageLayout from '../../components/layout/PageLayout.vue'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import FriendCardContent from '../../components/social/FriendCardContent.vue'
 import { useSocial } from '../../composables/useSocial'
@@ -135,7 +144,7 @@ const removeFriend = async (friendId: string, friendName: string) => {
 
 const goCreateConnection = (friendId: string | number) => {
   detailDialog.value.show = false
-  router.push({ path: '/app/routes/create', query: { friendId: String(friendId) } })
+  router.push({ path: '/cloud/routes/create', query: { friendId: String(friendId) } })
 }
 
 const openFriendDetails = (friend: Friend) => {

@@ -233,7 +233,7 @@ export function useAuth() {
         debug.log('🔧 [useAuth] Navigating to dashboard...')
         // 回登录前的原页（守卫写入的 ?redirect=）。只收站内相对路径，
         // `//evil` / `/\evil` 是协议相对/反斜杠伪装，会跳出站 —— 一律回控制台首页。
-        const target = resolveInternalRedirect(route.query.redirect) ?? '/app/dashboard'
+        const target = resolveInternalRedirect(route.query.redirect) ?? '/cloud/dashboard'
         await router.push(target)
         debug.log('🔧 [useAuth] Navigation to dashboard completed')
       } else {

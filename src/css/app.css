@@ -17,6 +17,7 @@
 
 /* Shared interaction and visual baseline, after legacy component themes. */
 @import '../styles/experience.scss';
+@import '../styles/cloud-unified.scss';
 
 /* 全局样式 */
 body {

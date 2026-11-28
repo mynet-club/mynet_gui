@@ -48,7 +48,7 @@ const statsCards = computed(() => [
     value: props.dashboardData.totalNodes,
     icon: 'dns',
     color: 'grey-7',
-    link: '/app/nodes'
+    link: '/cloud/nodes'
   },
   {
     id: 'online_nodes',
@@ -56,7 +56,7 @@ const statsCards = computed(() => [
     value: props.dashboardData.onlineNodes,
     icon: 'wifi',
     color: 'positive',
-    link: '/app/nodes?filter=online'
+    link: '/cloud/nodes?filter=online'
   },
   {
     id: 'total_routes',
@@ -64,7 +64,7 @@ const statsCards = computed(() => [
     value: props.dashboardData.totalRoutes,
     icon: 'router',
     color: 'grey-7',
-    link: '/app/routes'
+    link: '/cloud/routes'
   },
   {
     id: 'active_routes',
@@ -72,7 +72,7 @@ const statsCards = computed(() => [
     value: props.dashboardData.activeRoutes,
     icon: 'check_circle',
     color: 'grey-7',
-    link: '/app/routes?filter=active'
+    link: '/cloud/routes?filter=active'
   }
 ])
 

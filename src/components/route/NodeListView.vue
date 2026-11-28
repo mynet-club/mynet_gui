@@ -25,7 +25,7 @@
             color="primary" 
             label="节点管理" 
             icon="settings"
-            @click="$router.push('/app/nodes')"
+            @click="$router.push('/cloud/nodes')"
             class="q-mx-xs"
           />
           页面启用节点后才能创建路由。

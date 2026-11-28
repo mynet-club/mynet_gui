@@ -226,7 +226,7 @@ const formatLastSeen = (lastSeen: string | null) => {
 // 查看好友资料
 const handleViewFriend = () => {
   if (props.friendId) {
-    router.push(`/app/social/friends/${props.friendId}`)
+    router.push(`/cloud/social/friends/${props.friendId}`)
   }
 }
 

@@ -722,7 +722,7 @@ const handleNodeClick = (conn: any) => {
 const viewNodeDetails = () => {
   if (selectedNode.value) {
     const peerId = selectedNode.value.peer_id || selectedNode.value.node_id
-    router.push(`/app/routes/active/${props.nodeId}/p-${peerId}`)
+    router.push(`/cloud/routes/active/${props.nodeId}/p-${peerId}`)
   }
 }
 

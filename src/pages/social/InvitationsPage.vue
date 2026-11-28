@@ -1,9 +1,19 @@
 <template>
-  <q-page padding>
-    <div class="page-header q-mb-lg">
-      <h4 class="text-h4 q-ma-none">{{ $t('social.invitations.title') }}</h4>
-      <p class="text-grey-6 q-ma-none q-mt-sm">{{ $t('social.subtitle') }}</p>
-    </div>
+  <PageLayout
+    :title="$t('social.invitations.title')"
+    :subtitle="$t('social.subtitle')"
+    icon="send"
+  >
+    <template #actions>
+      <q-btn
+        dense
+        no-caps
+        class="btn-ghost"
+        icon="arrow_back"
+        :label="$t('navigation.social.friends')"
+        to="/cloud/social/friends"
+      />
+    </template>
 
     <!-- 功能选项卡 -->
     <div class="row q-mb-md">
@@ -305,13 +315,14 @@
         </q-card-actions>
       </q-card>
     </div>
-  </q-page>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import PageLayout from '../../components/layout/PageLayout.vue'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import { useSocial } from '../../composables/useSocial'
 import { useInviteCode } from '../../composables/useInviteCode'

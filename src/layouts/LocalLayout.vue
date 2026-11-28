@@ -1,70 +1,81 @@
 <template>
-  <q-layout view="hHh LpR fFf" class="local-layout">
-    <q-header :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-grey-9'">
-      <q-toolbar class="q-px-sm" style="min-height:44px">
-        <q-btn flat dense round icon="menu" class="lt-md" size="sm" @click="left = !left" />
-        <div class="row items-center no-wrap q-ml-sm" style="min-width:0">
-          <span class="text-weight-medium text-no-wrap">MyNet</span>
-          <q-badge v-if="formLabel" color="primary" class="q-mx-xs">{{ formLabel }}</q-badge>
-          <!-- 会话：网络区 → 用户 → 节点 -->
-          <div class="session-path gt-sm">
-            <span v-if="session.zone">{{ session.zone }}</span>
-            <span class="sep">→</span>
-            <span v-if="session.user" class="ellipsis" style="max-width:160px">{{ session.user }}</span>
-            <span v-if="session.user" class="sep">→</span>
-            <span v-if="session.node" class="ellipsis" style="max-width:140px">{{ session.node }}</span>
-            <span v-if="!session.user" :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-6'">未登录</span>
-          </div>
+  <q-layout view="lHh Lpr lFf" class="local-layout theme-transition">
+    <!-- Top Header（与云端一致的 56px 骨架；顶部 2px 青绿语义色条区分本机模式） -->
+    <q-header class="shell-header shell-header--local">
+      <q-toolbar class="shell-toolbar">
+        <q-btn
+          flat
+          dense
+          round
+          size="sm"
+          :icon="left ? 'menu_open' : 'menu'"
+          aria-label="切换侧边栏"
+          class="drawer-toggle-btn"
+          @click="left = !left"
+        >
+          <q-tooltip>{{ left ? '收起侧边栏' : '展开侧边栏' }}</q-tooltip>
+        </q-btn>
+
+        <ModeSwitcher class="q-ml-xs" />
+
+        <div class="header-divider gt-xs" />
+
+        <!-- 本机上下文：运行形态 + 网络区 → 本机设备名 -->
+        <div class="local-context gt-xs" style="min-width:0">
+          <span v-if="formLabel" class="form-badge">{{ formLabel }}</span>
+          <span v-if="session.zone" class="ctx-zone ellipsis">{{ session.zone }}</span>
+          <q-icon v-if="session.zone && session.node" name="chevron_right" size="15px" class="ctx-sep" />
+          <span v-if="session.node" class="ctx-node ellipsis">{{ session.node }}</span>
+          <span v-if="!session.zone && !session.node" class="ctx-muted">
+            {{ session.user ? '本机未绑定设备' : '未登录' }}
+          </span>
         </div>
+
         <q-space />
-        <q-btn flat dense round icon="translate" size="sm" class="q-mr-xs">
-          <q-menu>
-            <q-list dense style="min-width: 120px">
-              <q-item clickable v-close-popup @click="setLocale('zh-CN')">
-                <q-item-section>中文</q-item-section>
-                <q-item-section side v-if="locale === 'zh-CN'"><q-icon name="check" /></q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup @click="setLocale('en-US')">
-                <q-item-section>English</q-item-section>
-                <q-item-section side v-if="locale === 'en-US'"><q-icon name="check" /></q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
-        <q-btn flat dense round :icon="theme === 'dark' ? 'dark_mode' : 'light_mode'" size="sm" class="q-mr-xs" @click="toggleTheme">
-          <q-tooltip>{{ theme === 'dark' ? '切换浅色' : '切换深色' }}</q-tooltip>
-        </q-btn>
-        <q-btn flat dense round icon="refresh" size="sm" :loading="store.loading" @click="onRefresh" />
+
+        <HeaderUtilityBar
+          mode="local"
+          :refreshing="store.loading"
+          @refresh="onRefresh"
+          @open-login="loginOpen = true"
+        />
       </q-toolbar>
     </q-header>
 
+    <!-- Left Drawer（与云端完全一致的 256px 宽 + 56px 品牌顶栏；柔和青绿底色区分本机） -->
     <q-drawer
       v-model="left"
       show-if-above
       bordered
-      :width="220"
+      :width="256"
+      :breakpoint="1024"
       class="local-drawer"
-      :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-1'"
     >
-      <q-list padding>
-        <q-item-label header class="text-caption" :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-7'">导航</q-item-label>
+      <div class="drawer-brand">
+        <img :src="iconUrl" alt="MyNet" class="brand-logo" />
+        <span class="brand-title">MyNet</span>
+        <span class="mode-tag mode-tag--local">本机</span>
+      </div>
+
+      <q-list padding class="nav-list">
         <q-item
           v-for="item in navItems"
           :key="item.to"
           clickable
           :to="item.to"
           exact
-          active-class="bg-primary text-white"
+          active-class="nav-item--active"
+          class="nav-item"
         >
           <q-item-section avatar>
-            <q-icon :name="item.icon" />
+            <q-icon :name="item.icon" size="20px" />
           </q-item-section>
           <q-item-section>{{ item.label }}</q-item-section>
         </q-item>
       </q-list>
     </q-drawer>
 
-    <q-page-container>
+    <q-page-container class="local-page-container">
       <q-page class="q-pa-md">
         <div class="local-page-shell">
           <MynetStatusBanner
@@ -88,7 +99,7 @@
       class="ai-fab"
       round
       unelevated
-      color="primary"
+      color="teal-8"
       icon="smart_toy"
       size="lg"
       aria-label="本机 AI 助手"
@@ -102,49 +113,31 @@
 </template>
 
 <script setup lang="ts">
+const iconUrl = (import.meta.env.BASE_URL || '/') + 'icons/icon.png'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
+import { LocalStorage } from 'quasar'
 import { useExperienceStore } from '../stores/experience'
 import MynetStatusBanner from '../components/mynet/MynetStatusBanner.vue'
 import MynetLoginDialog from '../components/mynet/MynetLoginDialog.vue'
 import LocalByokAiAssistant from '../components/ai/LocalByokAiAssistant.vue'
+import ModeSwitcher from '../components/common/ModeSwitcher.vue'
+import HeaderUtilityBar from '../components/common/HeaderUtilityBar.vue'
 
-const left = ref(false)
+// 与云端共用同一个侧边栏折叠状态，切换模式时零跳动
+const left = ref(LocalStorage.getItem<boolean>('mynet_drawer_open') ?? true)
 const loginOpen = ref(false)
 const showLocalAi = ref(false)
 const store = useExperienceStore()
 const router = useRouter()
-const $q = useQuasar()
 
-const locale = ref(localStorage.getItem('app-locale') || 'zh-CN')
-const theme = ref(localStorage.getItem('mynet-theme') || ($q.dark.isActive ? 'dark' : 'light'))
+watch(left, (open) => LocalStorage.set('mynet_drawer_open', open))
 
-function setLocale(v: string) {
-  locale.value = v
-  localStorage.setItem('app-locale', v)
-}
-function toggleTheme() {
-  theme.value = theme.value === 'dark' ? 'light' : 'dark'
-}
-watch(theme, (v) => {
-  localStorage.setItem('mynet-theme', v)
-  $q.dark.set(v === 'dark')
-}, { immediate: true })
-watch(locale, (v) => {
-  // i18n 语言切换与偏好持久化；完整文案包在 i18n，这里保证偏好一致
-  document.documentElement.setAttribute('lang', v)
-}, { immediate: true })
-
-const formLabel = computed(() => {
-  if (store.isGateway) return 'GW'
-  return 'PC'
-})
+const formLabel = computed(() => (store.isGateway ? 'GW' : 'PC'))
 
 const identityName = ref('')
 const session = computed(() => {
   const w = store.experience?.wizard as Record<string, unknown> | undefined
-  // 优先本机身份展示名（如「Mac 笔记本」），不要拿 ID 顶替
   const node =
     identityName.value ||
     String(w?.node_name || '') ||
@@ -166,40 +159,29 @@ async function loadIdentityName() {
   } catch { /* optional */ }
 }
 
-const toneClass = computed(() => {
-  const t = store.uiStateLabel.tone
-  if (t === 'ok') return 'positive'
-  if (t === 'warn') return 'warning'
-  if (t === 'error') return 'negative'
-  return 'grey-7'
-})
-
 const navItems = computed(() => {
-  // gateway-only 项只在 capability 明确 form=gw 时出现（不猜 OS）。
-  // capabilities 未返回时按桌面默认，隐藏高级项。
   if (store.isGateway) {
     return [
-      { to: '/overview', label: '总览', icon: 'dashboard' },
-      { to: '/peers', label: '节点与对端', icon: 'lan' },
-      { to: '/network', label: '网络/路由', icon: 'route' },
-      { to: '/split', label: '分流与 DNS', icon: 'split' },
-      { to: '/exit', label: '出口与 ACL', icon: 'policy' },
-      { to: '/services', label: '服务与插件', icon: 'apps' },
-      { to: '/diagnostics', label: '诊断', icon: 'troubleshoot' },
-      { to: '/logs', label: '日志', icon: 'article' },
-      { to: '/console', label: '云端', icon: 'cloud' },
-      { to: '/settings', label: '系统设置', icon: 'settings' }
+      { to: '/local/overview', label: '网关总览', icon: 'dashboard' },
+      { to: '/local/peers', label: '节点与对端', icon: 'lan' },
+      { to: '/local/network', label: '网络与路由', icon: 'route' },
+      { to: '/local/split', label: '分流与 DNS', icon: 'split' },
+      { to: '/local/exit', label: '出口与 ACL', icon: 'policy' },
+      { to: '/local/services', label: '服务与插件', icon: 'apps' },
+      { to: '/local/acceleration', label: '本机加速', icon: 'speed' },
+      { to: '/local/diagnostics', label: '诊断', icon: 'troubleshoot' },
+      { to: '/local/logs', label: '日志', icon: 'article' },
+      { to: '/local/settings', label: '系统设置', icon: 'settings' }
     ]
   }
   return [
-    { to: '/home', label: '首页', icon: 'home' },
-    { to: '/node', label: '节点', icon: 'hub' },
-    { to: '/network', label: '网络', icon: 'route' },
-    { to: '/settings', label: '设置', icon: 'settings' },
-    { to: '/acceleration', label: '加速', icon: 'speed' },
-    { to: '/diagnostics', label: '诊断', icon: 'troubleshoot' },
-    { to: '/logs', label: '日志', icon: 'article' },
-    { to: '/console', label: '云端', icon: 'cloud' }
+    { to: '/local/home', label: '本机状态', icon: 'home' },
+    { to: '/local/node', label: '本机节点', icon: 'hub' },
+    { to: '/local/network', label: '网络与路由', icon: 'route' },
+    { to: '/local/acceleration', label: '本机加速', icon: 'speed' },
+    { to: '/local/diagnostics', label: '诊断', icon: 'troubleshoot' },
+    { to: '/local/logs', label: '日志', icon: 'article' },
+    { to: '/local/settings', label: '本机设置', icon: 'settings' }
   ]
 })
 
@@ -257,7 +239,6 @@ async function onRefresh() {
   await store.refreshAll()
   await store.refreshCapabilities()
   await loadIdentityName()
-  // 显式刷新才更新设备名缓存（成功则本地永久保存，失败保留旧名）
   try {
     const { localApi } = await import('../services/local/localApi')
     const res = await localApi.refreshNodeNames()
@@ -268,17 +249,16 @@ async function onRefresh() {
 
 function onBannerAction() {
   const s = store.uiState
-  // 登录在当前页弹框，不跳页
   if (s === 'needs_login') {
     loginOpen.value = true
     return
   }
   if (s === 'needs_configuration' || s === 'needs_install') {
-    router.push('/onboarding').catch(() => undefined)
+    router.push('/local/onboarding').catch(() => undefined)
     return
   }
   if (s === 'degraded') {
-    router.push('/diagnostics').catch(() => undefined)
+    router.push('/local/diagnostics').catch(() => undefined)
     return
   }
   if (s === 'error' && store.error?.retryable) {
@@ -289,7 +269,6 @@ function onBannerAction() {
 }
 
 function startNameWarmup() {
-  // 自动缓存：静默补齐设备名（缺条目/过期时后端才会真拉云端）
   const tick = () => {
     import('../services/local/localApi')
       .then(async (m) => {
@@ -312,13 +291,252 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.local-layout {
+  .shell-header {
+    background: #ffffff;
+    color: #0f172a;
+    border-top: 2px solid #0f766e;
+    border-bottom: 1px solid #d7ece9;
+    box-shadow: 0 1px 4px rgba(15, 118, 110, 0.05);
+  }
+
+  .shell-toolbar {
+    min-height: 54px;
+    padding: 0 14px;
+  }
+
+  .drawer-toggle-btn {
+    width: 28px;
+    height: 28px;
+    color: #475569;
+    border-radius: 6px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      background: rgba(15, 118, 110, 0.08);
+      color: #0f766e;
+    }
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 18px;
+    background: #cbd5e1;
+    margin: 0 12px;
+    flex-shrink: 0;
+  }
+
+  .local-context {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #0f172a;
+
+    .form-badge {
+      display: inline-flex;
+      align-items: center;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 5px;
+      background: rgba(15, 118, 110, 0.12);
+      color: #0f766e;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      flex-shrink: 0;
+    }
+
+    .ctx-zone {
+      color: #475569;
+      max-width: 160px;
+    }
+
+    .ctx-sep {
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+
+    .ctx-node {
+      color: #0f172a;
+      font-weight: 600;
+      max-width: 180px;
+    }
+
+    .ctx-muted {
+      color: #94a3b8;
+    }
+  }
+
+  :deep(.local-drawer) {
+    background: #f4fbfa;
+    border-right-color: #d7ece9;
+  }
+
+  .drawer-brand {
+    height: 56px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #d7ece9;
+  }
+
+  .brand-logo {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(15, 118, 110, 0.16);
+  }
+
+  .brand-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: #0f172a;
+  }
+
+  .mode-tag {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+
+    &--local {
+      background: rgba(15, 118, 110, 0.12);
+      color: #0f766e;
+    }
+  }
+
+  .nav-list {
+    padding: 10px 8px;
+  }
+
+  .nav-item {
+    margin: 3px 0;
+    border-radius: 8px;
+    min-height: 40px;
+    color: #334155;
+    font-size: 13.5px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    :deep(.q-item__section--avatar) {
+      min-width: 36px;
+      color: #64748b;
+    }
+
+    &:hover {
+      background: rgba(15, 118, 110, 0.08);
+      color: #0f766e;
+
+      :deep(.q-item__section--avatar) {
+        color: #0f766e;
+      }
+    }
+
+    &.nav-item--active {
+      background: #0f766e;
+      color: #ffffff;
+      font-weight: 500;
+
+      :deep(.q-item__section--avatar),
+      :deep(.q-icon) {
+        color: #ffffff;
+      }
+    }
+  }
+
+  .local-page-container {
+    background: #f7faf9;
+  }
+}
+
 .local-page-shell {
   max-width: 1280px;
   margin: 0 auto;
   width: 100%;
 }
-.local-layout :deep(.q-toolbar) {
-  min-height: 44px;
+
+.body--dark {
+  .local-layout {
+    .shell-header {
+      background: #0f1c1d;
+      color: #e2e8f0;
+      border-top-color: #14b8a6;
+      border-bottom-color: #163234;
+    }
+
+    .drawer-toggle-btn {
+      color: #94a3b8;
+
+      &:hover {
+        background: rgba(20, 184, 166, 0.14);
+        color: #5eead4;
+      }
+    }
+
+    .header-divider {
+      background: #1e3a3c;
+    }
+
+    .local-context {
+      color: #e2e8f0;
+
+      .form-badge {
+        background: rgba(20, 184, 166, 0.18);
+        color: #5eead4;
+      }
+
+      .ctx-zone {
+        color: #94a3b8;
+      }
+
+      .ctx-node {
+        color: #f8fafc;
+      }
+    }
+
+    :deep(.local-drawer) {
+      background: #0c1718;
+      border-right-color: #163234;
+    }
+
+    .drawer-brand {
+      border-bottom-color: #163234;
+    }
+
+    .brand-title {
+      color: #f8fafc;
+    }
+
+    .mode-tag--local {
+      background: rgba(20, 184, 166, 0.18);
+      color: #5eead4;
+    }
+
+    .nav-item {
+      color: #cbd5e1;
+
+      :deep(.q-item__section--avatar) {
+        color: #94a3b8;
+      }
+
+      &:hover {
+        background: rgba(20, 184, 166, 0.14);
+        color: #5eead4;
+      }
+
+      &.nav-item--active {
+        background: #0d9488;
+        color: #ffffff;
+      }
+    }
+
+    .local-page-container {
+      background: #091213;
+    }
+  }
 }
 
 .ai-fab {

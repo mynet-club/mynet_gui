@@ -41,7 +41,7 @@
         color="primary"
         label="配置向导"
         class="q-ml-sm"
-        to="/onboarding"
+        to="/local/onboarding"
       />
     </div>
 

@@ -91,7 +91,7 @@
       <q-tab-panel name="raw" class="panel-pad">
         <div class="row q-gutter-sm q-mb-sm">
           <q-btn outline color="primary" dense label="导出 system.json" :loading="exporting" @click="onExport" />
-          <q-btn flat dense label="查看日志" to="/logs" />
+          <q-btn flat dense label="查看日志" to="/local/logs" />
         </div>
         <pre class="raw mono compact">{{ statusRaw }}</pre>
       </q-tab-panel>

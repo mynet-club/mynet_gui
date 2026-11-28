@@ -7,7 +7,7 @@
     <!-- 面包屑导航 -->
     <template #breadcrumbs>
       <q-breadcrumbs v-if="currentView !== 'node-list'">
-        <q-breadcrumbs-el label="活跃路由" to="/app/routes/active" icon="route" />
+        <q-breadcrumbs-el label="活跃路由" to="/cloud/routes/active" icon="route" />
         <q-breadcrumbs-el 
           v-if="selectedNodeInfo"
           :label="selectedNodeInfo.node_name"
@@ -129,7 +129,6 @@ import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
 import { useNodes } from '../../composables/useNodes'
 import { useNotify } from '../../composables/useNotify'
-import { useOnboardingActions } from '../../composables/useOnboardingActions'
 import { extractNodeSummaries, type NodeSummary } from '../../models/nodeSummary'
 import PageLayout from '../../components/layout/PageLayout.vue'
 import NodeListView from '../../components/route/NodeListView.vue'
@@ -285,7 +284,7 @@ const processNodesByUserEmail = (nodes: any[]) => {
 const handleNodeSelect = async (node: Node) => {
   const nodeId = (node as any).node_id || (node as any).id
   // 通过路由跳转，而不是直接设置状态
-  router.push(`/app/routes/active/${nodeId}`)
+  router.push(`/cloud/routes/active/${nodeId}`)
 }
 
 const fetchNodeConnections = async (nodeId: string | number) => {
@@ -358,25 +357,25 @@ const fetchNodeConnections = async (nodeId: string | number) => {
 }
 
 const handleBack = () => {
-  router.push('/app/routes/active')
+  router.push('/cloud/routes/active')
 }
 
 const handleViewModeChange = (mode: 'card' | 'list' | 'topology') => {
   const nodeId = currentNodeId.value
   
   if (mode === 'list') {
-    router.push(`/app/routes/active/${nodeId}/list`)
+    router.push(`/cloud/routes/active/${nodeId}/list`)
   } else if (mode === 'topology') {
-    router.push(`/app/routes/active/${nodeId}/topology`)
+    router.push(`/cloud/routes/active/${nodeId}/topology`)
   } else {
-    router.push(`/app/routes/active/${nodeId}`)
+    router.push(`/cloud/routes/active/${nodeId}`)
   }
 }
 
 const handleConnectionClick = (connection: any) => {
   const peerId = connection.peer_id || connection.node_id || connection.id
   if (peerId) {
-    router.push(`/app/routes/active/${currentNodeId.value}/p-${peerId}`)
+    router.push(`/cloud/routes/active/${currentNodeId.value}/p-${peerId}`)
   }
 }
 
@@ -389,7 +388,7 @@ const handleRefresh = async () => {
 }
 
 const handleCreateRoute = () => {
-  router.push('/app/routes/create')
+  router.push('/cloud/routes/create')
 }
 
 // 批量获取节点统计信息
@@ -494,9 +493,7 @@ watch(
 )
 
 // 初始化
-const { onConnectionManagementViewed } = useOnboardingActions()
 onMounted(async () => {
-  onConnectionManagementViewed()
   // 只在节点列表视图时加载节点数据
   if (!currentNodeId.value) {
     await loadNodes()

@@ -2,13 +2,19 @@
   <PageLayout title="UTC 节点" subtitle="我的 transport、加速开关与用量进度" icon="hub">
     <template #actions>
       <q-btn
-        class="btn-ghost"
+        unelevated
+        dense
+        no-caps
+        color="primary"
         icon="person_add"
         label="登记 UTC 身份"
+        class="q-px-md"
         @click="openRegister"
       />
       <q-btn
-        class="btn-ghost q-ml-sm"
+        dense
+        no-caps
+        class="btn-ghost"
         icon="refresh"
         label="刷新"
         :loading="loading"

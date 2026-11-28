@@ -6,6 +6,7 @@ import { apiService } from '../services/api'
 import { tenantService } from '../services/tenant/tenantService'
 import { tokenManager } from '../utils/tokenManager'
 import { TENANT_SELECTION_KEY, LEGACY_TENANT_SELECTION_KEY } from '../config/app'
+import { isLocalMode } from '../config/localMode'
 import type { User, Tenant } from '../types'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -65,7 +66,10 @@ export const useAuthStore = defineStore('auth', () => {
     return tokenExpiry.value <= Date.now()
   })
   
-  const login = async (credentials: { email: string; password: string; zone?: string }) => {
+  const login = async (
+    credentials: { email: string; password: string; zone?: string },
+    options?: { skipLocalSync?: boolean }
+  ) => {
     isLoading.value = true
     try {
       const response = await apiService.login(credentials)
@@ -145,39 +149,66 @@ export const useAuthStore = defineStore('auth', () => {
         debug.warn('🔧 [AUTH] Tenant context unavailable after login:', tenantError)
       }
       
+      if (isLocalMode() && !options?.skipLocalSync) {
+        try {
+          const { localHttp } = await import('../services/local/localApi')
+          await localHttp.post('/wizard/login', {
+            email: credentials.email.trim(),
+            password: credentials.password
+          })
+          const { useExperienceStore } = await import('./experience')
+          useExperienceStore().refreshAll().catch(() => undefined)
+        } catch (localSyncError) {
+          debug.warn('🔧 [AUTH] Local daemon session sync skipped:', localSyncError)
+        }
+      }
+
       debug.log('🔧 [AUTH] Login completed successfully:', {
         user: user.value?.name,
         token: token.value ? '***' : null,
         isAuthenticated: isAuthenticated.value
       })
-      
+
       return response.data
     } finally {
       isLoading.value = false
     }
   }
-  
-  const logout = async () => {
+
+  const logout = async (options?: { skipLocalSync?: boolean }) => {
     try {
       await apiService.logout()
     } catch (error) {
       debug.error('Logout error:', error)
     }
-    
+
     // 清除本地数据
     user.value = null
     token.value = null
     currentTenant.value = null
     availableTenants.value = []
     tokenExpiry.value = 0
-    
+
     // 使用 tokenManager 清除所有 token
     tokenManager.clearTokens()
-    
+
     // 清除其他本地存储
     LocalStorage.remove('user_info')
     LocalStorage.remove(TENANT_SELECTION_KEY)
     LocalStorage.remove(LEGACY_TENANT_SELECTION_KEY)
+
+    // 主动退出时同步注销本机 mynetd 的用户级凭证（credential.json）；节点级隧道与心跳不受影响
+    if (isLocalMode() && !options?.skipLocalSync) {
+      try {
+        const { localHttp } = await import('../services/local/localApi')
+        await localHttp.post('/wizard/logout')
+        const { useExperienceStore } = await import('./experience')
+        useExperienceStore().refreshAll().catch(() => undefined)
+      } catch (localLogoutError) {
+        debug.warn('🔧 [AUTH] Local daemon logout sync skipped:', localLogoutError)
+      }
+    }
+
     debug.log('🔧 [AUTH] Cleared all auth data')
   }
   

@@ -164,6 +164,40 @@ export class NodeService {
   }
 
   /**
+   * 重载节点配置
+   */
+  async reloadNode(nodeId: string, reason?: string): Promise<ApiResponse<any>> {
+    const response = await api.post(`/nodes/${nodeId}/operator`, {
+      action: 'reload',
+      params: {
+        reason: reason || '手动重载配置'
+      }
+    })
+    return response.data
+  }
+
+  /**
+   * 应用节点系统路由
+   */
+  async applyNodeRoutes(nodeId: string, reason?: string): Promise<ApiResponse<any>> {
+    const response = await api.post(`/nodes/${nodeId}/operator`, {
+      action: 'apply',
+      params: {
+        reason: reason || '手动应用路由'
+      }
+    })
+    return response.data
+  }
+
+  /**
+   * 查询节点近期远程指令状态与执行回执（支持按 id 查单条）
+   */
+  async getNodeCommands(nodeId: string, params?: { id?: string | number; limit?: number }): Promise<ApiResponse<any>> {
+    const response = await api.get(`/nodes/${nodeId}/commands`, { params })
+    return response.data
+  }
+
+  /**
    * 获取节点设备信息
    * @param nodeId 节点ID
    * @returns 设备信息

@@ -1061,10 +1061,10 @@ export default {
     mainFeatures: 'Main Features',
     networkConfig: 'Network Configuration',
     systemTools: 'Development Settings',
-    dashboard: 'Dashboard',
-    nodes: 'Node Management',
+    dashboard: 'Overview',
+    nodes: 'My Devices',
     routes: {
-      title: 'Route Management',
+      title: 'Connections',
       overview: 'Route Overview',
       active: 'Active Routes',
       pending: 'Pending Connections',
@@ -1074,12 +1074,12 @@ export default {
     activeRoutes: 'Active Routes',
     pendingConnections: 'Pending Connections',
     friendNodes: 'Friend Nodes',
-    ippools: 'IP Pool Management',
+    ippools: 'IP Resources',
     zones: 'Network Management',
     zoneSharing: 'Zone Sharing',
     zoneServices: 'Zone Services',
     services: {
-      title: 'Service Management',
+      title: 'Services & Exits',
       description: 'Manage and access various network services',
       overview: 'Service Overview',
       overviewDescription: 'View service statistics and quick navigation',
@@ -1091,15 +1091,15 @@ export default {
       myServicesDescription: 'Manage and share services you created'
     },
     utc: {
-      title: 'UTC Network',
+      title: 'Acceleration',
       nodes: 'Nodes',
       usage: 'Usage',
     },
     social: {
-      title: 'Social Network',
+      title: 'Friends',
       friends: 'Friends',
       requests: 'Friend Requests',
-      invitations: 'Invitations'
+      invitations: 'Invite Codes'
     },
     help: 'Help Documentation'
   },
@@ -1830,13 +1830,13 @@ export default {
     friendRequestCancelError: 'Failed to cancel friend request'
   },
   ippools: {
-    title: 'IP Pool Management',
-    subtitle: 'IP address pool management and allocation',
-    comingSoonMessage: 'IP pool management feature is under development, stay tuned!',
+    title: 'IP Resources',
+    subtitle: 'Manage your subnets and IP resource packs',
+    comingSoonMessage: 'IP resources feature is under development, stay tuned!',
     // List page
-    pools: 'IP Pools',
+    pools: 'IP Resource Packs',
     statistics: 'Statistics',
-    createPool: 'Create Pool',
+    createPool: 'Add Resource Pack',
     searchPlaceholder: 'Search IP pool name or IP address...',
     filterAll: 'All',
     filterAllocated: 'Allocated',

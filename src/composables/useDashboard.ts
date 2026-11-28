@@ -294,7 +294,7 @@ export function useDashboard() {
         count: abnormal.offlineNodes.length,
         message: `${abnormal.offlineNodes.length} 个节点离线`,
         actionText: '检查节点',
-        actionPath: '/app/nodes?filter=offline',
+        actionPath: '/cloud/nodes?filter=offline',
         priority: 'high'
       })
     }
@@ -306,7 +306,7 @@ export function useDashboard() {
         count: pendingConnections.value.length,
         message: `${pendingConnections.value.length} 个待处理连接`,
         actionText: '立即处理',
-        actionPath: '/app/routes/pending',
+        actionPath: '/cloud/routes/pending',
         priority: 'medium'
       })
     }
@@ -318,7 +318,7 @@ export function useDashboard() {
         count: abnormal.unconfiguredNodes.length,
         message: `${abnormal.unconfiguredNodes.length} 个节点未配置`,
         actionText: '完成配置',
-        actionPath: '/app/nodes?filter=unconfigured',
+        actionPath: '/cloud/nodes?filter=unconfigured',
         priority: 'low'
       })
     }
@@ -422,7 +422,7 @@ export function useDashboard() {
         addActivity(
           'node_added',
           `新增节点 "${node.node_name}"`,
-          '/app/nodes',
+          '/cloud/nodes',
           { nodeId: id, nodeName: node.node_name }
         )
       }
@@ -446,14 +446,14 @@ export function useDashboard() {
           addActivity(
             'node_online',
             `节点 "${currentNode.node_name}" 上线`,
-            '/app/nodes',
+            '/cloud/nodes',
             { nodeId: id, nodeName: currentNode.node_name }
           )
         } else if (prevNode.node_status === NODE_STATUS.ONLINE && currentNode.node_status !== NODE_STATUS.ONLINE) {
           addActivity(
             'node_offline',
             `节点 "${currentNode.node_name}" 离线`,
-            '/app/nodes',
+            '/cloud/nodes',
             { nodeId: id, nodeName: currentNode.node_name }
           )
         }
@@ -481,7 +481,7 @@ export function useDashboard() {
       addActivity(
         'route_created',
         `新建了 ${diff} 个路由连接`,
-        '/app/routes',
+        '/cloud/routes',
         { count: diff }
       )
     } else if (currentRoutesCount < prevCount) {
@@ -489,7 +489,7 @@ export function useDashboard() {
       addActivity(
         'route_deleted',
         `删除了 ${diff} 个路由连接`,
-        '/app/routes',
+        '/cloud/routes',
         { count: diff }
       )
     }
@@ -514,7 +514,7 @@ export function useDashboard() {
       addActivity(
         'connection_request',
         `收到 ${diff} 个新的连接请求`,
-        '/app/routes/pending',
+        '/cloud/routes/pending',
         { count: diff }
       )
     } else if (currentPendingCount < prevCount) {
@@ -523,7 +523,7 @@ export function useDashboard() {
       addActivity(
         'connection_accepted',
         `处理了 ${diff} 个连接请求`,
-        '/app/routes',
+        '/cloud/routes',
         { count: diff }
       )
     }

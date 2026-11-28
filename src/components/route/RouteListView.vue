@@ -271,11 +271,11 @@ const filteredConnections = computed(() => {
 
 // 事件处理
 const handleRowClick = (evt: Event, row: NodeSummary) => {
-  router.push(`/app/routes/active/${props.nodeId}/p-${row.peer_id}`)
+  router.push(`/cloud/routes/active/${props.nodeId}/p-${row.peer_id}`)
 }
 
 const handleViewDetails = (row: NodeSummary) => {
-  router.push(`/app/routes/active/${props.nodeId}/p-${row.peer_id}`)
+  router.push(`/cloud/routes/active/${props.nodeId}/p-${row.peer_id}`)
 }
 </script>
 

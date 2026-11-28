@@ -17,7 +17,7 @@
                 size="sm"
                 color="grey-7"
                 icon="arrow_forward"
-                @click="$router.push('/app/nodes?filter=offline')"
+                @click="$router.push('/cloud/nodes?filter=offline')"
               />
             </q-card-section>
             
@@ -27,7 +27,7 @@
                   v-for="node in displayedOfflineNodes" 
                   :key="node.id"
                   clickable
-                  @click="$router.push(`/app/nodes/${node.id}`)"
+                  @click="$router.push(`/cloud/nodes/${node.id}`)"
                   class="offline-node-item"
                 >
                   <q-item-section avatar>
@@ -67,7 +67,7 @@
                 size="sm"
                 color="grey-7"
                 icon="arrow_forward"
-                @click="$router.push('/app/routes/pending')"
+                @click="$router.push('/cloud/routes/pending')"
               />
             </q-card-section>
             
@@ -96,7 +96,7 @@
                 size="sm"
                 color="grey-7"
                 icon="arrow_forward"
-                @click="$router.push('/app/nodes?filter=unconfigured')"
+                @click="$router.push('/cloud/nodes?filter=unconfigured')"
               />
             </q-card-section>
             

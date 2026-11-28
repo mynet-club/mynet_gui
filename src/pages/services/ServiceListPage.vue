@@ -5,23 +5,25 @@
     icon="apps"
   >
     <template #actions>
-      <div class="row q-gutter-sm items-center">
-        <q-btn
-          flat
-          color="primary"
-          icon="add"
-          :label="$t('zoneServices.addService')"
-          @click="navigateToMyServices"
-        />
-        <q-btn
-          flat
-          color="grey-7"
-          icon="refresh"
-          :label="$t('common.refresh')"
-          @click="handleRefresh"
-          :loading="loading"
-        />
-      </div>
+      <q-btn
+        unelevated
+        dense
+        no-caps
+        color="primary"
+        icon="add"
+        :label="$t('zoneServices.addService')"
+        class="q-px-md"
+        @click="navigateToMyServices"
+      />
+      <q-btn
+        dense
+        no-caps
+        class="btn-ghost"
+        icon="refresh"
+        :label="$t('common.refresh')"
+        @click="handleRefresh"
+        :loading="loading"
+      />
     </template>
 
     <!-- 服务概览统计 -->
@@ -142,7 +144,7 @@ const navigationItems = computed(() => [
     icon: 'public',
     color: 'primary',
     count: publicServices.value.length,
-    action: () => router.push('/app/services/public')
+    action: () => router.push('/cloud/services/public')
   },
   {
     title: t('navigation.services.friendServices'),
@@ -150,7 +152,7 @@ const navigationItems = computed(() => [
     icon: 'group', 
     color: 'positive',
     count: friendServices.value.length,
-    action: () => router.push('/app/services/friends')
+    action: () => router.push('/cloud/services/friends')
   },
   {
     title: t('navigation.services.myServices'),
@@ -158,7 +160,7 @@ const navigationItems = computed(() => [
     icon: 'person_add',
     color: 'accent',
     count: myServices.value.length,
-    action: () => router.push('/app/services/my')
+    action: () => router.push('/cloud/services/my')
   }
 ])
 
@@ -174,7 +176,7 @@ const handleRefresh = async () => {
 
 // 快速导航到我的服务
 const navigateToMyServices = () => {
-  router.push('/app/services/my')
+  router.push('/cloud/services/my')
 }
 </script>
 

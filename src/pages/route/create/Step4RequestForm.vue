@@ -194,7 +194,7 @@ const requestForm = reactive({
 
 // 方法
 const goBack = () => {
-  router.push('/app/routes/create/prev_3')
+  router.push('/cloud/routes/create/prev_3')
 }
 
 const submitRequest = async () => {
@@ -233,17 +233,17 @@ const submitRequest = async () => {
 
 const goToPending = () => {
   showSuccessDialog.value = false
-  router.push('/app/routes/pending')
+  router.push('/cloud/routes/pending')
 }
 
 const goToRoutes = () => {
   showSuccessDialog.value = false
-  router.push('/app/routes')
+  router.push('/cloud/routes')
 }
 
 const createAnother = () => {
   showSuccessDialog.value = false
-  router.push('/app/routes/create/prev_1')
+  router.push('/cloud/routes/create/prev_1')
 }
 
 // Retain the edited message when going back or refreshing; clear after submission.
@@ -253,7 +253,7 @@ watch(() => requestForm.message, message => {
 
 onMounted(() => {
   const saved = draft.read()
-  if (saved.requiredStep < 4) { router.replace(`/app/routes/create/prev_${saved.requiredStep}`); return }
+  if (saved.requiredStep < 4) { router.replace(`/cloud/routes/create/prev_${saved.requiredStep}`); return }
   selectedFriend.value = saved.friend as Friend
   selectedFriendNode.value = saved.friendNode
   selectedMyNode.value = saved.myNode

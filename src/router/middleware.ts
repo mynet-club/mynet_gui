@@ -25,6 +25,15 @@ export interface RouteAuthState {
   readonly token: string | null
 }
 
+function isCloudPath(path: string): boolean {
+  return (
+    path === '/cloud' ||
+    path.startsWith('/cloud/') ||
+    path === '/app' ||
+    path.startsWith('/app/')
+  )
+}
+
 export function setupRouteGuards(router: Router, auth: RouteAuthState) {
   // 唯一认证判断来自已恢复的 store（包含用户、token 与过期时间）。
   router.beforeEach((to) => {
@@ -39,15 +48,15 @@ export function setupRouteGuards(router: Router, auth: RouteAuthState) {
         window.location.href = target.href
         return false
       }
-      return '/app/dashboard'
+      return '/cloud/dashboard'
     }
 
     // 本机地址即本机面：本机面板路由不强制云端登录。
-    // 但平台控制台（/app/*）是云端页面 —— 会话过期/未登录一律去登录页，
-    // 不许在本机地址上放行后顶着占位帐号留在控制台（2026-11-03）。
+    // 但云端空间（/cloud/* 及兼容 /app/*）是云端页面 —— 会话过期/未登录一律去登录页，
+    // 不许在本机地址上放行后顶着占位帐号留在云端空间（2026-11-03）。
     if (!auth.isAuthenticated && !isAuthRoute && to.path !== '/') {
-      const isConsole = to.path === '/app' || to.path.startsWith('/app/')
-      if (localHost() && !isConsole) {
+      const isCloud = isCloudPath(to.path)
+      if (localHost() && !isCloud) {
         return true
       }
       return { path: '/auth/login', query: { redirect: to.fullPath } }
@@ -57,7 +66,7 @@ export function setupRouteGuards(router: Router, auth: RouteAuthState) {
     if (to.path.includes('/nodes/') && to.params.id !== undefined) {
       const nodeId = to.params.id
       if (typeof nodeId !== 'string' || !isValidNodeId(nodeId)) {
-        return '/app/nodes'
+        return '/cloud/nodes'
       }
     }
     return true

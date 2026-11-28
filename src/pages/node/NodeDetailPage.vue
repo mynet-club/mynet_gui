@@ -66,7 +66,7 @@
           color="grey-7"
           icon="arrow_back"
           :label="$t('common.back')"
-          @click="$router.push('/app/nodes')"
+          @click="$router.push('/cloud/nodes')"
         />
       </div>
     </template>
@@ -475,17 +475,118 @@
               <q-icon name="flash_on" class="q-mr-sm text-orange" size="sm" />
               <div class="text-h6">{{ $t('nodes.detail.quickActions') }}</div>
             </div>
-            <div class="q-gutter-sm">
+            <div class="column q-gutter-sm">
+              <div class="row q-gutter-xs">
+                <q-btn
+                  color="positive"
+                  outline
+                  size="sm"
+                  icon="play_arrow"
+                  label="启动"
+                  :loading="runningAction === 'start'"
+                  :disable="!node || isLoading || !!runningAction"
+                  @click="runNodeAction('start')"
+                />
+                <q-btn
+                  color="negative"
+                  outline
+                  size="sm"
+                  icon="stop"
+                  label="停止"
+                  :loading="runningAction === 'stop'"
+                  :disable="!node || isLoading || !!runningAction"
+                  @click="runNodeAction('stop')"
+                />
+                <q-btn
+                  color="warning"
+                  outline
+                  size="sm"
+                  icon="restart_alt"
+                  label="重启"
+                  :loading="runningAction === 'restart'"
+                  :disable="!node || isLoading || !!runningAction"
+                  @click="runNodeAction('restart')"
+                />
+              </div>
+              <div class="row q-gutter-xs">
+                <q-btn
+                  color="primary"
+                  outline
+                  size="sm"
+                  icon="sync"
+                  label="重载配置"
+                  :loading="runningAction === 'reload'"
+                  :disable="!node || isLoading || !!runningAction"
+                  @click="runNodeAction('reload')"
+                />
+                <q-btn
+                  color="secondary"
+                  outline
+                  size="sm"
+                  icon="alt_route"
+                  label="应用路由"
+                  :loading="runningAction === 'apply'"
+                  :disable="!node || isLoading || !!runningAction"
+                  @click="runNodeAction('apply')"
+                />
+                <q-btn
+                  color="grey-7"
+                  outline
+                  size="sm"
+                  icon="refresh"
+                  :label="$t('nodes.refreshData')"
+                  @click="refreshData"
+                  :loading="isRefreshing"
+                />
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+
+        <!-- 最近远程指令与回执 -->
+        <q-card class="q-mb-md">
+          <q-card-section>
+            <div class="row items-center justify-between q-mb-sm">
+              <div class="row items-center">
+                <q-icon name="terminal" class="q-mr-sm text-primary" size="sm" />
+                <div class="text-subtitle1 text-weight-medium">远程指令回执</div>
+              </div>
               <q-btn
-                color="primary"
-                outline
-                block
+                flat
+                dense
+                round
+                size="sm"
                 icon="refresh"
-                :label="$t('nodes.refreshData')"
-                @click="refreshData"
-                :loading="isRefreshing"
+                :loading="loadingCommands"
+                @click="loadRecentCommands"
               />
             </div>
+            <div v-if="recentCommands.length === 0" class="text-caption text-grey-6 q-py-sm">
+              暂无远程指令记录
+            </div>
+            <q-list v-else dense separator>
+              <q-item v-for="cmd in recentCommands" :key="cmd.command_id" class="q-px-none">
+                <q-item-section>
+                  <q-item-label class="row items-center justify-between">
+                    <span class="text-body2 text-weight-medium">{{ cmd.command }}</span>
+                    <q-chip
+                      dense
+                      size="xs"
+                      :color="getCommandStatusColor(cmd.status)"
+                      text-color="white"
+                    >
+                      {{ cmd.status_name }}
+                    </q-chip>
+                  </q-item-label>
+                  <q-item-label caption>
+                    {{ cmd.executed_at ? formatDate(cmd.executed_at) : (cmd.created_at ? formatDate(cmd.created_at) : '') }}
+                  </q-item-label>
+                  <q-item-label v-if="cmd.error_message || cmd.result" caption class="ellipsis text-grey-8">
+                    {{ cmd.error_message || (typeof cmd.result === 'string' ? cmd.result : JSON.stringify(cmd.result)) }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
           </q-card-section>
         </q-card>
       </div>
@@ -514,7 +615,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import debug from 'src/utils/debug'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -549,6 +650,39 @@ const routeCount = ref(0)
 const loadingRoutes = ref(false)
 const deviceInfo = ref<NodeDeviceInfo | null>(null)
 const loadingDeviceInfo = ref(false)
+
+interface RemoteCommandItem {
+  command_id: number | string
+  command: string
+  status: number
+  status_name: string
+  result?: unknown
+  error_message?: string | null
+  created_at?: string | null
+  executed_at?: string | null
+}
+
+const runningAction = ref<string | null>(null)
+const recentCommands = ref<RemoteCommandItem[]>([])
+const loadingCommands = ref(false)
+let commandPollTimer: ReturnType<typeof setInterval> | null = null
+
+const stopCommandPoll = () => {
+  if (commandPollTimer) {
+    clearInterval(commandPollTimer)
+    commandPollTimer = null
+  }
+}
+
+const getCommandStatusColor = (status: number) => {
+  switch (status) {
+    case 0: return 'orange'
+    case 1: return 'primary'
+    case 2: return 'positive'
+    case 3: return 'negative'
+    default: return 'grey'
+  }
+}
 
 // 状态相关工具函数
 const getStatusColor = (status?: NodeStatus | string | number) => {
@@ -675,6 +809,9 @@ const getPublicIPs = () => {
   }
   if (node.value?.public_ip && !ips.includes(node.value.public_ip)) {
     ips.push(node.value.public_ip)
+  }
+  if (deviceInfo.value?.public_ip && !ips.includes(deviceInfo.value.public_ip)) {
+    ips.push(deviceInfo.value.public_ip)
   }
   return ips
 }
@@ -829,24 +966,24 @@ const loadRouteCount = async () => {
 
 // 操作函数
 const goToEdit = () => {
-  router.push(`/app/nodes/${nodeId.value}/edit`)
+  router.push(`/cloud/nodes/${nodeId.value}/edit`)
 }
 
 // 新增的编辑操作方法
 const goToEditBasic = () => {
-  router.push(`/app/nodes/${nodeId.value}/edit/basic`)
+  router.push(`/cloud/nodes/${nodeId.value}/edit/basic`)
 }
 
 const goToEditConfig = () => {
-  router.push(`/app/nodes/${nodeId.value}/edit/config`)
+  router.push(`/cloud/nodes/${nodeId.value}/edit/config`)
 }
 
 const goToEditNetwork = () => {
-  router.push(`/app/nodes/${nodeId.value}/edit/network`)
+  router.push(`/cloud/nodes/${nodeId.value}/edit/network`)
 }
 
 const goToEditKeys = () => {
-  router.push(`/app/nodes/${nodeId.value}/edit/keys`)
+  router.push(`/cloud/nodes/${nodeId.value}/edit/keys`)
 }
 
 // 网络信息显示方法
@@ -877,11 +1014,84 @@ const getEndpointAddress = () => {
 
 // 新增的快速操作方法
 const goToNetworkConfig = () => {
-  router.push(`/app/nodes/${nodeId.value}/edit/network`)
+  router.push(`/cloud/nodes/${nodeId.value}/edit/network`)
 }
 
 const goToIPManagement = () => {
-  router.push(`/app/nodes/${nodeId.value}/ips`)
+  router.push(`/cloud/nodes/${nodeId.value}/ips`)
+}
+
+const loadRecentCommands = async () => {
+  if (!nodeId.value) return
+  loadingCommands.value = true
+  try {
+    const response = await nodeService.getNodeCommands(nodeId.value, { limit: 6 })
+    recentCommands.value = response?.data?.commands || []
+  } catch (error) {
+    debug.error('加载远程指令记录失败:', error)
+  } finally {
+    loadingCommands.value = false
+  }
+}
+
+const pollCommandUntilDone = (commandId: string | number) => {
+  stopCommandPoll()
+  let attempts = 0
+  commandPollTimer = setInterval(async () => {
+    attempts += 1
+    try {
+      const resp = await nodeService.getNodeCommands(nodeId.value, { id: commandId })
+      const item = resp?.data as RemoteCommandItem | undefined
+      if (item) {
+        const idx = recentCommands.value.findIndex(c => String(c.command_id) === String(commandId))
+        if (idx >= 0) {
+          recentCommands.value[idx] = item
+        } else {
+          recentCommands.value = [item, ...recentCommands.value].slice(0, 6)
+        }
+        if (item.status === 2 || item.status === 3) {
+          stopCommandPoll()
+          if (item.status === 2) {
+            notifySuccess(`指令 ${item.command} 执行成功`)
+          } else {
+            notifyError(`指令 ${item.command} 执行失败: ${item.error_message || '请检查节点日志'}`)
+          }
+          await loadNode(nodeId.value)
+          return
+        }
+      }
+    } catch (error) {
+      debug.error('轮询指令状态失败:', error)
+    }
+    if (attempts >= 15) {
+      stopCommandPoll()
+    }
+  }, 2000)
+}
+
+const runNodeAction = async (action: 'start' | 'stop' | 'restart' | 'reload' | 'apply') => {
+  if (!nodeId.value || runningAction.value) return
+  runningAction.value = action
+  try {
+    let resp: any
+    if (action === 'start') resp = await nodeService.startNode(nodeId.value)
+    else if (action === 'stop') resp = await nodeService.stopNode(nodeId.value)
+    else if (action === 'restart') resp = await nodeService.restartNode(nodeId.value)
+    else if (action === 'reload') resp = await nodeService.reloadNode(nodeId.value)
+    else resp = await nodeService.applyNodeRoutes(nodeId.value)
+
+    const cmdId = resp?.data?.command_id
+    notifySuccess(resp?.message || '操作指令已下发，等待节点执行')
+    await loadRecentCommands()
+    if (cmdId) {
+      pollCommandUntilDone(cmdId)
+    }
+  } catch (error: any) {
+    debug.error('节点远程操作失败:', error)
+    notifyError(error?.response?.data?.message || '下发远程指令失败')
+  } finally {
+    runningAction.value = null
+  }
 }
 
 const refreshData = async () => {
@@ -892,7 +1102,8 @@ const refreshData = async () => {
       loadIndexServices(),
       loadNetworkConfig(),
       loadDeviceInfo(),
-      loadRouteCount()
+      loadRouteCount(),
+      loadRecentCommands()
     ])
     notifySuccess(t('nodes.dataRefreshed'))
   } catch (error) {
@@ -915,7 +1126,7 @@ const deleteNode = async () => {
     const success = await removeNode()
     if (success) {
       notifySuccess(t('nodes.deleteSuccess'))
-      router.push('/app/nodes')
+      router.push('/cloud/nodes')
     }
   } catch (error) {
     debug.error('删除节点失败:', error)
@@ -934,9 +1145,14 @@ onMounted(async () => {
       loadIndexServices(),
       loadNetworkConfig(),
       loadDeviceInfo(),
-      loadRouteCount()
+      loadRouteCount(),
+      loadRecentCommands()
     ])
   }
+})
+
+onUnmounted(() => {
+  stopCommandPoll()
 })
 </script>
 

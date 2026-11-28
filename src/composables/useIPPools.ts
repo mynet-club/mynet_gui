@@ -200,8 +200,12 @@ export function useIPPools() {
           available_ips: apiData.ips_available || 0,
           active_ips: apiData.ips_consumed || 0,
           free_ips: apiData.ips_available || 0,
-          user_quota: apiData.pools_quota || 3,
-          usage_percentage: apiData.pools_usage_percentage || 0
+          user_quota: apiData.pools_quota ?? 3,
+          usage_percentage: apiData.pools_usage_percentage || 0,
+          desired_enabled: apiData.desired_enabled ?? true,
+          effective_enabled: apiData.effective_enabled ?? ((apiData.pools_remaining ?? 0) > 0),
+          blocked_by: apiData.blocked_by ?? ((apiData.pools_remaining ?? 0) > 0 ? null : 'quota'),
+          blocked_reason: apiData.blocked_reason ?? null
         }
         
         debug.log('Statistics fetched from API:', statistics.value)

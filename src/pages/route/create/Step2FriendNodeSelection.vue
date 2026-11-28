@@ -309,11 +309,11 @@ const getStatusColor = (status: string) => {
 }
 
 const changeFriend = () => {
-  router.push('/app/routes/create/prev_1')
+  router.push('/cloud/routes/create/prev_1')
 }
 
 const goBack = () => {
-  router.push('/app/routes/create/prev_1')
+  router.push('/cloud/routes/create/prev_1')
 }
 
 const goToNextStep = () => {
@@ -325,7 +325,7 @@ const goToNextStep = () => {
   // 将选中的节点存储到会话存储中
   draft.selectFriendNode(selectedNode.value)
   
-  router.push('/app/routes/create/prev_3')
+  router.push('/cloud/routes/create/prev_3')
 }
 
 // 获取好友节点列表
@@ -389,7 +389,7 @@ const fetchFriendNodes = async () => {
 
 onMounted(async () => {
   const saved = draft.read()
-  if (!saved.friend) { router.replace('/app/routes/create/prev_1'); return }
+  if (!saved.friend) { router.replace('/cloud/routes/create/prev_1'); return }
   selectedFriend.value = saved.friend as Friend
   await fetchFriendNodes()
 })

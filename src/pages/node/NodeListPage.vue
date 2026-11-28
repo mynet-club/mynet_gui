@@ -5,24 +5,26 @@
     icon="device_hub"
   >
     <template #actions>
-      <div class="row items-center" style="gap: 14px">
-        <q-btn
-          unelevated
-          color="primary"
-          icon="add"
-          :label="$t('nodes.createNode')"
-          data-tip-target="add-device-btn"
-          @click="goToCreate"
-          :disable="loading"
-        />
-        <q-btn
-          class="btn-ghost"
-          icon="refresh"
-          :label="$t('common.refresh')"
-          @click="refreshNodes"
-          :loading="loading"
-        />
-      </div>
+      <q-btn
+        unelevated
+        dense
+        no-caps
+        color="primary"
+        icon="add"
+        :label="$t('nodes.createNode')"
+        class="q-px-md"
+        @click="goToCreate"
+        :disable="loading"
+      />
+      <q-btn
+        dense
+        no-caps
+        class="btn-ghost"
+        icon="refresh"
+        :label="$t('common.refresh')"
+        @click="refreshNodes"
+        :loading="loading"
+      />
     </template>
 
     <!-- 节点列表 - 卡片布局 -->
@@ -298,16 +300,16 @@ const handleNodeAction = async (node: Node, action: 'start' | 'stop' | 'restart'
 
 // 操作方法
 const goToCreate = () => {
-  router.push('/app/nodes/create')
+  router.push('/cloud/nodes/create')
 }
 
 
 const goToDetail = (nodeId: string | number) => {
-  router.push(`/app/nodes/${nodeId}`)
+  router.push(`/cloud/nodes/${nodeId}`)
 }
 
 const goToEdit = (nodeId: string | number) => {
-  router.push(`/app/nodes/${nodeId}/edit`)
+  router.push(`/cloud/nodes/${nodeId}/edit`)
 }
 
 const refreshNodes = async () => {

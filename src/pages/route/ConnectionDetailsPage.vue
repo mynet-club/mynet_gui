@@ -6,10 +6,10 @@
     <!-- 面包屑 -->
     <template #breadcrumbs>
       <q-breadcrumbs>
-        <q-breadcrumbs-el label="活跃路由" to="/app/routes/active" icon="route" />
+        <q-breadcrumbs-el label="活跃路由" to="/cloud/routes/active" icon="route" />
         <q-breadcrumbs-el 
           :label="sourceNodeInfo?.node_name || '节点'"
-          :to="`/app/routes/active/${nodeId}`"
+          :to="`/cloud/routes/active/${nodeId}`"
         />
         <q-breadcrumbs-el 
           :label="peerNodeInfo?.node_name || '对端节点'"
@@ -428,7 +428,7 @@ const handleTimeRangeUpdate = (value: string) => {
 }
 
 const handleBack = () => {
-  router.push(`/app/routes/active/${nodeId.value}`)
+  router.push(`/cloud/routes/active/${nodeId.value}`)
 }
 
 // 初始化

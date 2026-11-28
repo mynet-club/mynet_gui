@@ -218,7 +218,7 @@ const friendSince = computed(() => {
 const handleSendMessage = () => {
   emit('send-message', props.friend.id)
   // TODO: 实现消息功能后，可以直接跳转到聊天页面
-  // router.push(`/app/messages/${props.friend.id}`)
+  // router.push(`/cloud/messages/${props.friend.id}`)
 }
 
 // 查看详情（由父组件打开详情弹窗，不再跳转 404 路由）

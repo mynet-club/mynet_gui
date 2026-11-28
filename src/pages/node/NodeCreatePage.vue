@@ -27,13 +27,13 @@
                 </q-banner>
                 <q-input v-model="form.description" :label="$t('workflow.optionalDescription')" outlined type="textarea" rows="3" maxlength="1000" :readonly="isCreating" />
                 <div class="text-caption q-mt-md">{{ $t('workflow.expertAfterCreate') }}</div>
-                <q-btn flat color="primary" icon="dns" :label="$t('workflow.manageIpPools')" to="/app/ippools" :disable="isCreating" class="q-mt-sm" />
+                <q-btn flat color="primary" icon="dns" :label="$t('workflow.manageIpPools')" to="/cloud/ip-resources" :disable="isCreating" class="q-mt-sm" />
               </div>
             </q-expansion-item>
             <q-banner v-if="createError" rounded class="creation-error" role="alert">{{ createError }}</q-banner>
             <div class="row q-gutter-sm">
               <q-btn type="submit" unelevated color="primary" icon="add" :label="$t('nodes.createNode')" :loading="isCreating" />
-              <q-btn flat :label="$t('common.cancel')" to="/app/nodes" :disable="isCreating" />
+              <q-btn flat :label="$t('common.cancel')" to="/cloud/nodes" :disable="isCreating" />
             </div>
           </q-form>
         </q-card-section>
@@ -49,8 +49,8 @@
         </q-card-section>
         <q-card-actions class="creation-actions" align="center">
           <q-btn v-if="isLocalPanel" unelevated color="primary" icon="link" :label="$t('workflow.connectLocally')" @click="connectLocally" />
-          <q-btn unelevated :color="isLocalPanel ? 'secondary' : 'primary'" icon="device_hub" :label="$t('nodes.quickCreate.viewNode')" :to="`/app/nodes/${createdDevice.id}`" />
-          <q-btn flat color="primary" :label="$t('workflow.expertMode')" :to="`/app/nodes/${createdDevice.id}/edit/config?mode=expert`" />
+          <q-btn unelevated :color="isLocalPanel ? 'secondary' : 'primary'" icon="device_hub" :label="$t('nodes.quickCreate.viewNode')" :to="`/cloud/nodes/${createdDevice.id}`" />
+          <q-btn flat color="primary" :label="$t('workflow.expertMode')" :to="`/cloud/nodes/${createdDevice.id}/edit/config?mode=expert`" />
           <q-btn flat :label="$t('workflow.createAnotherDevice')" @click="createAnother" />
         </q-card-actions>
       </q-card>
@@ -64,13 +64,11 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, onBeforeRouteLeave } from 'vue-router'
 import type { QForm } from 'quasar'
 import { nodeService } from '../../services/node/nodeService'
-import { useOnboardingActions } from '../../composables/useOnboardingActions'
 import type { VpnType } from '../../types/node'
 import PageLayout from '../../components/layout/PageLayout.vue'
 
 const route = useRoute()
 const { t } = useI18n()
-const { onNodeCreated, onIpPoolCreated } = useOnboardingActions()
 const createForm = ref<QForm | null>(null)
 const form = ref({ node_name: '', description: '', vpn_type: 'gnb' as VpnType })
 const isCreating = ref(false)
@@ -115,9 +113,7 @@ const onSubmit = async () => {
       if (!response.success || !response.data?.node?.node_id) throw new Error(response.message || t('nodes.operations.createFailed'))
       const node = response.data.node
       createdDevice.value = { id: node.node_id, name: node.node_name, ip: node.node_ip ?? null, vpnType: form.value.vpn_type.toUpperCase(), poolCreated: response.data.ip_pool_created ?? false }
-      onIpPoolCreated()
     }
-    onNodeCreated()
   } catch (error: any) {
     createError.value = error?.response?.data?.message || error?.message || t('nodes.operations.createFailed')
   } finally {

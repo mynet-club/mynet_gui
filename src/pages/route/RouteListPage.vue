@@ -5,26 +5,25 @@
     icon="route"
   >
     <template #actions>
-      <div class="row q-gutter-sm items-center">
-        <q-btn-group>
-          <q-btn
-            unelevated
-            color="primary"
-            icon="add"
-            :label="$t('routes.actions.createRoute')"
-            data-tip-target="add-route-btn"
-            @click="handleCreateRoute"
-          />
-          <q-btn
-            flat
-            color="grey-7"
-            icon="sync"
-            :label="$t('routes.actions.refreshRoutes')"
-            @click="handleRefreshRoutes"
-            :loading="loading"
-          />
-        </q-btn-group>
-      </div>
+      <q-btn
+        unelevated
+        dense
+        no-caps
+        color="primary"
+        icon="add"
+        :label="$t('routes.actions.createRoute')"
+        class="q-px-md"
+        @click="handleCreateRoute"
+      />
+      <q-btn
+        dense
+        no-caps
+        class="btn-ghost"
+        icon="refresh"
+        :label="$t('routes.actions.refreshRoutes')"
+        @click="handleRefreshRoutes"
+        :loading="loading"
+      />
     </template>
 
     <!-- 统计卡片 -->
@@ -186,7 +185,7 @@ const navigationCards = computed(() => [
     color: 'primary',
     buttonText: t('common.view'),
     buttonIcon: 'arrow_forward',
-    route: '/app/routes/active',
+    route: '/cloud/routes/active',
     stats: [
       {
         label: t('common.total'),
@@ -203,7 +202,7 @@ const navigationCards = computed(() => [
     color: 'orange',
     buttonText: t('common.manage'),
     buttonIcon: 'settings',
-    route: '/app/routes/pending',
+    route: '/cloud/routes/pending',
     stats: [
       {
         label: t('common.pending'),
@@ -220,7 +219,7 @@ const navigationCards = computed(() => [
     color: 'positive',
     buttonText: t('common.browse'),
     buttonIcon: 'explore',
-    route: '/app/routes/friends',
+    route: '/cloud/routes/friends',
     stats: [
       {
         label: t('common.available'),
@@ -250,7 +249,7 @@ const handleRefreshRoutes = () => {
 
 // 创建路由
 const handleCreateRoute = () => {
-  router.push('/app/routes/create')
+  router.push('/cloud/routes/create')
 }
 
 // 初始化

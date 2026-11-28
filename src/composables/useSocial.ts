@@ -62,34 +62,19 @@ export function useSocial() {
         active_routes: response.stats?.active_routes || 0
       }
       
-      // 同时设置好友数据（避免额外的API调用）
+      // 直接使用 /social/data 已聚合的节点统计（nodes_count / online_nodes_count），
+      // 消除原先对每个好友串行/并发 N 次调用 /social/friends/{id}/nodes 造成的 2s+ 瀑布延迟。
       if (response.friends) {
-        friends.value = await Promise.all(response.friends.map(async (friend: any) => {
-          // 获取每个好友的节点数量统计
-          try {
-            const friendNodes = await getFriendNodes(friend.id)
-            return {
-              ...friend,
-              friendship_date: friend.created_at, // 将 created_at 映射为 friendship_date
-              node_count: friendNodes.length, // 总节点数
-              available_node_count: friendNodes.filter((node: any) => 
-                node.status === 'online' && node.current_connections < node.max_connections
-              ).length // 可用节点数
-            }
-          } catch (error) {
-            debug.error(`获取好友 ${friend.id} 的节点失败:`, error)
-            return {
-              ...friend,
-              friendship_date: friend.created_at,
-              node_count: 0,
-              available_node_count: 0
-            }
-          }
+        friends.value = response.friends.map((friend: any) => ({
+          ...friend,
+          friendship_date: friend.created_at,
+          node_count: Number(friend.nodes_count ?? friend.node_count ?? 0),
+          online_node_count: Number(friend.online_nodes_count ?? friend.online_node_count ?? 0),
+          available_node_count: Number(friend.nodes_count ?? friend.available_node_count ?? 0)
         }))
-        // 模拟分页数据
-        currentPage.value = 1;
-        totalPages.value = 1;
-        totalItems.value = response.friends.length;
+        currentPage.value = 1
+        totalPages.value = 1
+        totalItems.value = response.friends.length
       }
       
       // 设置好友请求数据

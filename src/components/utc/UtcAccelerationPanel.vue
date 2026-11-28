@@ -79,11 +79,12 @@
             </span>
           </q-item-label>
           <q-item-label
-            v-if="isUpstreamBlocked(row) && row.blocked_reason"
+            v-if="gateOf(row).blocked"
             caption
-            class="text-negative"
+            :class="gateOf(row).tone === 'err' ? 'text-negative' : 'text-warning'"
           >
-            {{ row.blocked_reason }}
+            {{ gateOf(row).reason }}
+            <span v-if="gateOf(row).actionHint" class="text-grey-7"> · {{ gateOf(row).actionHint }}</span>
           </q-item-label>
           <q-item-label v-if="row.observed_detail" caption class="text-grey-6">
             {{ t('utcAcceleration.observedDetail') }} {{ row.observed_detail }}
@@ -92,7 +93,7 @@
         <q-item-section side>
           <div class="row items-center q-gutter-sm">
             <q-chip dense size="sm" :color="metaOf(row).color" text-color="white">
-              {{ t(metaOf(row).labelKey) }}
+              {{ metaOf(row).label }}
             </q-chip>
             <q-toggle
               :model-value="row.desired_enabled"
@@ -118,14 +119,14 @@ import MynetErrorPanel from '../mynet/MynetErrorPanel.vue'
 import { describeUtcError, utcService } from '../../services/utc/utcService'
 import type { UtcAccelerationItem, UtcDataSource } from '../../types/utc'
 import { accelerationState, formatUtcTime, type UtcAccelerationState } from '../../utils/utcFormat'
+import { resolveCapabilityGate } from '../../utils/capabilityGate'
 
 type Row = UtcAccelerationItem & { saving: boolean }
 
-const STATE_META: Record<UtcAccelerationState | 'blocked', { color: string; labelKey: string }> = {
+const STATE_META: Record<UtcAccelerationState, { color: string; labelKey: string }> = {
   applied: { color: 'positive', labelKey: 'utcAcceleration.stateApplied' },
   pending: { color: 'warning', labelKey: 'utcAcceleration.statePending' },
-  disabled: { color: 'grey', labelKey: 'utcAcceleration.stateDisabled' },
-  blocked: { color: 'negative', labelKey: 'utcAcceleration.stateBlocked' }
+  disabled: { color: 'grey', labelKey: 'utcAcceleration.stateDisabled' }
 }
 
 const { t } = useI18n()
@@ -137,19 +138,22 @@ const actionError = ref('')
 const rows = ref<Row[]>([])
 const source = ref<UtcDataSource | null>(null)
 
-function isUpstreamBlocked(row: Row): boolean {
-  return row.effective_enabled === false && Boolean(row.blocked_by) && row.blocked_by !== 'user'
+function gateOf(row: Row) {
+  return resolveCapabilityGate(row)
 }
 
-function metaOf(row: Row) {
-  if (isUpstreamBlocked(row)) {
-    return STATE_META.blocked
+function metaOf(row: Row): { color: string; label: string } {
+  const gate = gateOf(row)
+  if (gate.blocked) {
+    return { color: gate.chipColor, label: gate.chipLabel }
   }
-  return STATE_META[accelerationState(row.desired_enabled, row.observed_state)]
+  const st = STATE_META[accelerationState(row.desired_enabled, row.observed_state)]
+  return { color: st.color, label: t(st.labelKey) }
 }
 
 function dotClassOf(row: Row): string {
-  if (isUpstreamBlocked(row)) return 'is-err'
+  const gate = gateOf(row)
+  if (gate.blocked) return gate.tone === 'err' ? 'is-err' : 'is-warn'
   const state = accelerationState(row.desired_enabled, row.observed_state)
   if (state === 'applied') return 'is-ok'
   if (state === 'pending') return 'is-warn'

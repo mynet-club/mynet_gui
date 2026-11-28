@@ -108,7 +108,7 @@
               {{ $t('routes.create.step3.createNodeHint') }}
             </div>
             <q-btn v-if="hasFilters" flat color="primary" :label="$t('workflow.clearFilters')" @click="clearFilters" />
-            <q-btn v-else flat color="primary" :label="$t('nodes.createNode')" to="/app/nodes/create" />
+            <q-btn v-else flat color="primary" :label="$t('nodes.createNode')" to="/cloud/nodes/create" />
           </div>
 
           <!-- 节点卡片列表 -->
@@ -393,7 +393,7 @@ const getNodeStatusText = (node: any) => {
 }
 
 const goBack = () => {
-  router.push('/app/routes/create/prev_2')
+  router.push('/cloud/routes/create/prev_2')
 }
 
 const goToNextStep = () => {
@@ -410,7 +410,7 @@ const goToNextStep = () => {
   // 将选中的我的节点存储到会话存储中
   draft.selectMyNode(selectedMyNode.value)
   
-  router.push('/app/routes/create/prev_4')
+  router.push('/cloud/routes/create/prev_4')
 }
 
 // 获取我的节点列表
@@ -618,7 +618,7 @@ const checkConnectionStatusLocal = (myNodeId: string | number, friendNodeId: str
 
 onMounted(async () => {
   const saved = draft.read()
-  if (saved.requiredStep < 3) { router.replace(`/app/routes/create/prev_${saved.requiredStep}`); return }
+  if (saved.requiredStep < 3) { router.replace(`/cloud/routes/create/prev_${saved.requiredStep}`); return }
   selectedFriend.value = saved.friend as Friend
   selectedFriendNode.value = saved.friendNode
   await fetchMyNodes()

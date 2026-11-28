@@ -61,6 +61,10 @@ export interface IPPoolStatistics {
   free_ips?: number       // API 返回的可用IP数
   user_quota?: number     // 用户配额
   usage_percentage?: number // 使用百分比
+  desired_enabled?: boolean
+  effective_enabled?: boolean
+  blocked_by?: 'platform' | 'tenant' | 'user' | 'node' | 'quota' | null
+  blocked_reason?: string | null
 }
 
 export interface IPAllocation {

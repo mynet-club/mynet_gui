@@ -1,0 +1,245 @@
+/*
+ * MyNet Cloud 全站统一视觉与交互规范（/cloud/*）
+ * 目标：对齐本机/云端统一双模壳（Brand Blue #2563eb · Slate 层次 · 12px 卡片 · 8px 控件 · 1280px 内容宽）
+ */
+
+:root {
+  --cloud-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+  --cloud-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --cloud-primary: #2563eb;
+  --cloud-primary-hover: #1d4ed8;
+  --cloud-primary-soft: #eff6ff;
+
+  --cloud-canvas: #f8fafc;
+  --cloud-surface: #ffffff;
+  --cloud-surface-subtle: #f8fafc;
+  --cloud-border: #e2e8f0;
+  --cloud-border-strong: #cbd5e1;
+
+  --cloud-text: #0f172a;
+  --cloud-text-secondary: #475569;
+  --cloud-text-muted: #64748b;
+
+  --cloud-radius-card: 12px;
+  --cloud-radius-control: 8px;
+  --cloud-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --cloud-shadow-hover: 0 4px 14px rgba(37, 99, 235, 0.08);
+}
+
+.body--dark {
+  --cloud-canvas: #020617;
+  --cloud-surface: #0f172a;
+  --cloud-surface-subtle: #1e293b;
+  --cloud-border: #1e293b;
+  --cloud-border-strong: #334155;
+
+  --cloud-text: #f8fafc;
+  --cloud-text-secondary: #cbd5e1;
+  --cloud-text-muted: #94a3b8;
+
+  --cloud-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --cloud-shadow-hover: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+body {
+  font-family: var(--cloud-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.mono,
+.text-mono {
+  font-family: var(--cloud-font-mono);
+}
+
+/* 仅作用于云端空间（.main-layout）内的统一基线，避免污染本机青绿主题 */
+.main-layout {
+  .q-page-container {
+    background: var(--cloud-canvas);
+    min-height: 100vh;
+  }
+
+  /* 1. 卡片统一：去重阴影，改用 1px 清晰描边 + 12px 圆角 */
+  .q-card:not(.q-card--flat) {
+    background: var(--cloud-surface);
+    border: 1px solid var(--cloud-border);
+    border-radius: var(--cloud-radius-card);
+    box-shadow: var(--cloud-shadow-card);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .q-card.q-card--bordered {
+    background: var(--cloud-surface);
+    border-color: var(--cloud-border);
+    border-radius: var(--cloud-radius-card);
+  }
+
+  .q-card.cursor-pointer:hover,
+  .standard-card.cursor-pointer:hover,
+  .overview-card:hover,
+  .navigation-card:hover {
+    border-color: #93c5fd;
+    box-shadow: var(--cloud-shadow-hover);
+    transform: translateY(-1px);
+  }
+
+  /* 2. 按钮统一：8px 圆角、取消全大写、克制紧凑间距 */
+  .q-btn {
+    border-radius: var(--cloud-radius-control);
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .q-btn-group {
+    box-shadow: none;
+    border-radius: var(--cloud-radius-control);
+    gap: 6px;
+
+    > .q-btn {
+      border-radius: var(--cloud-radius-control) !important;
+    }
+  }
+
+  .btn-ghost {
+    background: var(--cloud-surface);
+    color: var(--cloud-text-secondary);
+    border: 1px solid var(--cloud-border-strong);
+
+    &:hover {
+      background: var(--cloud-surface-subtle);
+      color: var(--cloud-text);
+      border-color: #94a3b8;
+    }
+  }
+
+  /* 3. 输入框与选择器统一 */
+  .q-field--outlined .q-field__control {
+    border-radius: var(--cloud-radius-control);
+    background: var(--cloud-surface);
+  }
+
+  /* 4. 表格统一 */
+  .q-table__container {
+    background: var(--cloud-surface);
+    border: 1px solid var(--cloud-border);
+    border-radius: var(--cloud-radius-card);
+    box-shadow: none;
+
+    thead th {
+      background: var(--cloud-surface-subtle);
+      color: var(--cloud-text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    tbody tr {
+      transition: background-color 0.12s ease;
+
+      &:hover td {
+        background: var(--cloud-surface-subtle);
+      }
+    }
+
+    tbody td {
+      font-size: 13.5px;
+      color: var(--cloud-text);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  /* 5. 标签页统一 */
+  .q-tabs {
+    .q-tab {
+      text-transform: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      min-height: 40px;
+      border-radius: 6px 6px 0 0;
+    }
+  }
+
+  /* 6. 徽章与胶囊统一 */
+  .q-chip {
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* 7. 数字与标题字号对齐 */
+  .text-h4,
+  .text-h5,
+  .text-h6 {
+    color: var(--cloud-text);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  /* 8. 空状态卡片统一 */
+  .empty-state-card {
+    padding: 40px 24px;
+    text-align: center;
+    background: var(--cloud-surface);
+    border: 1px dashed var(--cloud-border-strong);
+    border-radius: var(--cloud-radius-card);
+    box-shadow: none;
+
+    .empty-icon {
+      font-size: 42px;
+      color: var(--cloud-text-muted);
+      opacity: 0.65;
+    }
+
+    .empty-title {
+      margin-top: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--cloud-text);
+    }
+
+    .empty-description {
+      margin-top: 4px;
+      font-size: 13px;
+      color: var(--cloud-text-muted);
+    }
+  }
+}
+
+/* 弹窗统一（挂在 body 下，脱离 .main-layout） */
+.q-dialog {
+  .q-card {
+    border-radius: 14px;
+    border: 1px solid var(--cloud-border);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+  }
+}
+
+.body--dark {
+  .main-layout {
+    .q-card.cursor-pointer:hover,
+    .standard-card.cursor-pointer:hover,
+    .overview-card:hover,
+    .navigation-card:hover {
+      border-color: #3b82f6;
+    }
+
+    .btn-ghost {
+      background: #0f172a;
+      color: #cbd5e1;
+      border-color: #334155;
+
+      &:hover {
+        background: #1e293b;
+        color: #f8fafc;
+        border-color: #475569;
+      }
+    }
+  }
+
+  .q-dialog .q-card {
+    background: #0f172a;
+    border-color: #1e293b;
+  }
+}

@@ -1128,10 +1128,10 @@ export default {
     mainFeatures: '主要功能',
     networkConfig: '网络配置',
     systemTools: '开发设置',
-    dashboard: '仪表板',
-    nodes: '设备管理',
+    dashboard: '概览',
+    nodes: '我的设备',
     routes: {
-      title: '连接管理',
+      title: '连接与路由',
       overview: '连接概览',
       active: '活跃连接',
       pending: '待处理连接',
@@ -1141,12 +1141,12 @@ export default {
     activeRoutes: '活跃连接',
     pendingConnections: '待处理连接',
     friendNodes: '好友设备',
-    ippools: 'IP池管理',
+    ippools: 'IP 资源',
     zones: `${TERM_ZONE}管理`,
     zoneSharing: `${TERM_ZONE}分享`,
     zoneServices: `${TERM_ZONE}服务`,
     services: {
-      title: '服务管理',
+      title: '服务与出口',
       description: '管理和访问各类网络服务',
       overview: '服务概览',
       overviewDescription: '查看服务统计和快速导航',
@@ -1158,15 +1158,15 @@ export default {
       myServicesDescription: '管理和分享你创建的服务'
     },
     utc: {
-      title: 'UTC 网络',
+      title: '网络加速',
       nodes: '节点',
       usage: '用量',
     },
     social: {
-      title: '组网管理',
+      title: '好友',
       friends: '好友列表',
       requests: '好友请求',
-      invitations: '邀请管理'
+      invitations: '邀请码'
     },
     help: '帮助文档'
   },
@@ -1991,13 +1991,13 @@ export default {
     fetchFriendNodesError: '获取好友设备失败'
   },
   ippools: {
-    title: 'IP池管理',
-    subtitle: 'IP地址池管理和分配',
-    comingSoonMessage: 'IP池管理功能正在开发中，敬请期待！',
+    title: 'IP 资源',
+    subtitle: '管理你的专属网段与 IP 资源包',
+    comingSoonMessage: 'IP 资源管理功能正在开发中，敬请期待！',
     // 列表页面
-    pools: 'IP池',
+    pools: 'IP 资源包',
     statistics: '统计信息',
-    createPool: '创建IP池',
+    createPool: '新增资源包',
     searchPlaceholder: '搜索IP池名称或IP地址...',
     filterAll: '全部',
     filterAllocated: '已分配',

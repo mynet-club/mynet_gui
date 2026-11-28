@@ -19,18 +19,18 @@ export interface ThemeOption {
   description: string
 }
 
-// 默认主题配置
+// 默认主题配置（与 quasar-variables.sass 品牌蓝 #2563EB 对齐）
 const defaultThemeConfig: ThemeConfig = {
   mode: 'auto',
-  primaryColor: '#1976D2',
-  accentColor: '#9C27B0'
+  primaryColor: '#2563EB',
+  accentColor: '#6366F1'
 }
 
 // 预设主题
 const presetThemes: Record<string, Partial<ThemeConfig>> = {
   default: {
-    primaryColor: '#1976D2',
-    accentColor: '#9C27B0'
+    primaryColor: '#2563EB',
+    accentColor: '#6366F1'
   },
   green: {
     primaryColor: '#4CAF50',

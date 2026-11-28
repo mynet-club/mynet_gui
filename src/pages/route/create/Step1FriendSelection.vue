@@ -55,7 +55,7 @@
             <q-icon name="people_outline" size="3em" class="q-mb-md" />
             <div>{{ $t(searchQuery ? 'workflow.noMatches' : 'routes.create.step1.noFriends') }}</div>
             <q-btn v-if="searchQuery" flat color="primary" :label="$t('workflow.clearFilters')" @click="searchQuery = ''" />
-            <q-btn v-else flat color="primary" :label="$t('workflow.manageFriends')" to="/app/social/friends" />
+            <q-btn v-else flat color="primary" :label="$t('workflow.manageFriends')" to="/cloud/social/friends" />
           </div>
 
           <div v-else class="row q-col-gutter-md">
@@ -194,7 +194,7 @@ const getStatusColor = (status: string) => {
 }
 
 const goBack = () => {
-  router.push('/app/routes')
+  router.push('/cloud/routes')
 }
 
 const goToNextStep = () => {
@@ -206,7 +206,7 @@ const goToNextStep = () => {
   // 将选中的好友存储到会话存储中
   draft.selectFriend(selectedFriend.value)
   
-  router.push('/app/routes/create/prev_2')
+  router.push('/cloud/routes/create/prev_2')
 }
 
 const loadFriends = async () => {

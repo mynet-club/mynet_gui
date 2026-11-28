@@ -150,13 +150,24 @@ async function onLogin() {
   if (!email.value || !password.value || busy.value) return
   busy.value = true
   error.value = ''
+  const trimmedEmail = email.value.trim()
+  const rawPassword = password.value
   try {
     const { localHttp } = await import('../../services/local/localApi')
     await localHttp.post('/wizard/login', {
-      email: email.value.trim(),
-      password: password.value
+      email: trimmedEmail,
+      password: rawPassword
     })
     password.value = ''
+    try {
+      const { useAuthStore } = await import('../../stores/auth')
+      await useAuthStore().login(
+        { email: trimmedEmail, password: rawPassword },
+        { skipLocalSync: true }
+      )
+    } catch {
+      /* 本机登录已成功，云端侧同步失败不阻断本机流程 */
+    }
     store.error = null
     await store.refreshAll()
     emit('success')

@@ -11,7 +11,7 @@
           color="primary"
           icon="hub"
           label="批量申请连接"
-          to="/app/routes/create"
+          to="/cloud/routes/create"
         />
         <q-btn
           flat
@@ -25,7 +25,7 @@
           color="positive"
           icon="group_add"
           :label="$t('routes.friendNodes.goToSocial')"
-          @click="$router.push('/app/social')"
+          @click="$router.push('/cloud/social')"
         />
       </div>
     </template>
@@ -89,7 +89,7 @@
         <q-btn
           color="primary"
           :label="$t('routes.friendNodes.goToSocial')"
-          @click="$router.push('/app/social')"
+          @click="$router.push('/cloud/social')"
         />
       </template>
     </ResponsiveCardGrid>
@@ -209,7 +209,6 @@ import { useRoutes } from '../../composables/useRoutes'
 import { useNodes } from '../../composables/useNodes'
 import { useSocial } from '../../composables/useSocial'
 import { useNotify } from '../../composables/useNotify'
-import { useOnboardingActions } from '../../composables/useOnboardingActions'
 import PageLayout from '../../components/layout/PageLayout.vue'
 import ResponsiveCardGrid from '../../components/common/ResponsiveCardGrid.vue'
 import AvatarReminder from '../../components/social/AvatarReminder.vue'
@@ -375,7 +374,7 @@ const handleRefresh = async () => {
 }
 
 const handleViewFriend = (friendId: number) => {
-  router.push(`/app/social/friends/${friendId}`)
+  router.push(`/cloud/social/friends/${friendId}`)
 }
 
 const handleViewDetails = (node: FriendNodeData) => {
@@ -504,9 +503,7 @@ const formatDate = (dateString: string) => {
 }
 
 // 初始化
-const { onInviterDevicesViewed } = useOnboardingActions()
 onMounted(async () => {
-  onInviterDevicesViewed()
   await fetchAllFriendNodes()
 })
 </script>
