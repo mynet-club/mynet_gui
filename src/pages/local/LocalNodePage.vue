@@ -268,11 +268,34 @@ async function loadBackups() {
   }
 }
 
-function onSwitchNode() {
-  cmd.run(['config', 'use', focusNode.value], '切换节点', 60000).then(() => {
+async function onSwitchNode() {
+  if (!focusNode.value) return
+  cmd.busy.value = true
+  cmd.message.value = ''
+  try {
+    const { localHttp, readLocalTenantId } = await import('../../services/local/localApi')
+    const tenant = (await readLocalTenantId()) || ''
+    if (!tenant) {
+      throw new Error('未能获取当前网络区（tenant），请先登录账号')
+    }
+    const picked = cloudNodes.value.find((n) => n.node_id === focusNode.value)
+    await localHttp.post('/config/active', {
+      tenant,
+      node: focusNode.value,
+      setup_only: true,
+      vpn_type: picked ? 'gnb' : undefined
+    }, { timeout: 60000 })
+    await localHttp.post('/config/connect', {}, { timeout: 180000 })
+    cmd.ok.value = true
+    cmd.message.value = `已切换到节点 ${focusNode.value}`
     showSwitch.value = false
-    loadAll()
-  })
+    await loadAll()
+  } catch (e) {
+    cmd.ok.value = false
+    cmd.message.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    cmd.busy.value = false
+  }
 }
 
 function onWriteKey() {

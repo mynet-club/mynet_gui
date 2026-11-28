@@ -263,7 +263,16 @@ async function onUseNode(id: string) {
   focusNode.value = id
   busy.value = true
   try {
-    await localGatewayApi.runCommand(['config', 'use', id], 60000)
+    const { readLocalTenantId } = await import('../../services/local/localApi')
+    const tenant = (await readLocalTenantId()) || ''
+    if (!tenant) {
+      throw new Error('未能获取当前网络区（tenant），请先登录账号')
+    }
+    await localHttp.post('/config/active', {
+      tenant,
+      node: id,
+      setup_only: true
+    }, { timeout: 60000 })
     toast(true, `已选择节点 ${id}`)
     await refreshSession()
   } catch (e) {
