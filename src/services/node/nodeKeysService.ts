@@ -61,14 +61,22 @@ export class NodeKeysService {
    *
    * v2: 与 generateNodeKeys 共用 POST /keys 端点；后端通过 custom_public_key 字段判定为上传
    */
-  async uploadPublicKey(nodeId: string, request: KeyUploadRequest): Promise<ApiResponse<NodeKey>> {
+  async uploadPublicKey(
+    nodeId: string,
+    request: KeyUploadRequest & { force_regenerate?: boolean }
+  ): Promise<ApiResponse<NodeKey>> {
     // 首先验证公钥格式
     const validation = this.validatePublicKey(request.public_key, request.key_type)
     if (!validation.valid) {
       throw new Error(validation.errors.join(', '))
     }
 
-    const response = await api.post(`/nodes/${nodeId}/keys`, request)
+    const payload = {
+      custom_public_key: request.public_key.trim(),
+      key_type: request.key_type,
+      ...(request.force_regenerate ? { force_regenerate: true } : {})
+    }
+    const response = await api.post(`/nodes/${nodeId}/keys`, payload)
     return response.data
   }
 

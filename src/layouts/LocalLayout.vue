@@ -242,8 +242,8 @@ async function onRefresh() {
   try {
     const { localApi } = await import('../services/local/localApi')
     const res = await localApi.refreshNodeNames()
-    const { mergePersistedNames } = await import('../utils/nodeDisplay')
-    mergePersistedNames(res.names || {})
+    const { replacePersistedNames } = await import('../utils/nodeDisplay')
+    replacePersistedNames(res.names || {})
   } catch { /* 离线/未登录保留旧缓存 */ }
 }
 

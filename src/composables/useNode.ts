@@ -60,7 +60,7 @@ export function useNode(nodeId?: string) {
   /**
    * 加载节点详情
    */
-  const loadNode = async (id?: string) => {
+  const loadNode = async (id?: string, forceRefresh = false) => {
     const targetId = id || nodeId
     if (!targetId) {
       error.value = '节点ID不能为空'
@@ -71,7 +71,7 @@ export function useNode(nodeId?: string) {
     error.value = null
 
     try {
-      const result = await nodeService.getNode(targetId)
+      const result = await nodeService.getNode(targetId, forceRefresh)
       node.value = result.data
       error.value = null
     } catch (err) {

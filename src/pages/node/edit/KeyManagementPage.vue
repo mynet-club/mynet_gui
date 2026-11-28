@@ -289,7 +289,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, inject, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -304,14 +304,24 @@ const { success: notifySuccess, error: notifyError } = useNotify()
 
 // 获取节点ID
 const nodeId = computed(() => route.params.id as string)
+const injectedNodeData = inject<any>('nodeData', null)
 
 // 使用组合式函数
 const {
   keys,
   loading,
   loadKeys,
-  generateKeyPair
+  generateKeyPair,
+  uploadKeyPair
 } = useNodeKeys(nodeId.value)
+
+if (injectedNodeData?.refreshVersion) {
+  watch(injectedNodeData.refreshVersion, () => {
+    if (nodeId.value) {
+      loadKeys(nodeId.value)
+    }
+  })
+}
 
 // 状态
 const selectedKey = ref<NodeKey | null>(null)
@@ -423,7 +433,6 @@ const createKey = async () => {
       const result = await generateKeyPair(params)
       
       if (result) {
-        notifySuccess(isUpdateMode.value ? t('nodes.edit.keys.keyUpdated') : t('nodes.edit.keys.keyPairGenerated'))
         // 如果有私钥，显示私钥保存提示
         if (result.private_key) {
           let downloadClicked = false
@@ -470,15 +479,23 @@ const createKey = async () => {
         }
       }
     } else if (newKey.value.generation_method === 'upload') {
-      // 上传公钥 - 如果是更新模式，也传递 force_regenerate 参数
-      // TODO: 实现上传公钥功能，需要传递 force_regenerate 参数
-      notifyError(t('nodes.edit.keys.uploadNotImplemented'))
-      return
+      const nodeVpnType = injectedNodeData?.node?.value?.vpn_type
+      const keyType: KeyType = nodeVpnType === 'wireguard' ? 'wireguard' : 'ed25519'
+      const uploaded = await uploadKeyPair({
+        public_key: newKey.value.public_key.trim(),
+        key_type: keyType,
+        force_regenerate: isUpdateMode.value
+      })
+      if (!uploaded) {
+        return
+      }
     } else {
-      // 本地生成
-      // TODO: 实现本地生成功能
       notifyError(t('nodes.edit.keys.localGenerateNotImplemented'))
       return
+    }
+
+    if (injectedNodeData?.loadNode && nodeId.value) {
+      await injectedNodeData.loadNode(nodeId.value, true)
     }
     
     showCreateDialog.value = false

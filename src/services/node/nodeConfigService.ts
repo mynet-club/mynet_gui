@@ -19,10 +19,15 @@ export class NodeConfigService {
   /**
    * 获取节点配置
    */
-  async getNodeConfig(nodeId: string): Promise<ApiResponse<NodeConfig>> {
+  async getNodeConfig(nodeId: string, forceRefresh = false): Promise<ApiResponse<NodeConfig>> {
     debug.log(`🔧 [NodeConfig] 获取节点 ${nodeId} 配置`)
     try {
-      const response = await api.get(`/nodes/${nodeId}/config`)
+      const response = await api.get(
+        `/nodes/${nodeId}/config`,
+        forceRefresh
+          ? { params: { _t: Date.now() }, headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' } }
+          : undefined
+      )
       debug.log(`🔧 [NodeConfig] 节点 ${nodeId} 配置获取成功:`, response.data)
       return response.data
     } catch (error: any) {

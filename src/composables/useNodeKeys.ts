@@ -140,7 +140,9 @@ export function useNodeKeys(nodeId?: string) {
   /**
    * 上传密钥对
    */
-  const uploadKeyPair = async (request: KeyUploadRequest): Promise<boolean> => {
+  const uploadKeyPair = async (
+    request: KeyUploadRequest & { force_regenerate?: boolean }
+  ): Promise<boolean> => {
     if (!nodeId) {
       error.value = '节点ID不能为空'
       return false

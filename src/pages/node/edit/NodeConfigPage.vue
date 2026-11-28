@@ -249,7 +249,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, inject } from 'vue'
 import debug from 'src/utils/debug'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -269,6 +269,7 @@ const { success: notifySuccess, error: notifyError } = useNotify()
 
 // 获取节点ID
 const nodeId = computed(() => route.params.id as string)
+const injectedNodeData = inject<any>('nodeData', null)
 
 // 加载状态
 const loading = ref(false)
@@ -285,9 +286,6 @@ const originalFormData = ref<Record<string, any>>({})
 
 // API参数架构缓存（用于安全的数据覆盖）
 const apiSchema = ref<Record<string, any>>({})
-
-// 编辑状态
-const hasUserEdited = ref(false)
 
 // 网络配置相关字段（在网络配置页面处理，本页面不显示）
 // 注意：现在只排除nodeid，其他字段都移动到节点配置页面
@@ -327,8 +325,7 @@ const modeOptions = computed(() => [
 ])
 
 const hasChanges = computed(() => {
-  // 简化的变更检测：只检查表单数据是否有变化或用户是否进行过编辑
-  return hasUserEdited.value || JSON.stringify(formData.value) !== JSON.stringify(originalFormData.value)
+  return JSON.stringify(formData.value) !== JSON.stringify(originalFormData.value)
 })
 
 // 完整配置预览（包含基本配置和专家配置）
@@ -588,9 +585,7 @@ const initializeFormData = () => {
   if (!formData.value.ipv6_only || formData.value.ipv6_only === '') {
     formData.value.ipv6_only = 'off' // 明确设为禁用
   }
-  
-  // 重置编辑状态
-  hasUserEdited.value = false
+  originalFormData.value = { ...formData.value }
   
   debug.log('完整表单数据初始化完成:', fullData)
 }
@@ -670,7 +665,6 @@ const switchConfigMode = (newMode: 'base' | 'expert') => {
 const resetForm = () => {
   // 重置为原始数据
   formData.value = { ...originalFormData.value }
-  hasUserEdited.value = false
   notifySuccess(t('common.formReset'))
 }
 
@@ -743,9 +737,12 @@ const onSubmit = async () => {
       notifySuccess(`${t('nodes.edit.config.saveSuccess')} · ${published.generation}`)
     }
 
-    // 更新原始数据并重置编辑状态
+    // 更新原始数据
     originalFormData.value = { ...formData.value }
-    hasUserEdited.value = false
+
+    if (injectedNodeData?.loadNode && nodeId.value) {
+      await injectedNodeData.loadNode(nodeId.value, true)
+    }
 
     if (!published?.generation) {
       notifySuccess(t('nodes.edit.config.saveSuccess'))
@@ -759,18 +756,6 @@ const onSubmit = async () => {
     saving.value = false
   }
 }
-
-// 监听表单数据变化，设置编辑状态
-watch(
-  formData,
-  () => {
-    // 用户有任何编辑行为时，设置编辑状态
-    if (!hasUserEdited.value) {
-      hasUserEdited.value = true
-    }
-  },
-  { deep: true }
-)
 
 // 监听配置变化
 watch(
@@ -792,20 +777,23 @@ watch(
   }
 )
 
-// 组件挂载时初始化
-onMounted(async () => {
+const loadConfigFromServer = async (forceRefresh = false) => {
   loading.value = true
   
   try {
-    // 根据节点ID自动判断VPN类型
+    // 优先使用父组件节点真实的 vpn_type，无则回退推断
     if (nodeId.value) {
-      const detectedVpnType = VPNConfigService.detectVpnType(nodeId.value)
+      const nodeVpn = injectedNodeData?.node?.value?.vpn_type
+      const detectedVpnType =
+        nodeVpn === 'wireguard' || nodeVpn === 'gnb'
+          ? nodeVpn
+          : VPNConfigService.detectVpnType(nodeId.value)
       vpnType.value = detectedVpnType
       
       // 尝试从API获取节点的具体配置
       try {
         debug.log('尝试加载节点配置:', nodeId.value)
-        const configResponse = await nodeConfigService.getNodeConfig(nodeId.value)
+        const configResponse = await nodeConfigService.getNodeConfig(nodeId.value, forceRefresh)
         
         debug.log('API返回的完整响应:', configResponse)
         
@@ -920,6 +908,16 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+}
+
+if (injectedNodeData?.refreshVersion) {
+  watch(injectedNodeData.refreshVersion, () => {
+    loadConfigFromServer(true)
+  })
+}
+
+onMounted(async () => {
+  await loadConfigFromServer(false)
 })
 </script>
 

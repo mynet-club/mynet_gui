@@ -32,13 +32,23 @@ import type {
  */
 export class NodeService {
   
+  private noCacheConfig(forceRefresh?: boolean, params?: Record<string, any>) {
+    if (!forceRefresh) {
+      return params ? { params } : undefined
+    }
+    return {
+      params: { ...(params || {}), _t: Date.now() },
+      headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' }
+    }
+  }
+
   /**
    * 获取节点列表
    * @param params 查询参数
    * @returns 分页的节点列表
    */
-  async getNodes(params?: NodesListParams): Promise<NodesListApiResponse> {
-    const response = await api.get('/nodes', { params })
+  async getNodes(params?: NodesListParams, forceRefresh = false): Promise<NodesListApiResponse> {
+    const response = await api.get('/nodes', this.noCacheConfig(forceRefresh, params))
     return response.data
   }
 
@@ -47,8 +57,8 @@ export class NodeService {
    * @param nodeId 节点ID (node_id)
    * @returns 节点详情
    */
-  async getNode(nodeId: string): Promise<ApiResponse<Node>> {
-    const response = await api.get(`/nodes/${nodeId}`)
+  async getNode(nodeId: string, forceRefresh = false): Promise<ApiResponse<Node>> {
+    const response = await api.get(`/nodes/${nodeId}`, this.noCacheConfig(forceRefresh))
     return response.data
   }
 
@@ -202,8 +212,8 @@ export class NodeService {
    * @param nodeId 节点ID
    * @returns 设备信息
    */
-  async getNodeDeviceInfo(nodeId: string): Promise<NodeDeviceInfoResponse> {
-    const response = await api.get(`/nodes/${nodeId}/deviceinfo`)
+  async getNodeDeviceInfo(nodeId: string, forceRefresh = false): Promise<NodeDeviceInfoResponse> {
+    const response = await api.get(`/nodes/${nodeId}/deviceinfo`, this.noCacheConfig(forceRefresh))
     return response.data
   }
 
@@ -273,8 +283,8 @@ export class NodeService {
    * @param nodeId 节点ID (node_id)
    * @returns 节点索引服务列表
    */
-  async getNodeIndexServices(nodeId: string): Promise<NodeIndexServicesResponse> {
-    const response = await api.get(`/nodes/${nodeId}/index-services`)
+  async getNodeIndexServices(nodeId: string, forceRefresh = false): Promise<NodeIndexServicesResponse> {
+    const response = await api.get(`/nodes/${nodeId}/index-services`, this.noCacheConfig(forceRefresh))
     return response.data
   }
 
@@ -299,10 +309,11 @@ export class NodeService {
    *      此处通过 section=network 拉取并解包 data.network，保持调用方接口不变。
    *      PUT /nodes/{id}/network-config 在 v2 中仍保留。
    */
-  async getNodeNetworkConfig(nodeId: string): Promise<ApiResponse<NodeNetworkConfig>> {
-    const response = await api.get(`/nodes/${nodeId}/configuration`, {
-      params: { section: 'network' }
-    })
+  async getNodeNetworkConfig(nodeId: string, forceRefresh = false): Promise<ApiResponse<NodeNetworkConfig>> {
+    const response = await api.get(
+      `/nodes/${nodeId}/configuration`,
+      this.noCacheConfig(forceRefresh, { section: 'network' })
+    )
     const body = response.data || {}
     // v2 返回 { data: { network: {...} }, ... }，向后兼容旧调用方期望的扁平 data
     const networkData = body?.data?.network ?? body?.network ?? body?.data ?? {}

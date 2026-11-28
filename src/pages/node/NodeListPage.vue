@@ -129,10 +129,15 @@ const nodeDeviceInfo = ref<Record<string | number, NodeDeviceInfo>>({})
 const loadingDeviceInfo = ref<Record<string | number, boolean>>({})
 
 // 批量加载所有节点的设备信息（用于显示操作系统信息）
-const loadAllNodesDeviceInfo = async () => {
+const loadAllNodesDeviceInfo = async (force = false) => {
+  // 强制刷新时清空本地内存缓存，避免设备信息一直停留旧快照
+  if (force) {
+    nodeDeviceInfo.value = {}
+  }
+
   // 过滤出还没有加载设备信息的节点
-  const nodesToLoad = nodes.value.filter(node => 
-    !nodeDeviceInfo.value[node.node_id] && !loadingDeviceInfo.value[node.node_id]
+  const nodesToLoad = nodes.value.filter(node =>
+    (force || !nodeDeviceInfo.value[node.node_id]) && !loadingDeviceInfo.value[node.node_id]
   )
   
   if (nodesToLoad.length === 0) {
@@ -312,10 +317,10 @@ const goToEdit = (nodeId: string | number) => {
   router.push(`/cloud/nodes/${nodeId}/edit`)
 }
 
-const refreshNodes = async () => {
-  await loadNodes()
-  // 加载所有节点的设备信息
-  await loadAllNodesDeviceInfo()
+const refreshNodes = async (force = true) => {
+  await loadNodes(undefined, force)
+  // 强制重拉所有节点的设备信息，避免命中旧内存快照
+  await loadAllNodesDeviceInfo(force)
 }
 
 const confirmDelete = (node: Node) => {

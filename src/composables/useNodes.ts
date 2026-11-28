@@ -105,7 +105,7 @@ export function useNodes() {
   /**
    * 加载节点列表
    */
-  const loadNodes = async (params?: Partial<NodesListParams>) => {
+  const loadNodes = async (params?: Partial<NodesListParams>, forceRefresh = false) => {
     loading.value = true
     try {
       const queryParams: NodesListParams = {
@@ -117,7 +117,7 @@ export function useNodes() {
       }
 
       debug.log('正在请求节点列表，参数:', queryParams)
-      const response = await nodeService.getNodes(queryParams)
+      const response = await nodeService.getNodes(queryParams, forceRefresh)
       debug.log('节点列表API响应:', response)
 
       // 根据实际API响应结构解析数据

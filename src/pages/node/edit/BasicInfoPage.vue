@@ -199,19 +199,19 @@ const hasChanges = computed(() => {
 })
 const initializeForm = () => {
   if (node.value) {
-    // 处理节点状态：数字1为active，数字0为inactive，字符串直接使用
+    // 处理节点状态：数字 1(启用)/2(在线) 为 active，其余为 inactive；字符串 active/online 为 active
     let nodeStatus: 'active' | 'inactive' = 'active'
     if (node.value.node_status !== undefined) {
       if (typeof node.value.node_status === 'number') {
-        nodeStatus = node.value.node_status === 1 ? 'active' : 'inactive'
+        nodeStatus = (node.value.node_status === 1 || node.value.node_status === 2) ? 'active' : 'inactive'
       } else if (typeof node.value.node_status === 'string') {
-        nodeStatus = node.value.node_status as 'active' | 'inactive'
+        nodeStatus = (node.value.node_status === 'active' || node.value.node_status === 'online') ? 'active' : 'inactive'
       }
     } else if (node.value.status !== undefined) {
       if (typeof node.value.status === 'number') {
-        nodeStatus = node.value.status === 1 ? 'active' : 'inactive'
+        nodeStatus = (node.value.status === 1 || node.value.status === 2) ? 'active' : 'inactive'
       } else if (typeof node.value.status === 'string') {
-        nodeStatus = node.value.status as 'active' | 'inactive'
+        nodeStatus = (node.value.status === 'active' || node.value.status === 'online') ? 'active' : 'inactive'
       }
     }
 
@@ -258,18 +258,20 @@ const resetForm = () => {
 
 const onSubmit = async () => {
   try {
-    const updateData: UpdateNodeRequest = {
+    // 后端 NodeController::update 读取 status（而非 node_status）；
+    // 仅在状态开关确实变更时提交 status，避免把在线(2)节点误改写为启用(1)；
+    // description 变更时即便清空为空串也显式提交，支持清空备注。
+    const updateData: UpdateNodeRequest & Record<string, any> = {
       node_name: form.value.node_name,
-      ...(form.value.description && { description: form.value.description }),
+      ...(form.value.description !== originalData.value.description && { description: form.value.description }),
       ...(form.value.vpn_type && { vpn_type: form.value.vpn_type }),
-      ...(form.value.node_app_version && { node_app_version: form.value.node_app_version }),
+      ...(form.value.node_app_version !== originalData.value.node_app_version && { node_app_version: form.value.node_app_version }),
       ...(form.value.node_type > 0 && { node_type: form.value.node_type }),
-      ...(form.value.node_status_active && { node_status: form.value.node_status_active })
+      ...(form.value.node_status_active !== originalData.value.node_status_active && { status: form.value.node_status_active })
     }
 
     const success = await updateNode(updateData)
     if (success) {
-      notifySuccess(t('nodes.edit.basic.basicInfoSaved'))
       originalData.value = { ...form.value }
     }
   } catch (error) {

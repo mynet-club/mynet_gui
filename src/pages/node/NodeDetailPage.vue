@@ -50,13 +50,24 @@
           </q-list>
         </q-btn-dropdown>
 
+        <!-- 刷新按钮 -->
+        <q-btn
+          flat
+          color="grey-8"
+          icon="refresh"
+          :label="$t('common.refresh')"
+          @click="refreshData"
+          :loading="isRefreshing"
+          :disable="isLoading"
+        />
+
         <!-- 删除按钮 -->
         <q-btn
           flat
           color="negative"
           icon="delete"
           :label="$t('common.delete')"
-          @click="showDeleteConfirm = true"
+          @click="showDeleteDialog = true"
           :disable="!node || isLoading"
         />
         
@@ -102,12 +113,12 @@
                 <div class="text-caption text-grey-6">{{ $t('nodes.detail.status') }}</div>
                 <div class="text-body2">
                   <q-chip
-                    :color="getStatusColor(node.node_status || node.status)"
+                    :color="getStatusColor(node.node_status ?? node.status)"
                     text-color="white"
-                    :icon="getStatusIcon(node.node_status || node.status)"
+                    :icon="getStatusIcon(node.node_status ?? node.status)"
                     size="sm"
                   >
-                    {{ getStatusText(node.node_status || node.status) }}
+                    {{ getStatusText(node.node_status ?? node.status) }}
                   </q-chip>
                 </div>
               </div>
@@ -700,9 +711,11 @@ const getStatusColor = (status?: NodeStatus | string | number) => {
   
   // 处理字符串状态
   switch (status) {
+    case 'online': return 'positive'
     case 'active': return 'positive'
     case 'inactive': return 'negative'
     case 'pending': return 'warning'
+    case 'unconfigured': return 'warning'
     case 'maintenance': return 'info'
     default: return 'grey'
   }
@@ -723,9 +736,11 @@ const getStatusIcon = (status?: NodeStatus | string | number) => {
   
   // 处理字符串状态
   switch (status) {
+    case 'online': return 'check_circle'
     case 'active': return 'check_circle'
     case 'inactive': return 'cancel'
     case 'pending': return 'schedule'
+    case 'unconfigured': return 'settings'
     case 'maintenance': return 'build'
     default: return 'help'
   }
@@ -746,9 +761,11 @@ const getStatusText = (status?: NodeStatus | string | number) => {
   
   // 处理字符串状态
   switch (status) {
+    case 'online': return t('nodes.status.online')
     case 'active': return t('nodes.status.active')
     case 'inactive': return t('nodes.status.inactive')
     case 'pending': return t('nodes.status.pending')
+    case 'unconfigured': return t('nodes.status.unconfigured')
     case 'maintenance': return t('nodes.status.maintenance')
     default: return t('common.unknown')
   }
@@ -891,12 +908,12 @@ const formatLibcInfo = (deviceInfo: NodeDeviceInfo) => {
 }
 
 // 数据加载函数
-const loadIndexServices = async () => {
+const loadIndexServices = async (forceRefresh = false) => {
   if (!nodeId.value) return
   
   try {
     loadingIndexServices.value = true
-    const response = await nodeService.getNodeIndexServices(nodeId.value)
+    const response = await nodeService.getNodeIndexServices(nodeId.value, forceRefresh)
     indexServices.value = response.data?.index_services || []
   } catch (error) {
     debug.error('加载索引服务器失败:', error)
@@ -906,12 +923,12 @@ const loadIndexServices = async () => {
   }
 }
 
-const loadNetworkConfig = async () => {
+const loadNetworkConfig = async (forceRefresh = false) => {
   if (!nodeId.value) return
   
   try {
     loadingNetworkConfig.value = true
-    const response = await nodeService.getNodeNetworkConfig(nodeId.value)
+    const response = await nodeService.getNodeNetworkConfig(nodeId.value, forceRefresh)
     networkConfig.value = response.data
   } catch (error) {
     debug.error('加载网络配置失败:', error)
@@ -921,12 +938,12 @@ const loadNetworkConfig = async () => {
   }
 }
 
-const loadDeviceInfo = async () => {
+const loadDeviceInfo = async (forceRefresh = false) => {
   if (!nodeId.value) return
 
   loadingDeviceInfo.value = true
   try {
-    const response = await nodeService.getNodeDeviceInfo(nodeId.value)
+    const response = await nodeService.getNodeDeviceInfo(nodeId.value, forceRefresh)
     debug.log('设备信息获取成功:', response)
     // ⚠️ response 必须在同一作用域内用 —— 此前它在内层 try 里声明、
     // 外层引用，作用域断裂 → ReferenceError: response is not defined
@@ -1098,10 +1115,10 @@ const refreshData = async () => {
   isRefreshing.value = true
   try {
     await Promise.all([
-      loadNode(nodeId.value),
-      loadIndexServices(),
-      loadNetworkConfig(),
-      loadDeviceInfo(),
+      loadNode(nodeId.value, true),
+      loadIndexServices(true),
+      loadNetworkConfig(true),
+      loadDeviceInfo(true),
       loadRouteCount(),
       loadRecentCommands()
     ])

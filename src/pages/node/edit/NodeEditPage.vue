@@ -5,14 +5,25 @@
     icon="edit"
   >
     <template #actions>
-      <q-btn
-        color="grey-7"
-        outline
-        @click="goBack"
-        :disable="saving"
-        icon="arrow_back"
-        :label="$t('common.back')"
-      />
+      <div class="row q-gutter-sm">
+        <q-btn
+          color="grey-8"
+          outline
+          @click="refreshAll"
+          :loading="refreshing || loading"
+          :disable="saving"
+          icon="refresh"
+          :label="$t('common.refresh')"
+        />
+        <q-btn
+          color="grey-7"
+          outline
+          @click="goBack"
+          :disable="saving"
+          icon="arrow_back"
+          :label="$t('common.back')"
+        />
+      </div>
     </template>
 
     <div class="row justify-center">
@@ -26,11 +37,11 @@
             </div>
             <div class="col-auto">
               <q-chip
-                :color="getStatusColor(node.status || 'inactive')"
+                :color="getStatusColor(node.node_status ?? node.status ?? 'inactive')"
                 text-color="white"
-                :icon="getStatusIcon(node.status || 'inactive')"
+                :icon="getStatusIcon(node.node_status ?? node.status ?? 'inactive')"
               >
-                {{ getStatusText(node.status || 'inactive') }}
+                {{ getStatusText(node.node_status ?? node.status ?? 'inactive') }}
               </q-chip>
             </div>
           </q-card-section>
@@ -140,6 +151,8 @@ const activeTab = ref('basic')
 
 // 状态
 const hasChanges = ref(false)
+const refreshing = ref(false)
+const refreshVersion = ref(0)
 
 // 判断是否在编辑页面（所有编辑子页面都不显示全局按钮）
 const isEditSubPage = computed(() => {
@@ -148,7 +161,7 @@ const isEditSubPage = computed(() => {
 })
 
 // 状态相关工具函数
-const getStatusColor = (status: NodeStatus | number) => {
+const getStatusColor = (status: NodeStatus | string | number) => {
   // 处理数字状态码
   if (typeof status === 'number') {
     switch (status) {
@@ -163,14 +176,17 @@ const getStatusColor = (status: NodeStatus | number) => {
   
   // 处理字符串状态
   switch (status) {
+    case 'online': return 'positive'
     case 'active': return 'positive'
     case 'inactive': return 'negative'
     case 'pending': return 'warning'
+    case 'unconfigured': return 'warning'
+    case 'maintenance': return 'info'
     default: return 'grey'
   }
 }
 
-const getStatusIcon = (status: NodeStatus | number) => {
+const getStatusIcon = (status: NodeStatus | string | number) => {
   // 处理数字状态码
   if (typeof status === 'number') {
     switch (status) {
@@ -185,14 +201,17 @@ const getStatusIcon = (status: NodeStatus | number) => {
   
   // 处理字符串状态
   switch (status) {
+    case 'online': return 'check_circle'
     case 'active': return 'check_circle'
     case 'inactive': return 'cancel'
     case 'pending': return 'schedule'
+    case 'unconfigured': return 'settings'
+    case 'maintenance': return 'build'
     default: return 'help'
   }
 }
 
-const getStatusText = (status: NodeStatus | number) => {
+const getStatusText = (status: NodeStatus | string | number) => {
   // 处理数字状态码
   if (typeof status === 'number') {
     switch (status) {
@@ -207,10 +226,29 @@ const getStatusText = (status: NodeStatus | number) => {
   
   // 处理字符串状态
   switch (status) {
-    case 'active': return t('nodes.status.online')
-    case 'inactive': return t('nodes.status.offline')
+    case 'online': return t('nodes.status.online')
+    case 'active': return t('nodes.status.enabled')
+    case 'inactive': return t('nodes.status.disabled')
     case 'pending': return t('nodes.status.pending')
+    case 'unconfigured': return t('nodes.status.unconfigured')
+    case 'maintenance': return t('nodes.status.maintenance')
     default: return t('common.unknown')
+  }
+}
+
+// 手动强制刷新节点与当前编辑子页数据
+const refreshAll = async () => {
+  if (!nodeId.value || refreshing.value) return
+  refreshing.value = true
+  try {
+    await loadNode(nodeId.value, true)
+    refreshVersion.value += 1
+    notifySuccess(t('nodes.dataRefreshed'))
+  } catch (error) {
+    debug.error('刷新节点数据失败:', error)
+    notifyError(t('nodes.refreshFailed'))
+  } finally {
+    refreshing.value = false
   }
 }
 
@@ -303,7 +341,8 @@ provide('nodeData', {
   saving,
   loadNode,
   updateNode,
-  hasError
+  hasError,
+  refreshVersion
 })
 </script>
 

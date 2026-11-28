@@ -369,10 +369,20 @@ const validateIPAddress = (ip: string): string | boolean => {
   return true
 }
 
-// 验证IPv4地址格式是否正确
+// 验证IPv4地址或局域网网段 CIDR（匹配后端 NodeIP::parseLanCIDR 支持的 /8, /16, /24）
 const validateIPv4Address = (ip: string): string | boolean => {
   if (!ip || !ip.trim()) return true // 空值允许
   const trimmedIP = ip.trim()
+  if (trimmedIP.includes('/')) {
+    const parts = trimmedIP.split('/')
+    if (parts.length !== 2) return t('node.network.invalidIPv4Format')
+    const [addr, prefixStr] = parts
+    const prefix = Number(prefixStr)
+    if (!addr || !isValidIPv4Address(addr) || !Number.isInteger(prefix) || ![8, 16, 24].includes(prefix)) {
+      return '请输入有效的 IPv4 地址或网段（支持 /8、/16、/24）'
+    }
+    return true
+  }
   if (!isValidIPv4Address(trimmedIP)) {
     return t('node.network.invalidIPv4Format')
   }
@@ -390,7 +400,7 @@ const validateIPPort = (ipPort: string): string | boolean => {
 }
 
 // 方法
-const loadNetworkConfig = async () => {
+const loadNetworkConfig = async (forceRefresh = false) => {
   if (!node.value) return
   
   try {
@@ -398,8 +408,8 @@ const loadNetworkConfig = async () => {
     
     // 并行加载网络配置数据和索引服务器数据
     const [networkResponse, indexServicesResponse] = await Promise.all([
-      nodeService.getNodeNetworkConfig(nodeId.value),
-      nodeService.getNodeIndexServices(nodeId.value).catch(() => ({ data: { index_services: [] } }))
+      nodeService.getNodeNetworkConfig(nodeId.value, forceRefresh),
+      nodeService.getNodeIndexServices(nodeId.value, forceRefresh).catch(() => ({ data: { index_services: [] } }))
     ])
     
     const networkConfig = networkResponse.data || {}
@@ -697,14 +707,16 @@ watch(
   { immediate: true }
 )
 
-// 组件挂载时初始化
+// 响应父页面手动刷新
+if (injectedNodeData?.refreshVersion) {
+  watch(injectedNodeData.refreshVersion, () => {
+    loadNetworkConfig(true)
+  })
+}
+
+// 组件挂载时初始化（若父组件未注入数据才由本页主动加载，避免与 watch 重复请求）
 onMounted(async () => {
-  // 如果使用了注入的数据并且节点已经存在，直接加载网络配置
-  if (injectedNodeData && node.value) {
-    await loadNetworkConfig()
-  } 
-  // 如果没有注入的数据，则需要加载节点数据（节点数据加载后会自动触发网络配置加载）
-  else if (!injectedNodeData && nodeId.value) {
+  if (!injectedNodeData && nodeId.value) {
     await loadNode(nodeId.value)
   }
 })

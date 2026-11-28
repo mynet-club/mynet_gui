@@ -28,12 +28,21 @@ export function persistNames(names: NodeNameSource): void {
   } catch { /* quota/private mode */ }
 }
 
-/** 合并：新值覆盖旧值，但不删除已有条目（除非显式刷新）。 */
+/** 合并：新值覆盖旧值，但不删除已有条目（自动预热时保留离线兜底）。 */
 export function mergePersistedNames(next: NodeNameSource): NodeNameSource {
   const cur = loadPersistedNames()
   const merged = { ...cur, ...next }
   persistNames(merged)
   return merged
+}
+
+/** 显式刷新：用云端最新映射全量替换本地缓存，清掉已改名或已删除节点的旧残留。 */
+export function replacePersistedNames(next: NodeNameSource): NodeNameSource {
+  const clean = next && typeof next === 'object' ? { ...next } : {}
+  try {
+    localStorage.setItem(NODE_NAMES_KEY, JSON.stringify(clean))
+  } catch { /* quota/private mode */ }
+  return clean
 }
 
 export function buildNodeNameMap(
